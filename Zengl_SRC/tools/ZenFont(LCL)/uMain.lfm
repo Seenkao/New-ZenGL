@@ -1,0 +1,302 @@
+object Form1: TForm1
+  Left = 425
+  Height = 600
+  Top = 66
+  Width = 800
+  ActiveControl = Panel1
+  Caption = 'ZenFont 0.2.6(LCL)'
+  ClientHeight = 600
+  ClientWidth = 800
+  Constraints.MinHeight = 600
+  Constraints.MinWidth = 800
+  OnActivate = FormActivate
+  OnClose = FormClose
+  OnResize = FormResize
+  Position = poScreenCenter
+  LCLVersion = '2.0.8.0'
+  Visible = True
+  object GroupBox1: TGroupBox
+    Left = 0
+    Height = 200
+    Top = 400
+    Width = 800
+    Align = alBottom
+    Caption = 'Parameters'
+    ClientHeight = 183
+    ClientWidth = 796
+    TabOrder = 0
+    object CheckBoxAntialiasing: TCheckBox
+      Left = 10
+      Height = 21
+      Top = 95
+      Width = 92
+      Caption = 'Antialiasing'
+      Checked = True
+      OnChange = CheckBoxAntialiasingChange
+      State = cbChecked
+      TabOrder = 0
+    end
+    object CheckBoxPack: TCheckBox
+      Left = 10
+      Height = 21
+      Top = 120
+      Width = 50
+      Caption = 'Pack'
+      Checked = True
+      OnChange = CheckBoxPackChange
+      State = cbChecked
+      TabOrder = 1
+    end
+    object LabelCurrentPage: TLabel
+      Left = 10
+      Height = 15
+      Top = 55
+      Width = 82
+      Caption = 'Current Page:'
+      ParentColor = False
+    end
+    object ComboBoxPageSize: TComboBox
+      Left = 90
+      Height = 23
+      Top = 10
+      Width = 70
+      ItemHeight = 0
+      ItemIndex = 1
+      Items.Strings = (
+        '128'
+        '256'
+        '512'
+        '1024'
+        '2048'
+      )
+      OnChange = ComboBoxPageSizeChange
+      Style = csDropDownList
+      TabOrder = 2
+      Text = '256'
+    end
+    object LabelPageSize: TLabel
+      Left = 10
+      Height = 15
+      Top = 15
+      Width = 60
+      Caption = 'Page Size:'
+      ParentColor = False
+    end
+    object ButtonChooseFont: TButton
+      Left = 10
+      Height = 25
+      Top = 150
+      Width = 150
+      Caption = 'Choose Font'
+      OnClick = ButtonChooseFontClick
+      TabOrder = 3
+    end
+    object ButtonSaveFont: TButton
+      Left = 640
+      Height = 25
+      Top = 40
+      Width = 150
+      Anchors = [akTop, akRight]
+      Caption = 'Save Font'
+      OnClick = ButtonSaveFontClick
+      TabOrder = 5
+    end
+    object ButtonExit: TButton
+      Left = 640
+      Height = 25
+      Top = 150
+      Width = 150
+      Anchors = [akTop, akRight]
+      Caption = 'Exit'
+      OnClick = ButtonExitClick
+      TabOrder = 6
+    end
+    object ButtonRebuildFont: TButton
+      Left = 640
+      Height = 25
+      Top = 10
+      Width = 150
+      Anchors = [akTop, akRight]
+      Caption = 'Rebuild Font'
+      OnClick = ButtonRebuildFontClick
+      TabOrder = 4
+    end
+    object GroupBox2: TGroupBox
+      Left = 170
+      Height = 70
+      Top = 105
+      Width = 460
+      Anchors = [akTop, akLeft, akRight]
+      Caption = 'Char Padding'
+      ClientHeight = 53
+      ClientWidth = 456
+      TabOrder = 7
+      object Label1: TLabel
+        Left = 120
+        Height = 15
+        Top = 15
+        Width = 24
+        Caption = 'Top:'
+        ParentColor = False
+      end
+      object Label2: TLabel
+        Left = 10
+        Height = 15
+        Top = 15
+        Width = 27
+        Caption = 'Left:'
+        ParentColor = False
+      end
+      object Label3: TLabel
+        Left = 220
+        Height = 15
+        Top = 15
+        Width = 36
+        Caption = 'Right:'
+        ParentColor = False
+      end
+      object Label4: TLabel
+        Left = 340
+        Height = 15
+        Top = 15
+        Width = 48
+        Caption = 'Bottom:'
+        ParentColor = False
+      end
+      object SpinTop: TSpinEdit
+        Left = 160
+        Height = 25
+        Top = 10
+        Width = 50
+        OnChange = SpinTopChange
+        TabOrder = 1
+        Value = 2
+      end
+      object SpinLeft: TSpinEdit
+        Left = 60
+        Height = 25
+        Top = 10
+        Width = 50
+        OnChange = SpinLeftChange
+        TabOrder = 0
+        Value = 2
+      end
+      object SpinRight: TSpinEdit
+        Left = 280
+        Height = 25
+        Top = 10
+        Width = 50
+        OnChange = SpinRightChange
+        TabOrder = 2
+        Value = 2
+      end
+      object SpinBottom: TSpinEdit
+        Left = 400
+        Height = 25
+        Top = 10
+        Width = 50
+        OnChange = SpinBottomChange
+        TabOrder = 3
+        Value = 2
+      end
+    end
+    object SpinCurrentPage: TSpinEdit
+      Left = 110
+      Height = 25
+      Top = 50
+      Width = 50
+      Enabled = False
+      MaxValue = 1
+      MinValue = 1
+      OnChange = SpinCurrentPageChange
+      TabOrder = 8
+      Value = 1
+    end
+    object GroupBox3: TGroupBox
+      Left = 295
+      Height = 95
+      Top = 0
+      Width = 335
+      Anchors = [akTop, akLeft, akRight]
+      Caption = 'Chars'
+      ClientHeight = 78
+      ClientWidth = 331
+      TabOrder = 9
+      object ButtonDefaultSymbols: TButton
+        Left = 11
+        Height = 25
+        Top = 45
+        Width = 150
+        Caption = 'Set default'
+        OnClick = ButtonDefaultSymbolsClick
+        TabOrder = 0
+      end
+      object ButtonImportSymbols: TButton
+        Left = 170
+        Height = 25
+        Top = 45
+        Width = 150
+        Anchors = [akTop, akRight]
+        Caption = 'Import from file'
+        OnClick = ButtonImportSymbolsClick
+        TabOrder = 1
+      end
+      object EditChars: TEdit
+        Left = 10
+        Height = 25
+        Top = 10
+        Width = 310
+        Anchors = [akTop, akLeft, akRight]
+        TabOrder = 2
+      end
+    end
+    object GroupBox4: TGroupBox
+      Left = 170
+      Height = 95
+      Top = 0
+      Width = 120
+      Caption = 'Test String'
+      ClientHeight = 78
+      ClientWidth = 116
+      TabOrder = 10
+      object EditTest: TEdit
+        Left = 10
+        Height = 25
+        Top = 10
+        Width = 95
+        TabOrder = 0
+        Text = 'Test'
+      end
+    end
+  end
+  object Panel1: TPanel
+    Left = 0
+    Height = 400
+    Top = 0
+    Width = 800
+    Align = alClient
+    Caption = 'Processing...'
+    TabOrder = 1
+    OnMouseDown = Panel1MouseDown
+    OnMouseMove = Panel1MouseMove
+    OnMouseUp = Panel1MouseUp
+  end
+  object SaveFontDialog: TSaveDialog
+    Title = 'Save Font'
+    Filter = 'Zen Font Info|*.zfi'
+    Left = 130
+  end
+  object FontDialog: TFontDialog
+    Title = 'Choose the Font'
+    Font.Height = -13
+    Font.Name = 'Sans'
+    MinFontSize = 0
+    MaxFontSize = 0
+    Left = 230
+  end
+  object OpenDialog: TOpenDialog
+    Title = 'Open text file'
+    Filter = 'Any UTF-8 file|*.*'
+    Left = 30
+  end
+end

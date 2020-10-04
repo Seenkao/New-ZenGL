@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectSession>
+    <Version Value="12"/>
+    <BuildModes Active="Default"/>
+    <Units>
+      <Unit>
+        <Filename Value="test.ppr"/>
+        <FRMtype Value="0"/>
+        <IsPartOfProject Value="True"/>
+        <IsVisibleTab Value="True"/>
+        <CursorPos X="28" Y="7"/>
+        <UsageCount Value="23"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="/usr/local/codetyphon/fpcsrc/rtl/inc/ctypes.pp"/>
+        <FRMtype Value="0"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="8"/>
+        <UsageCount Value="10"/>
+      </Unit>
+      <Unit>
+        <Filename Value="/usr/local/codetyphon/fpcsrc/rtl/unix/unixtype.pp"/>
+        <FRMtype Value="0"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="9" Y="21"/>
+        <UsageCount Value="10"/>
+      </Unit>
+      <Unit>
+        <Filename Value="/usr/local/codetyphon/fpcsrc/rtl/linux/ptypes.inc"/>
+        <FRMtype Value="0"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="10"/>
+      </Unit>
+      <Unit>
+        <Filename Value="/usr/local/codetyphon/fpcsrc/packages/jni/src/jni.pas"/>
+        <FRMtype Value="0"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="488"/>
+        <UsageCount Value="10"/>
+      </Unit>
+      <Unit>
+        <Filename Value="jni.pas"/>
+        <FRMtype Value="0"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="13" Y="531"/>
+        <UsageCount Value="11"/>
+      </Unit>
+      <Unit>
+        <Filename Value="../../Lib/Zengl_SRC/demos/Lazarus/01 - Initialization LCL/demo01.pas"/>
+        <FRMtype Value="0"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="10"/>
+      </Unit>
+      <Unit>
+        <Filename Value="/usr/local/codetyphon/fpcsrc/rtl/unix/sysutils.pp"/>
+        <FRMtype Value="0"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="72"/>
+        <UsageCount Value="10"/>
+      </Unit>
+    </Units>
+    <JumpHistory HistoryIndex="18">
+      <Position>
+        <Filename Value="test.ppr"/>
+        <Caret Line="11" Column="46"/>
+      </Position>
+      <Position>
+        <Filename Value="test.ppr"/>
+        <Caret Line="19" Column="9"/>
+      </Position>
+      <Position>
+        <Filename Value="test.ppr"/>
+        <Caret Line="22" Column="43"/>
+      </Position>
+      <Position>
+        <Filename Value="test.ppr"/>
+        <Caret Line="20" Column="10"/>
+      </Position>
+      <Position>
+        <Filename Value="test.ppr"/>
+        <Caret Line="7" Column="14"/>
+      </Position>
+      <Position>
+        <Filename Value="test.ppr"/>
+        <Caret Line="19" Column="10"/>
+      </Position>
+      <Position>
+        <Filename Value="test.ppr"/>
+        <Caret Line="7" Column="14"/>
+      </Position>
+      <Position>
+        <Filename Value="test.ppr"/>
+        <Caret Line="20" Column="3"/>
+      </Position>
+      <Position>
+        <Filename Value="test.ppr"/>
+        <Caret Line="22" Column="4"/>
+      </Position>
+      <Position>
+        <Filename Value="test.ppr"/>
+        <Caret Line="21" Column="36"/>
+      </Position>
+      <Position>
+        <Filename Value="test.ppr"/>
+        <Caret Line="22" Column="33"/>
+      </Position>
+      <Position>
+        <Filename Value="test.ppr"/>
+        <Caret Line="20" Column="15"/>
+      </Position>
+      <Position>
+        <Filename Value="test.ppr"/>
+        <Caret Line="18" Column="7"/>
+      </Position>
+      <Position>
+        <Filename Value="test.ppr"/>
+        <Caret Line="22" Column="49"/>
+      </Position>
+      <Position>
+        <Filename Value="test.ppr"/>
+        <Caret Line="7" Column="14"/>
+      </Position>
+      <Position>
+        <Filename Value="test.ppr"/>
+        <Caret Line="20" Column="34"/>
+      </Position>
+      <Position>
+        <Filename Value="test.ppr"/>
+        <Caret Line="28" Column="57"/>
+      </Position>
+      <Position>
+        <Filename Value="test.ppr"/>
+        <Caret Line="32" Column="4"/>
+      </Position>
+      <Position>
+        <Filename Value="test.ppr"/>
+        <Caret Line="7" Column="28"/>
+      </Position>
+    </JumpHistory>
+    <RunParams>
+      <FormatVersion Value="2"/>
+      <Modes ActiveMode=""/>
+    </RunParams>
+  </ProjectSession>
+</CONFIG>

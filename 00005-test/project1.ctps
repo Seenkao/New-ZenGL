@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectSession>
+    <Version Value="12"/>
+    <BuildModes Active="Default"/>
+    <Units>
+      <Unit>
+        <Filename Value="project1.ppr"/>
+        <FRMtype Value="0"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="12" Y="10"/>
+        <UsageCount Value="24"/>
+      </Unit>
+      <Unit>
+        <Filename Value="unit1.pas"/>
+        <FRMtype Value="200"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="Form1"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="Unit1"/>
+        <IsVisibleTab Value="True"/>
+        <TopLine Value="67"/>
+        <CursorPos X="14" Y="59"/>
+        <UsageCount Value="24"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="unit2.pas"/>
+        <FRMtype Value="0"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Unit2"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="29"/>
+        <CursorPos X="14" Y="35"/>
+        <UsageCount Value="21"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="../00004-gglOpenGL_LCL/lcl_opengl.pas"/>
+        <FRMtype Value="0"/>
+        <UnitName Value="LCL_OpenGL"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="41" Y="173"/>
+        <UsageCount Value="10"/>
+      </Unit>
+      <Unit>
+        <Filename Value="../../Lib/dglOpenGL.pas"/>
+        <FRMtype Value="0"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="7851"/>
+        <CursorPos X="16" Y="7870"/>
+        <UsageCount Value="12"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="/usr/local/codetyphon/typhon/lcl/include/application.inc"/>
+        <FRMtype Value="0"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="2210"/>
+        <CursorPos Y="2241"/>
+        <UsageCount Value="10"/>
+      </Unit>
+      <Unit>
+        <Filename Value="../../Lib/Zengl_SRC/demos/Lazarus/01 - Initialization LCL/demo01.pas"/>
+        <FRMtype Value="0"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="111"/>
+        <CursorPos X="14" Y="126"/>
+        <UsageCount Value="11"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="/media/mirrel/DataDisk/GLEngine2D-master/GLEngine.pas"/>
+        <FRMtype Value="0"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1781"/>
+        <CursorPos X="19" Y="1797"/>
+        <UsageCount Value="12"/>
+      </Unit>
+      <Unit>
+        <Filename Value="../../00006-GLutWin/Glut_01.lpr"/>
+        <FRMtype Value="0"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="35" Y="14"/>
+        <UsageCount Value="11"/>
+      </Unit>
+      <Unit>
+        <Filename Value="../../Lib/Zengl_SRC/src/zgl_main.pas"/>
+        <FRMtype Value="0"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="154"/>
+        <CursorPos X="43" Y="175"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="../../Lib/Zengl_SRC/src/zgl_types.pas"/>
+        <FRMtype Value="0"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="3" Y="36"/>
+        <UsageCount Value="10"/>
+      </Unit>
+    </Units>
+    <JumpHistory HistoryIndex="25">
+      <Position>
+        <Filename Value="../../Lib/dglOpenGL.pas"/>
+        <Caret Line="15306" Column="10" TopLine="15285"/>
+      </Position>
+      <Position>
+        <Filename Value="../../Lib/dglOpenGL.pas"/>
+        <Caret Line="14837" Column="10" TopLine="14816"/>
+      </Position>
+      <Position>
+        <Filename Value="../../Lib/dglOpenGL.pas"/>
+        <Caret Line="15459" Column="25" TopLine="15442"/>
+      </Position>
+      <Position>
+        <Filename Value="../../Lib/dglOpenGL.pas"/>
+        <Caret Line="15134" TopLine="15113"/>
+      </Position>
+      <Position>
+        <Filename Value="../../Lib/dglOpenGL.pas"/>
+        <Caret Line="11373" Column="72" TopLine="11347"/>
+      </Position>
+      <Position>
+        <Filename Value="../../Lib/dglOpenGL.pas"/>
+        <Caret Line="15130" Column="3" TopLine="15113"/>
+      </Position>
+      <Position>
+        <Filename Value="unit1.pas"/>
+        <Caret Line="10" Column="39"/>
+      </Position>
+      <Position>
+        <Filename Value="unit1.pas"/>
+        <Caret Line="60" TopLine="60"/>
+      </Position>
+      <Position>
+        <Filename Value="unit1.pas"/>
+        <Caret Line="174" TopLine="150"/>
+      </Position>
+      <Position>
+        <Filename Value="unit1.pas"/>
+        <Caret Line="178" Column="26" TopLine="177"/>
+      </Position>
+      <Position>
+        <Filename Value="unit1.pas"/>
+        <Caret Line="40" Column="35" TopLine="25"/>
+      </Position>
+      <Position>
+        <Filename Value="unit1.pas"/>
+        <Caret Line="203" Column="15" TopLine="185"/>
+      </Position>
+      <Position>
+        <Filename Value="../../Lib/dglOpenGL.pas"/>
+        <Caret Line="14700" Column="34" TopLine="14683"/>
+      </Position>
+      <Position>
+        <Filename Value="../../Lib/dglOpenGL.pas"/>
+        <Caret Line="15367" Column="58" TopLine="15339"/>
+      </Position>
+      <Position>
+        <Filename Value="unit1.pas"/>
+        <Caret Line="203" Column="60" TopLine="187"/>
+      </Position>
+      <Position>
+        <Filename Value="unit1.pas"/>
+        <Caret Line="228" Column="24" TopLine="78"/>
+      </Position>
+      <Position>
+        <Filename Value="unit1.pas"/>
+        <Caret Line="191" Column="12" TopLine="172"/>
+      </Position>
+      <Position>
+        <Filename Value="../../Lib/dglOpenGL.pas"/>
+        <Caret Line="11389" Column="30" TopLine="11370"/>
+      </Position>
+      <Position>
+        <Filename Value="../../Lib/dglOpenGL.pas"/>
+        <Caret Line="13484" Column="35" TopLine="13453"/>
+      </Position>
+      <Position>
+        <Filename Value="../../Lib/dglOpenGL.pas"/>
+        <Caret Line="13485" Column="36" TopLine="13454"/>
+      </Position>
+      <Position>
+        <Filename Value="../../Lib/dglOpenGL.pas"/>
+        <Caret Line="15493" Column="50" TopLine="15462"/>
+      </Position>
+      <Position>
+        <Filename Value="../../Lib/dglOpenGL.pas"/>
+        <Caret Line="18087" Column="55" TopLine="18056"/>
+      </Position>
+      <Position>
+        <Filename Value="../../Lib/dglOpenGL.pas"/>
+        <Caret Line="18088" Column="56" TopLine="18057"/>
+      </Position>
+      <Position>
+        <Filename Value="../../Lib/Zengl_SRC/demos/Lazarus/01 - Initialization LCL/demo01.pas"/>
+        <Caret Line="126" Column="14" TopLine="111"/>
+      </Position>
+      <Position>
+        <Filename Value="../../Lib/Zengl_SRC/src/zgl_main.pas"/>
+        <Caret Line="172" Column="38" TopLine="154"/>
+      </Position>
+      <Position>
+        <Filename Value="unit2.pas"/>
+        <Caret Line="35" Column="37"/>
+      </Position>
+    </JumpHistory>
+    <RunParams>
+      <FormatVersion Value="2"/>
+      <Modes ActiveMode=""/>
+    </RunParams>
+  </ProjectSession>
+</CONFIG>

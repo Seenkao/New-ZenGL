@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectSession>
+    <PathDelim Value="\"/>
+    <Version Value="11"/>
+    <BuildModes Active="Default"/>
+    <Units Count="12">
+      <Unit0>
+        <Filename Value="demo01.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <CursorPos X="3" Y="26"/>
+        <UsageCount Value="23"/>
+        <Loaded Value="True"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="..\..\..\..\src\zgl_application.pas"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="1680"/>
+        <CursorPos X="3" Y="1685"/>
+        <UsageCount Value="11"/>
+        <Loaded Value="True"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="..\..\..\..\src\zgl_main.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="426"/>
+        <CursorPos X="39" Y="449"/>
+        <UsageCount Value="11"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="..\..\..\..\src\zgl_screen.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="512"/>
+        <CursorPos X="17" Y="538"/>
+        <UsageCount Value="11"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="..\..\..\..\src\zgl_window.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="52"/>
+        <CursorPos X="12" Y="26"/>
+        <UsageCount Value="11"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="..\..\..\..\src\zgl_opengles.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="290"/>
+        <CursorPos X="73" Y="293"/>
+        <UsageCount Value="11"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="..\..\..\..\src\zgl_opengles_all.pas"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="897"/>
+        <CursorPos X="3" Y="912"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="..\..\..\..\src\zgl_config.cfg"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="76"/>
+        <UsageCount Value="11"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit7>
+      <Unit8>
+        <Filename Value="..\..\..\..\src\zgl_log.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="97"/>
+        <CursorPos X="28" Y="119"/>
+        <UsageCount Value="11"/>
+      </Unit8>
+      <Unit9>
+        <Filename Value="..\..\..\..\src\zgl_utils.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="85"/>
+        <CursorPos X="29" Y="104"/>
+        <UsageCount Value="11"/>
+      </Unit9>
+      <Unit10>
+        <Filename Value="..\..\..\..\src\zgl_text.pas"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="47"/>
+        <CursorPos X="13" Y="71"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit10>
+      <Unit11>
+        <Filename Value="..\..\..\..\src\zgl_textures.pas"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="155"/>
+        <CursorPos X="12" Y="170"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit11>
+    </Units>
+    <JumpHistory Count="22" HistoryIndex="21">
+      <Position1>
+        <Filename Value="demo01.lpr"/>
+        <Caret Line="15" Column="7"/>
+      </Position1>
+      <Position2>
+        <Filename Value="demo01.lpr"/>
+        <Caret Line="16" Column="61"/>
+      </Position2>
+      <Position3>
+        <Filename Value="..\..\..\..\src\zgl_text.pas"/>
+        <Caret Line="71" Column="13" TopLine="47"/>
+      </Position3>
+      <Position4>
+        <Filename Value="..\..\..\..\src\zgl_opengles_all.pas"/>
+        <Caret Line="7" Column="43"/>
+      </Position4>
+      <Position5>
+        <Filename Value="demo01.lpr"/>
+        <Caret Line="16" Column="61"/>
+      </Position5>
+      <Position6>
+        <Filename Value="..\..\..\..\src\zgl_textures.pas"/>
+        <Caret Line="170" Column="12" TopLine="155"/>
+      </Position6>
+      <Position7>
+        <Filename Value="..\..\..\..\src\zgl_opengles_all.pas"/>
+        <Caret Line="913" Column="14" TopLine="897"/>
+      </Position7>
+      <Position8>
+        <Filename Value="..\..\..\..\src\zgl_opengles_all.pas"/>
+        <Caret Line="1177" Column="16" TopLine="1151"/>
+      </Position8>
+      <Position9>
+        <Filename Value="..\..\..\..\src\zgl_opengles_all.pas"/>
+        <Caret Line="1288" Column="21" TopLine="1262"/>
+      </Position9>
+      <Position10>
+        <Filename Value="..\..\..\..\src\zgl_opengles_all.pas"/>
+        <Caret Line="1289" Column="19" TopLine="1263"/>
+      </Position10>
+      <Position11>
+        <Filename Value="..\..\..\..\src\zgl_opengles_all.pas"/>
+        <Caret Line="1297" Column="21" TopLine="1271"/>
+      </Position11>
+      <Position12>
+        <Filename Value="..\..\..\..\src\zgl_opengles_all.pas"/>
+        <Caret Line="1304" Column="20" TopLine="1279"/>
+      </Position12>
+      <Position13>
+        <Filename Value="..\..\..\..\src\zgl_opengles_all.pas"/>
+        <Caret Line="1324" Column="21" TopLine="1298"/>
+      </Position13>
+      <Position14>
+        <Filename Value="..\..\..\..\src\zgl_opengles_all.pas"/>
+        <Caret Line="1325" Column="19" TopLine="1299"/>
+      </Position14>
+      <Position15>
+        <Filename Value="..\..\..\..\src\zgl_opengles_all.pas"/>
+        <Caret Line="1333" Column="21" TopLine="1307"/>
+      </Position15>
+      <Position16>
+        <Filename Value="..\..\..\..\src\zgl_opengles_all.pas"/>
+        <Caret Line="1340" Column="20" TopLine="1315"/>
+      </Position16>
+      <Position17>
+        <Filename Value="..\..\..\..\src\zgl_opengles_all.pas"/>
+        <Caret Line="1360" Column="21" TopLine="1334"/>
+      </Position17>
+      <Position18>
+        <Filename Value="..\..\..\..\src\zgl_opengles_all.pas"/>
+        <Caret Line="1361" Column="19" TopLine="1335"/>
+      </Position18>
+      <Position19>
+        <Filename Value="..\..\..\..\src\zgl_opengles_all.pas"/>
+        <Caret Line="1369" Column="21" TopLine="1343"/>
+      </Position19>
+      <Position20>
+        <Filename Value="..\..\..\..\src\zgl_opengles_all.pas"/>
+        <Caret Line="1376" Column="20" TopLine="1351"/>
+      </Position20>
+      <Position21>
+        <Filename Value="..\..\..\..\src\zgl_opengles_all.pas"/>
+        <Caret Line="912" Column="3" TopLine="897"/>
+      </Position21>
+      <Position22>
+        <Filename Value="..\..\..\..\src\zgl_application.pas"/>
+        <Caret Line="123" Column="42" TopLine="111"/>
+      </Position22>
+    </JumpHistory>
+    <RunParams>
+      <FormatVersion Value="2"/>
+      <Modes Count="0" ActiveMode=""/>
+    </RunParams>
+  </ProjectSession>
+</CONFIG>

@@ -1,0 +1,290 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		BA3CA47B154DF9DE00068B76 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BA3CA47A154DF9DE00068B76 /* UIKit.framework */; };
+		BA3CA47D154DF9DE00068B76 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BA3CA47C154DF9DE00068B76 /* Foundation.framework */; };
+		BA3CA47F154DF9DE00068B76 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BA3CA47E154DF9DE00068B76 /* CoreGraphics.framework */; };
+		BA3CA487154DF9DE00068B76 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = BA3CA486154DF9DE00068B76 /* main.m */; };
+		BAFE8B5E154E09050022F6CA /* icons in Resources */ = {isa = PBXBuildFile; fileRef = BAFE8B5D154E09050022F6CA /* icons */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		BA3CA476154DF9DE00068B76 /* demo01.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = demo01.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		BA3CA47A154DF9DE00068B76 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		BA3CA47C154DF9DE00068B76 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		BA3CA47E154DF9DE00068B76 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		BA3CA482154DF9DE00068B76 /* demo01-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "demo01-Info.plist"; sourceTree = "<group>"; };
+		BA3CA486154DF9DE00068B76 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		BA3CA488154DF9DE00068B76 /* demo01-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "demo01-Prefix.pch"; sourceTree = "<group>"; };
+		BA3CA489154DF9DE00068B76 /* ReadMe.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = ReadMe.txt; sourceTree = "<group>"; };
+		BA3CA48D154DF9DE00068B76 /* demo01.pas */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.pascal; path = demo01.pas; sourceTree = "<group>"; };
+		BAFE8B5D154E09050022F6CA /* icons */ = {isa = PBXFileReference; lastKnownFileType = folder; name = icons; path = ../../icons; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		BA3CA472154DF9DE00068B76 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BA3CA47B154DF9DE00068B76 /* UIKit.framework in Frameworks */,
+				BA3CA47D154DF9DE00068B76 /* Foundation.framework in Frameworks */,
+				BA3CA47F154DF9DE00068B76 /* CoreGraphics.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		BA3CA46A154DF9DE00068B76 = {
+			isa = PBXGroup;
+			children = (
+				BA3CA480154DF9DE00068B76 /* demo01 */,
+				BA3CA479154DF9DE00068B76 /* Frameworks */,
+				BA3CA477154DF9DE00068B76 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		BA3CA477154DF9DE00068B76 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				BA3CA476154DF9DE00068B76 /* demo01.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		BA3CA479154DF9DE00068B76 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				BA3CA47A154DF9DE00068B76 /* UIKit.framework */,
+				BA3CA47C154DF9DE00068B76 /* Foundation.framework */,
+				BA3CA47E154DF9DE00068B76 /* CoreGraphics.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		BA3CA480154DF9DE00068B76 /* demo01 */ = {
+			isa = PBXGroup;
+			children = (
+				BAFE8B5D154E09050022F6CA /* icons */,
+				BA3CA489154DF9DE00068B76 /* ReadMe.txt */,
+				BA3CA48D154DF9DE00068B76 /* demo01.pas */,
+				BA3CA482154DF9DE00068B76 /* demo01-Info.plist */,
+				BA3CA481154DF9DE00068B76 /* Supporting Files */,
+			);
+			path = demo01;
+			sourceTree = "<group>";
+		};
+		BA3CA481154DF9DE00068B76 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				BA3CA486154DF9DE00068B76 /* main.m */,
+				BA3CA488154DF9DE00068B76 /* demo01-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		BA3CA475154DF9DE00068B76 /* demo01 */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BA3CA4A1154DF9DE00068B76 /* Build configuration list for PBXNativeTarget "demo01" */;
+			buildPhases = (
+				BA3CA471154DF9DE00068B76 /* Sources */,
+				BA3CA472154DF9DE00068B76 /* Frameworks */,
+				BA3CA473154DF9DE00068B76 /* Resources */,
+				BA3CA474154DF9DE00068B76 /* ShellScript */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = demo01;
+			productName = demo01;
+			productReference = BA3CA476154DF9DE00068B76 /* demo01.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		BA3CA46C154DF9DE00068B76 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
+			buildConfigurationList = BA3CA46F154DF9DE00068B76 /* Build configuration list for PBXProject "demo01" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = BA3CA46A154DF9DE00068B76;
+			productRefGroup = BA3CA477154DF9DE00068B76 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				BA3CA475154DF9DE00068B76 /* demo01 */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		BA3CA473154DF9DE00068B76 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BAFE8B5E154E09050022F6CA /* icons in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		BA3CA474154DF9DE00068B76 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e\nif [ $PLATFORM_NAME = \"iphonesimulator\" ]; then\n  OUT_FILES=\"-FU$OBJECT_FILE_DIR_normal/$CURRENT_ARCH -o$BUILT_PRODUCTS_DIR/$EXECUTABLE_PATH\"\n  CMD_LINE=\"$FPC_SIM_COMPILER $FPC_COMMON $FPC_CONFIG $FPC_SIM_UNITS $FPC_SIM $OUT_FILES $FPC_MAIN_FILE\"\n  echo $CMD_LINE\n  $CMD_LINE\nelse\n  if [ \"$ARCHS\" = \"armv6\" ]; then\n    OUT_FILES=\"-FU$OBJECT_FILE_DIR_normal/armv6 -o$BUILT_PRODUCTS_DIR/$EXECUTABLE_PATH\"\n    CMD_LINE=\"$FPC_ARM_COMPILER $FPC_COMMON $FPC_CONFIG $FPC_ARM_UNITS $FPC_ARMV6 $OUT_FILES $FPC_MAIN_FILE\"\n    echo $CMD_LINE\n    $CMD_LINE\n  elif [ \"$ARCHS\" = \"armv7\" ]; then\n    OUT_FILES=\"-FU$OBJECT_FILE_DIR_normal/armv7 -o$BUILT_PRODUCTS_DIR/$EXECUTABLE_PATH\"\n    CMD_LINE=\"$FPC_ARM_COMPILER $FPC_COMMON $FPC_CONFIG $FPC_ARM_UNITS $FPC_ARMV7 $OUT_FILES $FPC_MAIN_FILE\"\n    echo $CMD_LINE\n    $CMD_LINE\n  else\n    OUT_FILES=\"-FU$OBJECT_FILE_DIR_normal/armv6 -o$OBJECT_FILE_DIR_normal/armv6/$EXECUTABLE_NAME\"\n    CMD_LINE=\"$FPC_ARM_COMPILER $FPC_COMMON $FPC_CONFIG $FPC_ARM_UNITS $FPC_ARMV6 $OUT_FILES $FPC_MAIN_FILE\"\n    echo $CMD_LINE\n    $CMD_LINE\n    OUT_FILES=\"-FU$OBJECT_FILE_DIR_normal/armv7 -o$OBJECT_FILE_DIR_normal/armv7/$EXECUTABLE_NAME\"\n    CMD_LINE=\"$FPC_ARM_COMPILER $FPC_COMMON $FPC_CONFIG $FPC_ARM_UNITS $FPC_ARMV7 $OUT_FILES $FPC_MAIN_FILE\"\n    echo $CMD_LINE\n    $CMD_LINE\n    CMD_LINE=\"/usr/bin/lipo -create $OBJECT_FILE_DIR_normal/armv6/$EXECUTABLE_NAME $OBJECT_FILE_DIR_normal/armv7/$EXECUTABLE_NAME -output $BUILT_PRODUCTS_DIR/$EXECUTABLE_PATH\"\n    echo $CMD_LINE\n    $CMD_LINE\n  fi\nfi\n/Developer/usr/bin/dsymutil --verbose $BUILT_PRODUCTS_DIR/$EXECUTABLE_PATH -o $BUILT_PRODUCTS_DIR/$PROJECT_NAME.app.dSYM";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		BA3CA471154DF9DE00068B76 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BA3CA487154DF9DE00068B76 /* main.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		BA3CA49F154DF9DE00068B76 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = armv6;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 3.2;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		BA3CA4A0154DF9DE00068B76 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = armv6;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 3.2;
+				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		BA3CA4A2154DF9DE00068B76 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMPRESS_PNG_FILES = NO;
+				FPC_ARMV6 = "-Cparmv6 -Cfvfpv2 -FD/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin";
+				FPC_ARMV7 = "-Cparmv7 -Cfvfpv3 -FD/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin";
+				FPC_ARM_COMPILER = /usr/local/bin/ppcarm;
+				FPC_ARM_UNITS = "-Fu$(SRCROOT)/../../../lib/chipmunk/arm-darwin -Fu$(SRCROOT)/../../../lib/jpeg/arm-darwin -Fu$(SRCROOT)/../../../lib/glu/arm-darwin -Fu$(SRCROOT)/../../../lib/jpeg/arm-darwin -Fu$(SRCROOT)/../../../lib/ogg/arm-darwin -Fu$(SRCROOT)/../../../lib/theora/arm-darwin -Fu$(SRCROOT)/../../../lib/zlib/arm-darwin -Fu$(SRCROOT)/../../../lib/zip/arm-darwin";
+				FPC_COMMON = "-Mdelphi -XX -k-ios_version_min -k$(IPHONEOS_DEPLOYMENT_TARGET) -XR$(SDKROOT) -Fu$(SRCROOT)/../../../src -Fi$(SRCROOT)/../../../headers -Fu$(SRCROOT)/../../../extra -Fu/Developer/FreePascalCompiler/iOS5/uikit-skel/src";
+				FPC_CONFIG = "-Xg -gl";
+				FPC_MAIN_FILE = "$(SRCROOT)/$(PROJECT_NAME)/$(PROJECT_NAME).pas";
+				FPC_SIM = "-Tiphonesim";
+				FPC_SIM_COMPILER = /usr/local/bin/ppc386;
+				FPC_SIM_UNITS = "-Fu$(SRCROOT)/../../../lib/chipmunk/i386-iphonesim -Fu$(SRCROOT)/../../../lib/glu/i386-iphonesim -Fu$(SRCROOT)/../../../lib/jpeg/i386-iphonesim -Fu$(SRCROOT)/../../../lib/ogg/i386-iphonesim -Fu$(SRCROOT)/../../../lib/theora/i386-iphonesim -Fu$(SRCROOT)/../../../lib/zlib/i386-iphonesim -Fu$(SRCROOT)/../../../lib/zip/i386-iphonesim";
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "demo01/demo01-Prefix.pch";
+				INFOPLIST_FILE = "demo01/demo01-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		BA3CA4A3154DF9DE00068B76 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMPRESS_PNG_FILES = NO;
+				FPC_ARMV6 = "-Cparmv6 -Cfvfpv2 -FD/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin";
+				FPC_ARMV7 = "-Cparmv7 -Cfvfpv3 -FD/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin";
+				FPC_ARM_COMPILER = /usr/local/bin/ppcarm;
+				FPC_ARM_UNITS = "-Fu$(SRCROOT)/../../../lib/chipmunk/arm-darwin -Fu$(SRCROOT)/../../../lib/glu/arm-darwin -Fu$(SRCROOT)/../../../lib/jpeg/arm-darwin -Fu$(SRCROOT)/../../../lib/ogg/arm-darwin -Fu$(SRCROOT)/../../../lib/theora/arm-darwin -Fu$(SRCROOT)/../../../lib/zlib/arm-darwin -Fu$(SRCROOT)/../../../lib/zip/arm-darwin";
+				FPC_COMMON = "-Mdelphi -XX -k-ios_version_min -k$(IPHONEOS_DEPLOYMENT_TARGET) -XR$(SDKROOT) -Fu$(SRCROOT)/../../../src -Fi$(SRCROOT)/../../../headers -Fu$(SRCROOT)/../../../extra -Fu/Developer/FreePascalCompiler/iOS5/uikit-skel/src";
+				FPC_CONFIG = "-O2 -XsX";
+				FPC_MAIN_FILE = "$(SRCROOT)/$(PROJECT_NAME)/$(PROJECT_NAME).pas";
+				FPC_SIM = "-Tiphonesim";
+				FPC_SIM_COMPILER = /usr/local/bin/ppc386;
+				FPC_SIM_UNITS = "-Fu$(SRCROOT)/../../../lib/chipmunk/i386-iphonesim -Fu$(SRCROOT)/../../../lib/glu/i386-iphonesim -Fu$(SRCROOT)/../../../lib/jpeg/i386-iphonesim -Fu$(SRCROOT)/../../../lib/ogg/i386-iphonesim -Fu$(SRCROOT)/../../../lib/theora/i386-iphonesim -Fu$(SRCROOT)/../../../lib/zlib/i386-iphonesim -Fu$(SRCROOT)/../../../lib/zip/i386-iphonesim";
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "demo01/demo01-Prefix.pch";
+				INFOPLIST_FILE = "demo01/demo01-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				VALIDATE_PRODUCT = YES;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		BA3CA46F154DF9DE00068B76 /* Build configuration list for PBXProject "demo01" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BA3CA49F154DF9DE00068B76 /* Debug */,
+				BA3CA4A0154DF9DE00068B76 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BA3CA4A1154DF9DE00068B76 /* Build configuration list for PBXNativeTarget "demo01" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BA3CA4A2154DF9DE00068B76 /* Debug */,
+				BA3CA4A3154DF9DE00068B76 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = BA3CA46C154DF9DE00068B76 /* Project object */;
+}

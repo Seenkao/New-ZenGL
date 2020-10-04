@@ -1,0 +1,51 @@
+// Выставляем в постоянную компиляцию без собранных библиотек, с скомпилированными библиотеками наа данный момент можно использовать версию 3.12
+{$DEFINE USE_ZENGL_STATIC}
+
+// RU: Использовать статическую компиляцию с библиотекой Chipmunk. Возможно только для FreePascal
+// EN: Use a static compilation with Chipmunk. Possible only for FreePascal
+{$IFDEF FPC}
+  {$DEFINE USE_CHIPMUNK_STATIC}
+{$ENDIF}
+
+// RU: Ниже определяются ОС и объявляются специальные дефайны. Список возможных дефайнов:
+// EN: Conditions below determine OS and define special defines. Possible defines are:
+// - WINDOWS
+// - MACOSX
+// - iOS
+// - ANDROID
+{$IFDEF MSWINDOWS}
+  {$DEFINE WINDOWS}
+{$ENDIF}
+{$IFDEF DARWIN}
+  {$IF DEFINED(iPHONESIM) or (DEFINED(DARWIN) and DEFINED(CPUARM))}
+    {$DEFINE iOS}
+  {$ELSE}
+    {$DEFINE MACOSX}
+  {$IFEND}
+{$ENDIF}
+// это оставил для возможности собирать из-под линукса для андроид, хотя может и не нужно было
+{$IF DEFINED(LINUX) and DEFINED(CPUARM)}
+  {$DEFINE ANDROID}
+{$IFEND}
+
+// RU: Ограничения.
+// EN: Restrictions.
+
+// RU: Chipmunk для iOS может быть использован только со статической компиляцией.
+// EB: Chipmunk for iOS can be used only with static compilation.
+{$IFDEF iOS}
+  {$DEFINE USE_CHIPMUNK_STATIC}
+{$ENDIF}
+// RU: Chipmunk для Android может быть использован только с линковкой к libchipmunk.so.
+// EB: Chipmunk for Andriud can be used only with linking to libchipmunk.so.
+{$IFDEF ANDROID}
+  {$DEFINE USE_CHIPMUNK_LINK}
+{$ENDIF}
+
+{$IFNDEF USE_INIT_HANDLE}
+  {$DEFINE WND_USE}
+{$ELSE}
+  {$IFDEF WINDOWS}
+    {$DEFINE WND_USE}
+  {$ENDIF}
+{$ENDIF}

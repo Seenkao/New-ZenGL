@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectSession>
+    <PathDelim Value="\"/>
+    <Version Value="11"/>
+    <BuildModes Active="Default"/>
+    <Units Count="3">
+      <Unit0>
+        <Filename Value="demo09.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <IsVisibleTab Value="True"/>
+        <TopLine Value="11"/>
+        <CursorPos X="18" Y="26"/>
+        <UsageCount Value="20"/>
+        <Loaded Value="True"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="..\..\..\..\src\zgl_mouse.pas"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="69"/>
+        <CursorPos X="36" Y="91"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="..\..\..\..\src\zgl_application.pas"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="106"/>
+        <CursorPos X="40" Y="121"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit2>
+    </Units>
+    <JumpHistory Count="5" HistoryIndex="4">
+      <Position1>
+        <Filename Value="demo09.lpr"/>
+        <Caret Line="204" Column="13" TopLine="181"/>
+      </Position1>
+      <Position2>
+        <Filename Value="..\..\..\..\src\zgl_mouse.pas"/>
+        <Caret Line="79" Column="20" TopLine="64"/>
+      </Position2>
+      <Position3>
+        <Filename Value="demo09.lpr"/>
+        <Caret Line="192" Column="14" TopLine="176"/>
+      </Position3>
+      <Position4>
+        <Filename Value="demo09.lpr"/>
+        <Caret Line="6" Column="11" TopLine="2"/>
+      </Position4>
+      <Position5>
+        <Filename Value="..\..\..\..\src\zgl_application.pas"/>
+        <Caret Line="121" Column="40" TopLine="106"/>
+      </Position5>
+    </JumpHistory>
+    <RunParams>
+      <FormatVersion Value="2"/>
+      <Modes Count="0" ActiveMode=""/>
+    </RunParams>
+  </ProjectSession>
+</CONFIG>

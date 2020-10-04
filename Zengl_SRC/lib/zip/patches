@@ -1,0 +1,42 @@
+// GCC
+#ifdef _WIN32
+  #define fstat( a, b ) _fstat( a, b )
+  #define stat( a, b ) _stat( a, b )
+  #define close _close
+  #define strdup _strdup
+  #define fileno _fileno
+  #define fdopen _fdopen
+  #define strcasecmp _stricmp
+  #define snprintf _snprintf
+  #define dup _dup
+#endif
+
+#ifdef _WIN64
+  #define fstat( a, b ) _fstat( a, b )
+  #define stat( a, b ) _stat( a, b )
+  #define close _close
+  #define strdup _strdup
+  #define fseeko fseek
+  #define ftello ftell
+  #define fileno _fileno
+  #define fdopen _fdopen
+  #define strcasecmp _stricmp
+  #define snprintf _snprintf
+  #define dup _dup
+#endif
+
+// Borland C++
+extern char *_strdup( const char *strSource );
+extern int _stricmp( const char *string1, const char *string2 );
+extern int _setmode ( int fd, int mode );
+extern int _dup( int fd );
+
+#define close _close
+#define strdup _strdup
+#define fdopen _fdopen
+#define stricmp _stricmp
+#define _fputc fputc
+#define fstat _fstat
+#define stat _stat
+#define snprintf _snprintf
+#define dup(a) _dup(a)

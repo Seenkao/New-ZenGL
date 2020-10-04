@@ -1,0 +1,32 @@
+library test;
+
+{$mode delphi}
+{$PackRecords c}
+
+uses
+  Classes, jni, ctypes, sysutils;
+
+const
+  cJavaClass = 'com/ex/test/MyActivity';
+  cFuncPrefix = 'Java_com_ex_test_MyActivity_vTest';
+
+function JNI_OnLoad(vm: PJavaVM; reserved: pointer): JInt; {$ifdef mswindows} stdcall; {$else} cdecl; {$endif}
+begin
+  curVM := vm;
+  result := JNI_VERSION_1_6;
+end;
+
+procedure JNI_OnUnload(vm: PJavaVM; reserved: pointer); {$ifdef mswindows} stdcall; {$else} cdecl; {$endif}
+begin
+end;
+
+function Java_com_ex_test_MyActivity_vTest(env: PJNIEnv; this: jobject; value: Integer): Integer; cdecl;
+begin
+  Result := 10 * value;
+end;
+
+exports
+  JNI_OnLoad name 'JNI_OnLoad',
+  JNI_OnUnload name 'JNI_OnUnload',
+  Java_com_ex_test_MyActivity_vTest name 'Java_com_ex_test_MyActivity_vTest';
+end.

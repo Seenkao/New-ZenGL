@@ -1,0 +1,65 @@
+#------------------------------------------------------------------------------
+VERSION = BWS.01
+#------------------------------------------------------------------------------
+!ifndef ROOT
+ROOT = $(MAKEDIR)\..
+!endif
+#------------------------------------------------------------------------------
+MAKE = $(ROOT)\bin\make.exe -$(MAKEFLAGS) -f$**
+DCC = $(ROOT)\bin\dcc32.exe $**
+BRCC = $(ROOT)\bin\brcc32.exe $**
+#------------------------------------------------------------------------------
+PROJECTS = demo01.exe demo02.exe demo03.exe demo04.exe demo05.exe demo06.exe \
+  demo07.exe demo08.exe demo09.exe demo10.exe demo11.exe demo12.exe demo13.exe \
+  demo14.exe demo15.exe demo16.exe
+#------------------------------------------------------------------------------
+default: $(PROJECTS)
+#------------------------------------------------------------------------------
+
+demo01.exe: 01 - Initialization\demo01.dpr
+  $(DCC)
+
+demo02.exe: 02 - Resources\demo02.dpr
+  $(DCC)
+
+demo03.exe: 03 - Input\demo03.dpr
+  $(DCC)
+
+demo04.exe: 04 - Screen Settings\demo04.dpr
+  $(DCC)
+
+demo05.exe: 05 - Primitives\demo05.dpr
+  $(DCC)
+
+demo06.exe: 06 - Text\demo06.dpr
+  $(DCC)
+
+demo07.exe: 07 - Sprites\demo07.dpr
+  $(DCC)
+
+demo08.exe: 08 - Sprite Engine\demo08.dpr
+  $(DCC)
+
+demo09.exe: 09 - Sprite Engine(Classes)\demo09.dpr
+  $(DCC)
+
+demo10.exe: 10 - Grid\demo10.dpr
+  $(DCC)
+
+demo11.exe: 11 - Grid\demo11.dpr
+  $(DCC)
+
+demo12.exe: 12 - Render into Texture\demo12.dpr
+  $(DCC)
+
+demo13.exe: 13 - Particles\demo13.dpr
+  $(DCC)
+
+demo14.exe: 14 - Sound\demo14.dpr
+  $(DCC)
+
+demo15.exe: 14 - Sound\demo15.dpr
+  $(DCC)
+
+demo16.exe: 16 - Physics\demo16.dpr
+  $(DCC)

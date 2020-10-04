@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <Compiler Value="D:\lazarus\FPC_32\bin\i386-Win32\fpc.exe" Date="1355043128"/>
+  <Params Value=" -MDelphi -Scghi -CX -O3 -Xs -XX -WG -l -vewibq -vn-h- -FiD:\Zengl_SRC\demos\Lazarus\tmp\i386-win32 -FiD:\Zengl_SRC\headers -FuD:\Zengl_SRC\headers -FuD:\Zengl_SRC\extra -FuD:\Zengl_SRC\src -FuD:\Zengl_SRC\lib\jpeg\i386-win32 -FuD:\Zengl_SRC\lib\msvcrt\i386 -FuD:\Zengl_SRC\lib\ogg\i386-win32 -FuD:\Zengl_SRC\lib\theora\i386-win32 -FuD:\Zengl_SRC\lib\zlib\i386-win32 -FuD:\Zengl_SRC\lib\zip\i386-win32 &quot;-FuD:\Zengl_SRC\demos\Lazarus\04 - Screen Settings\&quot; -FUD:\Zengl_SRC\demos\Lazarus\tmp\i386-win32\ -FED:\Zengl_SRC\bin\i386-win32\ -oD:\Zengl_SRC\bin\i386-win32\demo04.exe demo04.lpr"/>
+</CONFIG>

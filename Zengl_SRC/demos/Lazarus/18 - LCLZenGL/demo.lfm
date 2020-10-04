@@ -1,0 +1,21 @@
+object Form1: TForm1
+  Left = 257
+  Height = 600
+  Top = 130
+  Width = 800
+  BorderStyle = bsSingle
+  Caption = 'demo LCL'
+  OnClose = FormClose
+  OnCreate = FormCreate
+  OnKeyDown = FormKeyDown
+  OnMouseDown = FormMouseDown
+  OnMouseMove = FormMouseMove
+  Position = poScreenCenter
+  LCLVersion = '2.0.10.0'
+  object Timer1: TTimer
+    Interval = 20
+    OnTimer = Timer1Timer
+    Left = 64
+    Top = 26
+  end
+end
