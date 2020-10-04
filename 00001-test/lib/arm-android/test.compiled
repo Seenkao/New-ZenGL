@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<CONFIG>
-  <Compiler Value="/usr/local/codetyphon/fpc/fpc32/bin/i386-linux/ppcrossarm" Date="1587012487"/>
-  <Params Value=" -Tandroid -Parm -MObjFPC -Scghi -O1 -l -vewnhibq -Fi/home/mirrel/Programming/Lazarus/projects/00001-test/lib/arm-android -Fl/usr/local/codetyphon/binLibraries/android-4.0-api14-arm -Fu/home/mirrel/Programming/Lazarus/projects/00001-test/ -FU/home/mirrel/Programming/Lazarus/projects/00001-test/lib/arm-android/ -FE/home/mirrel/Programming/Lazarus/projects/00001-test/ -o/home/mirrel/Programming/Lazarus/projects/00001-test/libtest.so test.ppr"/>
-</CONFIG>

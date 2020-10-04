@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<CONFIG>
-  <Compiler Value="/usr/local/codetyphon/fpc/fpc64/bin/x86_64-linux/fpc" Date="1587014402"/>
-  <Params Value=" -Parm -MObjFPC -Scghi -CX -Os1 -g -gl -Xg -Xs -XX -l -vewnhibq -Fi/home/mirrel/Programming/Lazarus/projects/00001-test/lib/arm-linux -Fi/home/mirrel/Programming/Lazarus/Zengl_SRC/headers -Fu/home/mirrel/Programming/Lazarus/Zengl_SRC/src -Fu/home/mirrel/Programming/Lazarus/Zengl_SRC/lib/zlib/x86_64-linux -Fu/home/mirrel/Programming/Lazarus/Zengl_SRC/lib/zip/x86_64-linux -Fu/home/mirrel/Programming/Lazarus/Zengl_SRC/lib/theora/x86_64-linux -Fu/home/mirrel/Programming/Lazarus/Zengl_SRC/lib/ogg/x86_64-linux -Fu/home/mirrel/Programming/Lazarus/Zengl_SRC/lib/jpeg/x86_64-linux -Fu/home/mirrel/Programming/Lazarus/Lib -Fu/home/mirrel/Programming/Lazarus/projects/00001-test/ -FU/home/mirrel/Programming/Lazarus/projects/00001-test/lib/arm-linux/ -FE/home/mirrel/Programming/Lazarus/projects/00001-test/ -o/home/mirrel/Programming/Lazarus/projects/00001-test/ZenTest001 ZenTest001.lpr"/>
-  <Complete Value="False"/>
-</CONFIG>

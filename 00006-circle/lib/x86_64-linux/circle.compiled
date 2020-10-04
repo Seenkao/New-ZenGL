@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<CONFIG>
-  <Compiler Value="/usr/bin/fpc" Date="1548372422"/>
-  <Params Value=" -MObjFPC -Scghi -Cg -O1 -g -gl -Xg -l -vewnhibq -Fi/home/mirrel/Programming/Lazarus/projects/00006-circle/lib/x86_64-linux -Fi/home/mirrel/Programming/Lazarus/Zengl_SRC/headers -Fu/home/mirrel/Programming/Lazarus/Zengl_SRC/src -Fu/home/mirrel/Programming/Lazarus/Zengl_SRC/lib/zlib/x86_64-linux -Fu/home/mirrel/Programming/Lazarus/Zengl_SRC/lib/zip/x86_64-linux -Fu/home/mirrel/Programming/Lazarus/Zengl_SRC/lib/theora/x86_64-linux -Fu/home/mirrel/Programming/Lazarus/Zengl_SRC/lib/ogg/x86_64-linux -Fu/home/mirrel/Programming/Lazarus/Zengl_SRC/lib/jpeg/x86_64-linux -Fu/home/mirrel/Programming/Lazarus/projects/00006-circle/ -FU/home/mirrel/Programming/Lazarus/projects/00006-circle/lib/x86_64-linux/ -FE/home/mirrel/Programming/Lazarus/projects/00006-circle/ -o/home/mirrel/Programming/Lazarus/projects/00006-circle/circle circle.pas"/>
-</CONFIG>
