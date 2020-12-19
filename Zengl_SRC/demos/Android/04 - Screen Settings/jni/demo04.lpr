@@ -4,7 +4,6 @@ library demo04;
 
 uses
   zgl_application,
-  zgl_main,
   zgl_file,
   zgl_screen,
   zgl_window,
@@ -17,7 +16,7 @@ uses
   zgl_textures,
   zgl_textures_png,
   zgl_textures_jpg,
-  zgl_math_2d,
+  zgl_types,
   zgl_collision_2d,
   zgl_utils
   ;
@@ -25,13 +24,15 @@ uses
 var
   dirRes  : UTF8String = 'assets/';
 
-  fntMain : zglPFont;
+  fntMain : Byte;
   texBack : zglPTexture;
 
   correctAspect : Boolean = TRUE;
   correctRect   : zglTRect;
 
   str : UTF8String;
+
+  TimeStart: Byte;
 
 procedure Init;
 begin
@@ -46,7 +47,7 @@ begin
   file_CloseArchive();
 
   str := 'Tap here to toggle' + #10 + 'Correction of aspect';
-  setTextScale(1.5);
+  setTextScale(15, fntMain);
 end;
 
 procedure Draw;
@@ -107,7 +108,7 @@ end;
 
 procedure Java_zengl_android_ZenGL_Main( var env; var thiz ); cdecl;
 begin
-  timer_Add( @Timer, 16 );
+  TimeStart := timer_Add( @Timer, 16, Start );
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );

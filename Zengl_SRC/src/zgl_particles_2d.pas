@@ -31,6 +31,7 @@ interface
 uses
   zgl_textures,
   zgl_math_2d,
+  zgl_types,
   zgl_file,
   zgl_memory;
 

@@ -9,49 +9,55 @@
         <Filename Value="demo09.lpr"/>
         <IsPartOfProject Value="True"/>
         <IsVisibleTab Value="True"/>
-        <TopLine Value="11"/>
-        <CursorPos X="18" Y="26"/>
+        <TopLine Value="135"/>
+        <CursorPos X="27" Y="149"/>
         <UsageCount Value="20"/>
         <Loaded Value="True"/>
       </Unit0>
       <Unit1>
         <Filename Value="..\..\..\..\src\zgl_mouse.pas"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="69"/>
         <CursorPos X="36" Y="91"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
       </Unit1>
       <Unit2>
         <Filename Value="..\..\..\..\src\zgl_application.pas"/>
-        <EditorIndex Value="1"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="106"/>
         <CursorPos X="40" Y="121"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
       </Unit2>
     </Units>
-    <JumpHistory Count="5" HistoryIndex="4">
+    <JumpHistory Count="7" HistoryIndex="6">
       <Position1>
         <Filename Value="demo09.lpr"/>
         <Caret Line="204" Column="13" TopLine="181"/>
       </Position1>
       <Position2>
-        <Filename Value="..\..\..\..\src\zgl_mouse.pas"/>
-        <Caret Line="79" Column="20" TopLine="64"/>
+        <Filename Value="demo09.lpr"/>
+        <Caret Line="192" Column="14" TopLine="176"/>
       </Position2>
       <Position3>
         <Filename Value="demo09.lpr"/>
-        <Caret Line="192" Column="14" TopLine="176"/>
+        <Caret Line="6" Column="11" TopLine="2"/>
       </Position3>
       <Position4>
         <Filename Value="demo09.lpr"/>
-        <Caret Line="6" Column="11" TopLine="2"/>
+        <Caret Line="41" Column="19" TopLine="33"/>
       </Position4>
       <Position5>
-        <Filename Value="..\..\..\..\src\zgl_application.pas"/>
-        <Caret Line="121" Column="40" TopLine="106"/>
+        <Filename Value="demo09.lpr"/>
+        <Caret Line="141" Column="72" TopLine="152"/>
       </Position5>
+      <Position6>
+        <Filename Value="demo09.lpr"/>
+        <Caret Line="21" Column="12" TopLine="7"/>
+      </Position6>
+      <Position7>
+        <Filename Value="demo09.lpr"/>
+        <Caret Line="149" Column="17" TopLine="136"/>
+      </Position7>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>

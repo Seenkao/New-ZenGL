@@ -4,7 +4,6 @@ library demo11;
 
 uses
   zgl_application,
-  zgl_main,
   zgl_screen,
   zgl_window,
   zgl_timers,
@@ -13,18 +12,17 @@ uses
   zgl_file,
   zgl_textures,
   zgl_textures_png,
-  zgl_textures_jpg,
   zgl_tiles_2d,
   zgl_font,
   zgl_text,
-  zgl_math_2d,
+  zgl_types,
   zgl_utils,
   zgl_render_2d
   ;
 
 var
   dirRes   : UTF8String = 'assets/';
-  fntMain  : zglPFont;
+  fntMain  : Byte;
   map      : zglTTiles2D;
   texTiles : zglPTexture;
 
@@ -64,7 +62,7 @@ begin
   file_Close( f );
 
   file_CloseArchive();
-  setTextScale(1.5);
+  setTextScale(15, fntMain);
 end;
 
 procedure Draw;

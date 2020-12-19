@@ -46,14 +46,19 @@
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <CodeGeneration>
+      <SmartLinkUnit Value="True"/>
       <RelocatableUnit Value="True"/>
       <TargetCPU Value="arm"/>
       <TargetOS Value="android"/>
+      <Optimizations>
+        <OptimizationLevel Value="3"/>
+      </Optimizations>
     </CodeGeneration>
     <Linking>
       <Debugging>
         <GenerateDebugInfo Value="False"/>
       </Debugging>
+      <LinkSmart Value="True"/>
       <Options>
         <ExecutableType Value="Library"/>
       </Options>

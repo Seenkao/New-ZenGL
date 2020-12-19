@@ -14,10 +14,8 @@ uses
   {$ENDIF}
   zglChipmunk,
   {$IFDEF USE_ZENGL_STATIC}
-  zgl_main,
   zgl_screen,
   zgl_window,
-  zgl_application,
   zgl_timers,
   zgl_keyboard,
   zgl_mouse,
@@ -36,11 +34,14 @@ uses
 
 var
   dirRes  : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
-  fntMain : zglPFont;
+  fntMain : Byte;
   space   : PcpSpace;
   bCount  : Integer;
   Bodies  : array of PcpBody;
   Shapes  : array of PcpShape;
+
+  TimeStart: Byte;
+  TimePhisics: Byte;
 
 // RU: Добавить объект "шар"
 //     x, y - координаты центра
@@ -116,6 +117,7 @@ procedure Init;
     e, u       : cpFloat;
 begin
   fntMain := font_LoadFromFile(dirRes + 'font.zfi');
+  setTextScale(15, fntMain);
 
   cpInitChipmunk();
 
@@ -128,10 +130,10 @@ begin
   space^.elasticIterations := 10;
   // RU: Задаем силу гравитации.
   // EN: Set the gravity.
-  space^.gravity    := cpv(0, 256);
+  space^.gravity    := cpv(1, 100);
   // RU: Задаем коэффициент "затухания" движения объектов.
   // EN: Set the damping for moving of objects.
-  space^.damping    := 0.9;
+  space^.damping    := 0.99;
 
   e := 1;
   u := 0.9;
@@ -167,12 +169,11 @@ begin
   ground^.e := e;
   ground^.u := u;
   cpSpaceAddStaticShape(space, ground);
-  setTextScale(1.5);
 end;
 
 procedure Draw;
 begin
-  batch2d_Begin();
+//  batch2d_Begin();
 
   // RU: Рендерим объекты указанного "мира". Второй аргумент функции отвечает за показ точек соприкосновения.
   // EN: Render objects for specified "world". Second argument responsible for rendering of collision points.
@@ -180,7 +181,7 @@ begin
 
   text_Draw(fntMain, 10, 5,  'FPS: ' + u_IntToStr(zgl_Get(RENDER_FPS)));
   text_Draw(fntMain, 10, 25, 'Use your mouse: Left Click - box, Right Click - ball');
-  batch2d_End();
+//  batch2d_End();
 end;
 
 procedure Proc;
@@ -199,9 +200,9 @@ begin
   mouse_ClearState();
 end;
 
-procedure Update(dt : Double);
+procedure Phisics;
 begin
-  cpSpaceStep(space, 1 / (1000 / dt));
+  cpSpaceStep(space, 1 / zgl_Get(RENDER_FPS));
 end;
 
 procedure Quit;
@@ -222,11 +223,11 @@ Begin
   if not cpLoad( libChipmunk ) Then exit;
   {$ENDIF}
 
-  timer_Add(@Proc, 16);
+  TimeStart := timer_Add(@Proc, 16, Start);
+  TimePhisics := timer_Add(@Phisics, 16, Start);
 
   zgl_Reg(SYS_LOAD, @Init);
   zgl_Reg(SYS_DRAW, @Draw);
-  zgl_Reg(SYS_UPDATE, @Update);
   zgl_Reg(SYS_EXIT, @Quit);
 
   wnd_SetCaption(utf8_Copy('16 - Physics Simple'));

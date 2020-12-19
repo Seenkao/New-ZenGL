@@ -5,7 +5,6 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls,
   ExtCtrls, ComCtrls,
-  zgl_main,
   zgl_application,
   zgl_screen,
   zgl_window,
@@ -53,6 +52,7 @@ type
     SpinLeft: TSpinEdit;
     SpinRight: TSpinEdit;
     SpinBottom: TSpinEdit;
+    Timer1: TTimer;
     procedure ButtonChooseFontClick(Sender: TObject);
     procedure ButtonDefaultSymbolsClick(Sender: TObject);
     procedure ButtonExitClick(Sender: TObject);
@@ -76,6 +76,7 @@ type
     procedure SpinBottomChange(Sender: TObject);
     procedure SpinRightChange(Sender: TObject);
     procedure SpinCurrentPageChange(Sender: TObject);
+    procedure Timer1Timer(Sender: TObject);
   private
     { private declarations }
   public
@@ -88,15 +89,13 @@ type
 var
   Form1        : TForm1;
 
-  zglInited    : Boolean;
+  zgl_Inited   : Boolean = False;
   fontMoving   : Boolean;
   fontX, fontY : Integer;
   lastX, lastY : Integer;
   utf8chars    : array[0..65535, 0..5] of AnsiChar;
 
 implementation
-uses
-  uProcessing;
 
 {$R *.dfm}
 
@@ -106,7 +105,6 @@ procedure Init;
 begin
   wnd_SetSize( Form1.Panel1.ClientWidth, Form1.Panel1.ClientHeight);
   scrVSync := True;
-  scr_SetOptions();
 
   fontgen_Init();                                                         // это "установка" (выбор) шрифта
   fg_Font := font_Add();
@@ -124,13 +122,13 @@ begin
   pr2d_Rect(0, 0, Form1.Panel1.Width, Form1.Panel1.Height, $505050, 255, PR2D_FILL);
   pr2d_Rect(fontX, fontY, fg_PageSize, fg_PageSize, $000000, 255, PR2D_FILL);
 
-  if Assigned(fg_Font) and Assigned(fg_Font.Pages) Then
+  if (fg_Font <> 0) and Assigned(managerFont.Font[fg_Font].Pages) Then
   begin
-    ssprite2d_Draw(fg_Font.Pages[Form1.SpinCurrentPage.Value - 1], fontX, fontY, fg_PageSize, fg_PageSize, 0);
+    ssprite2d_Draw(managerFont.Font[fg_Font].Pages[Form1.SpinCurrentPage.Value - 1], fontX, fontY, fg_PageSize, fg_PageSize, 0);
 
     w := text_GetWidth(fg_Font, Form1.EditTest.Text);
-    pr2d_Rect((Form1.Panel1.Width - w) / 2, Form1.Panel1.Height - fg_Font.MaxShiftY - fg_Font.MaxHeight, w, fg_Font.MaxShiftY + fg_Font.MaxHeight, $000000, 255, PR2D_FILL);
-    text_Draw(fg_Font, Form1.Panel1.Width div 2, Form1.Panel1.Height - fg_Font.MaxHeight, Form1.EditTest.Text, TEXT_HALIGN_CENTER);
+    pr2d_Rect((Form1.Panel1.Width - w) / 2, Form1.Panel1.Height - managerFont.Font[fg_Font].MaxShiftY - managerFont.Font[fg_Font].MaxHeight, w, managerFont.Font[fg_Font].MaxShiftY + managerFont.Font[fg_Font].MaxHeight, $000000, 255, PR2D_FILL);
+    text_Draw(fg_Font, Form1.Panel1.Width div 2, Form1.Panel1.Height - managerFont.Font[fg_Font].MaxHeight, Form1.EditTest.Text, TEXT_HALIGN_CENTER);
   end;
 
   Application.ProcessMessages();
@@ -143,7 +141,6 @@ procedure TForm1.SetDefaultSymbolList;
 begin
   EditChars.Text := ' !"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}' +
                     '~ВЎВўВЈВ¤ВҐВ¦В§ВЁВ©ВЄВ«В¬В®ВЇВ°В±ВІВіВґВµВ¶В·ВёВ№ВєВ»ВјВЅВѕВїв„–' +
-                    // 'ГЂГЃГ‚ГѓГ„Г…Г†Г‡Г€Г‰ГЉГ‹ГЊГЌГЋГЏГђГ‘Г’Г“Г”Г•Г–Г—ГГ™ГљГ›ГњГќГћГџГ ГЎГўГЈГ¤ГҐГ¦Г§ГЁГ©ГЄГ«Г¬Г­Г®ГЇГ°Г±ГІГіГґГµГ¶Г·ГёГ№ГєГ»ГјГЅГѕГї' +
                     'РЃР„Р†Р‡РђР‘Р’Р“Р”Р•Р–Р—РР™РљР›РњРќРћРџР РЎРўРЈР¤РҐР¦Р§РЁР©РЄР«Р¬Р­Р®РЇР°Р±РІРіРґРµР¶Р·РёР№РєР»РјРЅРѕРїСЂСЃС‚СѓС„С…С†С‡С€С‰СЉС‹СЊСЌСЋСЏС‘С”С–С—ТђТ‘';
 end;
 
@@ -152,37 +149,28 @@ procedure TForm1.UpdateSymbolList;
     i, j, len : Integer;
     c : Word;
 begin
-  Form2.Show();
-  Form2.Left := Form1.Left + (Form1.Width - Form2.Width) div 2;
-  Form2.Top := Form1.Top + (Form1.Height - Form2.Height) div 2;
-  Form2.ProgressBar1.Position := 0;
-
 //  Panel1.Canvas.Clear();
+  Panel1.Update;
   Application.ProcessMessages();
 
   i := 1;
   FillChar(fg_CharsUse, 65536, 0);
-  fg_Font.Count.Chars := 0;
+  managerFont.Font[fg_Font].Count.Chars := 0;
   len := length(EditChars.Text);
-  Form2.ProgressBar1.Max := len;
   while i <= len do
   begin
-    Form2.ProgressBar1.Position := i;
-    Form2.ProgressBar1.Update();
-
-    c := utf8_GetID(EditChars.Text, i, @j);
+    c := utf8_toUnicode(EditChars.Text, i, @j);
     if not fg_CharsUse[c] Then                          // если не прописан(не назначен) символ
     begin
       fg_CharsUse[c] := TRUE;                           // назначаем
       FillChar(utf8chars[c, 0], 6, 0);                  // заполняем 6 значений нулями
       Move(EditChars.Text[i], utf8chars[c, 0], j - i);  // и перемещаем туда символ???
-      INC(fg_Font.Count.Chars);
+      INC(managerFont.Font[fg_Font].Count.Chars);
     end;
     i := j;
   end;
 
   EditChars.Text := '';
-//  for i := 0 to 65535 do
   i := 0;
   while i < 65536 do
   begin
@@ -191,7 +179,6 @@ begin
     inc(i);
   end;
 
-  Form2.Hide();
   Application.ProcessMessages();
 end;
 
@@ -199,11 +186,11 @@ procedure TForm1.UpdateFont;
 begin
   UpdateSymbolList();
   fontgen_BuildFont(fg_Font, FontDialog.Font.Name);                       // генерация символов шрифта
-  SpinCurrentPage.MaxValue := fg_Font.Count.Pages;
-  if (fg_Font.Count.Pages = 0) or (fg_Font.Count.Pages = 1) then
+  SpinCurrentPage.MaxValue := managerFont.Font[fg_Font].Count.Pages;
+  if (managerFont.Font[fg_Font].Count.Pages = 0) or (managerFont.Font[fg_Font].Count.Pages = 1) then
   begin
     SpinCurrentPage.Enabled := False;
-    SpinCurrentPage.Value := fg_Font.Count.Pages;
+    SpinCurrentPage.Value := managerFont.Font[fg_Font].Count.Pages;
     Exit;
   end
   else
@@ -214,6 +201,7 @@ end;
 
 procedure TForm1.ButtonChooseFontClick(Sender: TObject);
 begin
+  Timer1.Enabled := False;
   if FontDialog.Execute() Then
   begin
     fg_FontSize   := FontDialog.Font.Size;
@@ -221,17 +209,20 @@ begin
     fg_FontItalic := fsItalic in FontDialog.Font.Style;
     UpdateFont();
   end;
+  Timer1.Enabled := True;
 end;
 
 procedure TForm1.ButtonDefaultSymbolsClick(Sender: TObject);
 begin
+  Timer1.Enabled := False;
   SetDefaultSymbolList();
   UpdateFont();
+  Timer1.Enabled := True;
 end;
 
 procedure TForm1.ButtonExitClick(Sender: TObject);
 begin
-  winOn := false;
+  Form1.Close;
 end;
 
 procedure TForm1.ButtonImportSymbolsClick(Sender: TObject);
@@ -239,6 +230,7 @@ procedure TForm1.ButtonImportSymbolsClick(Sender: TObject);
     i : Integer;
     s : TStrings;
 begin
+  Timer1.Enabled := False;
   s := TStringList.Create;
   if OpenDialog.Execute() Then
   begin
@@ -248,22 +240,27 @@ begin
 
     UpdateFont();
   end;
+  Timer1.Enabled := True;
 end;
 
 procedure TForm1.ButtonRebuildFontClick(Sender: TObject);
 begin
+  Timer1.Enabled := False;
   UpdateFont();
+  Timer1.Enabled := True;
 end;
 
 procedure TForm1.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
+  Timer1.Enabled := False;
   winOn := False;
+  zgl_Destroy;
+  Application.Terminate;
 end;
 
 procedure TForm1.FormResize(Sender: TObject);
 begin
-  if zglInited Then
-    wnd_SetSize(Panel1.ClientWidth, Panel1.ClientHeight);
+  wnd_SetSize(Panel1.ClientWidth, Panel1.ClientHeight);
 end;
 
 procedure TForm1.Panel1MouseDown(Sender: TObject; Button: TMouseButton;
@@ -297,6 +294,7 @@ end;
 
 procedure TForm1.SpinLeftChange(Sender: TObject);
 begin
+  Timer1.Enabled := False;
   if SpinLeft.Value < 0 then
     SpinLeft.Value := 0;
   if fg_FontPadding[0] <> SpinLeft.Value Then
@@ -304,10 +302,12 @@ begin
     fg_FontPadding[0] := SpinLeft.Value;
     UpdateFont();
   end;
+  Timer1.Enabled := True;
 end;
 
 procedure TForm1.SpinTopChange(Sender: TObject);
 begin
+  Timer1.Enabled := False;
   if SpinTop.Value < 0 then
     SpinTop.Value := 0;
   if fg_FontPadding[1] <> SpinTop.Value Then
@@ -315,10 +315,12 @@ begin
     fg_FontPadding[1] := SpinTop.Value;
     UpdateFont();
   end;
+  Timer1.Enabled := True;
 end;
 
 procedure TForm1.SpinRightChange(Sender: TObject);
 begin
+  Timer1.Enabled := False;
   if SpinRight.Value < 0 then
     SpinRight.Value := 0;
   if fg_FontPadding[2] <> SpinRight.Value Then
@@ -326,10 +328,12 @@ begin
     fg_FontPadding[2] := SpinRight.Value;
     UpdateFont();
   end;
+  Timer1.Enabled := True;
 end;
 
 procedure TForm1.SpinBottomChange(Sender: TObject);
 begin
+  Timer1.Enabled := False;
   if SpinBottom.Value < 0 then
     SpinBottom.Value := 0;
   if fg_FontPadding[3] <> SpinBottom.Value Then
@@ -337,6 +341,7 @@ begin
     fg_FontPadding[3] := SpinBottom.Value;
     UpdateFont();
   end;
+  Timer1.Enabled := True;
 end;
 
 procedure TForm1.ButtonSaveFontClick(Sender: TObject);
@@ -356,48 +361,55 @@ begin
       else
         style := 'Regular';
 
+  Timer1.Enabled := False;
   SaveFontDialog.FileName := FontDialog.Font.Name + '-' + style + '-' + IntToStr(fg_FontSize) + 'pt';
 
-  if SaveFontDialog.Execute() Then
-  begin
+//  if SaveFontDialog.Execute() Then
+//  begin
     name := file_GetName(SaveFontDialog.FileName);
     dir  := file_GetDirectory(SaveFontDialog.FileName);
-    fontgen_SaveFont(fg_Font, dir + name);
-  end;
+    fontgen_SaveFont(fg_Font, name);
+//  end;
+  ShowMessage(name + ' save');
+  Timer1.Enabled := True;
 end;
 
 procedure TForm1.CheckBoxAntialiasingChange(Sender: TObject);
 begin
+  Timer1.Enabled := False;
   fg_FontAA := CheckBoxAntialiasing.Checked;
   UpdateFont();
+  Timer1.Enabled := True;
 end;
 
 procedure TForm1.CheckBoxPackChange(Sender: TObject);
 begin
+  Timer1.Enabled := False;
   fg_FontPack := CheckBoxPack.Checked;
   UpdateFont();
+  Timer1.Enabled := True;
 end;
 
 procedure TForm1.ComboBoxPageSizeChange(Sender: TObject);
 begin
+  Timer1.Enabled := False;
   fg_PageSize := StrToInt(ComboBoxPageSize.Items[ComboBoxPageSize.ItemIndex]);
   UpdateFont();
+  Timer1.Enabled := True;
 end;
 
 procedure TForm1.FormActivate(Sender: TObject);
 begin
-  if not zglInited Then
+  if not zgl_Inited then
   begin
-    zglInited := TRUE;
-
+    zgl_Inited := True;
     zgl_Disable(APP_USE_LOG);
 
     zgl_Reg(SYS_LOAD, @Init);
     zgl_Reg(SYS_DRAW, @Draw);
 
     zgl_InitToHandle(Panel1.Handle);
-
-    Application.Terminate();
+    Timer1.Enabled := True;
   end;
 end;
 
@@ -405,6 +417,11 @@ procedure TForm1.SpinCurrentPageChange(Sender: TObject);
 begin
   if SpinCurrentPage.Value < 1 then
     SpinCurrentPage.Value := 1;
+end;
+
+procedure TForm1.Timer1Timer(Sender: TObject);
+begin
+  app_PLoop;
 end;
 
 end.

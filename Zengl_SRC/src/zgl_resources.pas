@@ -20,6 +20,8 @@
  *
  *  3. This notice may not be removed or altered from any
  *     source distribution.
+
+ !!! modification from Serge 15.12.2020
 }
 unit zgl_resources;
 
@@ -110,7 +112,7 @@ type
   zglTFontResource = record
     FileName: UTF8String;
     Memory  : zglTMemory;
-    Font    : zglPFont;
+    Font    : Byte;
     pData   : array of PByteArray;
     Format  : array of Word;
     Width   : array of Word;
@@ -286,9 +288,9 @@ begin
                   with zglPFontResource(item.Resource)^ do
                     if item.Prepared Then
                       begin
-                        for i := 0 to Font.Count.Pages - 1 do
+                        for i := 0 to managerFont.Font[Font].Count.Pages - 1 do
                           begin
-                            tex_CreateGL(Font.Pages[i]^, pData[i]);
+                            tex_CreateGL(managerFont.Font[Font].Pages[i]^, pData[i]);
                             FreeMem(pData[i]);
                           end;
                         SetLength(pData, 0);
@@ -318,8 +320,8 @@ begin
                   if item.Ready Then
                     with zglPFontResource(item.Resource)^ do
                       begin
-                        for i := 0 to Font.Count.Pages - 1 do
-                          Font.Pages[i] := tex_Add();
+                        for i := 0 to managerFont.Font[Font].Count.Pages - 1 do
+                          managerFont.Font[Font].Pages[i] := tex_Add();
                         item.Prepared := TRUE;
                         thread_EventSet(resQueueState[id]);
                         item.Ready := FALSE;
@@ -618,17 +620,17 @@ begin
                         if IsFromFile Then
                           mem_Free(mem);
 
-                        if Assigned(Font) Then
+                        if (managerFont.Font[Font].Flags and UseFnt) <> 0 Then
                           begin
                             if IsFromFile Then
                               begin
                                 dir  := file_GetDirectory(FileName);
                                 name := file_GetName(FileName);
-                                SetLength(pData, Font.Count.Pages);
-                                SetLength(Format, Font.Count.Pages);
-                                SetLength(Width, Font.Count.Pages);
-                                SetLength(Height, Font.Count.Pages);
-                                for i := 0 to Font.Count.Pages - 1 do
+                                SetLength(pData, managerFont.Font[Font].Count.Pages);
+                                SetLength(Format, managerFont.Font[Font].Count.Pages);
+                                SetLength(Width, managerFont.Font[Font].Count.Pages);
+                                SetLength(Height, managerFont.Font[Font].Count.Pages);
+                                for i := 0 to managerFont.Font[Font].Count.Pages - 1 do
                                   for j := managerTexture.Count.Formats - 1 downto 0 do
                                     begin
                                       tmp := dir + name + '-page' + u_IntToStr(i) + '.' + u_StrDown(managerTexture.Formats[j].Extension);
@@ -663,16 +665,16 @@ begin
                             end;
                       end else
                         begin
-                          for i := 0 to Font.Count.Pages - 1 do
+                          for i := 0 to managerFont.Font[Font].Count.Pages - 1 do
                             begin
-                              Font.Pages[i].Flags  := TEX_DEFAULT_2D;
-                              Font.Pages[i].Format := Format[i];
-                              Font.Pages[i].Width  := Width[i];
-                              Font.Pages[i].Height := Height[i];
+                              managerFont.Font[Font].Pages[i].Flags  := TEX_DEFAULT_2D;
+                              managerFont.Font[Font].Pages[i].Format := Format[i];
+                              managerFont.Font[Font].Pages[i].Width  := Width[i];
+                              managerFont.Font[Font].Pages[i].Height := Height[i];
                               if Format[i] = TEX_FORMAT_RGBA Then
                                 tex_CalcAlpha(pData[i], Width[i], Height[i]);
-                              tex_CalcFlags(Font.Pages[i]^, pData[i]);
-                              tex_CalcTexCoords(Font.Pages[i]^);
+                              tex_CalcFlags(managerFont.Font[Font].Pages[i]^, pData[i]);
+                              tex_CalcTexCoords(managerFont.Font[Font].Pages[i]^);
                             end;
 
                           Ready := TRUE;

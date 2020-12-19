@@ -21,7 +21,7 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 28.09.2020
+ !!! modification from Serge 15.12.2020
 }
 unit zgl_screen;
 
@@ -31,18 +31,21 @@ unit zgl_screen;
 {$ENDIF}
 
 interface
+
+uses
 {$IFDEF USE_X11}
-  uses X, XLib, XRandr, UnixType;
+  X, XLib, XRandr, UnixType,
 {$ENDIF}
 {$IFDEF WINDOWS}
-  uses Windows;
+  Windows,
 {$ENDIF}
 {$IFDEF MACOSX}
-  uses MacOSAll;
+  MacOSAll,
 {$ENDIF}
 {$IFDEF iOS}
-  uses iPhoneAll, CFBase, CFString;
+  iPhoneAll, CFBase, CFString,
 {$ENDIF}
+  zgl_types;
 
 const
   REFRESH_MAXIMUM = 0;
@@ -64,7 +67,11 @@ function  scr_SetOptions(): Boolean;
 procedure scr_CorrectResolution(Width, Height: Word);
 procedure scr_SetViewPort;
 procedure scr_SetVSync(WSync: Boolean);
+procedure scr_SetClearColor(flag: Boolean; Color: Cardinal = 0);
 procedure scr_VSync;
+{$IfNDef USE_INIT_HANDLE}
+procedure scr_SetFPS(FPS: Byte);
+{$EndIf}
 
 //procedure scr_SetFSAA(FSAA: Byte);
 
@@ -119,6 +126,10 @@ var
   scrAddCY: Integer = 0;
   scrSubCX: Integer = 0;
   scrSubCY: Integer = 0;
+
+  scrViewPort       : Boolean = True;
+  scrClearColor     : Boolean = True;
+  scr_UseClearColor : zglTColor;
 
   {$IFDEF USE_X11}
   scrDisplay  : PDisplay;
@@ -490,6 +501,7 @@ begin
       exit;
     end;
   {$ENDIF}
+  scr_SetClearColor(False);
   log_Add('Current mode: ' + u_IntToStr(zgl_Get(DESKTOP_WIDTH)) + ' x ' + u_IntToStr(zgl_Get(DESKTOP_HEIGHT)));
   Result := TRUE;
 end;
@@ -521,6 +533,8 @@ begin
   batch2d_Flush();
   glClear(GL_COLOR_BUFFER_BIT * Byte(appFlags and COLOR_BUFFER_CLEAR > 0) or GL_DEPTH_BUFFER_BIT * Byte(appFlags and DEPTH_BUFFER_CLEAR > 0) or
            GL_STENCIL_BUFFER_BIT * Byte(appFlags and STENCIL_BUFFER_CLEAR > 0));
+  if scrClearColor then
+    glClearColor(scr_UseClearColor.R, scr_UseClearColor.G, scr_UseClearColor.b, scr_UseClearColor.A);
 end;
 
 procedure scr_Flush;
@@ -778,7 +792,20 @@ end;
 
 procedure scr_SetVSync(WSync: Boolean);
 begin
+  {$IfNDef USE_INIT_HANDLE}
+  if (useFPS > 60) and WSync then
+    scr_SetFPS(60);
+  {$EndIf}
   scrVSync := WSync;
+end;
+
+procedure scr_SetClearColor(flag: Boolean; Color: Cardinal = 0);
+begin
+  scrClearColor := flag;
+  scr_UseClearColor.R := (Color shr 16) / 255;
+  scr_UseClearColor.G := ((Color and $FF00) shr 8) / 255;
+  scr_UseClearColor.B := (Color and $FF) / 255;
+  scr_UseClearColor.A := 1;
 end;
 
 procedure scr_VSync;                  
@@ -803,6 +830,23 @@ begin
   {$ENDIF}
 {$ENDIF}
 end;
+
+{$IfNDef USE_INIT_HANDLE}
+procedure scr_SetFPS(FPS: Byte);
+begin
+  if FPS < 30 then
+    FPS := 30;
+  if (FPS <> 60) and (FPS <> 75) and (FPS <> 85) and (FPS <> 90) and (FPS <> 100) and (FPS <> 120) and (FPS <> 144) then
+    FPS := 60;
+  useFPS := FPS;
+  if useFPS > 60 then
+  begin
+    scrVSync := True;
+    scr_VSync;
+  end;
+  maxFPS := 1000 / FPS;
+end;
+{$EndIf}
 
 {procedure scr_SetFSAA(FSAA: Byte);
 begin

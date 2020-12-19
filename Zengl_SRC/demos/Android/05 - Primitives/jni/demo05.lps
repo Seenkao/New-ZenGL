@@ -4,13 +4,12 @@
     <PathDelim Value="\"/>
     <Version Value="11"/>
     <BuildModes Active="Default"/>
-    <Units Count="13">
+    <Units Count="14">
       <Unit0>
         <Filename Value="demo05.pas"/>
         <IsPartOfProject Value="True"/>
         <IsVisibleTab Value="True"/>
-        <TopLine Value="46"/>
-        <CursorPos X="52" Y="58"/>
+        <CursorPos X="15" Y="14"/>
         <UsageCount Value="37"/>
         <Loaded Value="True"/>
       </Unit0>
@@ -79,10 +78,11 @@
       </Unit9>
       <Unit10>
         <Filename Value="..\..\..\..\src\zgl_config.cfg"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="122"/>
-        <CursorPos X="9" Y="148"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="103"/>
+        <CursorPos X="3" Y="114"/>
         <UsageCount Value="10"/>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit10>
       <Unit11>
@@ -100,8 +100,16 @@
         <CursorPos X="11" Y="26"/>
         <UsageCount Value="10"/>
       </Unit12>
+      <Unit13>
+        <Filename Value="..\..\..\..\src\zgl_screen.pas"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="17"/>
+        <CursorPos X="14" Y="28"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit13>
     </Units>
-    <JumpHistory Count="3" HistoryIndex="2">
+    <JumpHistory Count="8" HistoryIndex="7">
       <Position1>
         <Filename Value="demo05.pas"/>
         <Caret Line="6" Column="12"/>
@@ -114,6 +122,26 @@
         <Filename Value="demo05.pas"/>
         <Caret Line="49" Column="7" TopLine="49"/>
       </Position3>
+      <Position4>
+        <Filename Value="demo05.pas"/>
+        <Caret Line="22" Column="17"/>
+      </Position4>
+      <Position5>
+        <Filename Value="demo05.pas"/>
+        <Caret Line="7" Column="7"/>
+      </Position5>
+      <Position6>
+        <Filename Value="..\..\..\..\src\zgl_screen.pas"/>
+        <Caret Line="28" Column="14" TopLine="17"/>
+      </Position6>
+      <Position7>
+        <Filename Value="..\..\..\..\src\zgl_config.cfg"/>
+        <Caret Line="114" Column="3" TopLine="103"/>
+      </Position7>
+      <Position8>
+        <Filename Value="demo05.pas"/>
+        <Caret Line="13" Column="12"/>
+      </Position8>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>

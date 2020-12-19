@@ -1,4 +1,4 @@
-unit demo;
+﻿unit demo;
 
 {$mode objfpc}{$H+}
 {$I zglCustomConfig.cfg}
@@ -30,7 +30,6 @@ uses
   zgl_window,
   zgl_screen,
   zgl_render_2d,
-  zgl_primitives_2d,
   zgl_joystick,
   zgl_mouse,
   zgl_fx,
@@ -38,7 +37,7 @@ uses
   zgl_text,
   zgl_textures,
   zgl_textures_png,
-  zgl_math_2d,
+  zgl_types,
   zgl_collision_2d,
   zgl_sprite_2d,
   // sound
@@ -57,6 +56,7 @@ type
 
   TForm1 = class(TForm)
     Timer1: TTimer;
+    procedure FormActivate(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -74,9 +74,9 @@ var
   Form1: TForm1;
 
 //-----------------------------------------
-  dirRes  : UTF8String {$IFNDEF MACOSX} = '/data/' {$ENDIF};
+  dirRes  : UTF8String {$IFNDEF MACOSX} = 'data/' {$ENDIF};
 
-  fntMain : zglPFont;
+  fntMain : Byte;
   MyIcon    : array[ 0..1 ] of zglPTexture;
   sound, audio   : zglPSound;
   audioPlay : Boolean = false;
@@ -112,12 +112,12 @@ end;
 
 procedure Draw;
 begin
-  setTextScale(1.5);
+  setTextScale(15, fntMain);
   text_Draw( fntMain, 0, 0, 'Escape - Exit' );
 
   // RU: Координаты мыши можно получить при помощи функций mouse_X и mouse_Y.
   // EN: Mouse coordinates can be got using functions mouse_X and mouse_Y.
-  text_Draw( fntMain, 0, 16, 'Mouse X, Y: ' + u_IntToStr( mouseX ) + '; ' + u_IntToStr( mouseY ) );
+  text_Draw( fntMain, 0, 18, 'Mouse X, Y: ' + u_IntToStr( mouseX ) + '; ' + u_IntToStr( mouseY ) );
 
   ssprite2d_Draw( MyIcon[ state ], ( ScreenWidth - 128 ) / 2, ( ScreenHeight - 128 ) / 2, 128, 128, 0 );
   text_Draw( fntMain, ScreenWidth / 2, ScreenHeight / 2 + 64, 'Skillet - Comatose - Whispers In The Dark', TEXT_HALIGN_CENTER );
@@ -128,29 +128,13 @@ begin
       ssprite2d_Draw(MyIcon[state], (ScreenWidth - 132) / 2, (ScreenHeight - 132) / 2, 132, 132, 0, 155);
       fx_SetBlendMode( FX_BLEND_NORMAL );
     end;
+  Application.ProcessMessages;
 end;
 
-{ TForm1 }
-
-procedure TForm1.FormCreate(Sender: TObject);
-{$IFDEF LINUX}
-  var
-    widget : PGtkWidget;
-{$ENDIF}
+procedure Init;
 begin
-  // вариант для неизменного окна или выбирайте нужный вариант в настройках формы.
-  // Form1.BorderStyle := bsSingle;
-
-  // Производим инициализацию --------------------------------------------------
-  // RU: Вертикальная синхронизация поможет избежать загрузки процессора.
-  // EN: Vertical synchronization will decrease a CPU loading.
-  scrVSync := true;
-
-  // RU: Перед стартом необходимо настроить viewport.
-  // EN: Before the start need to configure a viewport.
-  wnd_SetPos( Form1.Left, Form1.Top );
   wnd_SetSize( Form1.ClientWidth, Form1.ClientHeight );
-
+  scrVSync := true;
   // RU: Инициализируем звуковую подсистему. Для Windows можно сделать выбор между DirectSound и OpenAL отредактировав файл zgl_config.cfg.
   // EN: Initializing sound subsystem. For Windows can be used DirectSound or OpenAL, see zgl_config.cfg.
   snd_Init();
@@ -159,6 +143,53 @@ begin
   // EN: Load the sound file and set maximum count of sources that can be played to 2.
 
 
+  // RU: Инициализируем обработку ввода джойстиков и получаем количество подключенных джойстиков.
+  // EN: Initialize processing joystick input and get count of plugged joysticks.
+  joyCount := joy_Init();
+
+  // RU: Загружаем текстуры, которые будут индикаторами.
+  // EN: Load the textures, that will be indicators.
+  MyIcon[ 0 ] := tex_LoadFromFile( dirRes + 'audio-stop.png' );
+  MyIcon[ 1 ] := tex_LoadFromFile( dirRes + 'audio-play.png' );
+
+  fntMain := font_LoadFromFile( dirRes + 'font.zfi' );
+
+  sound := snd_LoadFromFile( dirRes + 'click.wav', 2 );
+  audio := snd_LoadFromFile(dirRes + 'music.ogg', 2);
+end;
+
+{ TForm1 }
+
+procedure TForm1.FormCreate(Sender: TObject);
+begin
+  // вариант для неизменного окна или выбирайте нужный вариант в настройках формы.
+  // Form1.BorderStyle := bsSingle;
+end;
+
+// закрываем форму
+procedure TForm1.FormClose(Sender: TObject; var CloseAction: TCloseAction);
+begin
+  Timer1.Enabled := false;
+  zgl_Destroy;
+  Application.Terminate;
+end;
+
+procedure TForm1.FormActivate(Sender: TObject);
+{$IFDEF LINUX}
+  var
+    widget : PGtkWidget;
+{$ENDIF}
+begin
+  // Производим инициализацию --------------------------------------------------
+  // RU: Вертикальная синхронизация поможет избежать загрузки процессора.
+  // EN: Vertical synchronization will decrease a CPU loading.
+  scrVSync := true;
+
+  // RU: Перед стартом необходимо настроить viewport.
+  // EN: Before the start need to configure a viewport.
+  wnd_SetPos( Form1.Left, Form1.Top );
+//  wnd_SetSize( Form1.ClientWidth, Form1.ClientHeight );
+
   Form1.BringToFront();
   r.X := ( Form1.ClientWidth - 128 ) / 2;
   r.Y := ( Form1.ClientHeight - 128 ) / 2;
@@ -166,11 +197,7 @@ begin
   r.H := 128;
 //-----------------------------------------------------
 
-  // RU: Инициализируем обработку ввода джойстиков и получаем количество подключенных джойстиков.
-  // EN: Initialize processing joystick input and get count of plugged joysticks.
-  joyCount := joy_Init();
-  // окончили инициализацию ----------------------------------------------------
-
+  zgl_Reg(SYS_LOAD, @Init);
   zgl_Reg( SYS_DRAW, @Draw );
 
   {$IFDEF LINUX}
@@ -190,30 +217,10 @@ begin
     // EN: For MacOS X initialization should be done into form, even if rendering will be into another control.
     zgl_InitToHandle( LongWord( TCarbonWindow( Form1.Handle ).Window ) );
   {$ENDIF}
-
-  // обязательно загрузка файлов после всей инициализации!!!
-
-  // RU: Загружаем текстуры, которые будут индикаторами.
-  // EN: Load the textures, that will be indicators.
-  MyIcon[ 0 ] := tex_LoadFromFile( dirRes + 'audio-stop.png' );
-  MyIcon[ 1 ] := tex_LoadFromFile( dirRes + 'audio-play.png' );
-
-  fntMain := font_LoadFromFile( dirRes + 'font.zfi' );
-
-  sound := snd_LoadFromFile( dirRes + 'click.wav', 2 );
-  audio := snd_LoadFromFile(dirRes + 'music.ogg', 2);
-end;
-
-// закрываем форму
-procedure TForm1.FormClose(Sender: TObject; var CloseAction: TCloseAction);
-begin
-  Timer1.Enabled := false;
-  zgl_Destroy;
 end;
 
 // проверка нажатия клавиши
-procedure TForm1.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState
-  );
+procedure TForm1.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   if Key = 27 then Form1.Close;
 end;

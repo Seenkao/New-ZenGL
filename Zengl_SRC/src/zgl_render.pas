@@ -106,6 +106,7 @@ begin
     Set2DMode()
   else
     Set3DMode(oglFOVY);
+  scrViewPort := False;
 end;
 
 procedure zbuffer_SetDepth(zNear, zFar: Single);

@@ -5,6 +5,7 @@ object Form1: TForm1
   Width = 800
   BorderStyle = bsSingle
   Caption = 'demo LCL'
+  OnActivate = FormActivate
   OnClose = FormClose
   OnCreate = FormCreate
   OnKeyDown = FormKeyDown
@@ -13,7 +14,7 @@ object Form1: TForm1
   Position = poScreenCenter
   LCLVersion = '2.0.10.0'
   object Timer1: TTimer
-    Interval = 20
+    Interval = 10
     OnTimer = Timer1Timer
     Left = 64
     Top = 26

@@ -4,14 +4,13 @@
     <PathDelim Value="\"/>
     <Version Value="11"/>
     <BuildModes Active="Default"/>
-    <Units Count="8">
+    <Units Count="10">
       <Unit0>
         <Filename Value="demo10.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="demo11"/>
         <IsVisibleTab Value="True"/>
-        <TopLine Value="58"/>
-        <CursorPos X="15" Y="71"/>
+        <CursorPos X="11" Y="6"/>
         <UsageCount Value="33"/>
         <Loaded Value="True"/>
       </Unit0>
@@ -64,8 +63,22 @@
         <CursorPos X="25" Y="113"/>
         <UsageCount Value="9"/>
       </Unit7>
+      <Unit8>
+        <Filename Value="..\..\..\..\src\zgl_application.pas"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="13" Y="28"/>
+        <UsageCount Value="10"/>
+      </Unit8>
+      <Unit9>
+        <Filename Value="..\..\..\..\src\zgl_config.cfg"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="101"/>
+        <CursorPos X="3" Y="114"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit9>
     </Units>
-    <JumpHistory Count="7" HistoryIndex="6">
+    <JumpHistory Count="9" HistoryIndex="8">
       <Position1>
         <Filename Value="demo10.lpr"/>
         <Caret Line="73" Column="10" TopLine="50"/>
@@ -94,6 +107,14 @@
         <Filename Value="demo10.lpr"/>
         <Caret Line="73" Column="8" TopLine="60"/>
       </Position7>
+      <Position8>
+        <Filename Value="demo10.lpr"/>
+        <Caret Line="67" Column="24" TopLine="47"/>
+      </Position8>
+      <Position9>
+        <Filename Value="demo10.lpr"/>
+        <Caret Line="6" Column="11"/>
+      </Position9>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>

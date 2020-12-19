@@ -21,7 +21,7 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 04.08.2020
+ !!! modification from Serge 15.12.2020
 }
 unit zgl_primitives_2d;
 
@@ -31,7 +31,8 @@ interface
 uses
   zgl_fx,
   zgl_textures,
-  zgl_math_2d;
+  zgl_math_2d,
+  zgl_types;
 
 const
   PR2D_FILL   = $010000;
@@ -116,10 +117,14 @@ begin
 end;
 
 procedure pr2d_Rect( X, Y, W, H : Single; Color : LongWord; Alpha : Byte = 255; FX : LongWord = 0 );
+var
+  mode: LongWord;
 begin
-
-
-  if ( not b2dStarted ) or batch2d_Check( GL_TRIANGLES, FX_BLEND or FX, nil ) Then
+  if (FX and PR2D_FILL = 0) then
+    mode := GL_LINES
+  else
+    mode := GL_TRIANGLES;
+  if ( not b2dStarted ) or batch2d_Check( mode, FX_BLEND or FX, nil ) Then
   begin
     if FX and PR2D_SMOOTH > 0 Then
     begin
@@ -135,9 +140,8 @@ begin
       Y := Y + 0.5;
       W := W - 1;
       H := H - 1;
-      glBegin( GL_LINES );
-    End else
-      glBegin( GL_TRIANGLES );
+    End;
+    glBegin( mode );
   end;
 
   if FX and FX2D_VCA > 0 Then

@@ -20,6 +20,8 @@
  *
  *  3. This notice may not be removed or altered from any
  *     source distribution.
+
+ !!! modification from Serge 15.12.2020
 }
 unit zgl_utils;
 
@@ -31,7 +33,7 @@ unit zgl_utils;
 interface
 uses
   {$IFDEF UNIX}
-  UnixType,
+  UnixType, sysutils,
   {$ENDIF}
   {$IFDEF WINDOWS}
   Windows,
@@ -64,7 +66,9 @@ procedure utf8_Delete(var Str: UTF8String; FromPosition, Count: Integer);
 procedure utf8_Backspace(var Str: UTF8String);
 function  utf8_Length(const Str: UTF8String): Integer;
 procedure utf8_GetShift(const Text: UTF8String; Pos: Integer; out NewPos: Integer; Chars: Integer = 1);
-function utf8_GetID(const Text: UTF8String; Pos: Integer; Shift: PInteger): LongWord;
+function utf8_toUnicode(const Text: UTF8String; Pos: Integer; Shift: PInteger): LongWord;
+
+function Unicode_toUTF8(Symb: LongWord): UTF8String;
 
 function utf8_GetPAnsiChar(const Str: UTF8String): PAnsiChar;
 {$IFDEF WINDOWS}
@@ -223,14 +227,17 @@ procedure utf8_Delete(var Str: UTF8String; FromPosition, Count: Integer);
     Result   : UTF8String;
 begin
   len := utf8_Length(Str);
-  if FromPosition < 1 Then FromPosition := 1;
-  if (FromPosition > len) or (Count < 1) Then exit;
-  if FromPosition + Count > len + 1 Then Count := len - FromPosition + 1;
+  if FromPosition < 1 Then
+    FromPosition := 1;
+  if (FromPosition > len) or (Count < 1) Then
+    exit;
+  if FromPosition + Count > len + 1 Then
+    Count := len - FromPosition + 1;
   if (FromPosition = 1) and (Count = len) Then
-    begin
-      Str := '';
-      exit;
-    end;
+  begin
+    Str := '';
+    exit;
+  end;
 
   len := Length(Str);
   i := 1;
@@ -240,6 +247,7 @@ begin
   System.Move(Str[1], Result[1], i - 1);
   if j <= len Then
     System.Move(Str[j], Result[i], len - (j - 1));
+
   Str := Result;
 end;
 
@@ -291,55 +299,55 @@ begin
 end;
 
 // получение "номера" символа
-function utf8_GetID(const Text: UTF8String; Pos: Integer; Shift: PInteger): LongWord;
+function utf8_toUnicode(const Text: UTF8String; Pos: Integer; Shift: PInteger): LongWord;
 begin
   case Byte(Text[Pos]) of
-    0..127:
+    0..$7F:
       begin
         Result := Byte(Text[Pos]);
         if Assigned(Shift) Then
           Shift^ := Pos + 1;
       end;
 
-    192..223:
+    $C0..$DF:
       begin
-        Result := (Byte(Text[Pos]) - 192) * 64 + (Byte(Text[Pos + 1]) - 128);
+        Result := (Byte(Text[Pos]) - $C0) * $40 + (Byte(Text[Pos + 1]) - $80);
         if Assigned(Shift) Then
           Shift^ := Pos + 2;
       end;
 
-    224..239:
+    $E0..$EF:
       begin
-        Result := (Byte(Text[Pos]) - 224) * 4096 + (Byte(Text[Pos + 1]) - 128) * 64 + (Byte(Text[Pos + 2]) - 128);
+        Result := (Byte(Text[Pos]) - $E0) * $1000 + (Byte(Text[Pos + 1]) - $80) * $40 + (Byte(Text[Pos + 2]) - $80);
         if Assigned(Shift) Then
           Shift^ := Pos + 3;
       end;
 
-    240..247:
+    $F0..$F7:
       begin
-        Result := (Byte(Text[Pos]) - 240) * 262144 + (Byte(Text[Pos + 1]) - 128) * 4096 + (Byte(Text[Pos + 2]) - 128) * 64 +
-                  (Byte(Text[Pos + 3]) - 128);
+        Result := (Byte(Text[Pos]) - $F0) * $40000 + (Byte(Text[Pos + 1]) - $80) * $1000 + (Byte(Text[Pos + 2]) - $80) * $40 +
+                  (Byte(Text[Pos + 3]) - $80);
         if Assigned(Shift) Then
           Shift^ := Pos + 4;
       end;
 
-    248..251:
+    $F8..$FB:
       begin
-        Result := (Byte(Text[Pos]) - 248) * 16777216 + (Byte(Text[Pos + 1]) - 128) * 262144 + (Byte(Text[Pos + 2]) - 128) * 4096 +
-                  (Byte(Text[Pos + 3]) - 128) * 64 + (Byte(Text[Pos + 4]) - 128);
+        Result := (Byte(Text[Pos]) - $F8) * $1000000 + (Byte(Text[Pos + 1]) - $80) * $40000 + (Byte(Text[Pos + 2]) - $80) * $1000 +
+                  (Byte(Text[Pos + 3]) - $80) * $40 + (Byte(Text[Pos + 4]) - $80);
         if Assigned(Shift) Then
           Shift^ := Pos + 5;
       end;
 
-    252..253:
+    $FC..$FD:
       begin
-        Result := (Byte(Text[Pos]) - 252) * 1073741824 + (Byte(Text[Pos + 1]) - 128) * 16777216 + (Byte(Text[Pos + 2]) - 128) * 262144 +
-                  (Byte(Text[Pos + 3]) - 128) * 4096 + (Byte(Text[Pos + 4]) - 128) * 64 + (Byte(Text[Pos + 5]) - 128);
+        Result := (Byte(Text[Pos]) - $FC) * $40000000 + (Byte(Text[Pos + 1]) - $80) * $1000000 + (Byte(Text[Pos + 2]) - $80) * $40000 +
+                  (Byte(Text[Pos + 3]) - $80) * $1000 + (Byte(Text[Pos + 4]) - $80) * 64 + (Byte(Text[Pos + 5]) - $80);
         if Assigned(Shift) Then
           Shift^ := Pos + 6;
       end;
 
-    254..255:
+    $FE..$FF:
       begin
         Result := 0;
         if Assigned(Shift) Then
@@ -350,6 +358,37 @@ begin
     if Assigned(Shift) Then
       Shift^ := Pos + 1;
   end;
+end;
+
+function Unicode_toUTF8(Symb: LongWord): UTF8String;
+begin
+  if Symb <= $7F then
+  begin
+{1}    Result := chr(Symb);
+    Exit;
+  end;
+  if Symb <= $7FF then
+  begin
+{2}    Result := chr($C0 or (Symb shr 6)) + chr($80 or (Symb and $3F));
+    Exit;
+  end;
+  if Symb <= $FFFF then
+  begin
+{3}    Result := chr($E0 or (Symb shr 12)) + chr($80 or (Symb and $FC0) shr 6) + chr($80 or (Symb and $3F));
+    Exit;
+  end;
+  if Symb <= $1FFFFF then
+  begin
+{4}    Result := chr($F0 or (Symb shr 18)) + chr($80 or (Symb and $3F000) shr 12) + chr($80 or (Symb and $FC0) shr 6) + chr($80 or (Symb and $3F));
+    Exit;
+  end;
+  if Symb <= $3FFFFFF then
+  begin
+{5}    Result := chr($F8 or (Symb shr 24)) + chr($80 or (Symb and $FC0000) shr 18) + chr($80 or (Symb and $3F000) shr 12) + chr($80 or (Symb and $FC0) shr 6) + chr($80 or (Symb and $3F));
+    Exit;
+  end;
+  if Symb <= $7FFFFFFF then
+{6}    Result := chr($FC or (Symb shr 30)) + chr($80 or (Symb and $3F000000) shr 24) + chr($80 or (Symb and $FC0000) shr 18) + chr($80 or (Symb and $3F000) shr 12) + chr($80 or (Symb and $FC0) shr 6) + chr($80 or (Symb and $3F));
 end;
 
 function utf8_GetPAnsiChar(const Str: UTF8String): PAnsiChar;
@@ -539,19 +578,19 @@ end;
 
 // пауза
 procedure u_Sleep(Milliseconds: LongWord);
-  {$IFDEF UNIX}
+(*  {$IFDEF UNIX}
   var
     tv: TimeVal;
-  {$ENDIF}
+  {$ENDIF}       *)
 begin
-{$IFDEF UNIX}
+(*{$IFDEF UNIX}
   tv.tv_sec  := Milliseconds div 1000;
   tv.tv_usec := (Milliseconds mod 1000) * 1000;
   select(0, nil, nil, nil, tv);
 {$ENDIF}
-{$IFDEF WINDOWS}
+{$IFDEF WINDOWS}      *)
   Sleep(Milliseconds);
-{$ENDIF}
+//{$ENDIF}
 end;
 
 {$IF DEFINED(LINUX) and DEFINED(CPUx86_64)}

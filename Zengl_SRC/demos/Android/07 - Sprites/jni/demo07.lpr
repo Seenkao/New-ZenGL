@@ -3,7 +3,6 @@ library demo07;
 {$I zglCustomConfig.cfg}
 uses
   zgl_application,
-  zgl_main,
   zgl_file,
   zgl_screen,
   zgl_window,
@@ -18,7 +17,7 @@ uses
   zgl_primitives_2d,
   zgl_font,
   zgl_text,
-  zgl_math_2d,
+  zgl_types,
   zgl_log,
   zgl_utils
   ;
@@ -31,7 +30,7 @@ end;
 
 var
   dirRes      : UTF8String = 'assets/';
-  fntMain     : zglPFont;
+  fntMain     : Byte;
   texLogo     : zglPTexture;
   texBack     : zglPTexture;
   texGround   : zglPTexture;
@@ -40,6 +39,8 @@ var
   tux         : array[ 0..20 ] of TTux;
   time        : Integer;
   camMain     : zglTCamera2D;
+
+  TimeStart: Byte;
 
 procedure Init;
   var
@@ -98,14 +99,18 @@ begin
   fntMain := font_LoadFromFile( dirRes + 'font.zfi' );
 
   file_CloseArchive();
+
+  setTextScale(20, fntMain);
 end;
 
 procedure Draw;
   var
     i : Integer;
     t : Single;
+    ScaleF: LongWord;
 begin
-//  batch2d_Begin();
+  ScaleF := 20;      // условно указываем размеры фонта, но можно использовать -> ScaleF := getTextScale(fntMain)
+  batch2d_Begin();
   if time > 255 Then
     begin
       // RU: Рисуем задний фон с размерами 800х600 используя текстуру back.
@@ -130,10 +135,10 @@ begin
           begin
             // RU: Рисуем надпись в "рамочке" над пингвином.
             // EN: Render the text in frame over penguins.
-            t := text_GetWidth( fntMain, 'I''m so red...' ) * 1 + 4;
-            pr2d_Rect( tux[ i ].Pos.X - 2, tux[ i ].Pos.Y - fntMain^.MaxHeight + 4, t, fntMain^.MaxHeight, $000000, 200, PR2D_FILL );
-            pr2d_Rect( tux[ i ].Pos.X - 2, tux[ i ].Pos.Y - fntMain^.MaxHeight + 4, t, fntMain^.MaxHeight, $FFFFFF );
-            text_DrawEx( fntMain, tux[ i ].Pos.X, tux[ i ].Pos.Y - fntMain^.MaxHeight + 8, 1, 0, 'I''m so red...' );
+            t := text_GetWidth( fntMain, 'I''m so red...' ) * 0.75;
+            pr2d_Rect( tux[ i ].Pos.X - 2, tux[ i ].Pos.Y - ScaleF + 4, t, ScaleF, $000000, 200, PR2D_FILL );
+            pr2d_Rect( tux[ i ].Pos.X - 2, tux[ i ].Pos.Y - ScaleF + 3, t + 2, ScaleF + 2, $FFFFFF );
+            text_DrawEx( fntMain, tux[ i ].Pos.X, tux[ i ].Pos.Y - ScaleF + 5, 1, 0, 'I''m so red...' );
             // RU: Рисуем красного пингвина используя fx2d-функцию и флаг FX_COLOR.
             // EN: Render red penguin using fx2d-function and flag FX_COLOR.
             fx2d_SetColor( $FF0000 );
@@ -141,10 +146,10 @@ begin
           end else
             if i = 7 Then
               begin
-                t := text_GetWidth( fntMain, '???' ) * 1 + 4;
-                pr2d_Rect( tux[ i ].Pos.X + 32 - t / 2, tux[ i ].Pos.Y - fntMain^.MaxHeight + 4, t, fntMain^.MaxHeight, $000000, 200, PR2D_FILL );
-                pr2d_Rect( tux[ i ].Pos.X + 32 - t / 2, tux[ i ].Pos.Y - fntMain^.MaxHeight + 4, t, fntMain^.MaxHeight, $FFFFFF );
-                text_DrawEx( fntMain, tux[ i ].Pos.X + 32, tux[ i ].Pos.Y - fntMain^.MaxHeight + 8, 1, 0, '???', 255, $FFFFFF, TEXT_HALIGN_CENTER );
+                t := text_GetWidth( fntMain, '???' )+ 4;
+                pr2d_Rect( tux[ i ].Pos.X + 32 - t / 2, tux[ i ].Pos.Y - ScaleF + 4, t, ScaleF, $000000, 200, PR2D_FILL );
+                pr2d_Rect( tux[ i ].Pos.X + 32 - t / 2 - 1, tux[ i ].Pos.Y - ScaleF + 3, t + 2, ScaleF + 2, $FFFFFF );
+                text_DrawEx( fntMain, tux[ i ].Pos.X + 32, tux[ i ].Pos.Y - ScaleF + 5, 1, 0, '???', 255, $FFFFFF, TEXT_HALIGN_CENTER );
                 // RU: Рисуем пингвина приведение используя флаг FX_COLOR установив режим в FX_COLOR_SET :)
                 // EN: Render penguin ghost using flag FX_COLOR and mode FX_COLOR_SET :)
                 fx_SetColorMode( FX_COLOR_SET );
@@ -161,10 +166,10 @@ begin
       for i := 10 to 19 do
         if i = 13 Then
           begin
-            t := text_GetWidth( fntMain, 'I''m so big...' ) * 1 + 4;
-            pr2d_Rect( tux[ i ].Pos.X - 2, tux[ i ].Pos.Y - fntMain^.MaxHeight - 10, t, fntMain^.MaxHeight, $000000, 200, PR2D_FILL );
-            pr2d_Rect( tux[ i ].Pos.X - 2, tux[ i ].Pos.Y - fntMain^.MaxHeight - 10, t, fntMain^.MaxHeight, $FFFFFF );
-            text_DrawEx( fntMain, tux[ i ].Pos.X, tux[ i ].Pos.Y - fntMain^.MaxHeight - 4, 1, 0, 'I''m so big...' );
+            t := text_GetWidth( fntMain, 'I''m so big...' ) * 0.75;
+            pr2d_Rect( tux[ i ].Pos.X - 2, tux[ i ].Pos.Y - ScaleF - 10, t, ScaleF, $000000, 200, PR2D_FILL );
+            pr2d_Rect( tux[ i ].Pos.X - 2, tux[ i ].Pos.Y - ScaleF - 11, t + 2, ScaleF + 2, $FFFFFF );
+            text_DrawEx( fntMain, tux[ i ].Pos.X, tux[ i ].Pos.Y - ScaleF - 9, 1, 0, 'I''m so big...' );
             // RU: Рисуем "большего" пингвина. Т.к. FX2D_SCALE увеличивает спрайт относительно центра, то пингвина следует немного "поднять".
             // EN: Render "big" penguin. It must be shifted up, because FX2D_SCALE scale sprite relative to the center.
             fx2d_SetScale( 1.25, 1.25 );
@@ -189,10 +194,10 @@ begin
       asprite2d_Draw( texGround, 12 * 32, 300 - 16, 32, 32, 0, 2 );
       asprite2d_Draw( texGround, 13 * 32, 300 - 16, 32, 32, 0, 3 );
 
-      t := text_GetWidth( fntMain, 'o_O' ) * 1 + 4;
-      pr2d_Rect( tux[ 20 ].Pos.X + 32 - t / 2, tux[ 20 ].Pos.Y - fntMain^.MaxHeight + 4, t, fntMain^.MaxHeight, $000000, 200, PR2D_FILL );
-      pr2d_Rect( tux[ 20 ].Pos.X + 32 - t / 2, tux[ 20 ].Pos.Y - fntMain^.MaxHeight + 4, t, fntMain^.MaxHeight, $FFFFFF );
-      text_DrawEx( fntMain, tux[ 20 ].Pos.X + 32, tux[ 20 ].Pos.Y - fntMain^.MaxHeight + 8, 1, 0, 'o_O', 255, $FFFFFF, TEXT_HALIGN_CENTER );
+      t := text_GetWidth( fntMain, 'o_O' ) * 0.75;
+      pr2d_Rect( tux[ 20 ].Pos.X + 32 - t / 2, tux[ 20 ].Pos.Y - ScaleF + 3, t + 2, ScaleF + 2, $000000, 200, PR2D_FILL );
+      pr2d_Rect( tux[ 20 ].Pos.X + 32 - t / 2, tux[ 20 ].Pos.Y - ScaleF + 2, t + 4, ScaleF + 4, $FFFFFF );
+      text_DrawEx( fntMain, tux[ 20 ].Pos.X + 32, tux[ 20 ].Pos.Y - ScaleF + 5, 1, 0, 'o_O', 255, $FFFFFF, TEXT_HALIGN_CENTER );
       asprite2d_Draw( tux[ 20 ].Texture, tux[ 20 ].Pos.X, tux[ 20 ].Pos.Y, 64, 64, 0, tux[ 20 ].Frame div 2 );
     end;
 
@@ -206,11 +211,9 @@ begin
       end;
 
   if time > 255 Then
-  begin
-    setTextScale(1.5);
     text_Draw( fntMain, 0, 0, 'FPS: ' + u_IntToStr( zgl_Get( RENDER_FPS ) ) );
-  end;
-//  batch2d_End();
+
+  batch2d_End();
 end;
 
 procedure Timer;
@@ -260,7 +263,7 @@ procedure Java_zengl_android_ZenGL_Main( var env; var thiz ); cdecl;
 begin
   randomize();
 
-  timer_Add( @Timer, 16 );
+  TimeStart := timer_Add( @Timer, 16, Start );
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );

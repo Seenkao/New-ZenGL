@@ -27,6 +27,9 @@ unit zgl_math_2d;
 
 interface
 
+uses
+  zgl_types;
+
 const
   EPS = 0.000001;
 
@@ -37,36 +40,6 @@ const
   ORIENTATION_LEFT  = -1;
   ORIENTATION_RIGHT = 1;
   ORIENTATION_ZERO  = 0;
-
-type
-  zglPPoint2D = ^zglTPoint2D;
-  zglTPoint2D = record
-    X, Y: Single;
-end;
-
-type
-  zglPPoints2D = ^zglTPoints2D;
-  zglTPoints2D = array[0..0] of zglTPoint2D;
-
-type
-  zglPLine = ^zglTLine;
-  zglTLine = record
-    x0, y0: Single;
-    x1, y1: Single;
-end;
-
-type
-  zglPRect = ^zglTRect;
-  zglTRect = record
-    X, Y, W, H: Single;
-end;
-
-type
-  zglPCircle = ^zglTCircle;
-  zglTCircle = record
-    cX, cY: Single;
-    Radius: Single;
-end;
 
 function min(a, b: Single): Single; {$IFDEF USE_INLINE} inline; {$ENDIF}
 function max(a, b: Single): Single; {$IFDEF USE_INLINE} inline; {$ENDIF}

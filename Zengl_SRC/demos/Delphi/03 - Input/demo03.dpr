@@ -15,7 +15,7 @@ uses
   zgl_font,
   zgl_text,
   zgl_textures_png,
-  zgl_math_2d,
+  zgl_types,
   zgl_collision_2d,
   zgl_utils
   ;
@@ -23,13 +23,14 @@ uses
 var
   dirRes  : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
 
-  fntMain   : zglPFont;
+  fntMain   : Byte;
 
   joyCount   : Integer;
   userInput  : UTF8String;
   trackInput : Boolean;
   inputRect  : zglTRect;
   lineAlpha  : Byte;
+  TimeStart  : Byte;
 
 procedure Init;
 begin
@@ -50,7 +51,7 @@ procedure Draw;
     w : Single;
 begin
   // размеры шрита
-  setTextScale(1.5);
+  setTextScale(15, fntMain);
   text_Draw(fntMain, 0, 0, 'Escape - Exit');
 
   // RU: Координаты мыши можно получить при помощи функций mouse_X и mouse_Y.
@@ -141,7 +142,7 @@ begin
 end;
 
 Begin
-  timer_Add(@Timer, 16);
+  TimeStart := timer_Add(@Timer, 16, Start);
 
   zgl_Reg(SYS_LOAD, @Init);
   zgl_Reg(SYS_DRAW, @Draw);

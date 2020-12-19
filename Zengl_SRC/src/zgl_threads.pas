@@ -26,7 +26,7 @@ unit zgl_threads;
 {$I zgl_config.cfg}
 
 interface
-{$IFDEF UNIX}
+{$IfDef UNIX}
   uses cthreads;
 {$ENDIF}
 {$IFNDEF FPC}

@@ -3,12 +3,13 @@
   <ProjectSession>
     <Version Value="11"/>
     <BuildModes Active="Default"/>
-    <Units Count="20">
+    <Units Count="24">
       <Unit0>
         <Filename Value="demo17.lpr"/>
         <IsPartOfProject Value="True"/>
-        <CursorPos X="19" Y="14"/>
-        <UsageCount Value="165"/>
+        <TopLine Value="31"/>
+        <CursorPos X="5" Y="53"/>
+        <UsageCount Value="170"/>
         <Loaded Value="True"/>
       </Unit0>
       <Unit1>
@@ -21,9 +22,9 @@
       <Unit2>
         <Filename Value="../../../src/zgl_application.pas"/>
         <EditorIndex Value="5"/>
-        <TopLine Value="464"/>
-        <CursorPos Y="484"/>
-        <UsageCount Value="84"/>
+        <TopLine Value="11"/>
+        <CursorPos X="14" Y="28"/>
+        <UsageCount Value="86"/>
         <Loaded Value="True"/>
       </Unit2>
       <Unit3>
@@ -35,35 +36,32 @@
       </Unit3>
       <Unit4>
         <Filename Value="../../../extra/sw_draw_gui.pas"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="284"/>
         <CursorPos X="57" Y="304"/>
         <UsageCount Value="84"/>
-        <Loaded Value="True"/>
       </Unit4>
       <Unit5>
         <Filename Value="../../../extra/sw_touch_menu.pas"/>
-        <EditorIndex Value="3"/>
-        <TopLine Value="1060"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1048"/>
         <CursorPos X="27" Y="1043"/>
         <UsageCount Value="84"/>
-        <Loaded Value="True"/>
       </Unit5>
       <Unit6>
         <Filename Value="../../../src/zgl_config.cfg"/>
-        <EditorIndex Value="-1"/>
-        <CursorPos X="14" Y="4"/>
-        <UsageCount Value="42"/>
+        <EditorIndex Value="6"/>
+        <CursorPos X="43" Y="11"/>
+        <UsageCount Value="44"/>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit6>
       <Unit7>
         <Filename Value="../../../src/zgl_keyboard.pas"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="115"/>
         <CursorPos X="21" Y="127"/>
         <UsageCount Value="83"/>
-        <Loaded Value="True"/>
       </Unit7>
       <Unit8>
         <Filename Value="../../../src/zgl_timers.pas"/>
@@ -100,10 +98,9 @@
       </Unit12>
       <Unit13>
         <Filename Value="../../../src/zgl_screen.pas"/>
-        <EditorIndex Value="6"/>
-        <TopLine Value="530"/>
-        <CursorPos Y="550"/>
-        <UsageCount Value="31"/>
+        <EditorIndex Value="4"/>
+        <CursorPos X="11" Y="28"/>
+        <UsageCount Value="33"/>
         <Loaded Value="True"/>
       </Unit13>
       <Unit14>
@@ -115,10 +112,9 @@
       </Unit14>
       <Unit15>
         <Filename Value="../../../src/zgl_mouse.pas"/>
-        <EditorIndex Value="1"/>
+        <EditorIndex Value="-1"/>
         <CursorPos X="8" Y="28"/>
         <UsageCount Value="30"/>
-        <Loaded Value="True"/>
       </Unit15>
       <Unit16>
         <Filename Value="../../../src/zgl_utils.pas"/>
@@ -128,13 +124,13 @@
         <UsageCount Value="27"/>
       </Unit16>
       <Unit17>
-        <Filename Value="../../../../../../FreePas/fpcsrc/packages/univint/src/Dialogs.pas"/>
+        <Filename Value="../../../../FreePas/fpcsrc/packages/univint/src/Dialogs.pas"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="24"/>
         <UsageCount Value="7"/>
       </Unit17>
       <Unit18>
-        <Filename Value="../../../../../../FreePas/fpcsrc/packages/univint/src/MacOSAll.pas"/>
+        <Filename Value="../../../../FreePas/fpcsrc/packages/univint/src/MacOSAll.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="2242"/>
         <UsageCount Value="7"/>
@@ -145,128 +141,156 @@
         <CursorPos X="48" Y="11"/>
         <UsageCount Value="11"/>
       </Unit19>
+      <Unit20>
+        <Filename Value="../16 - Physics/demo16.lpr"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="28"/>
+        <CursorPos X="26" Y="44"/>
+        <UsageCount Value="10"/>
+      </Unit20>
+      <Unit21>
+        <Filename Value="../../../srcGEGL/gegl_touch_menu.pas"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="648"/>
+        <CursorPos X="53" Y="666"/>
+        <UsageCount Value="11"/>
+        <Loaded Value="True"/>
+      </Unit21>
+      <Unit22>
+        <Filename Value="../../../srcGEGL/gegl_draw_gui.pas"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="276"/>
+        <CursorPos X="58" Y="286"/>
+        <UsageCount Value="11"/>
+        <Loaded Value="True"/>
+      </Unit22>
+      <Unit23>
+        <Filename Value="../../../src/zgl_font.pas"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="31"/>
+        <CursorPos X="3" Y="41"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit23>
     </Units>
-    <JumpHistory Count="30" HistoryIndex="29">
+    <JumpHistory Count="29" HistoryIndex="28">
       <Position1>
-        <Filename Value="../../../extra/sw_draw_gui.pas"/>
-        <Caret Line="243" TopLine="220"/>
+        <Filename Value="demo17.lpr"/>
+        <Caret Line="11" Column="9"/>
       </Position1>
       <Position2>
-        <Filename Value="../../../extra/sw_draw_gui.pas"/>
-        <Caret Line="244" TopLine="220"/>
+        <Filename Value="../../../src/zgl_screen.pas"/>
+        <Caret Line="28" Column="11"/>
       </Position2>
       <Position3>
-        <Filename Value="../../../extra/sw_draw_gui.pas"/>
-        <Caret Line="253" TopLine="220"/>
+        <Filename Value="../../../src/zgl_screen.pas"/>
+        <Caret Line="168" Column="16" TopLine="143"/>
       </Position3>
       <Position4>
-        <Filename Value="../../../extra/sw_draw_gui.pas"/>
-        <Caret Line="254" TopLine="221"/>
+        <Filename Value="../../../src/zgl_application.pas"/>
+        <Caret Line="271" Column="18" TopLine="236"/>
       </Position4>
       <Position5>
-        <Filename Value="../../../extra/sw_draw_gui.pas"/>
-        <Caret Line="231" TopLine="221"/>
+        <Filename Value="../../../srcGEGL/gegl_touch_menu.pas"/>
+        <Caret Line="178" Column="86" TopLine="154"/>
       </Position5>
       <Position6>
-        <Filename Value="../../../extra/sw_draw_gui.pas"/>
-        <Caret Line="234" TopLine="221"/>
+        <Filename Value="../../../srcGEGL/gegl_draw_gui.pas"/>
+        <Caret Line="37" Column="17" TopLine="13"/>
       </Position6>
       <Position7>
-        <Filename Value="../../../extra/sw_draw_gui.pas"/>
-        <Caret Line="236" TopLine="221"/>
+        <Filename Value="demo17.lpr"/>
+        <Caret Line="10" Column="11" TopLine="2"/>
       </Position7>
       <Position8>
-        <Filename Value="../../../extra/sw_draw_gui.pas"/>
-        <Caret Line="238" TopLine="221"/>
+        <Filename Value="demo17.lpr"/>
+        <Caret Line="53" Column="9" TopLine="20"/>
       </Position8>
       <Position9>
-        <Filename Value="../../../extra/sw_draw_gui.pas"/>
-        <Caret Line="239" TopLine="221"/>
+        <Filename Value="../../../srcGEGL/gegl_draw_gui.pas"/>
+        <Caret Line="11" Column="15"/>
       </Position9>
       <Position10>
-        <Filename Value="../../../extra/sw_draw_gui.pas"/>
-        <Caret Line="240" TopLine="221"/>
+        <Filename Value="demo17.lpr"/>
+        <Caret Line="37" Column="74" TopLine="20"/>
       </Position10>
       <Position11>
-        <Filename Value="../../../extra/sw_draw_gui.pas"/>
-        <Caret Line="243" TopLine="221"/>
+        <Filename Value="../../../srcGEGL/gegl_draw_gui.pas"/>
+        <Caret Line="37" Column="43" TopLine="16"/>
       </Position11>
       <Position12>
-        <Filename Value="../../../extra/sw_draw_gui.pas"/>
-        <Caret Line="244" TopLine="221"/>
+        <Filename Value="../../../srcGEGL/gegl_draw_gui.pas"/>
+        <Caret Line="119" Column="26" TopLine="100"/>
       </Position12>
       <Position13>
-        <Filename Value="../../../extra/sw_draw_gui.pas"/>
-        <Caret Line="253" TopLine="221"/>
+        <Filename Value="../../../srcGEGL/gegl_draw_gui.pas"/>
+        <Caret Line="182" Column="30" TopLine="153"/>
       </Position13>
       <Position14>
-        <Filename Value="../../../extra/sw_draw_gui.pas"/>
-        <Caret Line="254" TopLine="221"/>
+        <Filename Value="../../../srcGEGL/gegl_draw_gui.pas"/>
+        <Caret Line="198" Column="29" TopLine="179"/>
       </Position14>
       <Position15>
-        <Filename Value="../../../extra/sw_draw_gui.pas"/>
-        <Caret Line="231" TopLine="221"/>
+        <Filename Value="../../../srcGEGL/gegl_touch_menu.pas"/>
+        <Caret Line="139" Column="13" TopLine="123"/>
       </Position15>
       <Position16>
-        <Filename Value="../../../extra/sw_draw_gui.pas"/>
-        <Caret Line="234" TopLine="221"/>
+        <Filename Value="../../../srcGEGL/gegl_draw_gui.pas"/>
+        <Caret Line="198" Column="42" TopLine="179"/>
       </Position16>
       <Position17>
-        <Filename Value="../../../extra/sw_draw_gui.pas"/>
-        <Caret Line="236" TopLine="221"/>
+        <Filename Value="../../../srcGEGL/gegl_draw_gui.pas"/>
+        <Caret Line="260" Column="46" TopLine="241"/>
       </Position17>
       <Position18>
-        <Filename Value="../../../extra/sw_draw_gui.pas"/>
-        <Caret Line="238" TopLine="221"/>
+        <Filename Value="../../../srcGEGL/gegl_draw_gui.pas"/>
+        <Caret Line="306" Column="50" TopLine="287"/>
       </Position18>
       <Position19>
-        <Filename Value="../../../extra/sw_draw_gui.pas"/>
-        <Caret Line="239" TopLine="221"/>
+        <Filename Value="../../../srcGEGL/gegl_draw_gui.pas"/>
+        <Caret Line="291" Column="61" TopLine="272"/>
       </Position19>
       <Position20>
-        <Filename Value="../../../extra/sw_draw_gui.pas"/>
-        <Caret Line="240" TopLine="221"/>
+        <Filename Value="../../../srcGEGL/gegl_touch_menu.pas"/>
+        <Caret Line="183" Column="34" TopLine="164"/>
       </Position20>
       <Position21>
-        <Filename Value="../../../extra/sw_draw_gui.pas"/>
-        <Caret Line="243" TopLine="221"/>
+        <Filename Value="../../../src/zgl_application.pas"/>
+        <Caret Line="28" Column="14" TopLine="11"/>
       </Position21>
       <Position22>
-        <Filename Value="../../../extra/sw_draw_gui.pas"/>
-        <Caret Line="244" TopLine="221"/>
+        <Filename Value="../../../src/zgl_config.cfg"/>
+        <Caret Line="2" Column="2"/>
       </Position22>
       <Position23>
-        <Filename Value="../../../extra/sw_draw_gui.pas"/>
-        <Caret Line="246" TopLine="221"/>
+        <Filename Value="demo17.lpr"/>
+        <Caret Line="23" Column="13"/>
       </Position23>
       <Position24>
-        <Filename Value="../../../extra/sw_draw_gui.pas"/>
-        <Caret Line="247" TopLine="221"/>
+        <Filename Value="demo17.lpr"/>
+        <Caret Line="66" Column="27" TopLine="47"/>
       </Position24>
       <Position25>
-        <Filename Value="../../../extra/sw_touch_menu.pas"/>
-        <Caret Line="1041" Column="14" TopLine="1019"/>
+        <Filename Value="demo17.lpr"/>
+        <Caret Line="12" Column="10"/>
       </Position25>
       <Position26>
-        <Filename Value="../../../extra/sw_touch_menu.pas"/>
-        <Caret Line="197" Column="11" TopLine="186"/>
+        <Filename Value="demo17.lpr"/>
+        <Caret Line="26" Column="10"/>
       </Position26>
       <Position27>
-        <Filename Value="../../../extra/sw_touch_menu.pas"/>
-        <Caret Line="440" Column="33" TopLine="420"/>
+        <Filename Value="../../../srcGEGL/gegl_draw_gui.pas"/>
+        <Caret Line="198" Column="29" TopLine="175"/>
       </Position27>
       <Position28>
-        <Filename Value="../../../extra/sw_touch_menu.pas"/>
-        <Caret Line="207" Column="11" TopLine="176"/>
+        <Filename Value="../../../srcGEGL/gegl_draw_gui.pas"/>
+        <Caret Line="119" Column="22" TopLine="97"/>
       </Position28>
       <Position29>
-        <Filename Value="../../../extra/sw_draw_gui.pas"/>
-        <Caret Line="245" Column="50" TopLine="221"/>
+        <Filename Value="demo17.lpr"/>
+        <Caret Line="53" Column="5" TopLine="31"/>
       </Position29>
-      <Position30>
-        <Filename Value="../../../extra/sw_draw_gui.pas"/>
-        <Caret Line="304" TopLine="284"/>
-      </Position30>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>

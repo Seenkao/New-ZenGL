@@ -21,7 +21,7 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 04.08.2020
+ !!! modification from Serge 15.12.2020
 }
 
 unit zgl_text;
@@ -31,7 +31,7 @@ unit zgl_text;
 interface
 uses
   zgl_font,
-  zgl_math_2d;
+  zgl_types;
 
 const
   TEXT_HALIGN_LEFT    = $000001;
@@ -45,20 +45,19 @@ const
   TEXT_FX_VCA         = $000100;
   TEXT_FX_LENGTH      = $000200;
 
-procedure text_Draw(Font: zglPFont; X, Y: Single; const Text: UTF8String; Flags: LongWord = 0);
-procedure text_DrawEx(Font: zglPFont; X, Y, Scale, Step: Single; const Text: UTF8String; Alpha: Byte = 255; Color: LongWord = $FFFFFF; Flags: LongWord = 0);
-procedure text_DrawInRect(Font: zglPFont; const Rect: zglTRect; const Text: UTF8String; Flags: LongWord = 0);
-procedure text_DrawInRectEx(Font: zglPFont; const Rect: zglTRect; Scale, Step: Single; const Text: UTF8String; Alpha: Byte = 0; Color: LongWord = $FFFFFF; Flags: LongWord = 0);
-function  text_GetWidth(Font: zglPFont; const Text: UTF8String; Step: Single = 0.0): Single;
-function  text_GetHeight(Font: zglPFont; Width: Single; const Text: UTF8String; Scale: Single = 1.0; Step: Single = 0.0): Single;
+procedure text_Draw(fnt: Byte; X, Y: Single; const Text: UTF8String; Flags: LongWord = 0);
+procedure text_DrawEx(fnt: Byte; X, Y, Scale, Step: Single; const Text: UTF8String; Alpha: Byte = 255; Color: LongWord = $FFFFFF; Flags: LongWord = 0);
+procedure text_DrawInRect(fnt: Byte; const Rect: zglTRect; const Text: UTF8String; Flags: LongWord = 0);
+procedure text_DrawInRectEx(fnt: Byte; const Rect: zglTRect; Scale, Step: Single; const Text: UTF8String; Alpha: Byte = 0; Color: LongWord = $FFFFFF; Flags: LongWord = 0);
+function  text_GetWidth(fnt: Byte; const Text: UTF8String; Step: Single = 0.0): Single;
+function  text_GetHeight(fnt: Byte; Width: Single; const Text: UTF8String; Scale: Single = 1.0; Step: Single = 0.0): Single;
 procedure textFx_SetLength(Length: Integer; LastCoord: zglPPoint2D = nil; LastCharDesc: zglPCharDesc = nil);
-procedure setTextScale(Index: Single);
+procedure setTextScale(Index: LongWord; fnt: Byte);
+function getTextScale(fnt: Byte): LongWord;
 procedure setTextColor(Color: Cardinal);
 
 var
-  TextScaleStandart : Single = 72;
-  TextScaleNormal   : Single;
-  textScale         : Single;
+  TextScaleStandart : Single;
 
 implementation
 uses
@@ -90,9 +89,14 @@ var
   textWordsCount: Integer;
   textLinesCount: Integer;
 
-procedure setTextScale(Index: Single);
+procedure setTextScale(Index: LongWord; fnt: Byte);
 begin
-  textScale := TextScaleNormal * Index;
+  managerFont.Font[fnt].Scale := managerFont.Font[fnt].ScaleNorm * Index / 10;
+end;
+
+function getTextScale(fnt: Byte): LongWord;
+begin
+  Result := Round(managerFont.Font[fnt].Scale * 10);
 end;
 
 procedure setTextColor(Color: Cardinal);
@@ -103,7 +107,7 @@ begin
   textRGBA[3] := Color and $FF;
 end;
 
-procedure text_CalcRect(Font: zglPFont; const Rect: zglTRect; const Text: UTF8String; Flags: LongWord = 0);
+procedure text_CalcRect(fnt: Byte; const Rect: zglTRect; const Text: UTF8String; Flags: LongWord = 0);
   var
     x, y, sX  : Integer;
     b, i, imax: Integer;
@@ -116,7 +120,7 @@ procedure text_CalcRect(Font: zglPFont; const Rect: zglTRect; const Text: UTF8St
     lineEnd   : Boolean;
     lineFeed  : Boolean;
 begin
-  if (Text = '') or (not Assigned(Font)) Then exit;
+  if (Text = '') or ((managerFont.Font[fnt].Flags and UseFnt) = 0) Then exit;
 
   i              := 1;
   b              := 1;
@@ -131,12 +135,12 @@ begin
   lineEnd        := FALSE;
   lineFeed       := FALSE;
   x              := Round(Rect.X) + 1;
-  y              := Round(Rect.Y) + 1 - Round(Font.MaxHeight * textScale);
+  y              := Round(Rect.Y) + 1 - Round(managerFont.Font[fnt].MaxHeight * managerFont.Font[fnt].Scale);
   while i <= Length(Text) do
   begin
     lc   := c;
     j    := i;
-    c    := utf8_GetID(Text, i, @i);
+    c    := utf8_toUnicode(Text, i, @i);
     imax := Integer(i > Length(Text));
 
     if (not startWord) and ((c = 32) or (c <> 10)) Then
@@ -171,7 +175,7 @@ begin
     if newWord Then
     begin
       textWords[curWord].Str := Copy(Text, b, i - b - (1 - imax));
-      textWords[curWord].W   := Round(text_GetWidth(Font, textWords[curWord].Str, textStep));// * textScale);
+      textWords[curWord].W   := Round(text_GetWidth(fnt, textWords[curWord].Str, textStep));// * textScale);
       lineWidth                := lineWidth + textWords[curWord].W;
 
       newWord := FALSE;
@@ -192,7 +196,7 @@ begin
 
     if lineFeed or lineEnd Then
     begin
-      y := y + Round(Font.MaxHeight * textScale);
+      y := y + Round(managerFont.Font[fnt].MaxHeight * managerFont.Font[fnt].Scale);
       textWords[newLine].X := x;
       textWords[newLine].Y := y;
       for j := newLine + 1 to curWord - 1 do
@@ -229,57 +233,57 @@ begin
       lineWidth := 0;
       lineFeed  := FALSE;
       INC(textLinesCount);
-      if (Flags and TEXT_CLIP_RECT > 0) and ((textLinesCount + 1) * Font.MaxHeight > Rect.H) Then break;
+      if (Flags and TEXT_CLIP_RECT > 0) and ((textLinesCount + 1) * managerFont.Font[fnt].MaxHeight > Rect.H) Then break;
     end;
   end;
 
   if Flags and TEXT_VALIGN_CENTER > 0 Then
   begin
-    y := Round((Rect.Y + Rect.H - 1) - (textWords[textWordsCount - 1].Y + Font.MaxHeight * textScale)) div 2;
+    y := Round((Rect.Y + Rect.H - 1) - (textWords[textWordsCount - 1].Y + managerFont.Font[fnt].MaxHeight * managerFont.Font[fnt].Scale)) div 2;
     for i := 0 to textWordsCount - 1 do
       textWords[i].Y := textWords[i].Y + y;
   end else
     if Flags and TEXT_VALIGN_BOTTOM > 0 Then
     begin
-      y := Round((Rect.Y + Rect.H - 1) - (textWords[textWordsCount - 1].Y + Font.MaxHeight * textScale));
+      y := Round((Rect.Y + Rect.H - 1) - (textWords[textWordsCount - 1].Y + managerFont.Font[fnt].MaxHeight * managerFont.Font[fnt].Scale));
       for i := 0 to textWordsCount - 1 do
         textWords[i].Y := textWords[i].Y + y;
     end;
 end;
 
-procedure text_Draw(Font: zglPFont; X, Y: Single; const Text: UTF8String; Flags: LongWord = 0);
+procedure text_Draw(fnt: Byte; X, Y: Single; const Text: UTF8String; Flags: LongWord = 0);
   var
-    i, c, s : Integer;
+    i, c, s : LongWord;
     charDesc: zglPCharDesc;
     quad    : array[0..3] of zglTPoint2D;
     sx      : Single;
     lastPage: Integer;
     mode    : Integer;
 begin
-  if (Text = '') or (not Assigned(Font)) Then exit;
-  for i := 0 to Font.Count.Pages - 1 do
-    if not Assigned(Font.Pages[i]) Then exit;
+  if (Text = '') or ((managerFont.Font[fnt].Flags and UseFnt) = 0) Then exit;
+  for i := 0 to managerFont.Font[fnt].Count.Pages - 1 do
+    if not Assigned(managerFont.Font[fnt].Pages[i]) Then exit;
 
   glColor4ubv(@textRGBA[0]);
 
-  Y := Y - Font.MaxShiftY * textScale;
+  Y := Y - managerFont.Font[fnt].MaxShiftY * managerFont.Font[fnt].Scale;
   if Flags and TEXT_HALIGN_CENTER > 0 Then
-    X := X - Round(text_GetWidth(Font, Text, textStep) / 2)
+    X := X - Round(text_GetWidth(fnt, Text, textStep) / 2)
   else
     if Flags and TEXT_HALIGN_RIGHT > 0 Then
-      X := X - Round(text_GetWidth(Font, Text, textStep));
+      X := X - Round(text_GetWidth(fnt, Text, textStep));
   sx := X;
 
   if Flags and TEXT_VALIGN_CENTER > 0 Then
-    Y := Y - (Font.MaxHeight div 2) //* textScale
+    Y := Y - (managerFont.Font[fnt].MaxHeight div 2)
   else
     if Flags and TEXT_VALIGN_BOTTOM > 0 Then
-      Y := Y - Font.MaxHeight; //* textScale;
+      Y := Y - managerFont.Font[fnt].MaxHeight;
 
   FillChar(quad[0], SizeOf(zglTPoint2D) * 4, 0);
   charDesc := nil;
   lastPage := -1;
-  c := utf8_GetID(Text, 1, @i);
+  c := utf8_toUnicode(Text, 1, @i);
   s := 1;
   i := 1;
   if Flags and TEXT_FX_VCA > 0 Then
@@ -288,14 +292,14 @@ begin
     mode := GL_QUADS;
   if not b2dStarted Then
   begin
-    if Assigned(Font.CharDesc[c]) Then
+    if Assigned(managerFont.Font[fnt].CharDesc[c]) Then
     begin
-      lastPage := Font.CharDesc[c].Page;
-      batch2d_Check(mode, FX_BLEND, Font.Pages[Font.CharDesc[c].Page]);
+      lastPage := managerFont.Font[fnt].CharDesc[c].Page;
+      batch2d_Check(mode, FX_BLEND, managerFont.Font[fnt].Pages[managerFont.Font[fnt].CharDesc[c].Page]);
 
       glEnable(GL_BLEND);
       glEnable(GL_TEXTURE_2D);
-      glBindTexture(GL_TEXTURE_2D, Font.Pages[Font.CharDesc[c].Page].ID);
+      glBindTexture(GL_TEXTURE_2D, managerFont.Font[fnt].Pages[managerFont.Font[fnt].CharDesc[c].Page].ID);
       glBegin(mode);
     end else
     begin
@@ -309,9 +313,9 @@ begin
     if Text[i] = #10 Then
     begin
       X := sx;
-      Y := Y + Font.MaxHeight * textScale;
+      Y := Y + managerFont.Font[fnt].MaxHeight * managerFont.Font[fnt].Scale;
     end;
-    c := utf8_GetID(Text, i, @i);
+    c := utf8_toUnicode(Text, i, @i);
 
     if (Flags and TEXT_FX_LENGTH > 0) and (s > textLength) Then
     begin
@@ -319,8 +323,8 @@ begin
       begin
         if Assigned(textLCoord) Then
         begin
-          textLCoord.X := quad[0].X + Font.Padding[0] * textScale;
-          textLCoord.Y := quad[0].Y + Font.Padding[1] * textScale;
+          textLCoord.X := quad[0].X + managerFont.Font[fnt].Padding[PaddingX1] * managerFont.Font[fnt].Scale;
+          textLCoord.Y := quad[0].Y + managerFont.Font[fnt].Padding[PaddingY1] * managerFont.Font[fnt].Scale;
         end;
         if Assigned(textLCharDesc) Then
           textLCharDesc^ := charDesc^;
@@ -329,7 +333,7 @@ begin
     end;
     INC(s);
 
-    charDesc := Font.CharDesc[c];
+    charDesc := managerFont.Font[fnt].CharDesc[c];
     if not Assigned(charDesc) Then continue;
 
     if lastPage <> charDesc.Page Then
@@ -340,27 +344,34 @@ begin
       begin
         glEnd();
 
-        glBindTexture(GL_TEXTURE_2D, Font.Pages[charDesc.Page].ID);
+        glBindTexture(GL_TEXTURE_2D, managerFont.Font[fnt].Pages[charDesc.Page].ID);
         glBegin(mode);
       end else
-        if batch2d_Check(mode, FX_BLEND, Font.Pages[charDesc.Page]) Then
+        if batch2d_Check(mode, FX_BLEND, managerFont.Font[fnt].Pages[charDesc.Page]) Then
         begin
           glEnable(GL_BLEND);
 
           glEnable(GL_TEXTURE_2D);
-          glBindTexture(GL_TEXTURE_2D, Font.Pages[charDesc.Page].ID);
+          glBindTexture(GL_TEXTURE_2D, managerFont.Font[fnt].Pages[charDesc.Page].ID);
           glBegin(mode);
         end;
     end;
 
-    quad[0].X := X + (charDesc.ShiftX - Font.Padding[0]) * textScale;
-    quad[0].Y := Y + (charDesc.ShiftY + (Font.MaxHeight - charDesc.Height) - Font.Padding[1]) * textScale;
-    quad[1].X := X + (charDesc.ShiftX + charDesc.Width + Font.Padding[2]) * textScale;
-    quad[1].Y := Y + (charDesc.ShiftY + (Font.MaxHeight - charDesc.Height) - Font.Padding[1]) * textScale;
-    quad[2].X := X + (charDesc.ShiftX + charDesc.Width + Font.Padding[2]) * textScale;
-    quad[2].Y := Y + (charDesc.ShiftY + charDesc.Height + (Font.MaxHeight - charDesc.Height) + Font.Padding[3]) * textScale;
-    quad[3].X := X + (charDesc.ShiftX - Font.Padding[0]) * textScale;
-    quad[3].Y := Y + (charDesc.ShiftY + charDesc.Height + (Font.MaxHeight - charDesc.Height) + Font.Padding[3]) * textScale;
+    quad[0].X := X + (charDesc.ShiftX - managerFont.Font[fnt].Padding[PaddingX1]) * managerFont.Font[fnt].Scale;
+    quad[0].Y := Y + (charDesc.ShiftY + (managerFont.Font[fnt].MaxHeight - charDesc.Height) -
+              managerFont.Font[fnt].Padding[PaddingY1]) * managerFont.Font[fnt].Scale;
+
+    quad[1].X := X + (charDesc.ShiftX + charDesc.Width + managerFont.Font[fnt].Padding[PaddingX2]) * managerFont.Font[fnt].Scale;
+    quad[1].Y := Y + (charDesc.ShiftY + (managerFont.Font[fnt].MaxHeight - charDesc.Height) -
+              managerFont.Font[fnt].Padding[PaddingY1]) * managerFont.Font[fnt].Scale;
+
+    quad[2].X := X + (charDesc.ShiftX + charDesc.Width + managerFont.Font[fnt].Padding[PaddingX2]) * managerFont.Font[fnt].Scale;
+    quad[2].Y := Y + (charDesc.ShiftY + charDesc.Height + (managerFont.Font[fnt].MaxHeight - charDesc.Height) +
+              managerFont.Font[fnt].Padding[PaddingY2]) * managerFont.Font[fnt].Scale;
+
+    quad[3].X := X + (charDesc.ShiftX - managerFont.Font[fnt].Padding[PaddingX1]) * managerFont.Font[fnt].Scale;
+    quad[3].Y := Y + (charDesc.ShiftY + charDesc.Height + (managerFont.Font[fnt].MaxHeight - charDesc.Height) +
+              managerFont.Font[fnt].Padding[PaddingY2]) * managerFont.Font[fnt].Scale;
 
     if Flags and TEXT_FX_VCA > 0 Then
     begin
@@ -402,7 +413,7 @@ begin
       glVertex2fv(@quad[3]);
     end;
 
-    X := X + (charDesc.ShiftP + textStep) * textScale;
+    X := X + (charDesc.ShiftP + textStep) * managerFont.Font[fnt].Scale;
   end;
 
   if not b2dStarted Then
@@ -414,31 +425,34 @@ begin
   end;
 end;
 
-procedure text_DrawEx(Font: zglPFont; X, Y, Scale, Step: Single; const Text: UTF8String; Alpha: Byte = 255; Color: LongWord = $FFFFFF; Flags: LongWord = 0);
+procedure text_DrawEx(fnt: Byte; X, Y, Scale, Step: Single; const Text: UTF8String; Alpha: Byte = 255; Color: LongWord = $FFFFFF; Flags: LongWord = 0);
+var
+  oldScale: Single;
 begin
   textRGBA[0] := Color shr 16;
   textRGBA[1] := (Color and $FF00) shr 8;
   textRGBA[2] := Color and $FF;
   textRGBA[3] := Alpha;
-  textScale   := TextScaleNormal * Scale;
+  oldScale := managerFont.Font[fnt].Scale;
+  managerFont.Font[fnt].Scale := managerFont.Font[fnt].ScaleNorm * Scale;
   textStep    := Step;
-  text_Draw(Font, X, Y, Text, Flags);
+  text_Draw(fnt, X, Y, Text, Flags);
   textRGBA[0] := 255;
   textRGBA[1] := 255;
   textRGBA[2] := 255;
   textRGBA[3] := 255;
-  textScale   := TextScaleNormal;
+  managerFont.Font[fnt].Scale := oldScale;
   textStep    := 0;
 end;
 
-procedure text_DrawInRect(Font: zglPFont; const Rect: zglTRect; const Text: UTF8String; Flags: LongWord = 0);
+procedure text_DrawInRect(fnt: Byte; const Rect: zglTRect; const Text: UTF8String; Flags: LongWord = 0);
   var
     i, j, b : Integer;
     NewFlags: Integer;
 begin
-  if (Text = '') or (not Assigned(Font)) Then exit;
+  if (Text = '') or ((managerFont.Font[fnt].Flags and UseFnt) = 0) Then exit;
 
-  text_CalcRect(Font, Rect, Text, Flags);
+  text_CalcRect(fnt, Rect, Text, Flags);
 
   NewFlags := 0;
   if Flags and TEXT_FX_VCA > 0 Then
@@ -456,28 +470,28 @@ begin
       if j > b Then continue;
       j := j + utf8_Length(textWords[i].Str);
     end;
-    text_Draw(Font, textWords[i].X, textWords[i].Y, textWords[i].Str, NewFlags);
+    text_Draw(fnt, textWords[i].X, textWords[i].Y, textWords[i].Str, NewFlags);
   end;
 end;
 
-procedure text_DrawInRectEx(Font: zglPFont; const Rect: zglTRect; Scale, Step: Single; const Text: UTF8String; Alpha: Byte = 0; Color: LongWord = $FFFFFF; Flags: LongWord = 0);
+procedure text_DrawInRectEx(fnt: Byte; const Rect: zglTRect; Scale, Step: Single; const Text: UTF8String; Alpha: Byte = 0; Color: LongWord = $FFFFFF; Flags: LongWord = 0);
 begin
   textRGBA[0] :=   Color             shr 16;
   textRGBA[1] := (Color and $FF00) shr 8;
   textRGBA[2] :=   Color and $FF;
   textRGBA[3] := Alpha;
-  textScale     := TextScaleNormal * Scale;
+  managerFont.Font[fnt].Scale := managerFont.Font[fnt].ScaleNorm * Scale;
   textStep      := Step;
-  text_DrawInRect(Font, Rect, Text, Flags);
+  text_DrawInRect(fnt, Rect, Text, Flags);
   textRGBA[0] := 255;
   textRGBA[1] := 255;
   textRGBA[2] := 255;
   textRGBA[3] := 255;
-  textScale     := TextScaleNormal;
+  managerFont.Font[fnt].Scale := managerFont.Font[fnt].ScaleNorm;
   textStep      := 0;
 end;
 
-function text_GetWidth(Font: zglPFont; const Text: UTF8String; Step: Single = 0.0): Single;
+function text_GetWidth(fnt: Byte; const Text: UTF8String; Step: Single = 0.0): Single;
   var
     i: Integer;
     c: LongWord;
@@ -485,28 +499,29 @@ function text_GetWidth(Font: zglPFont; const Text: UTF8String; Step: Single = 0.
 begin
   lResult := 0;
   Result  := 0;
-  if (Text = '') or (not Assigned(Font)) Then exit;
+  if (Text = '') or ((managerFont.Font[fnt].Flags and UseFnt) = 0) Then exit;
   i  := 1;
   while i <= Length(Text) do
   begin
-    c := utf8_GetID(Text, i, @i);
+    c := utf8_toUnicode(Text, i, @i);
     if c = 10 Then
     begin
       lResult := Result;
       Result  := 0;
     end else
-      if Assigned(Font.CharDesc[c]) Then
-        Result := Result + Font.CharDesc[c].ShiftP * textScale + Step;
+      if Assigned(managerFont.Font[fnt].CharDesc[c]) Then
+        // ShiftP - каким-то боком оказался шириной символа? помноженное на шкалу
+        Result := Result + managerFont.Font[fnt].CharDesc[c].ShiftP * managerFont.Font[fnt].Scale + Step;
   end;
   if lResult > Result Then
     Result := lResult;
 end;
 
-function text_GetHeight(Font: zglPFont; Width: Single; const Text: UTF8String; Scale: Single = 1.0; Step: Single = 0.0): Single;
+function text_GetHeight(fnt: Byte; Width: Single; const Text: UTF8String; Scale: Single = 1.0; Step: Single = 0.0): Single;
   var
     Rect: zglTRect;
 begin
-  if (Text = '') or (not Assigned(Font)) Then
+  if (Text = '') or ((managerFont.Font[fnt].Flags and UseFnt) = 0) Then
   begin
     Result := 0;
     exit;
@@ -516,11 +531,11 @@ begin
   Rect.Y    := 0;
   Rect.W    := Width;
   Rect.H    := 0;
-  textScale := TextScaleNormal * Scale;
+  managerFont.Font[fnt].Scale := managerFont.Font[fnt].ScaleNorm * Scale;
   textStep  := Step;
-  text_CalcRect(Font, Rect, Text, TEXT_HALIGN_LEFT);
-  Result := textWords[textWordsCount - 1].Y - textWords[0].Y + Font.MaxHeight * Scale;
-  textScale := TextScaleNormal;
+  text_CalcRect(fnt, Rect, Text, TEXT_HALIGN_LEFT);
+  Result := textWords[textWordsCount - 1].Y - textWords[0].Y + managerFont.Font[fnt].MaxHeight * Scale;
+  managerFont.Font[fnt].Scale := managerFont.Font[fnt].ScaleNorm;
   textStep  := 0;
 end;
 

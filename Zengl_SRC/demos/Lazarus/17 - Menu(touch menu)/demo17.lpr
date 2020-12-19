@@ -2,16 +2,13 @@
 
 {$I zglCustomConfig.cfg}
 
-{$IFDEF WINDOWS}
-  {$R *.res}
-{$ENDIF}
-
+// в разработке!!!
 uses
   {$IFDEF UNIX}
   cthreads,
   {$ENDIF}
   {$IFDEF USE_ZENGL_STATIC}
-  sw_touch_menu,
+  gegl_touch_menu,
   zgl_screen,
   zgl_window,
   zgl_timers,
@@ -24,10 +21,9 @@ uses
   zgl_font,
   zgl_text,
   zgl_file,
-  zgl_math_2d,
+  zgl_types,
   zgl_mouse,
-  zgl_application,
-  sw_draw_gui,
+  gegl_draw_gui,
 
   zgl_utils
   {$ELSE}
@@ -38,6 +34,7 @@ uses
 var
   //  dirRes  : UTF8String {$IFNDEF MACOSX} = 'data/' {$ENDIF};             // вне демо-версий
   dirRes  : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};            // в демо-версиях!!!
+  TimeStart: Byte = 0;
 
 
 procedure Init;
@@ -65,7 +62,7 @@ procedure Draw;
     s : UTF8String;
 begin
   batch2d_Begin();
-  setTextScale(1.5);
+  setTextScale(15, fontUse);
 
   // RU: ZenGL работает исключительно с кодировкой UTF-8, поэтому весь текст должен быть в UTF-8.
   // EN: ZenGL works only with UTF-8 encoding, so all text should be encoded with UTF-8.
@@ -74,7 +71,7 @@ begin
 
   text_DrawEx( fontUse, 400, 65, 3, 0, 'Scaling', 255, $FFFFFF, TEXT_HALIGN_CENTER );
 
-  setTextScale(1.5);
+  setTextScale(15, fontUse);
   fx2d_SetVCA( $FF0000, $00FF00, $0000FF, $FFFFFF, 255, 255, 255, 255 );
   text_Draw( fontUse, 400, 125, 'Gradient color for every symbol', TEXT_FX_VCA or TEXT_HALIGN_CENTER );
 
@@ -132,7 +129,7 @@ begin
   {$ENDIF}
   randomize();
 
-  timer_Add( @Timer, 16 );
+  timer_Add( @Timer, 16, TimeStart, Start );
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );

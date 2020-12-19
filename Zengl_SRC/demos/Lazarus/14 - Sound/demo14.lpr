@@ -11,7 +11,6 @@ uses
   cthreads,
   {$ENDIF}
   {$IFDEF USE_ZENGL_STATIC}
-  zgl_application,
   zgl_screen,
   zgl_window,
   zgl_timers,
@@ -27,7 +26,7 @@ uses
   zgl_sound,
   zgl_sound_wav,
   zgl_sound_ogg,
-  zgl_math_2d,
+  zgl_types,
   zgl_collision_2d,
   zgl_utils
   {$ELSE}
@@ -41,14 +40,16 @@ const
 
 var
   dirRes  : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
-  fntMain : zglPFont;
+  fntMain : Byte;
   icon    : array[ 0..1 ] of zglPTexture;
   sound   : zglPSound;
   audio   : Integer;
   state   : Integer;
 
   // добавляем номер звука, пока для одного звука
-  IDSound: Integer;
+  IDSound : Integer;
+
+  TimeStart: Byte = 0;
 
 // RU: Т.к. звуковая подсистема нацелена на 3D, для позиционирования звуков в 2D нужны некоторые ухищрения.
 // EN: Because sound subsystem using 3D, there is some tricky way to calculate sound position in 2D.
@@ -78,8 +79,7 @@ begin
   icon[ 1 ] := tex_LoadFromFile( dirRes + 'audio-play.png' );
 
   fntMain := font_LoadFromFile( dirRes + 'font.zfi' );
-
-  setTextScale(1.5);
+  setTextScale(15, fntMain);
 end;
 
 procedure Draw;
@@ -169,7 +169,7 @@ Begin
 
   randomize();
 
-  timer_Add( @Timer, 16 );
+  TimeStart := timer_Add( @Timer, 16, Start );
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );

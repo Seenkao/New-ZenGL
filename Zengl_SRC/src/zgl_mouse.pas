@@ -74,7 +74,11 @@ function mBUpDown(action: Byte): Boolean;
 function mBClickCanClick(action: Byte): Boolean;
 function mBDblClickWheel(action: Byte): Boolean;
 procedure mouse_ClearState;
+{$IfNDef ANDROID}
+{$IfNDef iOS}
 procedure mouse_Lock(X: Integer = -1; Y: Integer = -1);
+{$EndIf}
+{$EndIf}
 
 var
   mouseX       : Integer;
@@ -134,11 +138,12 @@ end;
 
 procedure mouse_ClearState;
 begin
-  mouseClickCanClick := 0;//M_BLEFT_CANCLICK or M_BRIGHT_CANCLICK or M_BMIDDLE_CANCLICK;
+  mouseClickCanClick := 0;
   mouseDblClickWheel := 0;
-//  mouseUpDown := mouseUpDown and (255 - M_BLEFT_UP - M_BRIGHT_UP - M_BMIDDLE_UP);
 end;
 
+{$IfNDef ANDROID}
+{$IfNDef iOS}
 procedure mouse_Lock(X: Integer = -1; Y: Integer = -1);
   {$IFDEF MACOSX}
   var
@@ -187,5 +192,7 @@ begin
   CGWarpMouseCursorPosition(Point);
 {$ENDIF}
 end;
+{$ENDIF}
+{$ENDIF}
 
 end.

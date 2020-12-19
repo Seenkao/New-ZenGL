@@ -5,10 +5,7 @@ library demo16;
 {$I zglCustomConfig.cfg}
 
 uses
-
-
   zgl_application,
-  zgl_main,
   zgl_file,
   zgl_screen,
   zgl_window,
@@ -30,12 +27,13 @@ uses
 
 var
   dirRes  : UTF8String = 'assets/';
-  fntMain : zglPFont;
+  fntMain : Byte;
   space   : PcpSpace;
   bCount  : Integer;
   Bodies  : array of PcpBody;
   Shapes  : array of PcpShape;
   balls   : Boolean = false;
+  TimeStart: Byte;
 
 // RU: Добавить объект "шар"
 //     x, y - координаты центра
@@ -170,7 +168,7 @@ begin
   ground^.u := u;
   cpSpaceAddStaticShape(space, ground);
 
-  setTextScale(1.5);
+  setTextScale(15, fntMain);
 end;
 
 procedure Draw;
@@ -231,7 +229,7 @@ procedure Java_zengl_android_ZenGL_Main(var env; var thiz); cdecl;
 begin
   randomize();
 
-  timer_Add(@Timer, 16);
+  TimeStart := timer_Add(@Timer, 16, Start);
 
   zgl_Reg(SYS_LOAD, @Init);
   zgl_Reg(SYS_DRAW, @Draw);

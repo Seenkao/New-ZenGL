@@ -7,9 +7,9 @@
 {$ENDIF}
 
 uses
-  {$IFDEF UNIX}
+  {$IF defined(LINUX) or defined (MACOSX)}
   cthreads,
-  {$ENDIF}
+  {$IfEnd}
   {$IFDEF USE_ZENGL_STATIC}
   zgl_screen,
   zgl_window,
@@ -23,7 +23,7 @@ uses
   zgl_font,
   zgl_text,
   zgl_file,
-  zgl_math_2d,
+  zgl_types,
   zgl_utils
   {$ELSE}
   zglHeader
@@ -33,11 +33,13 @@ uses
 var
 //  dirRes  : UTF8String {$IFNDEF MACOSX} = 'data/' {$ENDIF};             // вне демо-версий
   dirRes  : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};            // в демо-версиях!!!
-  fntMain : zglPFont;
+  fntMain : Byte;
+
+  TimeStart  : Byte = 0;
 
 procedure Init;
 begin
-  file_SetPath('');                       // если dirRes = '../data/'   !!!!!     в демо-версиях!!!
+//  file_SetPath('');                       // если dirRes = '../data/'   !!!!!     в демо-версиях!!!
   // RU: Загружаем данные о шрифте.
   // EN: Load the font.
 
@@ -54,7 +56,7 @@ procedure Draw;
     s : UTF8String;
 begin
   batch2d_Begin();
-  setTextScale(1.5);
+//  setTextScale(1.5, fntMain);
 
   // RU: ZenGL работает исключительно с кодировкой UTF-8, поэтому весь текст должен быть в UTF-8.
   // EN: ZenGL works only with UTF-8 encoding, so all text should be encoded with UTF-8.
@@ -63,7 +65,7 @@ begin
 
   text_DrawEx( fntMain, 400, 65, 3, 0, 'Scaling', 255, $FFFFFF, TEXT_HALIGN_CENTER );
 
-  setTextScale(1.5);
+  setTextScale(15, fntMain);
   fx2d_SetVCA( $FF0000, $00FF00, $0000FF, $FFFFFF, 255, 255, 255, 255 );
   text_Draw( fntMain, 400, 125, 'Gradient color for every symbol', TEXT_FX_VCA or TEXT_HALIGN_CENTER );
 
@@ -74,7 +76,7 @@ begin
 
   pr2d_Rect( r.X, r.Y, r.W, r.H, $FF0000 );
   text_DrawInRect( fntMain, r, 'Simple text rendering in rectangle' + #10 + 'Текст написанный в квадрате');
-  // для использования другой кодировки надо указать Lazarus что страница в кодировке UTF-8
+  // для использования другой кодировки надо указать Lazarus что страница в кодировке UTF-8 BOM!!!
   // File setting -> encoding -> UTF-8 with BOM
 
   r.X := 800 - 192;
@@ -120,7 +122,7 @@ Begin
   {$ENDIF}
   randomize();
 
-  timer_Add( @Timer, 16 );
+  timer_Add( @Timer, 16, TimeStart, Start );
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );

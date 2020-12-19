@@ -4,7 +4,6 @@ library demo09;
 
 uses
   zgl_application,
-  zgl_main,
   zgl_file,
   zgl_screen,
   zgl_window,
@@ -15,12 +14,11 @@ uses
   zgl_fx,
   zgl_textures,
   zgl_textures_png,
-  zgl_textures_jpg,
   zgl_sprite_2d,
   zgl_primitives_2d,
   zgl_font,
   zgl_text,
-  zgl_math_2d,
+  zgl_types,
   zgl_utils,
 
   zglSpriteEngine                       // переместили ниже, видимо какая-то активация проходит и вызывает ошибку при работе приложения
@@ -39,11 +37,13 @@ type
 
 var
   dirRes    : UTF8String = 'assets/';
-  fntMain   : zglPFont;
+  fntMain   : Byte;
   texLogo   : zglPTexture;
   texMiku   : zglPTexture;
   time      : Integer;
   sengine2d : zglCSEngine2D;
+  TimeStart : Byte;
+  TimeMiku  : Byte;
 
 // Miku
 procedure CMiku.OnInit( _Texture : zglPTexture; _Layer : Integer );
@@ -138,15 +138,15 @@ begin
   // EN: Create zglCSEngine2D object.
   sengine2d := zglCSEngine2D.Create();
 
-  // RU: Создадим 1000 спрайтов Miku-chan :)
+  // RU: Создадим 1000 спрайтов Miku-chan :)           Заменил, спрайты начнут появляться по истечению времени старта
   // EN: Create 1000 sprites of Miku-chan :)
-  for i := 0 to 9 do
-    AddMiku();
+//  for i := 0 to 9 do
+//    AddMiku();
 
   fntMain := font_LoadFromFile( dirRes + 'font.zfi' );
 
   file_CloseArchive();
-  setTextScale(1.5);
+  setTextScale(15, fntMain);
 end;
 
 procedure Draw;
@@ -228,8 +228,8 @@ procedure Java_zengl_android_ZenGL_Main( var env; var thiz ); cdecl;
 begin
   randomize();
 
-  timer_Add( @Timer, 16 );
-  timer_Add( @AddMiku, 4000 );
+  TimeStart := timer_Add( @Timer, 16, Start );
+  TimeMiku := timer_Add( @AddMiku, 3000, SleepToStart, 8 );
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );

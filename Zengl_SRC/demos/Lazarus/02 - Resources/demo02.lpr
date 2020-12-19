@@ -55,7 +55,7 @@ var
 
   // RU: У каждого ресурса есть свой определённый тип, который является указателем на структуру.
   // EN: Every resource has its own typem which is just a pointer to structure.
-  fntMain  : zglPFont;
+  fntMain  : Byte;
   //
   texLogo  : zglPTexture;
   texTest  : zglPTexture;
@@ -123,7 +123,7 @@ begin
   texLogo := tex_LoadFromFile( 'zengl.png' );
   file_CloseArchive();
 
-  setTextScale(1.5);
+  setTextScale(15, fntMain);
 end;
 
 procedure Draw;
@@ -139,7 +139,7 @@ begin
 
   ssprite2d_Draw( texTest, 0, 0, 800, 600, 0 );
   text_Draw( fntMain, 0, 0, 'FPS: ' + u_IntToStr( zgl_Get( RENDER_FPS ) ) );
-  text_Draw( fntMain, 0, 16, 'VRAM Used: ' + u_FloatToStr( zgl_Get( RENDER_VRAM_USED ) / 1024 / 1024 ) + 'Mb' );
+  text_Draw( fntMain, 0, 18, 'VRAM Used: ' + u_FloatToStr( zgl_Get( RENDER_VRAM_USED ) / 1024 / 1024 ) + 'Mb' );
 end;
 
 Begin

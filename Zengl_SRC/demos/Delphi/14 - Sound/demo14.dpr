@@ -20,7 +20,7 @@ uses
   zgl_sound,
   zgl_sound_wav,
   zgl_sound_ogg,
-  zgl_math_2d,
+  zgl_types,
   zgl_collision_2d,
   zgl_utils,
   zgl_memory
@@ -32,7 +32,7 @@ const
 
 var
   dirRes : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
-  fntMain: zglPFont;
+  fntMain: Byte;
   icon   : array[0..1] of zglPTexture;
   sound  : zglPSound;
   audio  : Integer;
@@ -42,17 +42,18 @@ var
 
   // добавляем номер звука, пока для одного звука
   IDSound: Integer;
+  TimeStart: Byte;
 
 // RU: Т.к. звуковая подсистема нацелена на 3D, для позиционирования звуков в 2D нужны некоторые ухищрения.
 // EN: Because sound subsystem using 3D, there is some tricky way to calculate sound position in 2D.
 function CalcX2D(const X: Single): Single;
 begin
-  Result := (X - SCREEN_WIDTH / 2) * (10 / SCREEN_WIDTH / 2);          // сменил смещение по X и Y, теперь более явно можно
+  Result := (X - SCREEN_WIDTH / 2) * (20 / SCREEN_WIDTH / 2);          // сменил смещение по X и Y, теперь более явно можно
 end;                                                                    // отдалить/приблизить звук
 
 function CalcY2D(const Y: Single): Single;
 begin
-  Result := (Y - SCREEN_HEIGHT / 2) * (10 / SCREEN_HEIGHT / 2);
+  Result := (Y - SCREEN_HEIGHT / 2) * (20 / SCREEN_HEIGHT / 2);
 end;
 
 procedure Init;
@@ -71,13 +72,13 @@ begin
   icon[1] := tex_LoadFromFile(dirRes + 'audio-play.png');
 
   fntMain := font_LoadFromFile(dirRes + 'font.zfi');
+  setTextScale(15, fntMain);
 end;
 
 procedure Draw;
   var
     r: zglTRect;
 begin
-  setTextScale(1.5);
   ssprite2d_Draw(icon[state], (SCREEN_WIDTH - 128) / 2, (SCREEN_HEIGHT - 128) / 2, 128, 128, 0);
   text_Draw(fntMain, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 64, 'Skillet - Comatose - Whispers In The Dark', TEXT_HALIGN_CENTER);
 
@@ -157,7 +158,7 @@ end;
 Begin
   randomize();
 
-  timer_Add(@Timer, 16);
+  TimeStart := timer_Add(@Timer, 16, Start);
 
   zgl_Reg(SYS_LOAD, @Init);
   zgl_Reg(SYS_DRAW, @Draw);

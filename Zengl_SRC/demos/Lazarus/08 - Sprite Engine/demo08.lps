@@ -8,8 +8,8 @@
       <Unit0>
         <Filename Value="demo08.lpr"/>
         <IsPartOfProject Value="True"/>
-        <TopLine Value="6"/>
-        <CursorPos X="20" Y="14"/>
+        <TopLine Value="10"/>
+        <CursorPos X="8" Y="28"/>
         <UsageCount Value="20"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>

@@ -23,10 +23,11 @@ uses
 
 var
   dirRes   : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
-  fntMain  : zglPFont;
+  fntMain  : Byte;
   texTux   : zglPTexture;
   rtFull   : zglPRenderTarget;
   rtDefault: zglPRenderTarget;
+  TimeStart: Byte;
 
 procedure Init;
 begin
@@ -45,7 +46,7 @@ begin
   // EN: Create one more RenderTarget with flag RT_DEFAULT for comparison.
   rtDefault := rtarget_Add(tex_CreateZero(256, 256), RT_DEFAULT);
 
-  setTextScale(1.5);
+  setTextScale(15, fntMain);
 end;
 
 procedure Draw;
@@ -80,7 +81,7 @@ end;
 Begin
   randomize();
 
-  timer_Add(@Timer, 16);
+  TimeStart := timer_Add(@Timer, 16, Start);
 
   zgl_Reg(SYS_LOAD, @Init);
   zgl_Reg(SYS_DRAW, @Draw);

@@ -183,7 +183,7 @@ begin
   if oglDisplay = EGL_NO_DISPLAY Then
   begin
     log_Add('eglGetDisplay: EGL_DEFAULT_DISPLAY');
-    oglDisplay := eglGetDisplay(EGL_DEFAULT_DISPLAY);    // не работает...
+    oglDisplay := eglGetDisplay(EGL_DEFAULT_DISPLAY);    
   end;
 
   if not eglInitialize(oglDisplay, @i, @j) Then

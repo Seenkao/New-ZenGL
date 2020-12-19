@@ -18,6 +18,7 @@ uses
   zgl_fx,
   zgl_render_2d,
   zgl_primitives_2d,
+  zgl_types,
   zgl_math_2d,
   zgl_utils
   {$Else}
@@ -28,6 +29,7 @@ uses
 var
   calc   : Integer;
   points : array[ 0..359 ] of zglTPoint2D;
+  TimeStart  : Byte = 0;
 
 procedure Init;
   var
@@ -82,7 +84,7 @@ Begin
   {$IFNDEF USE_ZENGL_STATIC}
   if not zglLoad( libZenGL ) Then exit;
   {$ENDIF}
-  timer_Add( @Timer, 16 );
+  TimeStart := timer_Add( @Timer, 16, Start );
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );

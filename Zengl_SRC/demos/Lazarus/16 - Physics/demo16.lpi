@@ -89,7 +89,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir);../../../headers"/>
-      <OtherUnitFiles Value="../../../extra;../../../src;../../../lib/zlib/$(TargetCPU)-$(TargetOS);../../../lib/zip/$(TargetCPU)-$(TargetOS);../../../lib/jpeg/$(TargetCPU)-$(TargetOS);../../../lib/msvcrt/i386/$(TargetCPU)-$(TargetOS);../../../lib/chipmunk/$(TargetCPU)-$(TargetOS);../../../lib/ogg/$(TargetCPU)-$(TargetOS);../../../lib/theora/$(TargetCPU)-$(TargetOS)"/>
+      <OtherUnitFiles Value="../../../extra;../../../src;../../../lib/zlib/$(TargetCPU)-$(TargetOS);../../../lib/zip/$(TargetCPU)-$(TargetOS);../../../lib/jpeg/$(TargetCPU)-$(TargetOS);../../../lib/msvcrt/$(TargetCPU);../../../lib/chipmunk/$(TargetCPU)-$(TargetOS);../../../lib/ogg/$(TargetCPU)-$(TargetOS);../../../lib/theora/$(TargetCPU)-$(TargetOS)"/>
       <UnitOutputDirectory Value="../tmp/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>

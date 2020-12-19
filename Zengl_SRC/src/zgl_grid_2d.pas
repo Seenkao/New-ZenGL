@@ -30,7 +30,7 @@ interface
 uses
   zgl_fx,
   zgl_textures,
-  zgl_math_2d;
+  zgl_types;
 
 type
   zglPGrid2D = ^zglTGrid2D;

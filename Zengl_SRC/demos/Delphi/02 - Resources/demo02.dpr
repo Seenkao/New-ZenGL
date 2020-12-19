@@ -52,7 +52,7 @@ var
 
   // RU: У каждого ресурса есть свой определённый тип, который является указателем на структуру.
   // EN: Every resource has its own typem which is just a pointer to structure.
-  fntMain: zglPFont;
+  fntMain: Byte;
   //
   texLogo: zglPTexture;
   texTest: zglPTexture;
@@ -124,7 +124,7 @@ begin
   texLogo := tex_LoadFromFile('zengl.png');
   file_CloseArchive();
 
-  setTextScale(1.5);                                            // выставляем размер шрифта
+  setTextScale(15, fntMain);                                            // выставляем размер шрифта
 end;
 
 procedure Draw;

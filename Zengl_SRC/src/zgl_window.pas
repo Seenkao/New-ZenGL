@@ -21,7 +21,7 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 28.09.2020
+ !!! modification from Serge 15.12.2020
 }
 unit zgl_window;
 
@@ -50,14 +50,13 @@ uses
   iPhoneAll, CGGeometry,
   {$ENDIF}
   zgl_types;
-//  zgl_screen
 
 const
-  cs_ZenGL    = 'ZenGL - test 0.3.25';
-  cs_Date     = '2020.09.28';
+  cs_ZenGL    = 'ZenGL - test 0.3.26';
+  cs_Date     = '2020.12.10';
   cv_major    = 0;
   cv_minor    = 3;
-  cv_revision = 24;
+  cv_revision = 26;
 
   // zgl_Reg
   SYS_APP_INIT           = $000001;
@@ -157,10 +156,10 @@ const
   {$ENDIF}
 
 {$IfNDef ANDROID}
-{$IFDEF WND_USE}
+{$If (not defined(USE_INIT_HANDLE)) or (defined(USE_INIT_HANDLE) and defined(WINDOWS))}
 function  wnd_Create(): Boolean;
 procedure wnd_Destroy;
-{$EndIf}
+{$IFEND}
 {$IfNDef USE_INIT_HANDLE}
 procedure wnd_Update;
 procedure wnd_UpdateCaption();
@@ -186,7 +185,6 @@ procedure zgl_Exit;
 procedure zgl_Reg(What: LongWord; UserData: Pointer);
 function  zgl_Get(What: LongWord): Ptr;
 
-// новое        new
 procedure zgl_SetParam(width, height: Integer; FullScreen, Vsync: Boolean);
 
 procedure zgl_GetMem(out Mem: Pointer; Size: LongWord);
@@ -316,7 +314,7 @@ end;
 {$EndIf}
 
 {$IfNDef ANDROID}
-{$IFDEF WND_USE}
+{$If (not defined(USE_INIT_HANDLE)) or (defined(USE_INIT_HANDLE) and defined(WINDOWS))}
 procedure wnd_Select;
 begin
 {$IFDEF USE_X11}
@@ -546,7 +544,7 @@ begin
 {$ENDIF}
   wndHandle := {$IFNDEF DARWIN} 0 {$ELSE} nil {$ENDIF};
 end;
-{$EndIf}
+{$IFEND}
 
 {$IfNDef USE_INIT_HANDLE}
 procedure wnd_Update;
@@ -622,6 +620,7 @@ begin
     wndCaption := cs_ZenGL
   else
     wndCaption := Caption;
+  wnd_UpdateCaption();
 end;
 
 procedure wnd_UpdateCaption();
@@ -682,8 +681,12 @@ end;
 
 procedure wnd_SetSize(Width, Height: Integer);
 begin
-  wndWidth  := Width;
-  wndHeight := Height;
+  if (wndWidth <> Width) or (wndHeight <> Height) then
+  begin
+    wndWidth  := Width;
+    wndHeight := Height;
+    scrViewPort := True;
+  end;
 {$IfNDef USE_INIT_HANDLE}
   {$IFDEF USE_X11}
   if wndHandle <> 0 Then
@@ -929,9 +932,8 @@ begin
 
   InitSoundVideo();
 
-  winOn := TRUE;
-
   app_PInit();
+  winOn := TRUE;
 end;
 {$EndIf}
 
@@ -950,18 +952,11 @@ begin
   if managerTimer.Count <> 0 Then
     log_Add('Timers to free: ' + u_IntToStr(managerTimer.Count));
   while managerTimer.Count > 0 do
-    begin
-      p := managerTimer.First.next;
-      timer_Del(zglPTimer(p));
-    end;
+    timers_Destroy;
 
   if managerFont.Count <> 0 Then
     log_Add('Fonts to free: ' + u_IntToStr(managerFont.Count));
-  while managerFont.Count > 0 do
-    begin
-      p := managerFont.First.next;
-      font_Del(zglPFont(p));
-    end;
+  allFont_Destroy;
 
   if managerRTarget.Count <> 0 Then
     log_Add('Render Targets to free: ' + u_IntToStr(managerRTarget.Count))
@@ -1423,6 +1418,8 @@ end;
 
 procedure zgl_SetParam(width, height: Integer; FullScreen, Vsync: Boolean);
 begin
+  if (wndWidth <> width) or (wndHeight <> height) or (wndFullScreen <> FullScreen) then
+    scrViewPort := true;
   wndWidth := Width;
   wndHeight := Height;
   wndFullScreen := FullScreen;

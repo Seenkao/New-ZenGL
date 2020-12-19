@@ -379,20 +379,14 @@ const
   //--------------------------------------------------------------
 
   // blendOP
-  GL_FUNC_ADD_EXT                     = $8006; // GL_FUNC_ADD_OES
+  GL_FUNC_ADD_EXT                     = $8006; 
   GL_MIN_EXT                          = $8007;
   GL_MAX_EXT                          = $8008;
-  GL_FUNC_SUBTRACT_EXT                = $800A; // GL_FUNC_SUBTRACT_OES
-  GL_FUNC_REVERSE_SUBTRACT_EXT        = $800B; // GL_FUNC_REVERSE_SUBTRACT_OES
+  GL_FUNC_SUBTRACT_EXT                = $800A;
+  GL_FUNC_REVERSE_SUBTRACT_EXT        = $800B;
 
-{  GL_BLEND_DST_RGB_EXT                = $80C8; // GL_BLEND_DST_RGB_OES
-  GL_BLEND_SRC_RGB_EXT                = $80C9; // GL_BLEND_SRC_RGB_OES
-  GL_BLEND_DST_ALPHA_EXT              = $80CA; // GL_BLEND_DST_ALPHA_OES
-  GL_BLEND_SRC_ALPHA_EXT              = $80CB; // GL_BLEND_SRC_ALPHA_OES
-  GL_BLEND_EQUATION_RGB_EXT           = $8009; // GL_BLEND_EQUATION_RGB_OES
-  GL_BLEND_EQUATION_ALPHA_EXT         = $883D; // GL_BLEND_EQUATION_ALPHA_OES }
-  GL_BLEND_DST                        = $0BE0;    // new, use?
-  GL_BLEND_SRC                        = $0BE1;    // new, use?
+  GL_BLEND_DST                        = $0BE0;
+  GL_BLEND_SRC                        = $0BE1;
 
   // Hint Mode
   GL_DONT_CARE                        = $1100;
@@ -426,13 +420,11 @@ const
   GL_TRIANGLES                        = $0004;
   GL_TRIANGLE_STRIP                   = $0005;
   GL_TRIANGLE_FAN                     = $0006;
-  GL_QUADS                            = $0007; // Doesn't exists
+  GL_QUADS                            = $0007;
 
   // Texture
   GL_TEXTURE_2D                       = $0DE1;
-//  GL_TEXTURE0_ARB                     = $84C0; // GL_TEXTURE0
   GL_MAX_TEXTURE_SIZE                 = $0D33;
-//  GL_MAX_TEXTURE_UNITS_ARB            = $84E2; // GL_MAX_TEXTURE_UNITS
   GL_TEXTURE_MAX_ANISOTROPY_EXT       = $84FE;
   GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT   = $84FF;
   // Texture Wrap Mode
@@ -468,31 +460,31 @@ const
   GL_TEXTURE_WRAP_S                   = $2802;
   GL_TEXTURE_WRAP_T                   = $2803;
 
-  GL_COMBINE_ARB                      = $8570; // GL_COMBINE
-  GL_COMBINE_RGB_ARB                  = $8571; // GL_COMBINE_RGB
-  GL_COMBINE_ALPHA_ARB                = $8572; // GL_COMBINE_ALPHA
-  GL_SOURCE0_RGB_ARB                  = $8580; // GL_SRC0_RGB
-  GL_SOURCE1_RGB_ARB                  = $8581; // GL_SRC1_RGB
-  GL_SOURCE2_RGB_ARB                  = $8582; // GL_SRC2_RGB
-  GL_SOURCE0_ALPHA_ARB                = $8588; // GL_SRC0_ALPHA
-  GL_SOURCE1_ALPHA_ARB                = $8589; // GL_SRC1_ALPHA
-  GL_SOURCE2_ALPHA_ARB                = $858A; // GL_SRC2_ALPHA
-  GL_OPERAND0_RGB_ARB                 = $8590; // GL_OPERAND0_RGB
-  GL_OPERAND1_RGB_ARB                 = $8591; // GL_OPERAND1_RGB
-  GL_OPERAND2_RGB_ARB                 = $8592; // GL_OPERAND2_RGB
-  GL_OPERAND0_ALPHA_ARB               = $8598; // GL_OPERAND0_ALPHA
-  GL_OPERAND1_ALPHA_ARB               = $8599; // GL_OPERAND1_ALPHA
-  GL_OPERAND2_ALPHA_ARB               = $859A; // GL_OPERAND2_ALPHA
-  GL_RGB_SCALE_ARB                    = $8573; // GL_RGB_SCALE
-//  GL_ADD_SIGNED_ARB                   = $8574; // GL_ADD_SIGNED
+  GL_COMBINE_ARB                      = $8570;
+  GL_COMBINE_RGB_ARB                  = $8571;
+  GL_COMBINE_ALPHA_ARB                = $8572;
+  GL_SOURCE0_RGB_ARB                  = $8580;
+  GL_SOURCE1_RGB_ARB                  = $8581;
+  GL_SOURCE2_RGB_ARB                  = $8582;
+  GL_SOURCE0_ALPHA_ARB                = $8588;
+  GL_SOURCE1_ALPHA_ARB                = $8589;
+  GL_SOURCE2_ALPHA_ARB                = $858A;
+  GL_OPERAND0_RGB_ARB                 = $8590;
+  GL_OPERAND1_RGB_ARB                 = $8591;
+  GL_OPERAND2_RGB_ARB                 = $8592;
+  GL_OPERAND0_ALPHA_ARB               = $8598;
+  GL_OPERAND1_ALPHA_ARB               = $8599;
+  GL_OPERAND2_ALPHA_ARB               = $859A;
+  GL_RGB_SCALE_ARB                    = $8573;
+
   GL_ADD_SIGNED                       = $8574;
-  GL_INTERPOLATE_ARB                  = $8575; // GL_INTERPOLATE
-  GL_SUBTRACT_ARB                     = $84E7; // GL_SUBTRACT
-  GL_CONSTANT_ARB                     = $8576; // GL_CONSTANT
-  GL_PRIMARY_COLOR_ARB                = $8577; // GL_PRIMARY_COLOR
-  GL_PREVIOUS_ARB                     = $8578; // GL_PREVIOUS
-  GL_DOT3_RGB                         = $86AE; // GL_DOT3_RGB
-  GL_DOT3_RGBA                        = $86AF; // GL_DOT3_RGBA
+  GL_INTERPOLATE_ARB                  = $8575;
+  GL_SUBTRACT_ARB                     = $84E7;
+  GL_CONSTANT_ARB                     = $8576;
+  GL_PRIMARY_COLOR_ARB                = $8577;
+  GL_PREVIOUS_ARB                     = $8578;
+  GL_DOT3_RGB                         = $86AE;
+  GL_DOT3_RGBA                        = $86AF;
 
   // Vertex Array
   GL_VERTEX_ARRAY                     = $8074;
@@ -501,14 +493,14 @@ const
   GL_TEXTURE_COORD_ARRAY              = $8078;
 
   // FBO
-  GL_FRAMEBUFFER                      = $8D40; // GL_FRAMEBUFFER_OES
-  GL_RENDERBUFFER                     = $8D41; // GL_RENDERBUFFER_OES
-  GL_DEPTH_COMPONENT16                = $81A5; // GL_DEPTH_COMPONENT16_OES
-  GL_DEPTH_COMPONENT24                = $81A6; // GL_DEPTH_COMPONENT24_OES
-  GL_DEPTH_COMPONENT32                = $81A7; // GL_DEPTH_COMPONENT32_OES
-  GL_COLOR_ATTACHMENT0                = $8CE0; // GL_COLOR_ATTACHMENT0_OES
-  GL_DEPTH_ATTACHMENT                 = $8D00; // GL_DEPTH_ATTACHMENT_OES
-  GL_MAX_RENDERBUFFER_SIZE            = $84E8; // GL_MAX_RENDERBUFFER_SIZE_OES
+  GL_FRAMEBUFFER                      = $8D40;
+  GL_RENDERBUFFER                     = $8D41;
+  GL_DEPTH_COMPONENT16                = $81A5;
+  GL_DEPTH_COMPONENT24                = $81A6;
+  GL_DEPTH_COMPONENT32                = $81A7;
+  GL_COLOR_ATTACHMENT0                = $8CE0;
+  GL_DEPTH_ATTACHMENT                 = $8D00;
+  GL_MAX_RENDERBUFFER_SIZE            = $84E8;
 
   // Matrices
   GL_MODELVIEW_MATRIX                 = $0BA6;
@@ -532,10 +524,10 @@ const
   GL_DECR                             = $1E03;
 
   // VBO
-  GL_BUFFER_SIZE_ARB                  = $8764; // GL_BUFFER_SIZE
-  GL_ARRAY_BUFFER_ARB                 = $8892; // GL_ARRAY_BUFFER
-  GL_ELEMENT_ARRAY_BUFFER_ARB         = $8893; // GL_ELEMENT_ARRAY_BUFFER
-  GL_WRITE_ONLY_ARB                   = $88B9; // GL_WRITE_ONLY_OES, GL_OES_mapbuffer
+  GL_BUFFER_SIZE_ARB                  = $8764;
+  GL_ARRAY_BUFFER_ARB                 = $8892;
+  GL_ELEMENT_ARRAY_BUFFER_ARB         = $8893;
+  GL_WRITE_ONLY_ARB                   = $88B9;
   GL_STATIC_DRAW_ARB                  = $88E4;
   GL_DYNAMIC_DRAW_ARB                 = $88E8;
 

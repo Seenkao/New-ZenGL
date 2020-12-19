@@ -12,8 +12,6 @@ uses
   {$ENDIF}
   zglSpriteEngine,
   {$IFDEF USE_ZENGL_STATIC}
-  zgl_main,
-  zgl_application,
   zgl_screen,
   zgl_window,
   zgl_timers,
@@ -27,7 +25,7 @@ uses
   zgl_primitives_2d,
   zgl_font,
   zgl_text,
-  zgl_math_2d,
+  zgl_types,
   zgl_utils
   {$ELSE}
   zglHeader
@@ -47,11 +45,14 @@ type
 
 var
   dirRes    : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
-  fntMain   : zglPFont;
+  fntMain   : Byte;
   texLogo   : zglPTexture;
   texMiku   : zglPTexture;
   time      : Integer;
   sengine2d : zglCSEngine2D;
+
+  TimeStart : Byte = 0;
+  TimeMiku  : Byte = 0;
 
 // Miku
 procedure CMiku.OnInit( _Texture : zglPTexture; _Layer : Integer );
@@ -147,7 +148,7 @@ begin
     AddMiku();
 
   fntMain := font_LoadFromFile( dirRes + 'font.zfi' );
-  setTextScale(1.5);
+  setTextScale(15, fntMain);
 end;
 
 procedure Draw;
@@ -208,8 +209,8 @@ Begin
 
   randomize();
 
-  timer_Add( @Timer, 16 );
-  timer_Add( @AddMiku, 1000 );
+  TimeStart := timer_Add( @Timer, 16, Start );
+  TimeMiku := timer_Add( @AddMiku, 1000, Start );
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );

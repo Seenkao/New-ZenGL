@@ -20,6 +20,8 @@
  *
  *  3. This notice may not be removed or altered from any
  *     source distribution.
+
+ !!! modification from Serge 18.12.2020
 }
 unit zgl_types;
 
@@ -50,7 +52,45 @@ type
   zglTStringList = record
     Count: Integer;
     Items: array of UTF8String;
-end;
+  end;
+
+  zglPColor = ^zglTColor;
+  zglTColor = record
+    R, G, B, A: Single;
+  end;
+
+//------------------------- primitives -------------------------------//
+type
+  zglPPoint2D = ^zglTPoint2D;
+  zglTPoint2D = record
+    X, Y: Single;
+  end;
+
+  zglPPoints2D = ^zglTPoints2D;
+  zglTPoints2D = array[0..0] of zglTPoint2D;
+
+  zglPLine = ^zglTLine;
+  zglTLine = record
+    x0, y0: Single;
+    x1, y1: Single;
+  end;
+
+  zglPRect = ^zglTRect;
+  zglTRect = record
+    X, Y, W, H: Single;
+  end;
+
+  zglPWordRect = ^zglTWordRect;
+  zglTWordRect = record
+    X, Y, W, H: Word;
+  end;
+
+  zglPCircle = ^zglTCircle;
+  zglTCircle = record
+    cX, cY: Single;
+    Radius: Single;
+  end;
+//-------------------- end primitives ---------------------------------//
 
 {***********************************************************************}
 {                       POSIX TYPE DEFINITIONS                          }
@@ -71,15 +111,15 @@ type
   cuint64 = qword;    pcuint64 = ^cuint64;
   cint64  = int64;    pcint64  = ^cint64;
   cbool   = longbool; pcbool   = ^cbool;
-{$IFDEF CPUx86_64}
+{$If defined(CPUx86_64) and not defined(WINDOWS)}
   clong   = int64;    pclong   = ^clong;
   cslong  = int64;    pcslong  = ^cslong;
   culong  = qword;    pculong  = ^culong;
-{$ELSE}
+{$Else}
   clong   = longint;  pclong   = ^clong;
   cslong  = longint;  pcslong  = ^cslong;
   culong  = cardinal; pculong  = ^culong;
-{$ENDIF}
+{$IfEnd}
   cfloat  = single;   pcfloat  = ^cfloat;
   cdouble = double;   pcdouble = ^cdouble;
 

@@ -182,6 +182,7 @@ procedure key_UpdateReadText(const Text: UTF8String; MaxSymbols: Integer = -1);
 function  key_GetText: UTF8String;
 procedure key_EndReadText;
 procedure key_ClearState;
+function scancode_to_utf8(ScanCode: Byte): Byte;
 
 procedure key_InputText(const Text: UTF8String);
 {$IFDEF USE_X11}
@@ -215,7 +216,7 @@ var
   keysText    : UTF8String = '';
   keysCanText : Boolean;
   keysMax     : Integer;
-  keysLast    : array[0..1] of Byte;
+  keysLast    : array[0..1] of Byte;                
   {$IFDEF USE_X11}
   keysRepeat: Integer; // Workaround, yeah... :)
   {$ENDIF}

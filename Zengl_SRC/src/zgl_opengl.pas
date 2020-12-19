@@ -324,7 +324,7 @@ begin
   repeat
     FillChar(oglAttr[0], Length(oglAttr) * 4, AGL_NONE);
     oglAttr[0] := AGL_RGBA;
-    oglAttr[1] := AGL_RED_SIZE;
+    oglAttr[1] := AGL_RED_5R4;
     oglAttr[2] := 8;
     oglAttr[3] := AGL_GREEN_SIZE;
     oglAttr[4] := 8;
@@ -641,7 +641,7 @@ begin
   aglSetInt(oglContext, AGL_SWAP_INTERVAL, Byte(scrVSync));
 {$ENDIF}
   if oglCanVSync Then
-    scr_VSync;                          // prikolno... super funkciya
+    scr_VSync;                          
   log_Add('Support WaitVSync: ' + u_BoolToStr(oglCanVSync));
 end;
 

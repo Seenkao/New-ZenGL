@@ -41,14 +41,16 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="..\..\..\..\headers;..\..\..\..\headers\android;$(ProjOutDir)"/>
-      <Libraries Value="..\libs\armeabi;C:\codetyphon\binLibraries\android-4.0-api14-arm\"/>
-      <OtherUnitFiles Value="..\..\..\..\src;..\..\..\..\lib\zlib\arm-linux;..\..\..\..\lib\zip\arm-linux;..\..\..\..\lib\ogg\arm-linux;..\..\..\..\lib\theora\arm-linux"/>
+      <Libraries Value="..\..\..\..\bin\Android\armv6;C:\codetyphon\binLibraries\android-4.0.2-api14-arm\"/>
+      <OtherUnitFiles Value="..\..\..\..\src;..\..\..\..\lib\zlib\arm-linux;..\..\..\..\lib\zip\arm-linux;..\..\..\..\lib\ogg\arm-linux;..\..\..\..\lib\theora\arm-linux;..\..\..\..\bin\Android\armv5"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <CodeGeneration>
-      <RelocatableUnit Value="True"/>
       <TargetCPU Value="arm"/>
       <TargetOS Value="android"/>
+      <Optimizations>
+        <OptimizationLevel Value="3"/>
+      </Optimizations>
     </CodeGeneration>
     <Linking>
       <Debugging>

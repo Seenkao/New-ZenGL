@@ -21,14 +21,15 @@ uses
 var
   dirRes  : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
 
-  fntMain : zglPFont;
+  fntMain : Byte;
   texBack : zglPTexture;
+  TimeStart: Byte;
 
 procedure Init;
 begin
   fntMain := font_LoadFromFile(dirRes + 'font.zfi');
   texBack := tex_LoadFromFile(dirRes + 'back03.jpg');
-  setTextScale(1.5);
+  setTextScale(15, fntMain);
 end;
 
 procedure Draw;
@@ -36,10 +37,10 @@ begin
   ssprite2d_Draw(texBack, 0, 0, 800, 600, 0);
 
   text_Draw(fntMain, 0, 0, 'Escape - Exit' );
-  text_Draw(fntMain, 0, fntMain.MaxHeight * 1, 'F1 - Fullscreen with desktop resolution and correction of aspect');
-  text_Draw(fntMain, 0, fntMain.MaxHeight * 2, 'F2 - Fullscreen with desktop resolution and simple scaling');
-  text_Draw(fntMain, 0, fntMain.MaxHeight * 3, 'F3 - Fullscreen with resolution 800x600');
-  text_Draw(fntMain, 0, fntMain.MaxHeight * 4, 'F4 - Windowed mode');
+  text_Draw(fntMain, 0, 20 * 1, 'F1 - Fullscreen with desktop resolution and correction of aspect');
+  text_Draw(fntMain, 0, 20 * 2, 'F2 - Fullscreen with desktop resolution and simple scaling');
+  text_Draw(fntMain, 0, 20 * 3, 'F3 - Fullscreen with resolution 800x600');
+  text_Draw(fntMain, 0, 20 * 4, 'F4 - Windowed mode');
 end;
 
 procedure Timer;
@@ -116,7 +117,7 @@ begin
 end;
 
 Begin
-  timer_Add( @Timer, 16 );
+  TimeStart := timer_Add( @Timer, 16, Start );
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );

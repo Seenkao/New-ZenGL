@@ -4,18 +4,59 @@
     <PathDelim Value="\"/>
     <Version Value="11"/>
     <BuildModes Active="Default"/>
-    <Units Count="1">
+    <Units Count="4">
       <Unit0>
         <Filename Value="demo13.lpr"/>
         <IsPartOfProject Value="True"/>
         <IsVisibleTab Value="True"/>
-        <TopLine Value="85"/>
-        <CursorPos X="3" Y="103"/>
-        <UsageCount Value="20"/>
+        <CursorPos X="22" Y="15"/>
+        <UsageCount Value="21"/>
         <Loaded Value="True"/>
       </Unit0>
+      <Unit1>
+        <Filename Value="..\..\..\..\src\zgl_application.pas"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="13" Y="28"/>
+        <UsageCount Value="10"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="..\..\..\..\src\zgl_config.cfg"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="30"/>
+        <CursorPos X="25" Y="137"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="..\..\..\..\src\zgl_particles_2d.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="430"/>
+        <CursorPos X="8" Y="281"/>
+        <UsageCount Value="10"/>
+      </Unit3>
     </Units>
-    <JumpHistory HistoryIndex="-1"/>
+    <JumpHistory Count="5" HistoryIndex="4">
+      <Position1>
+        <Filename Value="demo13.lpr"/>
+        <Caret Line="6" Column="10"/>
+      </Position1>
+      <Position2>
+        <Filename Value="demo13.lpr"/>
+        <Caret Line="147" Column="15" TopLine="121"/>
+      </Position2>
+      <Position3>
+        <Filename Value="demo13.lpr"/>
+        <Caret Line="64" Column="16" TopLine="53"/>
+      </Position3>
+      <Position4>
+        <Filename Value="demo13.lpr"/>
+        <Caret Line="58" Column="6" TopLine="53"/>
+      </Position4>
+      <Position5>
+        <Filename Value="demo13.lpr"/>
+        <Caret Line="40" Column="46" TopLine="31"/>
+      </Position5>
+    </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>
       <Modes Count="0" ActiveMode=""/>

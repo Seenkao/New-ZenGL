@@ -21,7 +21,7 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 28.09.2020
+ !!! modification from Serge 15.12.2020
 }
 unit zgl_application;
 
@@ -137,11 +137,9 @@ procedure Java_zengl_android_ZenGL_bArrJavaToPas(env: PJNIEnv; thiz: jobject; ar
 {$ENDIF}
 
 var
-  // to flags???
   appInitialized   : Boolean;
   appGotSysDirs    : Boolean;
   winOn            : Boolean = false;
-  winOff           : Boolean = True;
   appWorkTime      : LongWord;
   appPause         : Boolean;
   appAutoPause     : Boolean = TRUE;
@@ -149,6 +147,8 @@ var
   appLog           : Boolean;
   appWorkDir       : UTF8String;
   appHomeDir       : UTF8String;
+
+  name_CalcFPS     : Byte = 0;
 
   // call-back
   app_PInit      : procedure;
@@ -228,9 +228,9 @@ var
 
   appFlags: LongWord;
 
-  {$IfDef WINDOWS}
-  // ogranichenie FPS
+  {$IfNDef USE_INIT_HANDLE}
   newTimeDraw, oldTimeDraw: Double;
+  useFPS: Byte = 30;
   maxFPS: Single = 1000 / 30;
   {$EndIf}
 
@@ -261,13 +261,14 @@ uses
   zgl_sound,
   {$ENDIF}
   {$IfDef USE_MENUGUI}
-  sw_touch_menu,
+  gegl_touch_menu,
   {$EndIf}
   zgl_utils;
 
 procedure app_Draw;
 begin
-  SetCurrentMode();
+  if scrViewPort then
+    SetCurrentMode();
   scr_Clear();
   if Assigned(app_PDraw) Then
   begin
@@ -298,7 +299,8 @@ procedure app_Init;
 begin
   managerZeroTexture := tex_CreateZero(4, 4, $FFFFFFFF, TEX_DEFAULT_2D);
 
-  SetCurrentMode();
+  if scrViewPort then
+    SetCurrentMode();
   scr_Clear();
   if Assigned(app_PLoad) Then
     app_PLoad();
@@ -306,7 +308,7 @@ begin
 
 
   timer_Reset();
-  timer_Add(@app_CalcFPS, 1000);
+  name_CalcFPS := timer_Add(@app_CalcFPS, 1000, Start);
 end;
 
 {$IfNDef ANDROID}
@@ -359,9 +361,9 @@ begin
 
     appdt := t;
 
-    {$IfDef WINDOWS}
+    {$IfNDef USE_INIT_HANDLE}
+    t := newTimeDraw;
     newTimeDraw := timer_GetTicks;
-//    m := round(newTimeDraw - t1);
 
     if newTimeDraw >= (oldTimeDraw + maxFPS) then
     begin
@@ -369,7 +371,7 @@ begin
       oldTimeDraw := oldTimeDraw + maxFPS;
     end
     else begin
-      if (maxFPS <= 1000 / 60) then
+      if (newTimeDraw - t) < 2 then
       begin
         u_Sleep(1);
       end;
@@ -531,7 +533,7 @@ begin
 end;
 
 {$IFNDEF iOS}
-{$IfDef WND_USE}
+{$If (defined(USE_INIT_HANDLE) and defined(WINDOWS)) or (not defined(USE_INIT_HANDLE)) }
 function app_ProcessMessages;
   {$IFDEF MACOSX}
   type
@@ -1198,7 +1200,7 @@ begin
   end;
 {$ENDIF}
 end;
-{$EndIf}
+{$IFEND}
 {$ELSE}
 procedure app_InitPool;
 begin

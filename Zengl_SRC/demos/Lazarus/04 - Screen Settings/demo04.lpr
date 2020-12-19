@@ -6,6 +6,9 @@ program demo04;
   {$R *.res}
 {$ENDIF}
 
+// не рекомендуется к использованию!!! Желательно перезагружать программу,
+// в особенности, если вы делаете полноэкранное окно
+
 uses
   {$IFDEF UNIX}
   cthreads,
@@ -30,15 +33,17 @@ uses
 var
   dirRes  : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
 
-  fntMain : zglPFont;
+  fntMain : Byte;
   texBack : zglPTexture;
+
+  TimeStart  : Byte = 0;
 
 procedure Init;
 begin
   fntMain := font_LoadFromFile( dirRes + 'font.zfi' );
   texBack := tex_LoadFromFile( dirRes + 'back03.jpg' );
 
-  setTextScale(1.5);                  // razmery shrifta
+  setTextScale(15, fntMain);                  // razmery shrifta
 end;
 
 procedure Draw;
@@ -46,10 +51,10 @@ begin
   ssprite2d_Draw( texBack, 0, 0, 800, 600, 0 );
 
   text_Draw( fntMain, 0, 0, 'Escape - Exit' );
-  text_Draw( fntMain, 0, fntMain.MaxHeight * 1, 'F1 - Fullscreen with desktop resolution and correction of aspect' );
-  text_Draw( fntMain, 0, fntMain.MaxHeight * 2, 'F2 - Fullscreen with desktop resolution and simple scaling' );
-  text_Draw( fntMain, 0, fntMain.MaxHeight * 3, 'F3 - Fullscreen with resolution 800x600' );
-  text_Draw( fntMain, 0, fntMain.MaxHeight * 4, 'F4 - Windowed mode' );
+  text_Draw( fntMain, 0, 20 * 1, 'F1 - Fullscreen with desktop resolution and correction of aspect' );
+  text_Draw( fntMain, 0, 20 * 2, 'F2 - Fullscreen with desktop resolution and simple scaling' );
+  text_Draw( fntMain, 0, 20 * 3, 'F3 - Fullscreen with resolution 800x600' );
+  text_Draw( fntMain, 0, 20 * 4, 'F4 - Windowed mode' );
 end;
 
 procedure Timer;
@@ -66,10 +71,13 @@ begin
       // RU: Установить разрешение под которое изначально написано приложение.
       // EN: Set resolution for what application was wrote.
       scr_CorrectResolution( 800, 600 );
+      zgl_SetParam(zgl_Get( DESKTOP_WIDTH ), zgl_Get( DESKTOP_HEIGHT ), True, False);
+(*  --------------------- OR!!! ----------------------------------------
       wndWidth := zgl_Get( DESKTOP_WIDTH );
       wndHeight := zgl_Get( DESKTOP_HEIGHT );
       wndFullScreen := True;
       scrVSync := False;
+    -------------------------------------------------------------------- *)
       scr_SetOptions();
     end;
 
@@ -80,13 +88,15 @@ begin
   if key_Press( K_F2 ) Then
     begin
       zgl_Enable( CORRECT_RESOLUTION );
-      zgl_Disable( CORRECT_WIDTH );
-      zgl_Disable( CORRECT_HEIGHT );
+      zgl_Disable( CORRECT_WIDTH or CORRECT_HEIGHT );
       scr_CorrectResolution( 800, 600 );
+      zgl_SetParam(zgl_Get( DESKTOP_WIDTH ), zgl_Get( DESKTOP_HEIGHT ), True, False);
+(*  --------------------- OR!!! ----------------------------------------
       wndWidth := zgl_Get( DESKTOP_WIDTH );
       wndHeight := zgl_Get( DESKTOP_HEIGHT );
       wndFullScreen := True;
       scrVSync := False;
+    -------------------------------------------------------------------- *)
       scr_SetOptions();
     end;
 
@@ -96,13 +106,17 @@ begin
   // EN: Switching to fullscreen mode using set values. Nowadays this method two main problems with LCD:
   //     - if used resolution is not main for LCD, then without special options in drivers user will see pixelization
   //     - picture with aspect 4:3 will be stretched on widescreen monitors
-  if key_Press( K_F3 ) Then
+    if key_Press( K_F3 ) Then
     begin
       zgl_Disable( CORRECT_RESOLUTION );
+      zgl_SetParam(800, 600, True, False);
+(* ---------------------- OR!!! ----------------------------------------
       wndWidth := 800;
       wndHeight := 600;
       wndFullScreen := True;
       scrVSync := False;
+      scr_SetOptions();
+    -------------------------------------------------------------------- *)
       scr_SetOptions();
     end;
 
@@ -111,10 +125,13 @@ begin
   if key_Press( K_F4 ) Then
     begin
       zgl_Disable(CORRECT_RESOLUTION);
+      zgl_SetParam(800, 600, False, False);
+(* ---------------------- OR!!! ----------------------------------------
       wndWidth := 800;
       wndHeight := 600;
       wndFullScreen := False;
       scrVSync := False;
+   -------------------------------------------------------------------- *)
       scr_SetOptions();
     end;
 
@@ -126,7 +143,7 @@ Begin
   if not zglLoad( libZenGL ) Then exit;
   {$ENDIF}
 
-  timer_Add( @Timer, 16 );
+  TimeStart := timer_Add( @Timer, 16, Start );
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );

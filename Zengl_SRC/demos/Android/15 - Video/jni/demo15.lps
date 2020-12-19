@@ -4,13 +4,13 @@
     <PathDelim Value="\"/>
     <Version Value="11"/>
     <BuildModes Active="Default"/>
-    <Units Count="2">
+    <Units Count="7">
       <Unit0>
         <Filename Value="demo15.lpr"/>
         <IsPartOfProject Value="True"/>
         <IsVisibleTab Value="True"/>
-        <TopLine Value="87"/>
-        <CursorPos X="56" Y="49"/>
+        <TopLine Value="90"/>
+        <CursorPos X="44" Y="104"/>
         <UsageCount Value="20"/>
         <Loaded Value="True"/>
       </Unit0>
@@ -21,12 +21,61 @@
         <CursorPos X="3" Y="723"/>
         <UsageCount Value="10"/>
       </Unit1>
+      <Unit2>
+        <Filename Value="..\..\..\..\src\zgl_application.pas"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="13" Y="28"/>
+        <UsageCount Value="10"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="..\..\..\..\src\zgl_config.cfg"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="103"/>
+        <CursorPos X="3" Y="116"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="..\..\..\..\src\zgl_video_theora.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="37"/>
+        <CursorPos X="8" Y="44"/>
+        <UsageCount Value="10"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="..\..\..\..\src\zgl_video.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="94"/>
+        <UsageCount Value="10"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="..\..\..\..\src\zgl_lib_ogg.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="82"/>
+        <UsageCount Value="10"/>
+      </Unit6>
     </Units>
-    <JumpHistory Count="1">
+    <JumpHistory Count="5" HistoryIndex="4">
       <Position1>
         <Filename Value="demo15.lpr"/>
         <Caret Line="37" Column="14" TopLine="28"/>
       </Position1>
+      <Position2>
+        <Filename Value="demo15.lpr"/>
+        <Caret Line="26" Column="21" TopLine="16"/>
+      </Position2>
+      <Position3>
+        <Filename Value="demo15.lpr"/>
+        <Caret Line="6" Column="10"/>
+      </Position3>
+      <Position4>
+        <Filename Value="demo15.lpr"/>
+        <Caret Line="20" Column="13"/>
+      </Position4>
+      <Position5>
+        <Filename Value="demo15.lpr"/>
+        <Caret Line="15" Column="11" TopLine="78"/>
+      </Position5>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>

@@ -11,8 +11,6 @@ uses
   cthreads,
   {$ENDIF}
   {$IFDEF USE_ZENGL_STATIC}
-  zgl_main,
-  zgl_application,
   zgl_screen,
   zgl_window,
   zgl_timers,
@@ -33,10 +31,12 @@ uses
 
 var
   dirRes      : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
-  fntMain     : zglPFont;
+  fntMain     : Byte;
   texBack     : zglPTexture;
   grid        : zglTGrid2D;
   wave        : Single;
+
+  TimeStart  : Byte = 0;
 
 procedure Init;
   var
@@ -57,7 +57,7 @@ begin
         grid.Grid[ i, j ].X := i * 40;
         grid.Grid[ i, j ].Y := j * 40;
       end;
-  setTextScale(1.5);
+  setTextScale(15, fntMain);
 end;
 
 procedure Draw;
@@ -104,7 +104,7 @@ Begin
 
   randomize();
 
-  timer_Add( @Timer, 16 );
+  TimeStart := timer_Add( @Timer, 16, Start );
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );

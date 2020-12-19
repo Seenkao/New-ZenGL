@@ -43,7 +43,7 @@
       <IncludeFiles Value="..\..\..\..\headers;..\..\..\..\headers\android;$(ProjOutDir);..\..\..\..\src"/>
       <Libraries Value="..\libs\armeabi;C:\codetyphon\binLibraries\android-4.0-api14-arm\"/>
       <OtherUnitFiles Value="..\..\..\..\src;..\..\..\..\lib\zlib\arm-linux;..\..\..\..\lib\zip\arm-linux;..\..\..\..\lib\theora\arm-linux;..\..\..\..\lib\ogg\arm-linux;..\..\..\..\extra"/>
-      <UnitOutputDirectory Value="D:\programming\Zengl_SRC\demos\Android\03 - Input\jni\tmp"/>
+      <UnitOutputDirectory Value="\tmp"/>
     </SearchPaths>
     <CodeGeneration>
       <RelocatableUnit Value="True"/>

@@ -7,7 +7,6 @@ library demo01;
 
 uses
   zgl_application,
-  zgl_main,
   zgl_screen,
   zgl_window,
   zgl_timers,
@@ -18,6 +17,8 @@ uses
 var
   DirApp  : UTF8String;
   DirHome : UTF8String;
+
+  TimeStart  : Byte = 0;
 
 procedure Init;
 begin
@@ -62,7 +63,7 @@ begin
 
   // RU: Создаем таймер с интервалом 1000мс.
   // EN: Create a timer with interval 1000ms.
-  timer_Add( @Timer, 1000 );
+  TimeStart := timer_Add( @Timer, 100, Start);
 
   // RU:  Регистрируем процедуру, что выполнится сразу после инициализации ZenGL.
   // EN: Register the procedure, that will be executed after ZenGL initialization.
