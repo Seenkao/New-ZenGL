@@ -79,10 +79,12 @@ end;
 type
   zglTRenderCallback = procedure(Data: Pointer);
 
+{$IfNDef MAC_COCOA}
 function  rtarget_Add(Surface: zglPTexture; Flags: Byte): zglPRenderTarget;
 procedure rtarget_Del(var Target: zglPRenderTarget);
 procedure rtarget_Set(Target: zglPRenderTarget);
 procedure rtarget_DrawIn(Target: zglPRenderTarget; RenderCallback: zglTRenderCallback; Data: Pointer);
+{$EndIf}
 {$IFDEF ANDROID}
 procedure rtarget_Restore(var Target: zglPRenderTarget);
 {$ENDIF}
@@ -120,14 +122,14 @@ type
     RC    : HGLRC;
 end;
 {$ENDIF}
-{$IFDEF MACOSX}
+{$IFDEF MACOSX}{$IfNDef MAC_COCOA}
 type
   zglPPBuffer = ^zglTPBuffer;
   zglTPBuffer = record
     Context: TAGLContext;
     PBuffer: TAGLPbuffer;
-end;
-{$ENDIF}
+  end;
+{$ENDIF}{$EndIf}
 {$ENDIF}
 
 type
@@ -135,7 +137,7 @@ type
   zglTFBO = record
     FrameBuffer : LongWord;
     RenderBuffer: LongWord;
-end;
+  end;
 
 var
   lRTarget: zglPRenderTarget;
@@ -144,6 +146,7 @@ var
   lResCX  : Single;
   lResCY  : Single;
 
+{$IfNDef MAC_COCOA}
 function rtarget_Add(Surface: zglPTexture; Flags: Byte): zglPRenderTarget;
   var
     i, type_: Integer;
@@ -163,10 +166,10 @@ function rtarget_Add(Surface: zglPTexture; Flags: Byte): zglPRenderTarget;
     pixelFormat : array[0..63] of Integer;
     nPixelFormat: LongWord;
   {$ENDIF}
-  {$IFDEF MACOSX}
+  {$IFDEF MACOSX}{$IfNDef MAC_COCOA}
     pbufferdAttr: array[0..31] of LongWord;
     pixelFormat : TAGLPixelFormat;
-  {$ENDIF}
+  {$ENDIF}{$EndIf}
   procedure FreePBuffer(var Target: zglPRenderTarget; Stage: Integer);
   begin
     oglCanPBuffer := FALSE;
@@ -736,6 +739,7 @@ begin
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       end;
 end;
+{$EndIf}
 
 {$IFDEF ANDROID}
 procedure rtarget_Restore(var Target: zglPRenderTarget);

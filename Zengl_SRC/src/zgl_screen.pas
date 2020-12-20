@@ -21,31 +21,33 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 15.12.2020
+ !!! modification from Serge 20.12.2020
 }
 unit zgl_screen;
 
 {$I zgl_config.cfg}
-{$IFDEF iOS}
+{$IF defined(iOS) or defined(MAC_COCOA)}
   {$modeswitch objectivec1}
-{$ENDIF}
+{$IfEnd}
 
 interface
-
+{$IfNDef ANDROID}
 uses
+{$EndIf}
 {$IFDEF USE_X11}
-  X, XLib, XRandr, UnixType,
+  X, XLib, XRandr, UnixType;
 {$ENDIF}
 {$IFDEF WINDOWS}
-  Windows,
+  Windows;
 {$ENDIF}
-{$IFDEF MACOSX}
-  MacOSAll,
+{$IFDEF MACOSX}{$IfDef MAC_COCOA}
+  CocoaAll,
+{$EndIf}
+  MacOSAll;
 {$ENDIF}
 {$IFDEF iOS}
-  iPhoneAll, CFBase, CFString,
+  iPhoneAll, CFBase, CFString;
 {$ENDIF}
-  zgl_types;
 
 const
   REFRESH_MAXIMUM = 0;
@@ -53,7 +55,9 @@ const
 
 {$IfNDef ANDROID}
 procedure scr_Init;
+{$IfNDef MAC_COCOA}
 procedure scr_Reset;
+{$EndIf}
 function  scr_Create: Boolean;
 procedure scr_Destroy;
 {$EndIf}
@@ -67,7 +71,6 @@ function  scr_SetOptions(): Boolean;
 procedure scr_CorrectResolution(Width, Height: Word);
 procedure scr_SetViewPort;
 procedure scr_SetVSync(WSync: Boolean);
-procedure scr_SetClearColor(flag: Boolean; Color: Cardinal = 0);
 procedure scr_VSync;
 {$IfNDef USE_INIT_HANDLE}
 procedure scr_SetFPS(FPS: Byte);
@@ -77,7 +80,7 @@ procedure scr_SetFPS(FPS: Byte);
 
 procedure scr_ReadPixels(var pData: Pointer; X, Y, Width, Height: Word);
 {$IfNDef ANDROID}
-procedure scr_GetResList;
+//procedure scr_GetResList;
 {$EndIf}
 
 type
@@ -127,10 +130,6 @@ var
   scrSubCX: Integer = 0;
   scrSubCY: Integer = 0;
 
-  scrViewPort       : Boolean = True;
-  scrClearColor     : Boolean = True;
-  scr_UseClearColor : zglTColor;
-
   {$IFDEF USE_X11}
   scrDisplay  : PDisplay;
   scrDefault  : cint;
@@ -150,7 +149,7 @@ var
   {$ENDIF}
   {$IFDEF MACOSX}
   scrDisplay  : CGDirectDisplayID;
-  scrDesktop  : CFDictionaryRef;
+  scrDesktop  : {$IfDef MAC_COCOA}CGDisplayModeRef{$Else} CFDictionaryRef{$EndIf};
   scrDesktopW : Integer;
   scrDesktopH : Integer;
   scrSettings : CFDictionaryRef;
@@ -216,6 +215,7 @@ var
   {$IFDEF MACOSX}
   tmpSettings  : UnivPtr;
   width, height: Integer;
+
   {$ENDIF}
   function Already(Width, Height: Integer): Boolean;
   var
@@ -265,6 +265,7 @@ begin
   for i := 0 to scrModeCount - 1 do
   begin
     tmpSettings := CFArrayGetValueAtIndex(scrModeList, i);
+
     CFNumberGetValue(CFDictionaryGetValue(tmpSettings, CFSTRP('Width')), kCFNumberIntType, @width);
     CFNumberGetValue(CFDictionaryGetValue(tmpSettings, CFSTRP('Height')), kCFNumberIntType, @height);
     if not Already(width, height) Then
@@ -343,11 +344,11 @@ begin
 {$ENDIF}
 {$IFDEF MACOSX}
   scrDisplay  := CGMainDisplayID();
-  scrDesktop  := CGDisplayCurrentMode(scrDisplay);
+  scrDesktop  := {$IfNDef MAC_COCOA}CGDisplayCurrentMode(scrDisplay);{$Else}CGDisplayCopyDisplayMode(scrDisplay);{$EndIf}
   scrDesktopW := CGDisplayPixelsWide(scrDisplay);
   scrDesktopH := CGDisplayPixelsHigh(scrDisplay);
 
-  scrModeList  := CGDisplayAvailableModes(scrDisplay);
+  scrModeList  := {$IfNDef MAC_COCOA}CGDisplayAvailableModes(scrDisplay){$Else}CGDisplayCopyAllDisplayModes(scrDisplay, nil){$EndIf};
   scrModeCount := CFArrayGetCount(scrModeList);
 {$ENDIF}
 {$IFDEF iOS}
@@ -412,9 +413,13 @@ begin
   oglTargetW  := scrDesktopW;
   oglTargetH  := scrDesktopH;
 {$ENDIF}
+{$IfNDef MAC_COCOA}
+  scr_GetResList;
+{$EndIf}
   scrInitialized := TRUE;
 end;
 
+{$IfNDef MAC_COCOA}
 procedure scr_Reset;
 begin
 {$IFDEF USE_X11}
@@ -461,8 +466,14 @@ begin
   ShowMenuBar();
   {$ENDIF}
 end;
+{$EndIf}
 
 function scr_Create: Boolean;
+{$IfDef MAC_COCOA}
+var
+  pool: NSAutoreleasePool;
+  mainMenu: NSMenu;
+{$EndIf}
 begin
   {$IfNDef ANDROID}
   scr_Init();
@@ -492,7 +503,19 @@ begin
   if (not wndFullScreen) and (scrDesktop.dmBitsPerPel <> 32) Then
     scr_SetWindowedMode();
   {$ENDIF}
-  {$IFDEF MACOSX}
+  {$IFDEF MACOSX}{$IfDef MAC_COCOA}
+  pool := NSAutoreleasePool.new;
+  NSApp := NSApplication.sharedApplication;
+  NSApp.setActivationPolicy(0);
+  NSApp.activateIgnoringOtherApps(true);
+
+  mainMenu := NSMenu.alloc.init.autorelease;
+  NSApp.setMainMenu(mainMenu);
+  mainMenu.setMenuBarVisible(false);        // menu not visible
+
+  pool.dealloc;
+
+  {$Else}
   if CGDisplayBitsPerPixel(scrDisplay) <> 32 Then
     begin
       u_Error('Desktop not set to 32-bit mode.');
@@ -500,16 +523,17 @@ begin
       Result := FALSE;
       exit;
     end;
-  {$ENDIF}
-  scr_SetClearColor(False);
+  {$ENDIF}{$EndIf}
   log_Add('Current mode: ' + u_IntToStr(zgl_Get(DESKTOP_WIDTH)) + ' x ' + u_IntToStr(zgl_Get(DESKTOP_HEIGHT)));
   Result := TRUE;
 end;
 
 procedure scr_Destroy;
 begin
+  {$IfNDef MAC_COCOA}
   if wndFullScreen Then
     scr_Reset();
+  {$EndIf}
   {$IFDEF USE_X11}
   XRRFreeScreenConfigInfo(scrSettings);
 
@@ -533,8 +557,6 @@ begin
   batch2d_Flush();
   glClear(GL_COLOR_BUFFER_BIT * Byte(appFlags and COLOR_BUFFER_CLEAR > 0) or GL_DEPTH_BUFFER_BIT * Byte(appFlags and DEPTH_BUFFER_CLEAR > 0) or
            GL_STENCIL_BUFFER_BIT * Byte(appFlags and STENCIL_BUFFER_CLEAR > 0));
-  if scrClearColor then
-    glClearColor(scr_UseClearColor.R, scr_UseClearColor.G, scr_UseClearColor.b, scr_UseClearColor.A);
 end;
 
 procedure scr_Flush;
@@ -547,9 +569,11 @@ begin
   {$IFDEF WINDOWS}
   SwapBuffers(wndDC);
   {$ENDIF}
-  {$IFDEF MACOSX}
+  {$IFDEF MACOSX}{$IfDef MAC_COCOA}
+  oglContext.flushBuffer;
+  {$Else}
   aglSwapBuffers(oglContext);
-  {$ENDIF}
+  {$ENDIF}{$EndIf}
 {$ELSE}
   {$IFNDEF NO_EGL}
   eglSwapBuffers(oglDisplay, oglSurface);
@@ -671,7 +695,38 @@ begin
   end else
     scr_SetWindowedMode();
 {$ENDIF}
-{$IFDEF MACOSX}
+{$IFDEF MACOSX}{$IfDef MAC_COCOA}
+  if winOn then
+  begin
+    if wndFullScreen then
+    begin
+//      wndX := 0;
+//      wndY := 0;
+//      wndWidth := scrDesktopW;
+//      wndHeight := scrDesktopH;
+      viewNSRect.origin.x := 0;
+      viewNSRect.origin.y := 0;
+      viewNSRect.size.width := scrDesktopW;
+      viewNSRect.size.height := scrDesktopH;
+      wndHandle.setStyleMask(NSBorderlessWindowMask);
+      wndHandle.setFrame_display(viewNSRect, True);
+    end
+    else begin
+{      if (not wndFullScreen) and (appFlags and WND_USE_AUTOCENTER > 0) Then
+      begin
+        wndX := (zgl_Get(DESKTOP_WIDTH) - wndWidth) div 2;
+        wndY := (zgl_Get(DESKTOP_HEIGHT) - wndHeight) div 2;
+      end;         }
+      viewNSRect.origin.x := wndX;
+      viewNSRect.origin.y := wndY;
+      viewNSRect.size.width := { wndx +} wndWidth;
+      viewNSRect.size.height := {wndY +} wndHeight + 0;
+      wndHandle.setStyleMask(NSTitledWindowMask or NSClosableWindowMask);
+      wndHandle.setFrame_display(viewNSRect, True);
+    end;
+//    zglView.setFrame(viewNSRect);
+  end;
+{$Else}
   if wndFullScreen Then
   begin
     if (scrRefresh <> 0) and (scrRefresh <> 1) Then
@@ -693,12 +748,13 @@ begin
     HideMenuBar();
   end else
     scr_SetWindowedMode();
-{$ENDIF}
+{$ENDIF}{$EndIf}
   if wndFullScreen Then
     log_Add('Screen options changed to: ' + u_IntToStr(wndWidth) + ' x ' + u_IntToStr(wndHeight) + ' fullscreen')
   else
     log_Add('Screen options changed to: ' + u_IntToStr(wndWidth) + ' x ' + u_IntToStr(wndHeight) + ' windowed');
   {$IfNDef ANDROID}
+
   if winOn Then
     wnd_Update();
   {$Else}
@@ -709,6 +765,9 @@ end;
 
 procedure scr_CorrectResolution(Width, Height: Word);
 begin
+  {$IfDef MAC_COCOA}
+  zgl_Disable(CORRECT_RESOLUTION);
+  {$Else}
   scrResW        := Width;
   scrResH        := Height;
   scrResCX       := wndWidth  / Width;
@@ -746,6 +805,7 @@ begin
   scrSubCX  := oglWidth - Width;
   scrSubCY  := oglHeight - Height;
   SetCurrentMode();
+  {$EndIf}
 end;
 
 procedure scr_SetViewPort;
@@ -757,13 +817,13 @@ begin
       scrViewportX := scrAddCX;
       scrViewportY := scrAddCY;
       scrViewportW := wndWidth - scrAddCX * 2;
-      scrViewportH := wndHeight - scrAddCY * 2;
+      scrViewportH := wndHeight{$IfDef MAC_COCOA} + 0{$EndIf} - scrAddCY * 2;
     end else
     begin
       scrViewportX := 0;
       scrViewportY := 0;
       scrViewportW := wndWidth;
-      scrViewportH := wndHeight;
+      scrViewportH := wndHeight{$IfDef MAC_COCOA} + 0{$EndIf};
     end;
   end else
   begin
@@ -792,20 +852,7 @@ end;
 
 procedure scr_SetVSync(WSync: Boolean);
 begin
-  {$IfNDef USE_INIT_HANDLE}
-  if (useFPS > 60) and WSync then
-    scr_SetFPS(60);
-  {$EndIf}
   scrVSync := WSync;
-end;
-
-procedure scr_SetClearColor(flag: Boolean; Color: Cardinal = 0);
-begin
-  scrClearColor := flag;
-  scr_UseClearColor.R := (Color shr 16) / 255;
-  scr_UseClearColor.G := ((Color and $FF00) shr 8) / 255;
-  scr_UseClearColor.B := (Color and $FF) / 255;
-  scr_UseClearColor.A := 1;
 end;
 
 procedure scr_VSync;                  
@@ -819,10 +866,12 @@ begin
   if oglCanVSync Then
     wglSwapInterval(Integer(scrVSync));
   {$ENDIF}
-  {$IFDEF MACOSX}
+  {$IFDEF MACOSX}{$IfDef MAC_COCOA}
+//  oglContext.setValues_forParameter(30, NSOpenGLCPSwapInterval);
+  {$Else}
   if Assigned(oglContext) Then
     aglSetInt(oglContext, AGL_SWAP_INTERVAL, Byte(scrVSync));
-  {$ENDIF}
+  {$ENDIF}{$EndIf}
 {$ELSE}
   {$IFNDEF NO_EGL}
   if oglCanVSync Then

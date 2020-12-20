@@ -6,6 +6,7 @@ program demo12;
   {$R *.res}
 {$ENDIF}
 
+  // MacOS Cocoa not work. Deprecated.
 uses
   {$IFDEF UNIX}
   cthreads,

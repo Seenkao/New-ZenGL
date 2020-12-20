@@ -21,14 +21,14 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 15.12.2020
+ !!! modification from Serge 20.12.2020
 }
 unit zgl_window;
 
 {$I zgl_config.cfg}
-{$IFDEF iOS}
+{$IF defined(iOS) or defined(MAC_COCOA)}
   {$modeswitch objectivec1}
-{$ENDIF}
+{$IfEnd}
 
 interface
 
@@ -45,18 +45,20 @@ uses
   {$ENDIF}
   {$IFDEF MACOSX}
   MacOSAll,
-  {$ENDIF}
+  {$IfDef MAC_COCOA}
+  CocoaAll,
+  {$ENDIF}{$EndIf}
   {$IFDEF iOS}
   iPhoneAll, CGGeometry,
   {$ENDIF}
   zgl_types;
 
 const
-  cs_ZenGL    = 'ZenGL - test 0.3.26';
-  cs_Date     = '2020.12.10';
+  cs_ZenGL    = 'ZenGL - test 0.3.27';
+  cs_Date     = '2020.09.28';
   cv_major    = 0;
   cv_minor    = 3;
-  cv_revision = 26;
+  cv_revision = 27;
 
   // zgl_Reg
   SYS_APP_INIT           = $000001;
@@ -155,11 +157,30 @@ const
   SND_ALLOW_BACKGROUND_MUSIC = $100000;
   {$ENDIF}
 
+{$IfDef MAC_COCOA}
+type
+
+  { zglNSWindow }
+
+  zglNSWindow = objcclass(NSWindow)
+    private
+      procedure close; override;
+      procedure resignMainWindow; message'resignMainWindow'; override;
+      procedure becomeMainWindow; message'becomeMainWindow'; override;
+  end;
+
+  zglNSView = objcclass(NSView)
+    public
+//      procedure drawRect(rect: NSRect); override;
+      procedure windowWillClose(note: NSNotification); message 'windowWillClose:';
+  end;
+{$EndIf}
+
 {$IfNDef ANDROID}
-{$If (not defined(USE_INIT_HANDLE)) or (defined(USE_INIT_HANDLE) and defined(WINDOWS))}
+{$IFDEF WND_USE}
 function  wnd_Create(): Boolean;
 procedure wnd_Destroy;
-{$IFEND}
+{$EndIf}
 {$IfNDef USE_INIT_HANDLE}
 procedure wnd_Update;
 procedure wnd_UpdateCaption();
@@ -185,6 +206,7 @@ procedure zgl_Exit;
 procedure zgl_Reg(What: LongWord; UserData: Pointer);
 function  zgl_Get(What: LongWord): Ptr;
 
+// новое        new
 procedure zgl_SetParam(width, height: Integer; FullScreen, Vsync: Boolean);
 
 procedure zgl_GetMem(out Mem: Pointer; Size: LongWord);
@@ -200,6 +222,7 @@ var
   wndHeight    : Integer = 600;
   wndFullScreen: Boolean = false;
   wndCaption   : UTF8String = '';
+  wndUpdateWin : Boolean = true;
 
   {$IFDEF USE_X11}
   wndHandle     : TWindow;
@@ -224,12 +247,17 @@ var
   wndBrdSizeY : Integer;
   wndCaptionW : PWideChar;
   {$ENDIF}
-  {$IFDEF MACOSX}
+  {$IFDEF MACOSX}{$IfDef MAC_COCOA}
+  zglView     : zglNSView;
+  wndHandle   : zglNSWindow;
+  viewNSRect  : NSRect;
+//  pool      : NSAutoreleasePool;
+  {$Else}
   wndHandle : WindowRef;
   wndAttr   : WindowAttributes;
   wndEvents : array[0..14] of EventTypeSpec;
   wndMouseIn: Boolean;
-  {$ENDIF}
+  {$ENDIF}{$EndIf}
   {$IFDEF iOS}
   wndHandle  : UIWindow;
   wndViewCtrl: UIViewController;
@@ -238,7 +266,6 @@ var
 
 implementation
 uses
-
   zgl_application,
   zgl_screen,
   {$IFNDEF USE_GLES}
@@ -290,6 +317,33 @@ function LoadCursorW(hInstance: HINST; lpCursorName: PWideChar): HCURSOR; stdcal
 {$ENDIF}
 
 {$IfNDef USE_INIT_HANDLE}
+{$IfDef MAC_COCOA}
+procedure zglNSWindow.close;
+begin
+  winOn := false;
+//  inherited;
+end;
+
+procedure zglNSWindow.resignMainWindow;
+begin
+  appPause := True;
+  inherited resignMainWindow;
+end;
+
+procedure zglNSWindow.becomeMainWindow;
+begin
+  appPause := False;
+  inherited becomeMainWindow;
+end;
+
+procedure zglNSView.windowWillClose(note: NSNotification);
+begin
+  winOn := False;
+//  NSApp.terminate(nil);
+end;
+
+{$EndIf}
+
 {$IFDEF USE_X11}
 procedure wnd_SetHints(Initialized: Boolean = TRUE);
 var
@@ -314,7 +368,7 @@ end;
 {$EndIf}
 
 {$IfNDef ANDROID}
-{$If (not defined(USE_INIT_HANDLE)) or (defined(USE_INIT_HANDLE) and defined(WINDOWS))}
+{$IFDEF WND_USE}
 procedure wnd_Select;
 begin
 {$IFDEF USE_X11}
@@ -323,12 +377,13 @@ begin
 {$IFDEF WINDOWS}
   BringWindowToTop(wndHandle);
 {$ENDIF}
-{$IFDEF MACOSX}
+{$IFDEF MACOSX}{$IfNDef MAC_COCOA}
   SelectWindow(wndHandle);
   ShowWindow(wndHandle);
+{$Else}
   if wndFullScreen Then
     wnd_SetPos(0, 0);
-{$ENDIF}
+{$ENDIF}{$EndIf}
 {$IFDEF iOS}
   wndHandle.makeKeyAndVisible();
 {$ENDIF}
@@ -337,9 +392,12 @@ end;
 function wnd_Create(): Boolean;
   {$IFDEF MACOSX}
   var
+  {$IfDef MAC_COCOA}
+    createFlags: LongWord = 0;
+  {$Else}
     size  : MacOSAll.Rect;
     status: OSStatus;
-  {$ENDIF}
+  {$ENDIF}{$EndIf}
 begin
   Result := TRUE;
   if wndHandle <> {$IFNDEF DARWIN} 0 {$ELSE} nil {$ENDIF} Then exit;
@@ -445,7 +503,33 @@ begin
   end;
   wnd_Select();
 {$ENDIF}
-{$IFDEF MACOSX}
+{$IFDEF MACOSX}{$IfDef MAC_COCOA}
+  if wndFullScreen then
+  begin
+    viewNSRect.origin.x := 0;
+    viewNSRect.origin.y := 0;
+    viewNSRect.size.width := scrDesktopW;
+    viewNSRect.size.height := scrDesktopH;
+    createFlags := NSBorderlessWindowMask;
+  end
+  else begin
+    viewNSRect.origin.x := wndX;
+    viewNSRect.origin.y := wndY;
+    viewNSRect.size.width := { wndx +} wndWidth;
+    viewNSRect.size.height := {wndY +} wndHeight + 0;
+    createFlags := NSTitledWindowMask or NSClosableWindowMask;
+  end;
+  wndHandle := zglNSWindow.alloc;
+  wndHandle.initWithContentRect_styleMask_backing_defer(viewNSRect, createFlags, NSBackingStoreBuffered, False).autorelease;
+
+  // ???  zdes ili net
+  zglView := zglNSView.alloc;
+  zglView.initWithFrame(viewNSRect);
+  wndHandle.setContentView(zglView);
+  wndHandle.setDelegate(NSWindowDelegateProtocol(zglView));
+  wndHandle.setAcceptsMouseMovedEvents(True);
+  wndHandle.makeKeyAndOrderFront(nil);
+{$Else}
   size.Left   := wndX;
   size.Top    := wndY;
   size.Right  := wndX + wndWidth;
@@ -497,7 +581,7 @@ begin
   wndEvents[14].eventKind  := kEventProcessCommand;
   InstallEventHandler(GetApplicationEventTarget, NewEventHandlerUPP(@app_ProcessMessages), 15, @wndEvents[0], nil, nil);
   wnd_Select();
-{$ENDIF}
+{$ENDIF}{$EndIf}
 {$IFDEF iOS}
   // always fullscreen
   wndFullScreen := TRUE;
@@ -539,12 +623,17 @@ begin
     end;
   end;
 {$ENDIF}
+{$IfDef MAC_COCOA}
+  wndHandle.close;
+
+{$Else}
 {$IFDEF MACOSX}
   ReleaseWindow(wndHandle);
 {$ENDIF}
   wndHandle := {$IFNDEF DARWIN} 0 {$ELSE} nil {$ENDIF};
+{$EndIf}
 end;
-{$IFEND}
+{$EndIf}
 
 {$IfNDef USE_INIT_HANDLE}
 procedure wnd_Update;
@@ -593,7 +682,9 @@ begin
   SetWindowLongW(wndHandle, GWL_STYLE, LongInt(wndStyle));
   SetWindowLongW(wndHandle, GWL_EXSTYLE, WS_EX_APPWINDOW or WS_EX_TOPMOST * Byte(FullScreen));
 {$ENDIF}
-{$IFDEF MACOSX}
+{$IFDEF MACOSX}{$IfDef MAC_COCOA}
+
+{$Else}
   if wndFullScreen Then
     ChangeWindowAttributes(wndHandle, kWindowNoTitleBarAttribute, kWindowResizableAttribute)
   else
@@ -602,12 +693,15 @@ begin
   ChangeWindowAttributes(wndHandle, 0, kWindowResizableAttribute);
 
   aglSetCurrentContext(oglContext);
-{$ENDIF}
+{$ENDIF}{$EndIf}
 {$IFDEF iOS}
   UIApplication.sharedApplication.setStatusBarHidden(wndFullScreen);
 {$ENDIF}
-  winOn := TRUE;
+//  winOn := TRUE;
+
   wnd_UpdateCaption();
+  wndUpdateWin := False;
+
 
   if (not wndFullScreen) and (appFlags and WND_USE_AUTOCENTER > 0) Then
     wnd_SetPos((zgl_Get(DESKTOP_WIDTH) - wndWidth) div 2, (zgl_Get(DESKTOP_HEIGHT) - wndHeight) div 2);
@@ -620,7 +714,7 @@ begin
     wndCaption := cs_ZenGL
   else
     wndCaption := Caption;
-  wnd_UpdateCaption();
+  wndUpdateWin := true;;
 end;
 
 procedure wnd_UpdateCaption();
@@ -666,7 +760,9 @@ begin
     SetWindowTextW(wndHandle, wndCaptionW);
   end;
 {$ENDIF}
-{$IFDEF MACOSX}
+{$IFDEF MACOSX}{$IfDef MAC_COCOA}
+  wndHandle.setTitle(NSSTR(wndCaption));
+{$Else}
   if Assigned(wndHandle) Then
   begin
     str := CFStringCreateWithPascalString(nil, wndCaption, kCFStringEncodingUTF8);
@@ -674,19 +770,15 @@ begin
     CFRelease(str);
     wnd_Select();
   end;
-{$ENDIF}
+{$ENDIF}{$EndIf}
 end;
 {$EndIf}
 {$EndIf}
 
 procedure wnd_SetSize(Width, Height: Integer);
 begin
-  if (wndWidth <> Width) or (wndHeight <> Height) then
-  begin
-    wndWidth  := Width;
-    wndHeight := Height;
-    scrViewPort := True;
-  end;
+  wndWidth  := Width;
+  wndHeight := Height;
 {$IfNDef USE_INIT_HANDLE}
   {$IFDEF USE_X11}
   if wndHandle <> 0 Then
@@ -698,7 +790,10 @@ begin
   {$IFDEF WINDOWS}
     wnd_SetPos(wndX, wndY);
   {$ENDIF}
-  {$IFDEF MACOSX}
+  {$IFDEF MACOSX}{$IfDef MAC_COCOA}
+  viewNSRect.size.width := { wndx +} wndWidth;
+  viewNSRect.size.height := {wndY +} wndHeight;
+  {$Else}
   if Assigned(wndHandle) Then
     begin
       begin
@@ -708,7 +803,7 @@ begin
       end else
         wnd_SetPos(wndX, wndY);
     end;
-  {$ENDIF}
+  {$ENDIF}{$EndIf}
 {$ENDIF}
 {$IFDEF iOS}
   eglContext.renderbufferStorage_fromDrawable(GL_RENDERBUFFER, eglSurface);
@@ -756,13 +851,16 @@ begin
     else
       SetWindowPos(wndHandle, HWND_TOPMOST, 0, 0, wndWidth, wndHeight, SWP_NOACTIVATE);
   {$ENDIF}
-  {$IFDEF MACOSX}
+  {$IFDEF MACOSX}{$IfDef MAC_COCOA}
+  viewNSRect.origin.x := wndX;
+  viewNSRect.origin.y := wndY;
+  {$Else}
   if Assigned(wndHandle) Then
     if not wndFullScreen Then
       MoveWindow(wndHandle, wndX, wndY, TRUE)
     else
       MoveWindow(wndHandle, 0, 0, TRUE);
-  {$ENDIF}
+  {$ENDIF}{$EndIf}
   {$IFDEF iOS}
   wndX := 0;
   wndY := 0;
@@ -827,7 +925,7 @@ end;
 procedure zgl_Init(FSAA: Byte = 0; StencilBits: Byte = 0);
 begin
   {$IfNDef ANDROID}
-  scr_GetResList;
+//  scr_GetResList;
   zgl_GetSysDir();
   {$EndIf}
 
@@ -932,8 +1030,9 @@ begin
 
   InitSoundVideo();
 
-  app_PInit();
   winOn := TRUE;
+
+  app_PInit();
 end;
 {$EndIf}
 
@@ -965,7 +1064,9 @@ begin
   while managerRTarget.Count > 0 do
     begin
       p := managerRTarget.First.next;
+      {$IfNDef MAC_COCOA}
       rtarget_Del(zglPRenderTarget(p));
+      {$EndIf}
     end;
 
   managerZeroTexture := nil;
@@ -1010,11 +1111,8 @@ begin
   scr_Destroy();
   {$Else}
   {$EndIf}
+  {$IfNDef MAC_COCOA}
   gl_Destroy();
-  {$IfNDef ANDROID}
-  {$IfNDef USE_INIT_HANDLE}
-  wnd_Destroy();
-  {$EndIf}
   {$EndIf}
 
   {$IFDEF USE_OGG}
@@ -1028,6 +1126,11 @@ begin
 
   log_Add('End');
   log_Close();
+  {$IfNDef ANDROID}
+  {$IfNDef USE_INIT_HANDLE}
+  wnd_Destroy();
+  {$EndIf}
+  {$EndIf}
 end;
 
 procedure zgl_Exit;
@@ -1283,14 +1386,23 @@ begin
   appHomeDir[len + 1] := '\';
   FreeMem(fn);
 {$ENDIF}
-{$IFDEF MACOSX}
+{$IFDEF MACOSX}{$IfDef MAC_COCOA}
+  appWorkDir := ExtractFileDir(ParamStr(0));
+  appLogDir := file_GetDirectory(appWorkDir);
+  appWorkDir := appLogDir + utf8_Copy('Resources/');
+  appLogDir := copy(appLogDir, 0, Length(appLogDir) - 1);
+  appLogDir := file_GetDirectory(appLogDir);
+  appLogDir := copy(appLogDir, 0, Length(appLogDir) - 1);
+  appLogDir := file_GetDirectory(appLogDir);
+  appHomeDir  := FpGetEnv('HOME') + '/Library/Preferences/';
+{$Else}
   appBundle   := CFBundleGetMainBundle();
   appCFURLRef := CFBundleCopyBundleURL(appBundle);
   appCFString := CFURLCopyFileSystemPath(appCFURLRef, kCFURLPOSIXPathStyle);
   CFStringGetFileSystemRepresentation(appCFString, @appPath[0], 8192);
-  appWorkDir  := appPath + '/';
+  appWorkDir  := appPath + '/Contents/Resources/';
   appHomeDir  := FpGetEnv('HOME') + '/Library/Preferences/';
-{$ENDIF}
+{$ENDIF}{$EndIf}
 {$IFDEF iOS}
   appWorkDir := file_GetDirectory(ParamStr(0));
   appHomeDir := FpGetEnv('HOME') + '/Documents/';
@@ -1418,8 +1530,6 @@ end;
 
 procedure zgl_SetParam(width, height: Integer; FullScreen, Vsync: Boolean);
 begin
-  if (wndWidth <> width) or (wndHeight <> height) or (wndFullScreen <> FullScreen) then
-    scrViewPort := true;
   wndWidth := Width;
   wndHeight := Height;
   wndFullScreen := FullScreen;

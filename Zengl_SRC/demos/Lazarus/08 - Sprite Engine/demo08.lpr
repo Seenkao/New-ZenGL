@@ -210,7 +210,7 @@ Begin
   randomize;
 
   TimeStart := timer_Add( @Timer, 16, Start );
-  TimeMiku := timer_Add( @AddMiku, 1000, SleepToStart, 10 );
+  TimeMiku := timer_Add( @AddMiku, 1000, SleepToStart, 6);
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );

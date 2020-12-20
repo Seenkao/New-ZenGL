@@ -116,6 +116,8 @@ begin
   memory.Size     := memStream.Size;
   texTest := tex_LoadFromMemory( memory, 'JPG' );
   memStream.Free();
+  // код выше с использованием Stream не заработал у меня с MacOS Cocoa
+  //texTest := tex_LoadFromFile(dirRes + 'back01.jpg');
 
   // RU: Для загрузки ресурсов из zip-архива необходимо его сначала "открыть" и потом "закрыть" :) Для этого существуют функции file_OpenArchive и file_CloseArchive.
   // EN: For loading resources from zip-archive this archive should be "opened" first and then "closed" :) There are functions file_OpenArchive and file_CloseArchive for this.

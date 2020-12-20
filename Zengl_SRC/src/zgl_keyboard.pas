@@ -182,7 +182,6 @@ procedure key_UpdateReadText(const Text: UTF8String; MaxSymbols: Integer = -1);
 function  key_GetText: UTF8String;
 procedure key_EndReadText;
 procedure key_ClearState;
-function scancode_to_utf8(ScanCode: Byte): Byte;
 
 procedure key_InputText(const Text: UTF8String);
 {$IFDEF USE_X11}
@@ -208,6 +207,9 @@ procedure doKeyPress(KeyCode: LongWord);
 
 function _key_GetText: PAnsiChar;
 
+procedure key_WorkDown(keyCode: LongWord);
+procedure key_WorkUp(keyCode: LongWord);
+
 var
   keysDown    : array[0..255] of Boolean;
   keysUp      : array[0..255] of Boolean;
@@ -216,7 +218,7 @@ var
   keysText    : UTF8String = '';
   keysCanText : Boolean;
   keysMax     : Integer;
-  keysLast    : array[0..1] of Byte;                
+  keysLast    : array[0..1] of Byte;
   {$IFDEF USE_X11}
   keysRepeat: Integer; // Workaround, yeah... :)
   {$ENDIF}
@@ -674,6 +676,28 @@ end;
 function _key_GetText: PAnsiChar;
 begin
   Result := utf8_GetPAnsiChar(key_GetText());
+end;
+
+procedure key_WorkDown(keyCode: LongWord);
+begin
+  keysDown[keyCode]     := TRUE;
+  keysUp  [keyCode]     := FALSE;
+  keysLast[KA_DOWN] := keyCode;
+  {$IFDEF USE_X11}
+  if keysRepeat < 2 Then
+  {$ENDIF}
+  if keysCanPress[KeyCode] Then
+  begin
+    keysPress   [KeyCode] := TRUE;
+    keysCanPress[KeyCode] := FALSE;
+  end;
+end;
+
+procedure key_WorkUp(keyCode: LongWord);
+begin
+  keysDown[keyCode]   := FALSE;
+  keysUp  [keyCode]   := TRUE;
+  keysLast[KA_UP] := keyCode;
 end;
 
 end.

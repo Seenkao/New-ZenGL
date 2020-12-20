@@ -79,10 +79,9 @@ uses
   zgl_application,
   zgl_window;
 
-{$IfDef UNIX}
+{$IfDef UNIX}{$IfNDef MAC_COCOA}
 function fpGetTimeOfDay(val: PTimeVal; tzp: Pointer): Integer; cdecl; external 'libc' name 'gettimeofday';
-{$ENDIF}
-{$IFDEF DARWIN}
+{$Else}
 type
   mach_timebase_info_t = record
     numer: LongWord;
@@ -91,7 +90,7 @@ type
 
   function mach_timebase_info(var info: mach_timebase_info_t): Integer; cdecl; external 'libc';
   function mach_absolute_time: QWORD; cdecl; external 'libc';
-{$ENDIF}
+{$ENDIF}{$EndIf}
 
 var
   timersToKill : Byte = 0;

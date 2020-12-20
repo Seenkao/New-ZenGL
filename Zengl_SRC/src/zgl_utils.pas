@@ -533,9 +533,9 @@ begin
   MessageBoxW(0, wideStr, 'ERROR!', MB_OK or MB_ICONERROR);
   FreeMem(wideStr);
 {$ENDIF}
-{$IFDEF MACOSX}
+{$IFDEF MACOSX}{$IfNDef MAC_COCOA}
   StandardAlert(kAlertNoteAlert, 'ERROR!', ErrStr, nil, outItemHit);
-{$ENDIF}
+{$ENDIF}{$EndIf}
 
   log_Add('ERROR: ' + ErrStr);
 end;
@@ -558,9 +558,9 @@ begin
   MessageBoxW(0, wideStr, 'WARNING!', MB_OK or MB_ICONWARNING);
   FreeMem(wideStr);
 {$ENDIF}
-{$IFDEF MACOSX}
+{$IFDEF MACOSX}{$IfNDef MAC_COCOA}
   StandardAlert(kAlertNoteAlert, 'WARNING!', ErrStr, nil, outItemHit);
-{$ENDIF}
+{$ENDIF}{$EndIf}
 
   log_Add('WARNING: ' + ErrStr);
 end;

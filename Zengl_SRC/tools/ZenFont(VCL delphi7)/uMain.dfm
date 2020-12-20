@@ -1,6 +1,6 @@
 object Form1: TForm1
-  Left = 209
-  Top = 11
+  Left = 207
+  Top = 0
   ActiveControl = Panel1
   BorderIcons = []
   BorderStyle = bsSingle
@@ -16,6 +16,7 @@ object Form1: TForm1
   Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = True
+  Position = poScreenCenter
   Visible = True
   OnActivate = FormActivate
   OnClose = FormClose
@@ -315,11 +316,5 @@ object Form1: TForm1
     Filter = 'Any UTF-8 file|*.*'
     Title = 'Open text file'
     Left = 30
-  end
-  object Timer1: TTimer
-    Enabled = False
-    Interval = 16
-    OnTimer = Timer1Timer
-    Left = 328
   end
 end

@@ -616,7 +616,7 @@ end;
 
 procedure tex_CalcTexCoords(var Texture: zglTTexture; FramesX: Integer = 1; FramesY: Integer = 1);
 var
-  i: Integer;
+  i, z, n, countVertex: Integer;
   tX, tY, u, v: Single;
 begin
   if FramesX <= 0 Then FramesX := 1;
@@ -663,6 +663,8 @@ begin
 end;
 
 procedure _tex_Filter(Texture: zglPTexture; Flags: LongWord);
+  var
+    currentFilter: LongWord;
 begin
   batch2d_Flush();
 

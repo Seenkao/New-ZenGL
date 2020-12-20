@@ -30,8 +30,8 @@ unit zgl_particles_2d;
 interface
 uses
   zgl_textures,
-  zgl_math_2d,
   zgl_types,
+  zgl_math_2d,
   zgl_file,
   zgl_memory;
 

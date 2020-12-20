@@ -93,7 +93,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir);../../../headers"/>
-      <OtherUnitFiles Value="../../../headers;../../../extra;../../../src;../../../lib/jpeg/$(TargetCPU)-$(TargetOS);../../../lib/msvcrt/$(TargetCPU);../../../lib/ogg/$(TargetCPU)-$(TargetOS);../../../lib/theora/$(TargetCPU)-$(TargetOS);../../../lib/zlib/$(TargetCPU)-$(TargetOS);../../../lib/zip/$(TargetCPU)-$(TargetOS)"/>
+      <OtherUnitFiles Value="../../../headers;../../../extra;../../../src;../../../lib/ogg/cocoa-darwin;../../../lib/theora/cocoa-darwin;../../../lib/zlib/cocoa-darwin;../../../lib/zip/cocoa-darwin"/>
       <UnitOutputDirectory Value="../tmp/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>
@@ -110,12 +110,12 @@
     <Linking>
       <Debugging>
         <GenerateDebugInfo Value="False"/>
-        <UseLineInfoUnit Value="False"/>
+        <DebugInfoType Value="dsDwarf2"/>
         <StripSymbols Value="True"/>
+        <UseExternalDbgSyms Value="True"/>
       </Debugging>
       <LinkSmart Value="True"/>
       <Options>
-        <PassLinkerOptions Value="True"/>
         <LinkerOptions Value="-macosx_version_min 10.4"/>
         <Win32>
           <GraphicApplication Value="True"/>

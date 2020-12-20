@@ -122,9 +122,9 @@ type
     OneButton: array[1..34] of _oneTouchButton;
     StringButton: array[35..44] of _stringTouchButton;
     Flags: integer;             
-    {$IF defined(MACOSX) or defined(LINUX) or defined(WINDOWS)}
+    {.$IF defined(MACOSX) or defined(LINUX) or defined(WINDOWS)}
     FlagsKeyb: Integer;
-    {$EndIf}
+    {.$IfEnd}
     bPush: Byte;                
     _keyPush: Byte;             
   end;
