@@ -21,14 +21,14 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 28.09.2020
+ !!! modification from Serge 20.12.2020
 }
 unit zgl_application;
 
 {$I zgl_config.cfg}
-{$IFDEF iOS}
+{$IF defined(iOS) or defined(MAC_COCOA)}
   {$modeswitch objectivec1}
-{$ENDIF}
+{$IfEnd}
 
 interface
 uses
@@ -38,7 +38,9 @@ uses
   {$IFDEF WINDOWS}
   Windows, Messages
   {$ENDIF}
-  {$IFDEF MACOSX}
+  {$IFDEF MACOSX}{$IfDef MAC_COCOA}
+  CocoaAll,
+  {$EndIf}
   MacOSAll
   {$ENDIF}
   {$IFDEF iOS}
@@ -65,7 +67,7 @@ function app_ProcessMessages(hWnd: HWND; Msg: UINT; wParam: WPARAM; lParam: LPAR
 function app_ProcessMessages: LongWord;
 {$ENDIF}
 {$IFDEF MACOSX}
-function app_ProcessMessages(inHandlerCallRef: EventHandlerCallRef; inEvent: EventRef; inUserData: UnivPtr): OSStatus; cdecl;
+function app_ProcessMessages({$IfNDef MAC_COCOA}inHandlerCallRef: EventHandlerCallRef; inEvent: EventRef; inUserData: UnivPtr{$EndIf}): OSStatus; cdecl;
 {$ENDIF}
 {$Else}
 procedure app_Draw;
@@ -141,7 +143,6 @@ var
   appInitialized   : Boolean;
   appGotSysDirs    : Boolean;
   winOn            : Boolean = false;
-  winOff           : Boolean = True;
   appWorkTime      : LongWord;
   appPause         : Boolean;
   appAutoPause     : Boolean = TRUE;
@@ -149,6 +150,9 @@ var
   appLog           : Boolean;
   appWorkDir       : UTF8String;
   appHomeDir       : UTF8String;
+  {$IfDef MAC_COCOA}
+  appLogDir        : UTF8String;
+  {$EndIf}
 
   // call-back
   app_PInit      : procedure;
@@ -177,7 +181,8 @@ var
   app_DrawGui: procedure;
 
   MenuChange: Byte = 0;                                   
-  VisibleMenuChange: Boolean = true;                     
+  VisibleMenuChange: Boolean = true;
+  MenuTimerSleep: Byte;
   MaxNumMenu: Byte = 4;                                 
   {$EndIf}
 
@@ -228,9 +233,9 @@ var
 
   appFlags: LongWord;
 
-  {$IfDef WINDOWS}
-  // ogranichenie FPS
+  {$IfNDef USE_INIT_HANDLE}
   newTimeDraw, oldTimeDraw: Double;
+  useFPS: Byte = 30;
   maxFPS: Single = 1000 / 30;
   {$EndIf}
 
@@ -261,13 +266,14 @@ uses
   zgl_sound,
   {$ENDIF}
   {$IfDef USE_MENUGUI}
-  sw_touch_menu,
+  gegl_touch_menu,
   {$EndIf}
   zgl_utils;
 
 procedure app_Draw;
 begin
-  SetCurrentMode();
+  if scrViewPort then
+    SetCurrentMode();
   scr_Clear();
   if Assigned(app_PDraw) Then
   begin
@@ -298,7 +304,8 @@ procedure app_Init;
 begin
   managerZeroTexture := tex_CreateZero(4, 4, $FFFFFFFF, TEX_DEFAULT_2D);
 
-  SetCurrentMode();
+  if scrViewPort then
+    SetCurrentMode();
   scr_Clear();
   if Assigned(app_PLoad) Then
     app_PLoad();
@@ -306,7 +313,7 @@ begin
 
 
   timer_Reset();
-  timer_Add(@app_CalcFPS, 1000);
+  timer_Add(@app_CalcFPS, 1000, Start);
 end;
 
 {$IfNDef ANDROID}
@@ -318,11 +325,14 @@ begin
   while winOn do
   begin
     app_ProcessOS();
+    {$IfDef MAC_COCOA}
+    if (keysDown[K_SUPER_L] or keysDown[K_SUPER_R]) then
+      if keysDown[K_Q] then
+        winOn := False;
+    {$EndIf}
     {$IfDef USE_EXIT_ESCAPE}
-
     if keysDown[K_ESCAPE] = True then
       winOn := False;
-
     {$EndIf}
   {$EndIf}
     res_Proc();
@@ -359,9 +369,9 @@ begin
 
     appdt := t;
 
-    {$IfDef WINDOWS}
+    {$IfNDef USE_INIT_HANDLE}
+    t := newTimeDraw;
     newTimeDraw := timer_GetTicks;
-//    m := round(newTimeDraw - t1);
 
     if newTimeDraw >= (oldTimeDraw + maxFPS) then
     begin
@@ -369,7 +379,7 @@ begin
       oldTimeDraw := oldTimeDraw + maxFPS;
     end
     else begin
-      if (maxFPS <= 1000 / 60) then
+      if (newTimeDraw - t) < 2 then
       begin
         u_Sleep(1);
       end;
@@ -377,7 +387,10 @@ begin
     {$Else}
     app_Draw;
     {$EndIf}
+
   {$IfNDef USE_INIT_HANDLE}
+    if wndUpdateWin then
+      wnd_Update;
   end;
   {$EndIf}
 end;
@@ -396,10 +409,10 @@ var
     m        : tagMsg;
     cursorpos: TPoint;
   {$ENDIF}
-  {$IFDEF MACOSX}
+  {$IFDEF MACOSX}{$IfNDef MAC_COCOA}
     event: EventRecord;
     mPos : Point;
-  {$ENDIF}
+  {$ENDIF}{$EndIf}
 begin
   xmouse := mouseX;
   ymouse := mouseY;
@@ -418,11 +431,14 @@ begin
     mouseY := cursorpos.Y - wndY - wndBrdSizeY - wndCpnSize;
   end;
 {$ENDIF}
-{$IFDEF MACOSX}
+{$IFDEF MACOSX}{$IfDef MAC_COCOA}
+  mouseX := gMouseX;
+  mouseY := gMouseY;
+{$Else}
   GetGlobalMouse(mPos);
   mouseX := mPos.h - wndX;
   mouseY := mPos.v - wndY;
-{$ENDIF}
+{$ENDIF}{$EndIf}
 
   if appFlags and CORRECT_RESOLUTION > 0 Then
   begin
@@ -447,6 +463,7 @@ begin
     mouseY := ymouse;
   end;  
 
+  key_ClearState;
 {$IfNDef USE_INIT_HANDLE}
 {$IFDEF USE_X11}
   app_ProcessMessages();
@@ -459,9 +476,11 @@ begin
     DispatchMessageW(m);
   end;
 {$ENDIF}
-{$IFDEF MACOSX}
+{$IFDEF MACOSX}{$IfDef MAC_COCOA}
+  app_ProcessMessages;
+{$Else}
   while GetNextEvent(everyEvent, event) do;
-{$ENDIF}
+{$ENDIF}{$EndIf}
 {$EndIf}
 {$IFDEF iOS}
   while CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.01, TRUE) = kCFRunLoopRunHandledSource do;
@@ -469,63 +488,75 @@ begin
   {$IfDef USE_MENUGUI}
   if Assigned(app_DrawGui) then
   begin
-    if ((mouseUpDown and M_BLEFT_DOWN) > 0) and ((mouseClickCanClick and M_BLEFT_CLICK) > 0) then
-      app_UseMenuDown;
+    if (keysDown[K_F12]) and (MenuTimerSleep = 0) then
+    begin
+      VisibleMenuChange := not VisibleMenuChange;
+      MenuTimerSleep := 90;
+    end;
+    if MenuTimerSleep > 0 then
+      dec(MenuTimerSleep);
+    if VisibleMenuChange then
+    begin
+      if ((mouseUpDown and M_BLEFT_DOWN) > 0) and ((mouseClickCanClick and M_BLEFT_CLICK) > 0) then
+        app_UseMenuDown;
 
-    if ((mouseUpDown and M_BLEFT_UP) > 0) and ((mouseClickCanClick and M_BLEFT_CANCLICK) > 0) then
-      app_UseMenuUp;
+      if ((mouseUpDown and M_BLEFT_UP) > 0) and ((mouseClickCanClick and M_BLEFT_CANCLICK) > 0) then
+        app_UseMenuUp;
 
-    if (keysDown[K_CAPSLOCK]) and ((TouchKey.FlagsKeyb and keyboardCaps) = 0) then
-    begin
-      TouchKey.FlagsKeyb := TouchKey.FlagsKeyb xor keyboardCaps;
-      TouchKey.Flags := TouchKey.Flags xor keyboardCaps;
-    end;
-    if (keysDown[K_SHIFT]) and ((TouchKey.FlagsKeyb and keyboardShift) = 0) then
-    begin
-      TouchKey.FlagsKeyb := TouchKey.FlagsKeyb xor keyboardShift;
-      TouchKey.bPush := 128;
-    end;
-    if (keysDown[K_F1]) and ((TouchKey.FlagsKeyb and keyboardLatinRus) = 0) then
-    begin
-      TouchKey.FlagsKeyb := TouchKey.FlagsKeyb xor keyboardLatinRus;
-      TouchKey.Flags := TouchKey.Flags xor keyboardLatinRus;
-    end;
-    if (keysDown[K_F2]) and ((TouchKey.FlagsKeyb and keyboardSymbol) = 0) then
-    begin
-      TouchKey.FlagsKeyb := TouchKey.FlagsKeyb xor keyboardSymbol;
-      TouchKey.Flags := TouchKey.Flags xor keyboardSymbol;
-    end;
-    if (keysDown[K_INSERT]) and ((TouchKey.FlagsKeyb and keyboardInsert) = 0) then
-    begin
-      TouchKey.FlagsKeyb := TouchKey.FlagsKeyb xor keyboardInsert;
-      TouchKey.Flags := TouchKey.Flags xor keyboardInsert;
-      TouchKeySymb.Flags := TouchKeySymb.Flags xor keyboardInsert;
-    end;
-
-    if keysUp[K_CAPSLOCK] then
-      TouchKey.FlagsKeyb := TouchKey.FlagsKeyb xor keyboardCaps;
-    if keysUp[K_SHIFT] then
-    begin
-      TouchKey.bPush := TouchKey.bPush and (255 - 128);
-      TouchKey.FlagsKeyb := TouchKey.FlagsKeyb xor keyboardShift;
-    end;
-    if keysUp[K_F1] then
-      TouchKey.FlagsKeyb := TouchKey.FlagsKeyb xor keyboardLatinRus;
-    if keysUp[K_F2] then
-    begin
-      TouchKey.FlagsKeyb := TouchKey.FlagsKeyb xor keyboardSymbol;
-      if MenuChange = 3 then
+      if (keysDown[K_CAPSLOCK]) and ((TouchKey.FlagsKeyb and keyboardCaps) = 0) then
       begin
-        SetMenuProcess(4);
-        MenuChange := 4;
-      end
-      else begin
-        SetMenuProcess(3);
-        MenuChange := 3;
+        TouchKey.FlagsKeyb := TouchKey.FlagsKeyb or keyboardCaps;
+        TouchKey.Flags := TouchKey.Flags xor keyboardCaps;
       end;
+      if (keysDown[K_SHIFT]) and ((TouchKey.FlagsKeyb and keyboardShift) = 0) then
+      begin
+        TouchKey.FlagsKeyb := TouchKey.FlagsKeyb or keyboardShift;
+        TouchKey.Flags := TouchKey.Flags or keyboardShift;
+        TouchKeySymb.Flags := TouchKeySymb.Flags or keyboardShift;
+      end;
+      if (keysDown[K_F1]) and ((TouchKey.FlagsKeyb and keyboardLatinRus) = 0) then
+      begin
+        TouchKey.FlagsKeyb := TouchKey.FlagsKeyb or keyboardLatinRus;
+        TouchKey.Flags := TouchKey.Flags xor keyboardLatinRus;
+      end;
+      if (keysDown[K_F2]) and ((TouchKey.FlagsKeyb and keyboardSymbol) = 0) then
+      begin
+        TouchKey.FlagsKeyb := TouchKey.FlagsKeyb or keyboardSymbol;
+        TouchKey.Flags := TouchKey.Flags xor keyboardSymbol;
+      end;
+      if (keysDown[K_INSERT]) and ((TouchKey.FlagsKeyb and keyboardInsert) = 0) then
+      begin
+        TouchKey.FlagsKeyb := TouchKey.FlagsKeyb or keyboardInsert;
+        TouchKey.Flags := TouchKey.Flags xor keyboardInsert;
+        TouchKeySymb.Flags := TouchKeySymb.Flags xor keyboardInsert;
+      end;
+
+      if keysUp[K_CAPSLOCK] then
+        TouchKey.FlagsKeyb := TouchKey.FlagsKeyb and (255 - keyboardCaps);
+      if keysUp[K_SHIFT] then
+      begin
+        TouchKey.Flags := TouchKey.Flags and (255 - keyboardShift);
+        TouchKey.FlagsKeyb := TouchKey.FlagsKeyb and (255 - keyboardShift);
+        TouchKeySymb.Flags := TouchKeySymb.Flags and (255 - keyboardShift);
+      end;
+      if keysUp[K_F1] then
+        TouchKey.FlagsKeyb := TouchKey.FlagsKeyb and (255 - keyboardLatinRus);
+      if keysUp[K_F2] then
+      begin
+        TouchKey.FlagsKeyb := TouchKey.FlagsKeyb and (255 - keyboardSymbol);
+        if MenuChange = 3 then
+        begin
+          SetMenuProcess(4);
+          MenuChange := 4;
+        end
+        else begin
+          SetMenuProcess(3);
+          MenuChange := 3;
+        end;
+      end;
+      if keysUp[K_INSERT] then
+        TouchKey.FlagsKeyb := TouchKey.FlagsKeyb and (255 - keyboardInsert);
     end;
-    if keysUp[K_INSERT] then
-      TouchKey.FlagsKeyb := TouchKey.FlagsKeyb xor keyboardInsert;
   end;
   {$EndIf}
 end;
@@ -533,7 +564,17 @@ end;
 {$IFNDEF iOS}
 {$IfDef WND_USE}
 function app_ProcessMessages;
-  {$IFDEF MACOSX}
+  {$IFDEF MACOSX}{$IfDef MAC_COCOA}
+  const
+    MOUSELD      = $00000001;
+    MOUSELU      = $00000002;
+    MOUSERD      = $00000004;
+    MOUSERU      = $00000008;
+    MOUSEMD      = $00000010;
+    MOUSEMU      = $00000020;
+    MOUSEMOVE    = $00000040;
+    KEYUPDOWN    = $00000100;
+  {$Else}
   type
     zglTModifier = record
       bit: Integer;
@@ -549,7 +590,7 @@ function app_ProcessMessages;
                                              (bit: $000800; key: K_ALT_L),
                                              (bit: $000200; key: K_SHIFT_L),
                                              (bit: $000100; key: K_SUPER));
-  {$ENDIF}
+  {$ENDIF}{$EndIf}
 
   var
   {$IFDEF USE_X11}
@@ -566,11 +607,20 @@ function app_ProcessMessages;
     bounds : HIRect;
     SCAKey : LongWord;
     i      : Integer;
+    wndMouseIn: Boolean;
   {$ENDIF}
     len: Integer;
     c  : array[0..5] of AnsiChar;
     str: UTF8String;
     key: LongWord;
+  {$IfDef MAC_COCOA}
+    ev: NSEvent;
+    modFlags: NSUInteger;
+    pool: NSAutoreleasePool;
+    flagTrue: Word;
+  label
+    eventLoop;
+  {$EndIf}
 begin
   Result := 0;
 {$IFDEF USE_X11}
@@ -948,7 +998,252 @@ begin
     Result := DefWindowProcW(hWnd, Msg, wParam, lParam);
   end;
 {$ENDIF}
-{$IFDEF MACOSX}
+{$IFDEF MACOSX}{$IfDef MAC_COCOA}
+  flagTrue := 0;
+//  pool := NSAutoreleasePool.alloc.init;
+eventLoop:
+  ev := wndHandle.nextEventMatchingMask_untilDate_inMode_dequeue(NSAnyEventMask, nil, NSDefaultRunLoopMode, true);
+  if ev = nil then
+  begin
+//    NSApp.updateWindows;
+//    pool.release;
+    exit;
+  end;
+//  if ev.type_ <> 33 then
+//    flagTrue := flagTrue or KEYUPDOWN; ;
+  case ev.type_ of
+    NSMouseMoved, NSLeftMouseDragged, NSRightMouseDragged, NSOtherMouseDragged:
+      begin
+        if (flagTrue and MOUSEMOVE) = 0 then
+        begin
+          gMouseX := Trunc(ev.locationInWindow.x);
+          gMouseY := Trunc(ev.locationInWindow.y);
+          flagTrue := flagTrue or MOUSEMOVE;
+        end;
+ {       wndMouseIn := (mouseX >= 0) and (mouseX <= wndWidth) and (mouseY >= 0) and (mouseY <= wndHeight);
+        if wndMouseIn Then
+        begin
+          if (not appShowCursor) and (CGCursorIsVisible = 1) Then
+            CGDisplayHideCursor(scrDisplay);
+          if (appShowCursor) and (CGCursorIsVisible = 0) Then
+            CGDisplayShowCursor(scrDisplay);
+          end else
+            if CGCursorIsVisible = 0 Then
+              CGDisplayShowCursor(scrDisplay);      }
+      end;
+    NSLeftMouseDown:
+      begin
+        mouseUpDown := (mouseUpDown and (255 - M_BLEFT_UP)) or M_BLEFT_DOWN;
+        mouseClickCanClick := mouseClickCanClick or M_BLEFT_CLICK;
+        if timer_GetTicks() - mouseDblCTime[M_BLEFT] < mouseDblCInt Then
+          mouseDblClickWheel := mouseDblClickWheel or M_BLEFT_DBLCLICK;
+        mouseDblCTime[M_BLEFT] := timer_GetTicks();
+      end;
+    NSLeftMouseUp:
+      begin
+        mouseUpDown := (mouseUpDown and (255 - M_BLEFT_DOWN)) or M_BLEFT_UP;
+        mouseClickCanClick := mouseClickCanClick or M_BLEFT_CANCLICK;
+      end;
+    NSRightMouseDown:
+      begin
+        mouseUpDown := (mouseUpDown and (255 - M_BRIGHT_UP)) or M_BRIGHT_DOWN;
+        mouseClickCanClick := mouseClickCanClick or M_BRIGHT_CLICK;
+        if timer_GetTicks() - mouseDblCTime[M_BRIGHT] < mouseDblCInt Then
+          mouseDblClickWheel := mouseDblClickWheel or M_BRIGHT_DBLCLICK;
+        mouseDblCTime[M_BRIGHT] := timer_GetTicks();
+      end;
+    NSRightMouseUp:
+      begin
+        mouseUpDown := (mouseUpDown and (255 - M_BRIGHT_DOWN)) or M_BRIGHT_UP;
+        mouseClickCanClick := mouseClickCanClick or M_BRIGHT_CANCLICK;
+      end;
+    NSOtherMouseDown:
+      begin
+        mouseUpDown := (mouseUpDown and (255 - M_BMIDDLE_UP)) or M_BMIDDLE_DOWN;
+        mouseClickCanClick := mouseClickCanClick or M_BMIDDLE_CLICK;
+        if timer_GetTicks() - mouseDblCTime[M_BMIDDLE] < mouseDblCInt Then
+          mouseDblClickWheel := mouseDblClickWheel or M_BMIDDLE_DBLCLICK;
+        mouseDblCTime[M_BMIDDLE] := timer_GetTicks();
+      end;
+    NSOtherMouseUp:
+      begin
+        mouseUpDown := (mouseUpDown and (255 - M_BMIDDLE_DOWN)) or M_BMIDDLE_UP;
+        mouseClickCanClick := mouseClickCanClick or M_BMIDDLE_CANCLICK;
+      end;
+    NSScrollWheel:
+      begin
+   //         s :={ s + }'wheel mouse ';
+    //        s := s + FloatToStr(ev.scrollingDeltaY);
+      end;
+    NSFlagsChanged:
+      begin
+        modFlags := ev.modifierFlags;
+        if (modFlags and NSAlphaShiftKeyMask) > 0 then
+          key_WorkDown(K_CAPSLOCK)
+        else
+          key_WorkUp(K_CAPSLOCK);
+        if (modFlags and NSShiftKeyMask) > 0 then
+        begin
+          if (modFlags and 2) > 0 then
+          begin
+            key_WorkDown(K_SHIFT_L);
+            key := SCA(K_SHIFT_L);
+            keysDown[key] := TRUE;
+            keysUp  [key] := FALSE;
+          end
+          else begin
+            key_WorkUp(K_SHIFT_L);
+            key := SCA(K_SHIFT_L);
+            keysDown[key] := False;
+            keysUp  [key] := True;
+          end;
+          if (modFlags and 4) > 0 then
+          begin
+            key_WorkDown(K_SHIFT_R);
+            key := SCA(K_SHIFT_R);
+            keysDown[key] := TRUE;
+            keysUp  [key] := FALSE;
+          end
+          else begin
+            key_WorkUp(K_SHIFT_R);
+            key := SCA(K_SHIFT_R);
+            keysDown[key] := False;
+            keysUp  [key] := True;
+          end;
+        end;
+        if (modFlags and NSControlKeyMask) > 0 then
+        begin
+          if (modFlags and 1) > 0 then
+          begin
+            key_WorkDown(K_CTRL_L);
+            key := SCA(K_CTRL_L);
+            keysDown[key] := TRUE;
+            keysUp  [key] := FALSE;
+          end
+          else begin
+            key_WorkUp(K_CTRL_L);
+            key := SCA(K_CTRL_L);
+            keysDown[key] := False;
+            keysUp  [key] := True;
+          end;
+          if (modFlags and $2000) > 0 then
+          begin
+            key_WorkDown(K_CTRL_R);
+            key := SCA(K_CTRL_R);
+            keysDown[key] := TRUE;
+            keysUp  [key] := FALSE;
+          end
+          else begin
+            key_WorkUp(K_CTRL_R);
+            key := SCA(K_CTRL_R);
+            keysDown[key] := False;
+            keysUp  [key] := True;
+          end;
+        end;
+        if (modFlags and NSAlternateKeyMask) > 0 then
+        begin
+          if (modFlags and $20) > 0 then
+          begin
+            key_WorkDown(K_ALT_L);
+            key := SCA(K_ALT_L);
+            keysDown[key] := TRUE;
+            keysUp  [key] := FALSE;
+          end
+          else begin
+            key_WorkUp(K_ALT_L);
+            key := SCA(K_ALT_L);
+            keysDown[key] := False;
+            keysUp  [key] := True;
+          end;
+          if (modFlags and $40) > 0 then
+          begin
+            key_WorkDown(K_ALT_R);
+            key := SCA(K_ALT_R);
+            keysDown[key] := TRUE;
+            keysUp  [key] := FALSE;
+          end
+          else begin
+            key_WorkUp(K_ALT_R);
+            key := SCA(K_ALT_R);
+            keysDown[key] := False;
+            keysUp  [key] := True;
+          end;
+        end;
+        if (modFlags and NSCommandKeyMask) > 0 then
+        begin
+          if (modFlags and 8) > 0 then
+          begin
+            key_WorkDown(K_SUPER_L);
+            key := SCA(K_SUPER_L);
+            keysDown[key] := TRUE;
+            keysUp  [key] := FALSE;
+          end
+          else begin
+            key_WorkUp(K_SUPER_L);
+            key := SCA(K_SUPER_L);
+            keysDown[key] := False;
+            keysUp  [key] := True;
+          end;
+          if (modFlags and 16) > 0 then
+          begin
+            key_WorkDown(K_SUPER_R);
+            key := SCA(K_SUPER_R);
+            keysDown[key] := TRUE;
+            keysUp  [key] := FALSE;
+          end
+          else begin
+            key_WorkUp(K_SUPER_R);
+            key := SCA(K_SUPER_R);
+            keysDown[key] := False;
+            keysUp  [key] := True;
+          end;
+        end;
+      end;
+    NSKeyDown, NSKeyDownMask:
+      begin
+        flagTrue := flagTrue or KEYUPDOWN;
+        key := mackey_to_scancode(ev.keyCode);
+        key_WorkDown(key);
+
+(*        if keysCanText Then                     izmenit? polnostyu
+          case key of
+            K_SYSRQ, K_PAUSE,
+            K_ESCAPE, K_ENTER, K_KP_ENTER,
+            K_UP, K_DOWN, K_LEFT, K_RIGHT,
+            K_INSERT, K_DELETE, K_HOME, K_END,
+            K_PAGEUP, K_PAGEDOWN,
+            K_CTRL_L, K_CTRL_R,
+            K_ALT_L, K_ALT_R,
+            K_SHIFT_L, K_SHIFT_R,
+            K_SUPER_L, K_SUPER_R,
+            K_APP_MENU,
+            K_CAPSLOCK, K_NUMLOCK, K_SCROLL:;
+            K_BACKSPACE: utf8_Backspace(keysText);
+            K_TAB:       key_InputText('  ');
+          else
+ //           GetEventParameter(inEvent, kEventParamKeyUnicodes, typeUTF8Text, nil, 6, @len, @c[0]);
+ //           if len > 0 Then
+            begin
+  //            SetLength(str, len);
+  //            System.Move(c[0], str[1], len);
+              key_InputText(str);
+            end;
+          end;         *)
+      end;
+    NSKeyUp, NSKeyUpMask:
+      begin
+        flagTrue := flagTrue or KEYUPDOWN;
+        key := mackey_to_scancode(ev.keyCode);
+        key_WorkUp(key);
+      end;
+  end;
+  if (flagTrue and KEYUPDOWN) = 0 then
+  begin
+    NSApp.sendEvent(ev);
+//    NSApp.updateWindows;
+  end;
+  goto eventLoop;
+{$Else}
   eClass := GetEventClass(inEvent);
   eKind  := GetEventKind(inEvent);
   Result := CallNextEventHandler(inHandlerCallRef, inEvent);
@@ -1196,6 +1491,7 @@ begin
           end;
       end;
   end;
+{$EndIf}
 {$ENDIF}
 end;
 {$EndIf}

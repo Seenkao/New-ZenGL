@@ -4,7 +4,6 @@ library demo11;
 
 uses
   zgl_application,
-  zgl_main,
   zgl_screen,
   zgl_window,
   zgl_file,
@@ -22,10 +21,11 @@ uses
 
 var
   dirRes  : UTF8String = 'assets/';
-  fntMain : zglPFont;
+  fntMain : Byte;
   texBack : zglPTexture;
   grid    : zglTGrid2D;
   wave    : Single;
+  TimeStart: Byte;
 
 procedure Init;
   var
@@ -53,7 +53,7 @@ begin
         grid.Grid[ i, j ].X := i * 40;
         grid.Grid[ i, j ].Y := j * 40;
       end;
-  setTextScale(1.5);
+  setTextScale(15, fntMain);
 end;
 
 procedure Draw;
@@ -106,7 +106,7 @@ procedure Java_zengl_android_ZenGL_Main( var env; var thiz ); cdecl;
 begin
   randomize();
 
-  timer_Add( @Timer, 16 );
+  TimeStart := timer_Add( @Timer, 16, Start );
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );

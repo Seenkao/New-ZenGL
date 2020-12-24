@@ -24,13 +24,14 @@
 unit zgl_textures_jpg;
 
 {$I zgl_config.cfg}
-{$IFDEF iOS}
+{$IF defined(iOS) or defined(MAC_COCOA)}
   {$modeswitch objectivec1}
-{$ENDIF}
+{$IfEnd}
 
-{$IFNDEF FPC}
+{$If Not defined(FPC) or defined(MAC_COCOA)}
   {$UNDEF USE_LIBJPEG}
-{$ENDIF}
+{$IfEnd}
+
 
 {$IFDEF ANDROID}
   {$DEFINE USE_LIBJPEG}
@@ -40,9 +41,9 @@ unit zgl_textures_jpg;
   {$IFDEF WINDOWS}
     {$DEFINE USE_OLEPICTURE}
   {$ENDIF}
-  {$IFDEF iOS}
-    {$DEFINE USE_UIIMAGE}
-  {$ENDIF}
+  {$If defined(iOS) or defined(MAC_COCOA)}
+    {$DEFINE USE_NS_UIIMAGE}
+  {$IfEnd}
 {$ENDIF}
 
 interface
@@ -51,8 +52,11 @@ uses
   Windows,
   zgl_lib_msvcrt,
   {$ENDIF}
-  {$IFDEF USE_UIIMAGE}
+  {$IFDEF USE_NS_UIIMAGE}{$IfDef MAC_COCOA}
+  CocoaAll,
+  {$Else}
   iPhoneAll,
+  {$EndIf}
   CGContext,
   CGGeometry,
   CGImage,
@@ -66,6 +70,7 @@ const
   JPG_EXTENSION : UTF8String = 'JPG';
   JPEG_EXTENSION: UTF8String = 'JPEG';
 
+{/$IfNDef MAC_COCOA}
 {$IFDEF USE_LIBJPEG}
   {$IFNDEF ANDROID}
     {$L jpeg_helper}
@@ -100,9 +105,12 @@ const
     {$LINKLIB libgcc.a}
   {$ENDIF}
 {$ENDIF}
+{/$EndIf}
 
 procedure jpg_LoadFromFile(const FileName: UTF8String; out Data: PByteArray; out W, H, Format: Word);
+{$IfNDef MAC_COCOA}
 procedure jpg_LoadFromMemory(const Memory: zglTMemory; out Data: PByteArray; out W, H, Format: Word);
+{$EndIf}
 
 implementation
 uses
@@ -219,11 +227,16 @@ type
   end;
 {$ENDIF}
 
-{$IFDEF USE_UIIMAGE}
+{$IFDEF USE_NS_UIIMAGE}
 type
   zglPJPGData = ^zglTJPGData;
   zglTJPGData = record
+    {$IfDef MAC_COCOA}
+    Image  : NSImage;
+    Bitmap : NSBitmapImageRep;
+    {$Else}
     Image  : UIImage;
+    {$EndIf}
     Color  : CGColorSpaceRef;
     Context: CGContextRef;
     Data   : NSData;
@@ -286,12 +299,40 @@ end;
 
 procedure jpg_LoadFromFile(const FileName: UTF8String; out Data: PByteArray; out W, H, Format: Word);
   var
+    {$IfDef MAC_COCOA}
+    jpg: zglTJPGData;
+    mRect: NSRect;
+    {$Else}
     jpgMem: zglTMemory;
+    {$EndIf}
 begin
+  {$IfDef MAC_COCOA}
+  jpg.Image := NSImage.alloc.init;
+  jpg.Image.initWithContentsOfFile(NSSTR(PAnsiChar(zgl_Get(DIRECTORY_APPLICATION)) + FileName));
+  jpg.Width   := Round(jpg.Image.size.width);
+  jpg.Height  := Round(jpg.Image.size.height);
+  mRect.origin.x := 0;
+  mRect.origin.y := 0;
+  mRect.size.width := jpg.Width;
+  mRect.size.height := jpg.Height;
+  jpg.Color := CGImageGetColorSpace(CGImageRef(jpg.Image.CGImageForProposedRect_context_hints(@mRect, nil, nil)));
+  GetMem(Data, jpg.Width * jpg.Height * 4);
+  jpg.Context := CGBitmapContextCreate(Data, jpg.Width, jpg.Height, 8, jpg.Width * 4, jpg.Color, kCGImageAlphaPremultipliedLast);
+  CGContextTranslateCTM(jpg.Context, 0, jpg.Height);
+  CGContextScaleCTM(jpg.Context, 1, -1);
+  CGContextDrawImage(jpg.Context, CGRectMake(0, 0, jpg.Width, jpg.Height),
+            CGImageRef(jpg.Image.CGImageForProposedRect_context_hints(@mRect, nil, nil)));
+  CGContextRelease(jpg.Context);
+  W      := jpg.Width;
+  H      := jpg.Height;
+  Format := TEX_FORMAT_RGBA;
+  {$Else}
   mem_LoadFromFile(jpgMem, FileName);
   jpg_LoadFromMemory(jpgMem, Data, W, H, Format);
   mem_Free(jpgMem);
+  {$EndIf}
 end;
+
 
 procedure jpg_LoadFromMemory(const Memory: zglTMemory; out Data: PByteArray; out W, H, Format: Word);
   var
@@ -301,6 +342,7 @@ procedure jpg_LoadFromMemory(const Memory: zglTMemory; out Data: PByteArray; out
     g: HGLOBAL;
   {$ENDIF}
 begin
+{$IfNDef MAC_COCOA}
 {$IFDEF USE_LIBJPEG}
   jpg.Memory  := Memory.Memory;
   jpg.MemSize := Memory.Size;
@@ -324,10 +366,11 @@ begin
   end;
 {$ENDIF}
 
-{$IFDEF USE_UIIMAGE}
+{$IFDEF USE_NS_UIIMAGE}
   jpg.Data    := NSData.alloc().init();
+
+  jpg.Data.dataWithBytes_length(Memory.Memory, Memory.Size);
   jpg.Data.initWithBytesNoCopy_length_freeWhenDone(Memory.Memory, Memory.Size, FALSE);
-  jpg.Image   := UIImage.imageWithData(jpg.Data);
   jpg.Width   := Round(jpg.Image.size.width);
   jpg.Height  := Round(jpg.Image.size.height);
   jpg.Color   := CGImageGetColorSpace(jpg.Image.CGImage());
@@ -342,6 +385,7 @@ begin
   W      := jpg.Width;
   H      := jpg.Height;
   Format := TEX_FORMAT_RGBA;
+  {$EndIf}
 end;
 
 {$IFDEF USE_JPG}

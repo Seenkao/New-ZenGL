@@ -15,9 +15,8 @@ uses
   {$IFDEF USE_ZENGL_STATIC}
   // RU: При использовании статической компиляции необходимо подключать модули ZenGL содержащие необходимый функционал.
   // EN: Using static compilation needs to use ZenGL units with needed functionality.
-  zgl_main,
-  zgl_screen,
   zgl_window,
+  zgl_screen,
   zgl_timers,
   zgl_utils,
   zgl_log
@@ -31,6 +30,8 @@ uses
 var
   DirApp  : UTF8String;
   DirHome : UTF8String;
+
+  TimeStart  : Byte = 0;
 
 procedure Init;
 begin
@@ -54,8 +55,7 @@ procedure Timer;
 begin
   // RU: Будем в заголовке показывать количество кадров в секунду.
   // EN: Caption will show the frames per second.
-//  wnd_SetCaption( '01 - Initialization[ FPS: ' + u_IntToStr( zgl_Get( RENDER_FPS ) ) + ' ]' );
-  wndCaption := utf8_Copy('01 - Initialization[ FPS: ' + u_IntToStr( zgl_Get( RENDER_FPS ) ) + ' ]');     // как вариант
+  wnd_SetCaption( '01 - Initialization[ FPS: ' + u_IntToStr( zgl_Get( RENDER_FPS ) ) + ' ]' );
 end;
 
 procedure Quit;
@@ -97,7 +97,7 @@ Begin
 
   // RU: Создаем таймер с интервалом 1000мс.
   // EN: Create a timer with interval 1000ms.
-  timer_Add( @Timer, 100 );
+  TimeStart := timer_Add( @Timer, 100, Start );
 
   // RU: Регистрируем процедуру, что выполнится сразу после инициализации ZenGL.
   // EN: Register the procedure, that will be executed after ZenGL initialization.

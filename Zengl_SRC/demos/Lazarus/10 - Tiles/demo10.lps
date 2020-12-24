@@ -9,8 +9,9 @@
         <Filename Value="demo10.lpr"/>
         <IsPartOfProject Value="True"/>
         <IsVisibleTab Value="True"/>
-        <CursorPos X="13" Y="12"/>
-        <UsageCount Value="20"/>
+        <TopLine Value="49"/>
+        <CursorPos X="33" Y="70"/>
+        <UsageCount Value="22"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit0>
@@ -20,4 +21,15 @@
       <Modes Count="0" ActiveMode="default"/>
     </RunParams>
   </ProjectSession>
+  <Debugging>
+    <BreakPoints Count="1">
+      <Item1>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Source Value="..\..\..\src\zgl_screen.pas"/>
+        <Line Value="832"/>
+      </Item1>
+    </BreakPoints>
+  </Debugging>
 </CONFIG>

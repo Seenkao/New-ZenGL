@@ -57,7 +57,7 @@
     <Linking>
       <Debugging>
         <GenerateDebugInfo Value="False"/>
-        <UseExternalDbgSyms Value="True"/>
+        <StripSymbols Value="True"/>
       </Debugging>
       <Options>
         <Win32>
@@ -65,6 +65,11 @@
         </Win32>
       </Options>
     </Linking>
+    <Other>
+      <Verbosity>
+        <ShoLineNum Value="True"/>
+      </Verbosity>
+    </Other>
   </CompilerOptions>
   <Debugging>
     <Exceptions Count="3">

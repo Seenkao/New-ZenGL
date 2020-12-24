@@ -4,7 +4,6 @@ library demo12;
 
 uses
   zgl_application,
-  zgl_main,
   zgl_file,
   zgl_screen,
   zgl_window,
@@ -17,13 +16,13 @@ uses
   zgl_sprite_2d,
   zgl_font,
   zgl_text,
-  zgl_math_2d,
+  zgl_types,
   zgl_utils
   ;
 
 var
   dirRes    : UTF8String = 'assets/';
-  fntMain   : zglPFont;
+  fntMain   : Byte;
   texTux    : zglPTexture;
   rtFull    : zglPRenderTarget;
   rtDefault : zglPRenderTarget;
@@ -51,7 +50,7 @@ begin
   rtDefault := rtarget_Add( tex_CreateZero( 256, 256 ), RT_DEFAULT );
 
   file_CloseArchive();
-  setTextScale(1.5);
+  setTextScale(15, fntMain);
 end;
 
 procedure Draw;

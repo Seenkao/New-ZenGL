@@ -20,7 +20,7 @@ uses
   zgl_font,
   zgl_text,
   zgl_textures_png,
-  zgl_math_2d,
+  zgl_types,
   zgl_collision_2d,
   zgl_utils
   ;
@@ -28,7 +28,7 @@ uses
 var
   dirRes  : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
 
-  fntMain   : zglPFont;
+  fntMain    : Byte;
 
   joyCount   : Integer;
   userInput  : UTF8String;
@@ -36,9 +36,12 @@ var
   inputRect  : zglTRect;
   lineAlpha  : Byte;
 
+  TimeStart  : Byte;
+
 procedure Init;
 begin
   fntMain := font_LoadFromFile( dirRes + 'font.zfi' );
+  setTextScale(15, fntMain);
 
   inputRect.X := 400 - 192;
   inputRect.Y := 300 - 100 - 32;
@@ -54,12 +57,11 @@ procedure Draw;
   var
     w : Single;
 begin
-  setTextScale(1.5);
   text_Draw( fntMain, 0, 0, 'Escape - Exit' );
 
   // RU: Координаты мыши можно получить при помощи функций mouse_X и mouse_Y.
   // EN: Mouse coordinates can be got using functions mouse_X and mouse_Y.
-  text_Draw( fntMain, 0, 16, 'Mouse X, Y: ' + u_IntToStr( mouseX ) + '; ' + u_IntToStr( mouseY ) );
+  text_Draw( fntMain, 0, 18, 'Mouse X, Y: ' + u_IntToStr( mouseX ) + '; ' + u_IntToStr( mouseY ) );
 
   // RU: Выводим введённый пользователем текст.
   // EN: Show the inputted text.
@@ -115,18 +117,18 @@ begin
   // RU: Проверить нажата ли левая кнопка мыши в пределах inputRect и начать отслеживать ввод текста.
   // EN: Check if left mouse button was pressed inside inputRect and start to track text input.
   if mBClickCanClick( M_BLEFT_CLICK ) and col2d_PointInRect( mouseX, mouseY, inputRect ) Then
-    begin
-      trackInput := TRUE;
-      key_BeginReadText( userInput, 24 );
-    end;
+  begin
+    trackInput := TRUE;
+    key_BeginReadText( userInput, 24 );
+  end;
 
   // RU: Если был нажат Enter прекращаем отслеживать ввод текста.
   // EN: Finish to track text input if Enter was pressed.
   if key_Press( K_ENTER ) Then
-    begin
-      trackInput := FALSE;
-      key_EndReadText();
-    end;
+  begin
+    trackInput := FALSE;
+    key_EndReadText();
+  end;
 
   // RU: Получаем введённый пользователем текст.
   // EN: Get inputted by user text.
@@ -136,8 +138,9 @@ begin
   // RU: По нажатию Escape завершить приложение.
   // EN: If Escape was pressed - shutdown the application.
 
-  // if key_Press( K_ESCAPE ) Then zgl_Exit;              больше не нужно это делать, но если для чего-то понадобится клавиша Escape, надо
-  // отключить дефайн на её обработку
+  // if key_Press( K_ESCAPE ) Then zgl_Exit;
+                   // больше не нужно это делать, но если для чего-то понадобится клавиша Escape, надо
+                   // отключить дефайн (USE_EXIT_ESCAPE) на её обработку
 
   // RU: Обязательно очищаем состояния всех подсистем ввода.
   // EN: Necessarily clear all the states of input subsystems.
@@ -147,7 +150,7 @@ begin
 end;
 
 Begin
-  timer_Add( @Timer, 16 );
+  TimeStart := timer_Add( @Timer, 16, Start );
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );

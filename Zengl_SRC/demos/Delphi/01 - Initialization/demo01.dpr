@@ -9,15 +9,17 @@ program demo01;
 uses
   // RU: При использовании статической компиляции необходимо подключать модули ZenGL содержащие необходимый функционал.
   // EN: Using static compilation needs to use ZenGL units with needed functionality.
-  zgl_window,
   zgl_screen,
+  zgl_window,
   zgl_timers,
-  zgl_utils
+  zgl_utils,
+  zgl_application
   ;
 
 var
   DirApp  : UTF8String;
   DirHome : UTF8String;
+  TimeStart: Byte;
 
 procedure Init;
 begin
@@ -57,7 +59,7 @@ Begin
 
   // RU: Создаем таймер с интервалом 1000мс.
   // EN: Create a timer with interval 1000ms.
-  timer_Add(@Timer, 1000);
+  TimeStart := timer_Add(@Timer, 1000, Start);
 
   // RU: Регистрируем процедуру, что выполнится сразу после инициализации ZenGL.
   // EN: Register the procedure, that will be executed after ZenGL initialization.
@@ -77,7 +79,7 @@ Begin
   wndCaption := utf8_Copy('01 - Initialization');
   // RU: Разрешаем курсор мыши, по умолчанию стоит True.
   // EN: Allow to show the mouse cursor.
-   wnd_ShowCursor( TRUE );                        // по умолчанию стоит  
+  appShowCursor := True;
 
   // RU: Указываем первоначальные настройки. По умолчанию именно так всё и стоит.
   // EN: Set screen options.

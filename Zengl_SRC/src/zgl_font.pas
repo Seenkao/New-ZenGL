@@ -21,7 +21,7 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 04.08.2020
+ !!! modification from Serge 15.12.2020
 }
 unit zgl_font;
 
@@ -30,12 +30,20 @@ unit zgl_font;
 interface
 uses
   zgl_textures,
-  zgl_math_2d,
+  zgl_types,
   zgl_file,
   zgl_memory;
 
 const
   ZGL_FONT_INFO: array[0..13] of AnsiChar = ('Z', 'G', 'L', '_', 'F', 'O', 'N', 'T', '_', 'I', 'N', 'F', 'O', #0);
+  MAX_USE_FONT = 5;
+  Enable       = 1;
+  UseFnt       = 2;
+
+  PaddingX1    = 0;
+  PaddingX2    = 2;
+  PaddingY1    = 1;
+  PaddingY2    = 3;
 
 type
   zglPCharDesc = ^zglTCharDesc;
@@ -57,32 +65,34 @@ type
       Chars: Word;
                  end;
 
+    Flags     : Byte;
+    Scale     : Single;
+    ScaleNorm : Single;
     Pages     : array of zglPTexture;
     CharDesc  : array[0..65535] of zglPCharDesc;
     MaxHeight : Integer;
     MaxShiftY : Integer;
     Padding   : array[0..3] of Byte;
-
-    prev, next: zglPFont;
 end;
 
 type
   zglPFontManager = ^zglTFontManager;
   zglTFontManager = record
     Count: Integer;
-    First: zglTFont;
+    Font: array[1..MAX_USE_FONT] of zglTFont;
 end;
 
-function  font_Add: zglPFont;
-procedure font_Del(var Font: zglPFont);
+function  font_Add: Byte;
+procedure font_Del(var Font: Byte);
+procedure allFont_Destroy;
 
-function font_LoadFromFile(const FileName: UTF8String): zglPFont;
-function font_LoadFromMemory(const Memory: zglTMemory): zglPFont;
+function font_LoadFromFile(const FileName: UTF8String): Byte;
+function font_LoadFromMemory(const Memory: zglTMemory): Byte;
 {$IFDEF ANDROID}
-procedure font_RestoreFromFile(var Font: zglPFont; const FileName: UTF8String);
+procedure font_RestoreFromFile(var Font: Byte; const FileName: UTF8String);
 {$ENDIF}
 
-procedure font_Load(var fnt: zglPFont; var fntMem: zglTMemory);
+procedure font_Load(var fnt: Byte; var fntMem: zglTMemory);
 
 var
   managerFont: zglTFontManager;
@@ -95,43 +105,65 @@ uses
   zgl_text,
   zgl_utils;
 
-function font_Add;
+function font_Add: Byte;
+var
+  i: Byte;
 begin
-  Result := @managerFont.First;
-  while Assigned(Result.next) do
-    Result := Result.next;
-
-  zgl_GetMem(Pointer(Result.next), SizeOf(zglTFont));
-  Result.next.prev := Result;
-  Result.next.next := nil;
-  Result           := Result.next;
+  i := 1;
+  Result := 255;
+  if managerFont.Count = MAX_USE_FONT then Exit;
+  while i <= MAX_USE_FONT do
+  begin
+    if (managerFont.Font[i].Flags and UseFnt) = 0 then
+      Break;
+    inc(i);
+  end;
+  if i > MAX_USE_FONT then
+    Exit;
+  managerFont.Font[i].Flags := managerFont.Font[i].Flags or Enable or UseFnt;
+  Result := i;
   INC(managerFont.Count);
 end;
 
-procedure font_Del(var Font: zglPFont);
-  var
-    i: Integer;
+procedure font_Del(var Font: Byte);
 begin
-  if not Assigned(Font) Then exit;
-
-  for i := 0 to Font.Count.Pages - 1 do
-    tex_Del(Font.Pages[i]);
-  log_Add('Font to free');
-  for i := 0 to 65535 do
-    if Assigned(Font.CharDesc[i]) Then
-      FreeMem(Font.CharDesc[i]);
-  if Assigned(Font.prev) Then
-    Font.prev.next := Font.next;
-  if Assigned(Font.next) Then
-    Font.next.prev := Font.prev;
-  SetLength(Font.Pages, 0);
-  FreeMem(Font);
-  Font := nil;
-
+  if Font = 0 then
+  begin
+    Font := 255;
+    exit;
+  end;
+  if (managerFont.Font[Font].Flags and Enable) = 0 then
+    Exit;
+  if (managerFont.Font[Font].Flags and UseFnt) = 0 then
+    Exit;
+  managerFont.Font[Font].Flags := managerFont.Font[Font].Flags and (255 - UseFnt);
   DEC(managerFont.Count);
+  Font := 0;
 end;
 
-function font_LoadFromFile(const FileName: UTF8String): zglPFont;
+procedure allFont_Destroy;
+var
+  j, i: Word;
+begin
+  for j := 1 to MAX_USE_FONT do
+  begin
+    if (managerFont.Font[j].Flags and Enable) > 0 then
+    begin
+      for i := 0 to managerFont.Font[j].Count.Pages - 1 do
+        tex_Del(managerFont.Font[j].Pages[i]);
+      log_Add('Font to free');
+      for i := 0 to 65535 do
+        if Assigned(managerFont.Font[j].CharDesc[i]) Then
+          FreeMem(managerFont.Font[j].CharDesc[i]);
+      SetLength(managerFont.Font[j].Pages, 0);
+//      FreeMem(managerFont.Font[j]);
+//      Font := nil;
+    end;
+
+  end;
+end;
+
+function font_LoadFromFile(const FileName: UTF8String): Byte;
   var
     fntMem: zglTMemory;
     i, j  : Integer;
@@ -140,11 +172,13 @@ function font_LoadFromFile(const FileName: UTF8String): zglPFont;
     tmp   : UTF8String;
     res   : zglTFontResource;
 begin
-  Result := nil;
+  Result := 255;
 
   if resUseThreaded Then
   begin
     Result       := font_Add();
+    if Result = 255 then
+      exit;
     res.FileName := FileName;
     res.Font     := Result;
     res_AddToQueue(RES_FONT, TRUE, @res);
@@ -161,7 +195,7 @@ begin
   font_Load(Result, fntMem);
   mem_Free(fntMem);
 
-  if not Assigned(Result) Then
+  if Result = 255 Then
   begin
     log_Add('Unable to load font: "' + FileName + '"');
     exit;
@@ -169,31 +203,33 @@ begin
 
   dir  := file_GetDirectory(FileName);
   name := file_GetName(FileName);
-  for i := 0 to Result.Count.Pages - 1 do
+  for i := 0 to managerFont.Font[Result].Count.Pages - 1 do
     for j := managerTexture.Count.Formats - 1 downto 0 do
     begin
       tmp := dir + name + '-page' + u_IntToStr(i) + '.' + u_StrDown(managerTexture.Formats[j].Extension);
       if file_Exists(tmp) Then
       begin
-        Result.Pages[i] := tex_LoadFromFile(tmp, $FF000000, TEX_DEFAULT_2D);
+        managerFont.Font[Result].Pages[i] := tex_LoadFromFile(tmp, $FF000000, TEX_DEFAULT_2D);
         break;
       end;
     end;
-  TextScaleStandart := TextScaleStandart / 16 * (16 / (trunc(_textureWidth / (TextScaleStandart))));
-  TextScaleNormal := 1 / TextScaleStandart ;
-  textScale := TextScaleNormal;
+
+  managerFont.Font[Result].ScaleNorm := 16 / TextScaleStandart ;
+  managerFont.Font[Result].Scale := managerFont.Font[Result].ScaleNorm;
 end;
 
-function font_LoadFromMemory(const Memory: zglTMemory): zglPFont;
+function font_LoadFromMemory(const Memory: zglTMemory): Byte;
   var
     fntMem: zglTMemory;
     res   : zglTFontResource;
 begin
-  Result := nil;
+  Result := 255;
 
   if resUseThreaded Then
   begin
     Result     := font_Add();
+    if Result = 255 then
+      Exit;
     res.Memory := Memory;
     res.Font   := Result;
     res_AddToQueue(RES_FONT, FALSE, @res);
@@ -203,12 +239,12 @@ begin
   fntMem := Memory;
   font_Load(Result, fntMem);
 
-  if not Assigned(Result) Then
+  if Result = 255 Then
     log_Add('Unable to load font: From Memory');
 end;
 
 {$IFDEF ANDROID}
-procedure font_RestoreFromFile(var Font: zglPFont; const FileName: UTF8String);
+procedure font_RestoreFromFile(var Font: Byte; const FileName: UTF8String);
   var
     fntMem: zglTMemory;
     i, j  : Integer;
@@ -233,80 +269,79 @@ begin
 
   dir  := file_GetDirectory(FileName);
   name := file_GetName(FileName);
-  for i := 0 to Font.Count.Pages - 1 do
+  for i := 0 to managerFont.Font[Font].Count.Pages - 1 do
     for j := managerTexture.Count.Formats - 1 downto 0 do
     begin
       tmp := dir + name + '-page' + u_IntToStr(i) + '.' + u_StrDown(managerTexture.Formats[j].Extension);
       if file_Exists(tmp) Then
       begin
-        tex_RestoreFromFile(Font.Pages[i], tmp, TEX_NO_COLORKEY, TEX_DEFAULT_2D);
+        tex_RestoreFromFile(managerFont.Font[Font].Pages[i], tmp, TEX_NO_COLORKEY, TEX_DEFAULT_2D);
         break;
       end;
     end;
 end;
 {$ENDIF}
 
-procedure font_Load(var fnt: zglPFont; var fntMem: zglTMemory);
+procedure font_Load(var fnt: Byte; var fntMem: zglTMemory);
   var
     i    : Integer;
     c    : LongWord;
     fntID: array[0..13] of AnsiChar;
 begin
   TextScaleStandart := 0;
+  if fnt <> 255 then
+    exit;
   fntID[13] := #0;
   mem_Read(fntMem, fntID, 13);
   if fntID <> ZGL_FONT_INFO Then
   begin
-    if Assigned(fnt) Then
-      FreeMemory(fnt);
-    fnt := nil;
     exit;
   end;
+  fnt := font_Add;
+  if fnt = 255 then
+    exit;
+  mem_Read(fntMem, managerFont.Font[fnt].Count.Pages,  2);
+  mem_Read(fntMem, managerFont.Font[fnt].Count.Chars,  2);
+  mem_Read(fntMem, managerFont.Font[fnt].MaxHeight,    4);
+  mem_Read(fntMem, managerFont.Font[fnt].MaxShiftY,    4);
+  mem_Read(fntMem, managerFont.Font[fnt].Padding[0], 4);
+  SetLength(managerFont.Font[fnt].Pages, managerFont.Font[fnt].Count.Pages);
 
-  if not Assigned(fnt) Then
-    fnt := font_Add();
-  mem_Read(fntMem, fnt.Count.Pages,  2);
-  mem_Read(fntMem, fnt.Count.Chars,  2);
-  mem_Read(fntMem, fnt.MaxHeight,    4);
-  mem_Read(fntMem, fnt.MaxShiftY,    4);
-  mem_Read(fntMem, fnt.Padding[0], 4);
-  SetLength(fnt.Pages, fnt.Count.Pages);
-  for i := 0 to fnt.Count.Pages - 1 do
-    fnt.Pages[i] := nil;
-  for i := 0 to fnt.Count.Chars - 1 do
+  for i := 0 to managerFont.Font[fnt].Count.Pages - 1 do
+    managerFont.Font[fnt].Pages[i] := nil;
+  for i := 0 to managerFont.Font[fnt].Count.Chars - 1 do
   begin
     mem_Read(fntMem, c, 4);
-    zgl_GetMem(Pointer(fnt.CharDesc[c]), SizeOf(zglTCharDesc));
+    zgl_GetMem(Pointer(managerFont.Font[fnt].CharDesc[c]), SizeOf(zglTCharDesc));
     {$IFDEF ENDIAN_BIG}
     forceNoSwap := TRUE;
     {$ENDIF}
-    mem_Read(fntMem, fnt.CharDesc[c].Page, 4);
+    mem_Read(fntMem, managerFont.Font[fnt].CharDesc[c].Page, 4);
     {$IFDEF ENDIAN_BIG}
     forceNoSwap := FALSE;
     {$ENDIF}
-    mem_Read(fntMem, fnt.CharDesc[c].Width, 1);
-    mem_Read(fntMem, fnt.CharDesc[c].Height, 1);
-    if TextScaleStandart < fnt.CharDesc[c].Width then
+    mem_Read(fntMem, managerFont.Font[fnt].CharDesc[c].Width, 1);
+    mem_Read(fntMem, managerFont.Font[fnt].CharDesc[c].Height, 1);
+    if TextScaleStandart < managerFont.Font[fnt].CharDesc[c].Width then
     begin
-      TextScaleStandart := fnt.CharDesc[c].Width;
+      TextScaleStandart := managerFont.Font[fnt].CharDesc[c].Width;
     end;
-    mem_Read(fntMem, fnt.CharDesc[c].ShiftX, 4);
-    mem_Read(fntMem, fnt.CharDesc[c].ShiftY, 4);
-    mem_Read(fntMem, fnt.CharDesc[c].ShiftP, 4);
+    mem_Read(fntMem, managerFont.Font[fnt].CharDesc[c].ShiftX, 4);
+    mem_Read(fntMem, managerFont.Font[fnt].CharDesc[c].ShiftY, 4);
+    mem_Read(fntMem, managerFont.Font[fnt].CharDesc[c].ShiftP, 4);
     {$IFDEF ENDIAN_BIG}
-    mem_Read(fntMem, fnt.CharDesc[c].TexCoords[0].X, 4);
-    mem_Read(fntMem, fnt.CharDesc[c].TexCoords[0].Y, 4);
-    mem_Read(fntMem, fnt.CharDesc[c].TexCoords[1].X, 4);
-    mem_Read(fntMem, fnt.CharDesc[c].TexCoords[1].Y, 4);
-    mem_Read(fntMem, fnt.CharDesc[c].TexCoords[2].X, 4);
-    mem_Read(fntMem, fnt.CharDesc[c].TexCoords[2].Y, 4);
-    mem_Read(fntMem, fnt.CharDesc[c].TexCoords[3].X, 4);
-    mem_Read(fntMem, fnt.CharDesc[c].TexCoords[3].Y, 4);
+    mem_Read(fntMem, managerFont.Font[fnt].CharDesc[c].TexCoords[0].X, 4);
+    mem_Read(fntMem, managerFont.Font[fnt].CharDesc[c].TexCoords[0].Y, 4);
+    mem_Read(fntMem, managerFont.Font[fnt].CharDesc[c].TexCoords[1].X, 4);
+    mem_Read(fntMem, managerFont.Font[fnt].CharDesc[c].TexCoords[1].Y, 4);
+    mem_Read(fntMem, managerFont.Font[fnt].CharDesc[c].TexCoords[2].X, 4);
+    mem_Read(fntMem, managerFont.Font[fnt].CharDesc[c].TexCoords[2].Y, 4);
+    mem_Read(fntMem, managerFont.Font[fnt].CharDesc[c].TexCoords[3].X, 4);
+    mem_Read(fntMem, managerFont.Font[fnt].CharDesc[c].TexCoords[3].Y, 4);
     {$ELSE}
-    mem_Read(fntMem, fnt.CharDesc[c].TexCoords[0], SizeOf(zglTPoint2D) * 4);
+    mem_Read(fntMem, managerFont.Font[fnt].CharDesc[c].TexCoords[0], SizeOf(zglTPoint2D) * 4);
     {$ENDIF}
   end;
-  TextScaleStandart := TextScaleStandart + fnt.Padding[0] + fnt.Padding[2];
 end;
 
 end.

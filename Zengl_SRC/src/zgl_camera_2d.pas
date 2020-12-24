@@ -29,7 +29,7 @@ unit zgl_camera_2d;
 
 interface
 uses
-  zgl_math_2d;
+  zgl_types;
 
 type
   zglPCamera2D = ^zglTCamera2D;

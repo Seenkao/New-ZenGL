@@ -12,8 +12,8 @@
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
       <Title Value="demo06"/>
-      <UseAppBundle Value="False"/>
       <ResourceType Value="res"/>
+      <UseXPManifest Value="True"/>
       <Icon Value="0"/>
     </General>
     <BuildModes Count="1">
@@ -52,11 +52,13 @@
     </Parsing>
     <CodeGeneration>
       <SmartLinkUnit Value="True"/>
-      <TargetCPU Value="x86_64"/>
+      <Optimizations>
+        <OptimizationLevel Value="3"/>
+      </Optimizations>
     </CodeGeneration>
     <Linking>
       <Debugging>
-        <UseExternalDbgSyms Value="True"/>
+        <GenerateDebugInfo Value="False"/>
       </Debugging>
       <LinkSmart Value="True"/>
     </Linking>

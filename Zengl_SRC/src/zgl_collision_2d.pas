@@ -28,6 +28,7 @@ unit zgl_collision_2d;
 interface
 
 uses
+  zgl_types,
   zgl_math_2d;
 
 // point 2d

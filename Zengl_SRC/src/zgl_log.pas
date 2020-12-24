@@ -57,18 +57,21 @@ begin
   appLog   := TRUE;
   logStart := Round(timer_GetTicks());
 
-  {$IfDef UNIX}
+  {$IfDef UNIX}{$IfNDef MAC_COCOA}
   if not Assigned(logFile) Then
     logFile := utf8_GetPAnsiChar('log.txt')
-  {$ENDIF}
+  {$ENDIF}{$EndIf}
   {$IFDEF WINDOWS}
   if not Assigned(logFile) Then
     logFile := utf8_GetPAnsiChar('log.txt')
   {$ENDIF}
-  {$IFDEF MACOSX}
+  {$IFDEF MACOSX}{$IfDef MAC_COCOA}
+  if not Assigned(logFile) Then
+    logFile := utf8_GetPAnsiChar('log.txt')
+  {$Else}
   if not Assigned(logFile) Then
     logFile := utf8_GetPAnsiChar(appWorkDir + '../log.txt')
-  {$ENDIF}
+  {$ENDIF}{$EndIf}
   {$IFDEF iOS}
   if not Assigned(logFile) Then
     logFile := utf8_GetPAnsiChar(appHomeDir + 'log.txt')

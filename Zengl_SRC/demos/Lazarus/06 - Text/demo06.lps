@@ -4,21 +4,21 @@
     <PathDelim Value="\"/>
     <Version Value="11"/>
     <BuildModes Active="Default"/>
-    <Units Count="17">
+    <Units Count="22">
       <Unit0>
         <Filename Value="demo06.lpr"/>
         <IsPartOfProject Value="True"/>
         <IsVisibleTab Value="True"/>
-        <TopLine Value="104"/>
-        <CursorPos X="42" Y="112"/>
-        <UsageCount Value="39"/>
+        <CursorPos X="8" Y="14"/>
+        <UsageCount Value="40"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit0>
       <Unit1>
         <Filename Value="..\..\..\headers\zglCustomConfig.cfg"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="9"/>
+        <TopLine Value="4"/>
+        <UsageCount Value="10"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit1>
       <Unit2>
@@ -79,14 +79,15 @@
       <Unit9>
         <Filename Value="..\..\..\src\zgl_application.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="221"/>
-        <CursorPos X="10" Y="225"/>
+        <TopLine Value="24"/>
+        <CursorPos X="6" Y="49"/>
         <UsageCount Value="11"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit9>
       <Unit10>
         <Filename Value="..\..\..\src\zgl_screen.pas"/>
         <EditorIndex Value="-1"/>
+        <CursorPos X="10" Y="28"/>
         <UsageCount Value="10"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit10>
@@ -135,60 +136,152 @@
         <UsageCount Value="10"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit16>
+      <Unit17>
+        <Filename Value="..\..\..\src\zgl_config.cfg"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="3" Y="8"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit17>
+      <Unit18>
+        <Filename Value="..\..\..\src\zgl_threads.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="19"/>
+        <CursorPos X="31" Y="35"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit18>
+      <Unit19>
+        <Filename Value="..\..\..\src\zgl_new_text.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="91"/>
+        <CursorPos X="65" Y="93"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit19>
+      <Unit20>
+        <Filename Value="..\18 - LCLZenGL\demoLCL.lpr"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="11" Y="6"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit20>
+      <Unit21>
+        <Filename Value="..\..\..\src\zgl_fpc.cfg"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit21>
     </Units>
-    <JumpHistory Count="13" HistoryIndex="12">
+    <JumpHistory Count="27" HistoryIndex="26">
       <Position1>
         <Filename Value="demo06.lpr"/>
-        <Caret Line="25" Column="8" TopLine="3"/>
+        <Caret Line="29" Column="8" TopLine="3"/>
       </Position1>
       <Position2>
         <Filename Value="demo06.lpr"/>
-        <Caret Line="29" Column="8" TopLine="3"/>
+        <Caret Line="26" Column="9" TopLine="3"/>
       </Position2>
       <Position3>
         <Filename Value="demo06.lpr"/>
-        <Caret Line="26" Column="9" TopLine="3"/>
+        <Caret Line="26" Column="10" TopLine="11"/>
       </Position3>
       <Position4>
         <Filename Value="demo06.lpr"/>
-        <Caret Line="26" Column="10" TopLine="11"/>
+        <Caret Line="38" Column="26" TopLine="16"/>
       </Position4>
       <Position5>
         <Filename Value="demo06.lpr"/>
-        <Caret Line="38" Column="26" TopLine="16"/>
+        <Caret Line="30" Column="8" TopLine="7"/>
       </Position5>
       <Position6>
         <Filename Value="demo06.lpr"/>
-        <Caret Line="30" Column="8" TopLine="7"/>
+        <Caret Line="29" Column="29" TopLine="11"/>
       </Position6>
       <Position7>
         <Filename Value="demo06.lpr"/>
-        <Caret Line="29" Column="29" TopLine="11"/>
+        <Caret Line="58" TopLine="40"/>
       </Position7>
       <Position8>
         <Filename Value="demo06.lpr"/>
-        <Caret Line="58" TopLine="40"/>
+        <Caret Line="60" TopLine="40"/>
       </Position8>
       <Position9>
         <Filename Value="demo06.lpr"/>
-        <Caret Line="60" TopLine="40"/>
+        <Caret Line="58" TopLine="40"/>
       </Position9>
       <Position10>
         <Filename Value="demo06.lpr"/>
-        <Caret Line="58" TopLine="40"/>
+        <Caret Line="60" TopLine="40"/>
       </Position10>
       <Position11>
         <Filename Value="demo06.lpr"/>
-        <Caret Line="60" TopLine="40"/>
+        <Caret Line="78" Column="129" TopLine="60"/>
       </Position11>
       <Position12>
         <Filename Value="demo06.lpr"/>
-        <Caret Line="78" Column="129" TopLine="60"/>
+        <Caret Line="79" Column="93" TopLine="59"/>
       </Position12>
       <Position13>
         <Filename Value="demo06.lpr"/>
-        <Caret Line="79" Column="93" TopLine="59"/>
+        <Caret Line="15" Column="8"/>
       </Position13>
+      <Position14>
+        <Filename Value="demo06.lpr"/>
+        <Caret Line="14" Column="11"/>
+      </Position14>
+      <Position15>
+        <Filename Value="demo06.lpr"/>
+        <Caret Line="3" Column="12"/>
+      </Position15>
+      <Position16>
+        <Filename Value="demo06.lpr"/>
+        <Caret Line="24" Column="15"/>
+      </Position16>
+      <Position17>
+        <Filename Value="demo06.lpr"/>
+        <Caret Line="36" Column="17" TopLine="24"/>
+      </Position17>
+      <Position18>
+        <Filename Value="demo06.lpr"/>
+        <Caret Line="59" Column="7" TopLine="49"/>
+      </Position18>
+      <Position19>
+        <Filename Value="demo06.lpr"/>
+        <Caret Line="59" Column="3" TopLine="37"/>
+      </Position19>
+      <Position20>
+        <Filename Value="demo06.lpr"/>
+        <Caret Line="26" Column="19" TopLine="18"/>
+      </Position20>
+      <Position21>
+        <Filename Value="demo06.lpr"/>
+        <Caret Line="68" Column="17" TopLine="16"/>
+      </Position21>
+      <Position22>
+        <Filename Value="demo06.lpr"/>
+        <Caret Line="3" Column="16"/>
+      </Position22>
+      <Position23>
+        <Filename Value="demo06.lpr"/>
+        <Caret Line="14" Column="9" TopLine="7"/>
+      </Position23>
+      <Position24>
+        <Filename Value="demo06.lpr"/>
+        <Caret Line="10" Column="35"/>
+      </Position24>
+      <Position25>
+        <Filename Value="demo06.lpr"/>
+        <Caret Line="10" Column="7"/>
+      </Position25>
+      <Position26>
+        <Filename Value="demo06.lpr"/>
+        <Caret Line="12" Column="12"/>
+      </Position26>
+      <Position27>
+        <Filename Value="demo06.lpr"/>
+        <Caret Line="14" Column="8"/>
+      </Position27>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>

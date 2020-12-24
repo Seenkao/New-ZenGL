@@ -185,15 +185,21 @@ begin
 {$IFDEF USE_THEORA_STATIC}
   Result := TRUE;
 {$ELSE}
-  {$IFDEF UNIX}
+  {$IFDEF UNIX}{$IfNDef MACOSX}
   theoraLibrary := dlopen(libtheoradec, $001);
-  {$ENDIF}
+  {$ENDIF}{$EndIf}
   {$IFDEF WINDOWS}
   theoraLibrary := dlopen(libtheoradec);
   {$ENDIF}
-  {$IFDEF MACOSX}
+  {$IFDEF MACOSX}{$IfDef MAC_COCOA}
+  {$IfDef NO_USE_STATIC_LIBRARY}
+  theoraLibrary := dlopen(PAnsiChar(libtheoradec), $001);
+  {$Else}
+  theoraLibrary := dlopen(PAnsiChar('/usr/local/lib/' + libtheoradec), $001);
+  {$EndIf}
+  {$Else}
   theoraLibrary := dlopen(PAnsiChar(appWorkDir + 'Contents/Frameworks/' + libtheoradec), $001);
-  {$ENDIF}
+  {$ENDIF}{$EndIf}
 
   if theoraLibrary <> LIB_ERROR Then
   begin

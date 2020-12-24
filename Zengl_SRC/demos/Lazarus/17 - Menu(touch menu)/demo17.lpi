@@ -39,13 +39,22 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir);../../../headers"/>
-      <OtherUnitFiles Value="../../../src;../../../lib/zlib/$(TargetCPU)-$(TargetOS);../../../lib/zip/$(TargetCPU)-$(TargetOS);../../../lib/theora/$(TargetCPU)-$(TargetOS);../../../lib/ogg/$(TargetCPU)-$(TargetOS);../../../lib/msvcrt/$(TargetCPU);../../../lib/jpeg/$(TargetCPU)-$(TargetOS);../../../lib/chipmunk/$(TargetCPU)-$(TargetOS);../../../extra"/>
+      <OtherUnitFiles Value="../../../src;../../../lib/zlib/$(TargetCPU)-$(TargetOS);../../../lib/zip/$(TargetCPU)-$(TargetOS);../../../lib/theora/$(TargetCPU)-$(TargetOS);../../../lib/ogg/$(TargetCPU)-$(TargetOS);../../../lib/msvcrt/$(TargetCPU);../../../lib/jpeg/$(TargetCPU)-$(TargetOS);../../../lib/chipmunk/$(TargetCPU)-$(TargetOS);../../../extra;../../../srcGEGL"/>
       <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
+    <CodeGeneration>
+      <SmartLinkUnit Value="True"/>
+      <Optimizations>
+        <OptimizationLevel Value="3"/>
+      </Optimizations>
+    </CodeGeneration>
     <Linking>
       <Debugging>
-        <UseExternalDbgSyms Value="True"/>
+        <GenerateDebugInfo Value="False"/>
+        <DebugInfoType Value="dsDwarf2"/>
+        <StripSymbols Value="True"/>
       </Debugging>
+      <LinkSmart Value="True"/>
     </Linking>
   </CompilerOptions>
   <Debugging>

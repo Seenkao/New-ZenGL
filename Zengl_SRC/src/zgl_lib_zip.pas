@@ -25,11 +25,14 @@ unit zgl_lib_zip;
 
 {$I zgl_config.cfg}
 
+{$IfNDef MAC_COCOA}
 {$IFDEF USE_ZIP}
   {$L libzip}
-{$ENDIF}
+{$EndIf}
 
 {$L zlib_helper}
+{$ENDIF}
+
 {$IfDef WINDOWS}                
   {$IFDEF USE_ZLIB_FULL}
     {$L deflate}
@@ -59,7 +62,7 @@ unit zgl_lib_zip;
     {$LINKLIB libz.so}
   {$ENDIF}
   {$IFDEF DARWIN}
-    {$LINKLIB libz.dylib}
+    {/$LINKLIB libz.dylib}
   {$ENDIF}
 
 interface
@@ -67,7 +70,9 @@ uses
   {$IFDEF WINDOWS}
   zgl_lib_msvcrt,
   {$ENDIF}
+  sysutils,
   zgl_memory,
+  zgl_utils,
   zgl_types;
 
 {$IFDEF USE_ZIP}
@@ -132,30 +137,6 @@ type
     name  : PAnsiChar;
   end;
 
-function zip_open( path : PAnsiChar; flags : Integer; out errorp : cint ) : Pzip; cdecl; external;
-function zip_close( archive : Pzip ) : cint; cdecl; external;
-function zip_set_default_password( archive : Pzip; password : PAnsiChar ) : cint; cdecl; external;
-function zip_stat( archive : Pzip; fname : PAnsiChar; flags : cint; out sb : Tzip_stat ) : Integer; cdecl; external;
-
-function zip_fopen( archive : Pzip; fname : PAnsiChar; flags : cint ) : Pzip_file; cdecl; external;
-function zip_fread( file_ : Pzip_file; out buf; nbytes : cuint64 ) : cint; cdecl; external;
-function zip_fclose( file_ : Pzip_file ) : cint; cdecl; external;
-
-function zip_get_num_entries( archive : Pzip; flags : cint ) : cuint64; cdecl; external;
-function zip_get_name( archive : Pzip; index : cuint64; flags : cint ) : PAnsiChar; cdecl; external;
-
-// hack for compression functions which will be never used, but which are needed on linking stage
-{$IFDEF FPC}
-function deflate_fake : Integer; cdecl; public name '_deflate'; public name 'deflate';
-function deflateEnd_fake : Integer; cdecl; public name '_deflateEnd'; public name 'deflateEnd';
-function deflateInit2_fake : Integer; cdecl; public name '_deflateInit2_'; public name 'deflateInit2_';
-{$ELSE}
-function deflate : Integer; cdecl;
-function deflateEnd : Integer; cdecl;
-function deflateInit2_ : Integer; cdecl;
-{$ENDIF}
-{$ENDIF}
-
 type
   TAlloc = function( AppData : Pointer; Items, Size : cuint ): Pointer; cdecl;
   TFree = procedure( AppData, Block : Pointer ); cdecl;
@@ -181,16 +162,74 @@ type
     reserved  : culong;    // reserved for future use
   end;
 
-procedure zlib_Init( out strm : z_stream_s ); cdecl; external;
-procedure zlib_Free( var strm : z_stream_s ); cdecl; external;
-function png_DecodeIDAT( var pngMem : zglTMemory; var pngZStream : z_stream_s; out pngIDATEnd : LongWord; Buffer : Pointer; Bytes : Integer ) : Integer; cdecl; external;
+{$IfDef MAC_COCOA}
+var
+  zip_open: function(path: PAnsiChar; flags: Integer; out error: cint): Pzip; cdecl;
+  zip_close: function( archive : Pzip ): cint; cdecl;
+  zip_set_default_password: function( archive : Pzip; password : PAnsiChar ) : cint; cdecl;
+  zip_stat: function( archive : Pzip; fname : PAnsiChar; flags : cint; out sb : Tzip_stat ) : Integer; cdecl;
+
+  zip_fopen: function( archive : Pzip; fname : PAnsiChar; flags : cint ) : Pzip_file; cdecl;
+  zip_fread: function( file_ : Pzip_file; out buf; nbytes : cuint64 ) : cint; cdecl;
+  zip_fclose: function( file_ : Pzip_file ) : cint; cdecl;
+
+  zip_get_num_entries: function( archive : Pzip; flags : cint ) : cuint64; cdecl;
+  zip_get_name: function( archive : Pzip; index : cuint64; flags : cint ) : PAnsiChar; cdecl;
+
+  inflateInit_: function(var strm: z_stream_s; version: PChar; stream_size: cint): cint; cdecl;
+  inflateEnd: function(var strm: z_stream_s): cint; cdecl;
+  inflate: function(var strm: z_stream_s; flush: cint): cint; cdecl;
+
+  // hack for compression functions which will be never used, but which are needed on linking stage
+  deflate: function: Integer; cdecl;
+  deflateEnd: function: Integer; cdecl;
+  deflateInit2_: function: Integer; cdecl;
+  zlibVersion: function: Char; cdecl;
+{$Else}
+function zip_open( path : PAnsiChar; flags : Integer; out errorp : cint ) : Pzip; cdecl; external;
+function zip_close( archive : Pzip ) : cint; cdecl; external;
+function zip_set_default_password( archive : Pzip; password : PAnsiChar ) : cint; cdecl; external;
+function zip_stat( archive : Pzip; fname : PAnsiChar; flags : cint; out sb : Tzip_stat ) : Integer; cdecl; external;
+
+function zip_fopen( archive : Pzip; fname : PAnsiChar; flags : cint ) : Pzip_file; cdecl; external;
+function zip_fread( file_ : Pzip_file; out buf; nbytes : cuint64 ) : cint; cdecl; external;
+function zip_fclose( file_ : Pzip_file ) : cint; cdecl; external;
+
+function zip_get_num_entries( archive : Pzip; flags : cint ) : cuint64; cdecl; external;
+function zip_get_name( archive : Pzip; index : cuint64; flags : cint ) : PAnsiChar; cdecl; external;
+
+// hack for compression functions which will be never used, but which are needed on linking stage
+{$IFDEF FPC}
+function deflate_fake : Integer; cdecl; public name '_deflate'; public name 'deflate';
+function deflateEnd_fake : Integer; cdecl; public name '_deflateEnd'; public name 'deflateEnd';
+function deflateInit2_fake : Integer; cdecl; public name '_deflateInit2_'; public name 'deflateInit2_';
+{$ELSE}
+function deflate : Integer; cdecl;
+function deflateEnd : Integer; cdecl;
+function deflateInit2_ : Integer; cdecl;
+{$ENDIF}
+{$EndIf}
+{$ENDIF}
+
+procedure zlib_Init(out strm: z_stream_s ); cdecl;{$IfNDef MAC_COCOA}external;{$EndIf}
+procedure zlib_Free(var strm: z_stream_s ); cdecl;{$IfNDef MAC_COCOA} external;{$EndIf}
+function png_DecodeIDAT( var pngMem: zglTMemory; var pngZStream: z_stream_s; out pngIDATEnd: LongWord; Buffer: Pointer;
+     Bytes: Integer): Integer; cdecl;{$IfNDef MAC_COCOA} external;{$EndIf}
 
 {$IFDEF USE_ZIP}
 threadvar
   zipCurrent : Pzip;
+
+{$IfDef MAC_COCOA}
+procedure LoadLibZip(const zDLL, zlDLL: String);
+procedure UnloadLibZip;
+{$EndIf}
 {$ENDIF}
 
 implementation
+
+var
+  zipDLL: Pointer;
 
 {$IFDEF USE_ZIP}
 {$IFDEF FPC}
@@ -208,6 +247,145 @@ function deflateInit2_fake : Integer;
 begin
   Result := 0;
 end;
+
+{$IfDef MAC_COCOA}
+procedure zlib_Init( out strm : z_stream_s );
+begin
+  FillChar(strm, sizeof(strm), 0);
+  inflateInit_(strm, '1.2.11', sizeof(strm));
+end;
+
+procedure zlib_Free( var strm : z_stream_s );
+begin
+  inflateEnd(strm);
+end;
+
+function png_DecodeIDAT(var pngMem: zglTMemory; var pngZStream: z_stream_s; out pngIDATEnd: LongWord; Buffer: Pointer;
+     Bytes: Integer): Integer;
+var
+  b: PByte;
+  IDATHeader: PChar;
+begin
+  pngZStream.next_out := Buffer;
+  pngZStream.avail_out := Bytes;
+  while pngZStream.avail_out > 0 do
+  begin
+    if ((pngMem.Position = pngIDATEnd) and (pngZStream.avail_out > 0) and (pngZStream.avail_in = 0)) then
+    begin
+      inc(pngMem.Position, 4);
+      b := PByte(Ptr(pngMem.Memory) + pngMem.Position);
+      pngIDATEnd := b[3] + (b[2] shl 8) + (b[1] shl 16) + (b[0] shl 24);
+      inc(pngMem.Position, 4);
+
+      IDATHeader := PChar(Ptr(pngMem.Memory) + pngMem.Position);
+      if ((IDATHeader[0] <> 'I') and (IDATHeader[1] <> 'D') and (IDATHeader[2] <> 'A') and (IDATHeader[3] <> 'T')) then
+      begin
+        Result := - 1;
+        Exit;
+      end;
+      inc(pngMem.Position, 4);
+      inc(pngIDATEnd, pngMem.Position);
+    end;
+    if (pngZStream.avail_in = 0) then
+    begin
+      if (pngMem.Size - pngMem.Position > 0) then
+      begin
+        if (pngMem.Position + 65535 > pngIDATEnd) then
+        begin
+          if (pngMem.Position + (pngIDATEnd - pngMem.Position) > pngMem.Size) then
+            pngZStream.avail_in := pngMem.Size - pngMem.Position
+          else
+            pngZStream.avail_in := pngIDATEnd - pngMem.Position;
+        end
+        else begin
+          if (pngMem.Position + 65535 > pngMem.Size) then
+            pngZStream.avail_in := pngMem.Size - pngMem.Position
+          else
+            pngZStream.avail_in := 65535;
+        end;
+        inc(pngMem.Position, pngZStream.avail_in);
+      end
+      else
+        pngZStream.avail_in := 0;
+      if (pngZStream.avail_in = 0) then
+      begin
+        Result := Bytes - pngZStream.avail_out;
+        exit;
+      end;
+      pngZStream.next_in := PByte(Ptr(Ptr(pngMem.Memory) + pngMem.Position - pngZStream.avail_in));
+    end;
+    Result := inflate(pngZStream, 0);
+    if Result < 0 then
+      Result := -1
+    else
+      Result := pngZStream.avail_in;
+  end;
+end;
+
+procedure LoadLibZip(const zDLL, zlDLL: String);
+begin
+  UnloadLibZip;
+
+  zipDLL := dlopen(PChar(zDLL), 1);
+  if zipDLL = nil then raise Exception.Create('Could not load Zip');
+    @zip_open := dlsym(zipDLL, 'zip_open');
+    if not Assigned(zip_open) then
+      Exception.Create('Could not load zip_open from ' + zDLL);
+    @zip_close := dlsym(zipDLL, 'zip_close');
+    @zip_set_default_password := dlsym(zipDLL, 'zip_set_default_password');
+    @zip_stat := dlsym(zipDLL, 'zip_stat');
+
+    @zip_fopen := dlsym(zipDLL, 'zip_fopen');
+    @zip_fread := dlsym(zipDLL, 'zip_fread');
+    @zip_fclose := dlsym(zipDLL, 'zip_fclose');
+
+    @zip_get_num_entries := dlsym(zipDLL, 'zip_get_num_entries');
+    @zip_get_name := dlsym(zipDLL, 'zip_get_name');
+//    Exception.Create('Could not load ' + MethodName + ' from ' + zDLL);
+
+
+  zipDLL := dlopen(PChar(zlDLL), 1);
+  if zipDLL = nil then raise Exception.Create('Could not load Zip');
+
+    // hack for compression functions which will be never used, but which are needed on linking stage
+    @deflate := dlsym(zipDLL, 'deflate');
+    @deflateEnd := dlsym(zipDLL, 'deflateEnd');
+    @deflateInit2_ := dlsym(zipDLL, 'deflateInit2_');
+    @inflateInit_ := dlsym(zipDLL, 'inflateInit_');
+    @inflateEnd := dlsym(zipDLL, 'inflateEnd');
+    @inflate := dlsym(zipDLL, 'inflate');
+    @zlibVersion := dlsym(zipDLL, 'zlibVersion');
+//    Exception.Create('Could not load ' + MethodName + ' from ' + zlDLL);
+
+end;
+
+procedure UnloadLibZip;
+begin
+  if zipDLL <> nil then
+    dlclose(zipDLL);
+
+  @zip_open := nil;
+  @zip_close := nil;
+  @zip_set_default_password := nil;
+  @zip_stat := nil;
+
+  @zip_fopen := nil;
+  @zip_fread := nil;
+  @zip_fclose := nil;
+
+  @zip_get_num_entries := nil;
+  @zip_get_name := nil;
+
+  // hack for compression functions which will be never used, but which are needed on linking stage
+  @deflate := nil;
+  @deflateEnd := nil;
+  @deflateInit2_ := nil;
+  @inflateInit_ := nil;
+  @inflateEnd := nil;
+  @inflate := nil;
+  @zlibVersion := nil;
+end;
+{$EndIf}
 {$ELSE}
 function deflate : Integer;
 begin
@@ -225,5 +403,18 @@ begin
 end;
 {$ENDIF}
 {$ENDIF}
+
+{$IfDef USE_ZIP}{$IfDef MAC_COCOA}
+initialization
+  {$IfDef NO_USE_STATIC_LIBRARY}
+  LoadLibZip('libzip.dylib', 'libz.dylib');
+  {$Else}
+  LoadLibZip('/usr/local/lib/libzip.dylib', '/usr/local/Cellar/zlib/1.2.11/lib/libz.dylib');
+  {$EndIf}
+
+finalization
+
+  UnloadLibZip;
+{$EndIf}{$EndIf}
 
 end.

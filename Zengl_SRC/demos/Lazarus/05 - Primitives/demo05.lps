@@ -9,7 +9,8 @@
         <Filename Value="demo05.lpr"/>
         <IsPartOfProject Value="True"/>
         <IsVisibleTab Value="True"/>
-        <CursorPos X="20" Y="14"/>
+        <TopLine Value="56"/>
+        <CursorPos X="39" Y="87"/>
         <UsageCount Value="30"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>

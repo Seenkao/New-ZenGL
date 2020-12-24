@@ -23,9 +23,10 @@ uses
 
 var
   dirRes  : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
-  fntMain : zglPFont;
+  fntMain : Byte;
   map     : zglTTiles2D;
   texTiles: zglPTexture;
+  TimeStart: Byte;
 
 procedure Init;
   var
@@ -56,7 +57,7 @@ begin
   for i := 0 to map.X - 1 do
     file_Read(f, map.Tiles[i, 0], map.Y * SizeOf(Integer));
   file_Close(f);
-  setTextScale(1.5);
+  setTextScale(15, fntMain);
 end;
 
 procedure Draw;
@@ -80,7 +81,7 @@ end;
 Begin
   randomize();
 
-  timer_Add(@Timer, 16);
+  TimeStart := timer_Add(@Timer, 16, Start);
 
   zgl_Reg(SYS_LOAD, @Init);
   zgl_Reg(SYS_DRAW, @Draw);

@@ -11,7 +11,6 @@ uses
   cthreads,
   {$ENDIF}
   {$IFDEF USE_ZENGL_STATIC}
-  zgl_main,
   zgl_screen,
   zgl_window,
   zgl_timers,
@@ -26,7 +25,7 @@ uses
   zgl_primitives_2d,
   zgl_font,
   zgl_text,
-  zgl_math_2d,
+  zgl_types,
   zgl_utils
   {$ELSE}
   zglHeader
@@ -47,11 +46,14 @@ type
 
 var
   dirRes    : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
-  fntMain   : zglPFont;
+  fntMain   : Byte; // zglPFont;
   texLogo   : zglPTexture;
   texMiku   : zglPTexture;
   time      : Integer;
   sengine2d : zglTSEngine2D;
+
+  TimeStart : Byte;
+  TimeMiku  : Byte;
 
 // Miku
 procedure MikuInit( var Miku : zglTMikuSprite );
@@ -138,11 +140,11 @@ begin
 
   // RU: Создадим 1000 спрайтов Miku-chan :)
   // EN: Create 1000 sprites of Miku-chan :)
-  for i := 0 to 9 do
-    AddMiku();
+//  for i := 0 to 9 do
+//    AddMiku();
 
   fntMain := font_LoadFromFile( dirRes + 'font.zfi' );
-  setTextScale(1.5);
+  setTextScale(15, fntMain);
 end;
 
 procedure Draw;
@@ -207,8 +209,8 @@ Begin
 
   randomize;
 
-  timer_Add( @Timer, 16 );
-  timer_Add( @AddMiku, 1000 );
+  TimeStart := timer_Add( @Timer, 16, Start );
+  TimeMiku := timer_Add( @AddMiku, 1000, SleepToStart, 6);
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );

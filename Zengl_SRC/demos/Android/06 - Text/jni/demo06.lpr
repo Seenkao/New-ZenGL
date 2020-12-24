@@ -1,10 +1,9 @@
-library demo06;
+﻿library demo06;
 
 {$I zglCustomConfig.cfg}
 
 uses
   zgl_application,
-  zgl_main,
   zgl_file,
   zgl_screen,
   zgl_window,
@@ -16,17 +15,15 @@ uses
   zgl_textures_png,
   zgl_font,
   zgl_text,
-  zgl_math_2d,
+  zgl_types,
   zgl_utils
   ;
 
 var
   dirRes  : UTF8String = 'assets/';
-  fntMain : zglPFont;
+  fntMain : Byte;
 
 procedure Init;
-  //var
-  //  i : Integer;
 begin
   zgl_Enable( CORRECT_RESOLUTION );
   scr_CorrectResolution( 800, 600 );
@@ -58,7 +55,7 @@ begin
 
   text_DrawEx( fntMain, 400, 65, 3, 0, 'Scaling', 255, $FFFFFF, TEXT_HALIGN_CENTER );
 
-  setTextScale(1.5);    // установка полуторного размера шрифта
+  setTextScale(15, fntMain);    // установка полуторного размера шрифта
   fx2d_SetVCA( $FF0000, $00FF00, $0000FF, $FFFFFF, 255, 255, 255, 255 );
   text_Draw( fntMain, 400, 125, 'Gradient color for every symbol', TEXT_FX_VCA or TEXT_HALIGN_CENTER );
 
@@ -66,7 +63,8 @@ begin
   r.Y := 300 - 128;
   r.W := 192;
   r.H := 256;
-  text_DrawInRect( fntMain, r, 'Simple text rendering in rectangle' );
+  // выставить кодировку страницы на UTF-8 с BOM
+  text_DrawInRect( fntMain, r, 'Simple text rendering in rectangle ' + ' Текст в квадрате на русском )))');
   pr2d_Rect( r.X, r.Y, r.W, r.H, $FF0000 );
 
   r.X := 800 - 192;

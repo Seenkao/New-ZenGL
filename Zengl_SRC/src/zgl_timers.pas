@@ -21,7 +21,7 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 28.09.2020
+ !!! modification from Serge 15.12.2020
 }
 unit zgl_timers;
 
@@ -35,47 +35,53 @@ uses UnixType;
 uses Windows;
 {$ENDIF}
 
+const
+  MAX_TIMERS = 20;
+  Stop = 1;
+  Start = 2;
+  Tiks = 4;
+  SleepToStart = 8;
+  SleepToStop = 16;
+  Enable = 128;
+
 type
   zglPTimer = ^zglTTimer;
   zglTTimer = record
-    Active    : Boolean;
-    Custom    : Boolean;
-    UserData  : Pointer;
-    Interval  : LongWord;
-    LastTick  : Double;
-    OnTimer   : procedure;
-    OnTimerEx : procedure(Timer: zglPTimer);
-
-    prev, next: zglPTimer;
+    Interval, SInterval: Cardinal;
+    Flags: Byte;
+    LastTick, LastTickForSleep: Double;
+    OnTimer: procedure;
   end;
 
-type
   zglPTimerManager = ^zglTTimerManager;
   zglTTimerManager = record
-    Count: Integer;
-    First: zglTTimer;
+    Count: Byte;
+    Timers: array[1..MAX_TIMERS] of zglTTimer;
   end;
 
-function  timer_Add(OnTimer: Pointer; Interval: LongWord; UseSenderForCallback: Boolean = FALSE; UserData: Pointer = nil): zglPTimer;
-procedure timer_Del(var Timer: zglPTimer);
+function  timer_GetTicks: Double;
+
+function timer_Add(OnTimer: Pointer; Interval: Cardinal; Flags: Byte; SleepInterval: Cardinal = 5): Byte;
+procedure timer_Del(var num: Byte);
+procedure timers_Destroy;
+
+function timer_StartStop(num: Byte; Flags: Byte): Boolean;
+function timer_SleepStartStop(num: Byte; Flags: Byte; IntervalSleep: Cardinal = 1): Boolean;
 
 procedure timer_MainLoop;
-function  timer_GetTicks: Double;
 procedure timer_Reset;
 
 var
   managerTimer : zglTTimerManager;
-  canKillTimers: Boolean = TRUE;
 
 implementation
 uses
   zgl_application,
   zgl_window;
 
-{$IfDef UNIX}
+{$IfDef UNIX}{$IfNDef MAC_COCOA}
 function fpGetTimeOfDay(val: PTimeVal; tzp: Pointer): Integer; cdecl; external 'libc' name 'gettimeofday';
-{$ENDIF}
-{$IFDEF DARWIN}
+{$Else}
 type
   mach_timebase_info_t = record
     numer: LongWord;
@@ -84,106 +90,188 @@ type
 
   function mach_timebase_info(var info: mach_timebase_info_t): Integer; cdecl; external 'libc';
   function mach_absolute_time: QWORD; cdecl; external 'libc';
-{$ENDIF}
+{$ENDIF}{$EndIf}
 
 var
-  timersToKill : Word = 0;
-  aTimersToKill: array[0..1023] of zglPTimer;
+  timersToKill : Byte = 0;
+  aTimersToKill: array[1..200] of Byte;
 
-  {$IfDef UNIX}
+  {$IfDef UNIX}{$IfNDef MAC_COCOA}
   timerTimeVal: TimeVal;
+  {$Else}
+  timerTimebaseInfo: mach_timebase_info_t;
+  {$ENDIF}
   {$ENDIF}
   {$IFDEF WINDOWS}
   timerFrequency: Int64;
   timerFreq     : Single;
   {$ENDIF}
-  {$IFDEF DARWIN}
-  timerTimebaseInfo: mach_timebase_info_t;
-  {$ENDIF}
   timerStart: Double;
 
-function timer_Add(OnTimer: Pointer; Interval: LongWord; UseSenderForCallback: Boolean = FALSE; UserData: Pointer = nil): zglPTimer;
+function timer_Add(OnTimer: Pointer; Interval: Cardinal; Flags: Byte; SleepInterval: Cardinal = 5): Byte;
+var
+  i: Byte;
+  t: Double;
 begin
-  Result := @managerTimer.First;
-  while Assigned(Result.next) do
-    Result := Result.next;
-
-  zgl_GetMem(Pointer(Result.next), SizeOf(zglTTimer));
-  Result.next.Active    := TRUE;
-  Result.next.Custom    := UseSenderForCallback;
-  Result.next.UserData  := UserData;
-  Result.next.Interval  := Interval;
-  if UseSenderForCallback Then
-    Result.next.OnTimerEx := OnTimer
+  Result := 255;
+  if managerTimer.Count = MAX_TIMERS then exit;
+  i := 1;
+  while i <= MAX_TIMERS do
+  begin
+    if (managerTimer.Timers[i].Flags and Enable) = 0 then
+      Break;
+    inc(i);
+  end;
+  if i > MAX_TIMERS then
+    exit;
+  managerTimer.Timers[i].OnTimer := OnTimer;
+  t := timer_GetTicks;
+  if (Flags and SleepToStart) > 0 then
+  begin
+    Flags := Flags and (255 - Start);
+    managerTimer.Timers[i].LastTickForSleep := t;
+  end;
+  managerTimer.Timers[i].LastTick := t;
+  if (Flags and Start) > 0 then
+    managerTimer.Timers[i].Flags := (managerTimer.Timers[i].Flags and (255 - Stop)) or Enable or Flags
   else
-    Result.next.OnTimer := OnTimer;
-  Result.next.LastTick  := timer_GetTicks();
-  Result.next.prev      := Result;
-  Result.next.next      := nil;
-  Result := Result.next;
-  INC(managerTimer.Count);
+    managerTimer.Timers[i].Flags := (managerTimer.Timers[i].Flags and (255 - Start)) or Enable or Flags;
+  managerTimer.Timers[i].Interval := Interval;
+  managerTimer.Timers[i].SInterval := SleepInterval;
+  inc(managerTimer.Count);
+  Result := i;
 end;
 
-procedure timer_Del(var Timer: zglPTimer);
+function timer_StartStop(num: Byte; Flags: Byte): Boolean;
 begin
-  if not Assigned(Timer) Then exit;
-
-  if not canKillTimers Then
+  Result := False;
+  if (Flags and (Start or Stop or SleepToStop or SleepToStart) = 0) then exit;
+  if (num = 0) or (num > MAX_TIMERS) then Exit;
+  if (managerTimer.Timers[num].Flags and Enable) = 0 then Exit;
+  if (Flags = Start) or (Flags = SleepToStart) then
   begin
-    INC(timersToKill);
-    aTimersToKill[timersToKill] := Timer;
-    Timer := nil;
+    managerTimer.Timers[num].Flags := (managerTimer.Timers[num].Flags and (255 - Stop)) or Start;
+    managerTimer.Timers[num].LastTick := timer_GetTicks;
+  end
+  else
+    managerTimer.Timers[num].Flags := (managerTimer.Timers[num].Flags and (255 - Start)) or Stop;
+  Result := True;
+end;
+
+function timer_SleepStartStop(num: Byte; Flags: Byte; IntervalSleep: Cardinal = 1): Boolean;
+var
+  t: Double;
+begin
+  Result := False;
+  if (Flags and (Start or Stop or SleepToStop or SleepToStart) = 0) then exit;
+
+  if (num = 0) or (num > MAX_TIMERS) then Exit;
+  if (managerTimer.Timers[num].Flags and Enable) = 0 then Exit;
+  managerTimer.Timers[num].SInterval := IntervalSleep;
+  if (Flags = Start) or (Flags = SleepToStart) then
+    managerTimer.Timers[num].Flags := (managerTimer.Timers[num].Flags or SleepToStart or Stop) and (255 - Start)
+  else
+    managerTimer.Timers[num].Flags := (managerTimer.Timers[num].Flags or SleepToStop or Start) and (255 - Stop);
+  t := timer_GetTicks;
+  managerTimer.Timers[num].LastTick := t;
+  managerTimer.Timers[num].LastTickForSleep := t;
+
+  Result := True;
+end;
+
+procedure timer_Del(var num: Byte);
+begin
+  if (num = 0) or (num > MAX_TIMERS) then
     exit;
+  if (managerTimer.Timers[num].Flags and Enable) > 0 then
+  begin
+    inc(timersToKill);
+    aTimersToKill[timersToKill] := num;
+    num := 0;
   end;
+end;
 
-  if Assigned(Timer.Prev) Then
-    Timer.prev.next := Timer.next;
-  if Assigned(Timer.next) Then
-    Timer.next.prev := Timer.prev;
-  FreeMem(Timer);
-  Timer := nil;
-
-  DEC(managerTimer.Count);
+procedure timers_Destroy;
+var
+  i: Byte;
+begin
+  if managerTimer.Count = 0 then Exit;
+  for i := 1 to MAX_TIMERS do
+  begin
+    if Assigned(managerTimer.Timers[i].OnTimer) then
+    begin
+      managerTimer.Timers[i].OnTimer := nil;
+      managerTimer.Timers[i].Flags := 0;
+    end;
+  end;
+  managerTimer.Count := 0;
 end;
 
 procedure timer_MainLoop;
-  var
-    i    : Integer;
-    t    : Double;
-    timer: zglPTimer;
+var
+  i, j: Byte;
+  t : Double;
 begin
-  canKillTimers := FALSE;
-
-  timer := @managerTimer.First;
-  if timer <> nil Then
-    for i := 0 to managerTimer.Count do
+  j := managerTimer.Count;
+  i := 1;
+  while j > 0 do
+  begin
+    if i > MAX_TIMERS then Break;
+    if ((managerTimer.Timers[i].Flags and Enable) > 0) then
     begin
-      if timer.Active then
+      t := timer_GetTicks;
+      if ((managerTimer.Timers[i].Flags and SleepToStart) > 0) then
       begin
-        t := timer_GetTicks();
-        while t >= timer.LastTick + timer.Interval do
+        if (t - managerTimer.Timers[i].LastTickForSleep) > 1000 then
         begin
-          timer.LastTick := timer.LastTick + timer.Interval;
-          if timer.Custom Then
-            timer.OnTimerEx(timer)
-          else
-            timer.OnTimer();
-          if t < timer_GetTicks() - timer.Interval Then
-            break
-          else
-            t := timer_GetTicks();
+          dec(managerTimer.Timers[i].SInterval);
+          managerTimer.Timers[i].LastTickForSleep := managerTimer.Timers[i].LastTickForSleep + 1000;
         end;
-      end
-      else
-        timer.LastTick := timer_GetTicks();
-
-      timer := timer.next;
+        if managerTimer.Timers[i].SInterval = 0 then
+        begin
+          managerTimer.Timers[i].Flags := (managerTimer.Timers[i].Flags or Start) and (255 - SleepToStart - Stop);
+          managerTimer.Timers[i].LastTick := t;
+        end;
+        inc(j);
+        inc(i);
+        Continue;
+      end;
+      if ((managerTimer.Timers[i].Flags and Start ) > 0) then
+      begin
+        while ((t - managerTimer.Timers[i].LastTick) > managerTimer.Timers[i].Interval) do
+        begin
+          if (managerTimer.Timers[i].Flags and Tiks) = 0 then
+          begin
+            managerTimer.Timers[i].OnTimer;
+            managerTimer.Timers[i].Flags := managerTimer.Timers[i].Flags or Tiks;
+          end;
+          managerTimer.Timers[i].LastTick :=  managerTimer.Timers[i].LastTick + managerTimer.Timers[i].Interval;
+        end;
+        managerTimer.Timers[i].Flags := managerTimer.Timers[i].Flags and (255 - Tiks);
+        if (managerTimer.Timers[i].Flags and SleepToStop) > 0 then
+        begin
+          if (t - managerTimer.Timers[i].LastTickForSleep) > 1000 then
+          begin
+            managerTimer.Timers[i].LastTickForSleep := managerTimer.Timers[i].LastTickForSleep + 1000;
+            dec(managerTimer.Timers[i].SInterval);
+          end;
+          if managerTimer.Timers[i].SInterval = 0 then
+          begin
+            managerTimer.Timers[i].Flags := (managerTimer.Timers[i].Flags or Stop) and (255 - SleepToStop - Start);
+          end;
+        end;
+        dec(j);
+      end;
     end;
+    inc(i);
+  end;
 
-  canKillTimers := TRUE;
   for i := 1 to timersToKill do
-    timer_Del(aTimersToKill[i]);
-  timersToKill  := 0;
+  begin
+    managerTimer.Timers[aTimersToKill[i]].Flags := managerTimer.Timers[aTimersToKill[i]].Flags and (255 - Enable);
+    dec(managerTimer.Count);
+  end;
+  timersToKill := 0;
 end;
 
 function timer_GetTicks: Double;
@@ -193,34 +281,35 @@ function timer_GetTicks: Double;
     m: LongWord;
   {$ENDIF}
 begin
-{$IfDef UNIX}
+{$IfDef UNIX}{$IfNDef MAC_COCOA}
   fpGetTimeOfDay(@timerTimeVal, nil);
   {$Q-}
   // FIXME: почему-то overflow вылетает с флагом -Co
   Result := timerTimeVal.tv_sec * 1000 + timerTimeVal.tv_usec / 1000 - timerStart;
   {$Q+}
-{$ENDIF}
+{$Else}
+  Result := mach_absolute_time() * timerTimebaseInfo.numer / timerTimebaseInfo.denom / 1000000 - timerStart;
+{$ENDIF}{$EndIf}
 {$IFDEF WINDOWS}
   m := SetThreadAffinityMask(GetCurrentThread(), 1);
   QueryPerformanceCounter(t);
   Result := 1000 * t * timerFreq - timerStart;
   SetThreadAffinityMask(GetCurrentThread(), m);
 {$ENDIF}
-{$IFDEF DARWIN}
-  Result := mach_absolute_time() * timerTimebaseInfo.numer / timerTimebaseInfo.denom / 1000000 - timerStart;
-{$ENDIF}
 end;
 
 procedure timer_Reset;
-  var
-    currTimer: zglPTimer;
+var
+  i: Byte;
 begin
   appdt := timer_GetTicks();
-  currTimer := @managerTimer.First;                    
-  while Assigned(currTimer) do
+  for i := 1 to MAX_TIMERS do
   begin
-    currTimer.LastTick := timer_GetTicks();
-    currTimer := currTimer.next;
+    if Assigned(managerTimer.Timers[i].OnTimer) then
+    begin
+      managerTimer.Timers[i].LastTick := timer_GetTicks ;
+      managerTimer.Timers[i].LastTickForSleep := timer_GetTicks;                    
+    end;
   end;
 end;
 

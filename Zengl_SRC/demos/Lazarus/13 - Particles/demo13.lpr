@@ -11,7 +11,6 @@ uses
   cthreads,
   {$ENDIF}
   {$IFDEF USE_ZENGL_STATIC}
-  zgl_main,
   zgl_screen,
   zgl_window,
   zgl_timers,
@@ -35,13 +34,15 @@ uses
 
 var
   dirRes         : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
-  fntMain        : zglPFont;
+  fntMain        : Byte;
   texBack        : zglPTexture;
   debug          : Boolean;
   particles      : zglTPEngine2D;
   emitterFire    : array[ 0..2 ] of zglPEmitter2D;
   emitterDiamond : zglPEmitter2D;
   emitterRain    : zglPEmitter2D;
+
+  TimeStart      : Byte = 0;
 
 procedure Init;
   var
@@ -50,6 +51,7 @@ begin
   texBack := tex_LoadFromFile( dirRes + 'back02.png' );
 
   fntMain := font_LoadFromFile( dirRes + 'font.zfi' );
+  setTextScale(15, fntMain);
 
   // EN: Load three types of fire emitters.
   // RU: Загрузка трёх разных видов эмиттеров огня.
@@ -78,7 +80,6 @@ begin
 
   emitterRain := emitter2d_LoadFromFile( dirRes + 'emitter_rain.zei' );
   pengine2d_AddEmitter( emitterRain, nil );
-  setTextScale(1.5);
 end;
 
 procedure Draw;
@@ -98,7 +99,6 @@ begin
       with particles.List[ i ].BBox do
         pr2d_Rect( MinX, MinY, MaxX - MinX, MaxY - MinY, $FF0000, 255 );
 
-  setTextScale(1.5);
   text_Draw( fntMain, 0, 0, 'FPS: ' + u_IntToStr( zgl_Get( RENDER_FPS ) ) );
   text_Draw( fntMain, 0, 20, 'Particles: ' + u_IntToStr( particles.Count.Particles ) );
   text_Draw( fntMain, 0, 40, 'Debug(F1): ' + u_BoolToStr( debug ) );
@@ -134,7 +134,7 @@ Begin
   {$ENDIF}
   randomize();
 
-  timer_Add( @Timer, 16 );
+  TimeStart := timer_Add( @Timer, 16, Start );
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );

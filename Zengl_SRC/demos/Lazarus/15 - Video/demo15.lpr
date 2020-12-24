@@ -11,10 +11,8 @@ uses
   cthreads,
   {$ENDIF}
   {$IFDEF USE_ZENGL_STATIC}
-  zgl_main,
   zgl_screen,
   zgl_window,
-  zgl_application,
   zgl_timers,
   zgl_keyboard,
   zgl_mouse,
@@ -34,9 +32,11 @@ uses
 
 var
   dirRes    : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
-  fntMain   : zglPFont;
+  fntMain   : Byte;
   video     : zglPVideoStream;
   videoSeek : Boolean;
+
+  TimeStart : Byte = 0;
 
 procedure Init;
 begin
@@ -46,7 +46,7 @@ begin
   // RU: Открыть видео файл.
   video := video_OpenFile( dirRes + 'video.ogv' );
 
-  setTextScale(1.5);
+  setTextScale(15, fntMain);
 end;
 
 procedure Draw;
@@ -99,7 +99,7 @@ Begin
 
   randomize();
 
-  timer_Add( @Timer, 16 );
+  TimeStart := timer_Add( @Timer, 16, Start );
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );

@@ -9,9 +9,9 @@
         <Filename Value="demo03.lpr"/>
         <IsPartOfProject Value="True"/>
         <IsVisibleTab Value="True"/>
-        <TopLine Value="28"/>
-        <CursorPos X="26" Y="47"/>
-        <UsageCount Value="45"/>
+        <TopLine Value="72"/>
+        <CursorPos X="8" Y="8"/>
+        <UsageCount Value="46"/>
         <Loaded Value="True"/>
       </Unit0>
       <Unit1>
@@ -90,7 +90,7 @@
       <Unit12>
         <Filename Value="..\..\..\Lazarus\03 - Input\demo03.lpr"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="124"/>
+        <TopLine Value="130"/>
         <CursorPos X="10" Y="44"/>
         <UsageCount Value="18"/>
       </Unit12>
@@ -111,8 +111,8 @@
       <Unit15>
         <Filename Value="..\..\..\..\src\zgl_screen.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="655"/>
-        <CursorPos Y="591"/>
+        <TopLine Value="16"/>
+        <CursorPos X="11" Y="28"/>
         <UsageCount Value="11"/>
       </Unit15>
       <Unit16>
@@ -146,6 +146,8 @@
       <Unit20>
         <Filename Value="..\..\..\..\src\zgl_config.cfg"/>
         <EditorIndex Value="-1"/>
+        <TopLine Value="97"/>
+        <CursorPos X="3" Y="113"/>
         <UsageCount Value="10"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit20>
@@ -197,7 +199,7 @@
         <UsageCount Value="10"/>
       </Unit27>
     </Units>
-    <JumpHistory Count="8" HistoryIndex="7">
+    <JumpHistory Count="14" HistoryIndex="13">
       <Position1>
         <Filename Value="demo03.lpr"/>
         <Caret Line="126" Column="8" TopLine="105"/>
@@ -230,6 +232,30 @@
         <Filename Value="demo03.lpr"/>
         <Caret Line="58" Column="8" TopLine="43"/>
       </Position8>
+      <Position9>
+        <Filename Value="demo03.lpr"/>
+        <Caret Line="26" Column="18" TopLine="16"/>
+      </Position9>
+      <Position10>
+        <Filename Value="demo03.lpr"/>
+        <Caret Line="135" Column="15" TopLine="109"/>
+      </Position10>
+      <Position11>
+        <Filename Value="demo03.lpr"/>
+        <Caret Line="17" Column="12"/>
+      </Position11>
+      <Position12>
+        <Filename Value="demo03.lpr"/>
+        <Caret Line="47" Column="27" TopLine="35"/>
+      </Position12>
+      <Position13>
+        <Filename Value="demo03.lpr"/>
+        <Caret Line="127" Column="16" TopLine="110"/>
+      </Position13>
+      <Position14>
+        <Filename Value="demo03.lpr"/>
+        <Caret Line="8" Column="8" TopLine="6"/>
+      </Position14>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>

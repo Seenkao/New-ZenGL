@@ -4,7 +4,6 @@ library demo15;
 
 uses
   zgl_application,
-  zgl_main,
   zgl_file,
   zgl_memory,
   zgl_screen,
@@ -24,10 +23,11 @@ uses
 
 var
   dirRes    : UTF8String = 'assets/';
-  fntMain   : zglPFont;
+  fntMain   : Byte;
   video     : zglPVideoStream;
   videoFile : zglTMemory;
   videoSeek : Boolean;
+  TimeStart : Byte;
 
 procedure Init;
 begin
@@ -45,7 +45,7 @@ begin
   // EN: Open the video file.
   // RU: Открыть видео файл.
   video := video_OpenMemory( videoFile, 'OGV' );
-  setTextScale(1.5);
+  setTextScale(15, fntMain);
 end;
 
 procedure Draw;
@@ -101,7 +101,7 @@ procedure Java_zengl_android_ZenGL_Main( var env; var thiz ); cdecl;
 begin
   randomize();
 
-  timer_Add( @Timer, 16 );
+  TimeStart := timer_Add( @Timer, 16, Start );
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );

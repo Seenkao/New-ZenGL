@@ -22,10 +22,11 @@ uses
 
 var
   dirRes     : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
-  fntMain    : zglPFont;
+  fntMain    : Byte;
   texBack    : zglPTexture;
   grid       : zglTGrid2D;
   wave       : Single;
+  TimeStart  : Byte;
 
 procedure Init;
   var
@@ -46,6 +47,8 @@ begin
         grid.Grid[i, j].X := i * 40;
         grid.Grid[i, j].Y := j * 40;
       end;
+
+  setTextScale(15, fntMain);
 end;
 
 procedure Draw;
@@ -54,7 +57,6 @@ begin
   // EN: Render grid in coordinates 0,0.
   sgrid2d_Draw(texBack, 0, 0, @grid);
 
-  setTextScale(1.5);
   text_Draw(fntMain, 0, 0, 'FPS: ' + u_IntToStr(zgl_Get(RENDER_FPS)));
 end;
 
@@ -83,14 +85,13 @@ begin
       end;
     end;
 
-//  if key_Press(K_ESCAPE) Then winOn := false;
   key_ClearState();
 end;
 
 Begin
   randomize();
 
-  timer_Add(@Timer, 16);
+  TimeStart := timer_Add(@Timer, 16, SleepToStart, 3);
 
   zgl_Reg(SYS_LOAD, @Init);
   zgl_Reg(SYS_DRAW, @Draw);

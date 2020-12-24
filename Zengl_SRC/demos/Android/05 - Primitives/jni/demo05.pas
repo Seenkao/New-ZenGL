@@ -4,13 +4,13 @@ library demo05;
 
 uses
   zgl_application,
-  zgl_main,
   zgl_screen,
   zgl_window,
   zgl_timers,
   zgl_fx,
   zgl_render_2d,
   zgl_primitives_2d,
+  zgl_types,
   zgl_math_2d,
   zgl_utils
   ;

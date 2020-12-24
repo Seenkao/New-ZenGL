@@ -45,11 +45,12 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="..\..\..\..\headers;..\..\..\..\headers\android;$(ProjOutDir)"/>
-      <Libraries Value="..\libs\armeabi;E:\SDK_manadger\android-ndk-r9c\platforms\android-14\arch-arm\usr\lib\"/>
+      <Libraries Value="..\libs\armeabi;C:\codetyphon\binLibraries\android-4.0-api14-arm\"/>
       <OtherUnitFiles Value="..\..\..\..\src;..\..\..\..\lib\zlib\arm-linux;..\..\..\..\lib\zip\arm-linux;..\..\..\..\lib\theora\arm-linux;..\..\..\..\lib\ogg\arm-linux;..\..\..\..\extra"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <CodeGeneration>
+      <SmartLinkUnit Value="True"/>
       <RelocatableUnit Value="True"/>
       <TargetCPU Value="arm"/>
       <TargetOS Value="android"/>
@@ -58,6 +59,7 @@
       <Debugging>
         <GenerateDebugInfo Value="False"/>
       </Debugging>
+      <LinkSmart Value="True"/>
       <Options>
         <ExecutableType Value="Library"/>
       </Options>

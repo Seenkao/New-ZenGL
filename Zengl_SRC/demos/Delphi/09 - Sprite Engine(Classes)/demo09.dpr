@@ -8,18 +8,18 @@ uses
   zglSpriteEngine,
   zgl_screen,
   zgl_window,
+  zgl_application,
   zgl_timers,
   zgl_keyboard,
   zgl_render_2d,
   zgl_fx,
   zgl_textures,
   zgl_textures_png,
-  zgl_textures_jpg,
   zgl_sprite_2d,
   zgl_primitives_2d,
   zgl_font,
   zgl_text,
-  zgl_math_2d,
+  zgl_types,
   zgl_utils
   ;
 
@@ -36,11 +36,13 @@ type
 
 var
   dirRes   : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
-  fntMain  : zglPFont;
+  fntMain  : Byte;
   texLogo  : zglPTexture;
   texMiku  : zglPTexture;
   time     : Integer;
   sengine2d: zglCSEngine2D;
+  TimeStart : Byte;
+  TimeMiku  : Byte;
 
 // Miku
 procedure CMiku.OnInit(_Texture: zglPTexture; _Layer: Integer);
@@ -132,16 +134,16 @@ begin
 
   // RU: Создадим 1000 спрайтов Miku-chan :)
   // EN: Create 1000 sprites of Miku-chan :)
-  for i := 0 to 9 do
-    AddMiku();
+//  for i := 0 to 9 do
+//    AddMiku();
 
   fntMain := font_LoadFromFile(dirRes + 'font.zfi');
 end;
 
 procedure Draw;
 begin
-  setTextScale(1.5);
-  batch2d_Begin();
+  setTextScale(15, fntMain);
+//  batch2d_Begin();
   // RU: Рисуем все спрайты находящиеся в текущем спрайтовом менеджере.
   // EN: Render all sprites contained in current sprite engine.
   if time > 255 Then
@@ -163,7 +165,7 @@ begin
       text_Draw(fntMain, 0, 20, 'Sprites: ' + u_IntToStr(sengine2d.Count));
       text_Draw(fntMain, 0, 40, 'Up/Down - Add/Delete Miku :)');
     end;
-  batch2d_End();
+//  batch2d_End();
 end;
 
 procedure Timer;
@@ -180,8 +182,6 @@ begin
   if key_Press(K_UP) Then AddMiku();
   if key_Press(K_DOWN) Then DelMiku();
 
-//  if key_Press(K_ESCAPE) Then winOn := false;
-
   key_ClearState();
 end;
 
@@ -195,8 +195,8 @@ end;
 Begin
   randomize();
 
-  timer_Add(@Timer, 16);
-  timer_Add(@AddMiku, 1000);
+  TimeStart := timer_Add( @Timer, 16, Start );
+  TimeMiku := timer_Add( @AddMiku, 1000, SleepToStart, 10 );
 
   zgl_Reg(SYS_LOAD, @Init);
   zgl_Reg(SYS_DRAW, @Draw);

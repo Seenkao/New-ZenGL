@@ -26,33 +26,53 @@
 unit zgl_opengl;
 
 {$I zgl_config.cfg}
+{$IfDef MAC_COCOA}
+  {$modeswitch objectivec1}
+{$EndIf}
+{$IFDEF UNIX}
+  {$DEFINE stdcall := cdecl}
+{$ENDIF}
 
 interface
 uses
+  zgl_opengl_all,
   {$IFDEF LINUX}
-  X, XUtil,
+  X, XUtil
   {$ENDIF}
-
   {$IFDEF WINDOWS}
-  Windows,
+  Windows
   {$ENDIF}
-
-  {$IFDEF MACOSX}
-  MacOSAll,
+  {$IFDEF MACOSX}{$IfDef MAC_COCOA}
+  CocoaAll,
+  {$EndIf}
+  MacOSAll
   {$ENDIF}
-  zgl_opengl_all;
+  ;
 
 const
   TARGET_SCREEN  = 1;
   TARGET_TEXTURE = 2;
+  {$IfDef MACOSX}
+  CORE_2_1 = 1;
+  CORE_3_2 = 2;
+  CORE_4_1 = 3;
+  {$EndIf}
 
 function  gl_Create: Boolean;
+{$IfNDef MAC_COCOA}
 procedure gl_Destroy;
+{$Else}
+procedure gl_SetCoreGL(mode: Byte);
+{$EndIf}
 function  gl_Initialize: Boolean;
 procedure gl_ResetState;
 procedure gl_LoadEx;
 
 var
+  glCompressedTexImage2D: procedure(target: GLenum; level, internalformat: GLint; width, height: GLsizei; border: GLint; imageSize: GLsizei; const pixels: Pointer); stdcall;
+  glBlendEquation: procedure(mode: GLenum); stdcall;
+  glBlendFuncSeparate: procedure(sfactorRGB: GLenum; dfactorRGB: GLenum; sfactorAlpha: GLenum; dfactorAlpha: GLenum); stdcall;
+
   oglzDepth    : Byte;
   oglStencil   : Byte;
   oglFSAA      : Byte;
@@ -102,12 +122,17 @@ var
   oglFormatDesc: TPixelFormatDescriptor;
   {$ENDIF}
 
-  {$IFDEF MACOSX}
+  {$IFDEF MACOSX}{$IfDef MAC_COCOA}
+  oglContext : NSOpenGLContext;
+  oglCoreGL  : Integer;
+  oglAttr    : array[0..9] of NSOpenGLPixelFormatAttribute = (NSOpenGLPFADoubleBuffer, NSOpenGLPFAColorSize, 32, NSOpenGLPFADepthSize, 32,
+                        NSOpenGLPFAStencilSize, 8, NSOpenGLPFAOpenGLProfile, NSOpenGLProfileVersionLegacy, 0);
+  {$Else}
   oglDevice  : GDHandle;
   oglContext : TAGLContext;
   oglFormat  : TAGLPixelFormat;
   oglAttr    : array[0..31] of LongWord;
-  {$ENDIF}
+  {$ENDIF}{$EndIf}
 
 implementation
 uses
@@ -198,7 +223,6 @@ begin
       exit;
     end;
 {$ENDIF}
-
 {$IFDEF WINDOWS}
   wnd_Create();
 
@@ -312,8 +336,9 @@ begin
   wnd_Destroy();
   wndFirst := FALSE;
 {$ENDIF}
+{$IFDEF MACOSX}{$IfDef MAC_COCOA}
 
-{$IFDEF MACOSX}
+{$Else}
   if not InitAGL() Then
     begin
       log_Add('Cannot load AGL library');
@@ -370,11 +395,11 @@ begin
       u_Error('Cannot choose pixel format.');
       exit;
     end;
-{$ENDIF}
-
+{$ENDIF}{$EndIf}
   Result := TRUE;
 end;
 
+{$IfNDef MAC_COCOA}
 procedure gl_Destroy;
 begin
 {$IFDEF LINUX}
@@ -400,8 +425,13 @@ begin
 
   FreeGL();
 end;
+{$EndIf}
 
 function gl_Initialize: Boolean;
+{$IfDef MAC_COCOA}
+var
+  pixfmt: NSOpenGLPixelFormat;
+{$EndIf}
 begin
   Result := FALSE;
 {$IFDEF LINUX}
@@ -440,7 +470,14 @@ begin
     exit;
   end;
 {$ENDIF}
-{$IFDEF MACOSX}
+{$IFDEF MACOSX}{$IfDef MAC_COCOA}
+  pixfmt := NSOpenGLPixelFormat.alloc.initWithAttributes(@oglAttr);
+  oglContext := NSOpenGLContext.alloc.initWithFormat_shareContext(pixfmt, nil);
+  pixfmt.release;
+  oglContext.makeCurrentContext;
+
+  oglContext.setView(zglView);
+{$Else}
   oglContext := aglCreateContext(oglFormat, nil);
   if not Assigned(oglContext) Then
     begin
@@ -457,7 +494,7 @@ begin
       u_Error('Cannot set current OpenGL context');
       exit;
     end;
-{$ENDIF}
+{$ENDIF}{$EndIf}
 
   oglRenderer := glGetString(GL_RENDERER);
   log_Add('GL_VERSION: ' + glGetString(GL_VERSION));
@@ -619,10 +656,10 @@ begin
     oglCanPBuffer := FALSE;
   log_Add('WGL_PBUFFER: ' + u_BoolToStr(oglCanPBuffer));
 {$ENDIF}
-{$IFDEF MACOSX}
+{$IFDEF MACOSX}{$IfNDef MAC_COCOA}
   oglCanPBuffer := Assigned(aglCreatePBuffer);
   log_Add('AGL_PBUFFER: ' + u_BoolToStr(oglCanPBuffer));
-{$ENDIF}
+{$ENDIF}{$EndIf}
 
   // WaitVSync
 {$IFDEF LINUX}
@@ -633,16 +670,34 @@ begin
   wglSwapInterval := gl_GetProc('wglSwapInterval');
   oglCanVSync     := Assigned(wglSwapInterval);
 {$ENDIF}
-{$IFDEF MACOSX}
+{$IFDEF MACOSX}{$IfNDef MAC_COCOA}
   if aglSetInt(oglContext, AGL_SWAP_INTERVAL, 1) = GL_TRUE Then
     oglCanVSync := TRUE
   else
     oglCanVSync := FALSE;
   aglSetInt(oglContext, AGL_SWAP_INTERVAL, Byte(scrVSync));
-{$ENDIF}
+{$ENDIF}{$EndIf}
   if oglCanVSync Then
     scr_VSync;                          // prikolno... super funkciya
   log_Add('Support WaitVSync: ' + u_BoolToStr(oglCanVSync));
 end;
 
+{$IfDef MACOSX}
+procedure gl_SetCoreGL(mode: Byte);
+begin
+  if mode = CORE_3_2 then
+  begin
+    oglAttr[8] := $3200;
+    exit;
+  end;
+  if mode = CORE_4_1 then
+  begin
+    oglAttr[8] := $4100;
+    exit;
+  end;
+  oglAttr[8] := $1000;
+end;
+{$EndIf}
+
 end.
+

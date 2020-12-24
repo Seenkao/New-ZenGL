@@ -51,10 +51,10 @@ uses
 
 function InitGL: Boolean;
 procedure FreeGL;
-{$IFDEF MACOSX}
+{$IFDEF MACOSX}{$IfNDef MAC_COCOA}
 function InitAGL: Boolean;
 procedure FreeAGL;
-{$ENDIF}
+{$ENDIF}{$EndIf}
 function gl_GetProc(const Proc: UTF8String): Pointer;
 function gl_IsSupported(const Extension, SearchIn: UTF8String): Boolean;
 
@@ -356,9 +356,9 @@ type
   // Alpha
   procedure glAlphaFunc(func: GLenum; ref: GLclampf); stdcall; external libGL;
   procedure glBlendFunc(sfactor, dfactor: GLenum); stdcall; external libGL;
-var
-  glBlendEquation: procedure(mode: GLenum); stdcall;
-  glBlendFuncSeparate: procedure(sfactorRGB: GLenum; dfactorRGB: GLenum; sfactorAlpha: GLenum; dfactorAlpha: GLenum); stdcall;
+//var
+//  glBlendEquation: procedure(mode: GLenum); stdcall;
+//  glBlendFuncSeparate: procedure(sfactorRGB: GLenum; dfactorRGB: GLenum; sfactorAlpha: GLenum; dfactorAlpha: GLenum); stdcall;
   // Matrix
   procedure glPushMatrix; stdcall; external libGL;
   procedure glPopMatrix; stdcall; external libGL;
@@ -402,7 +402,7 @@ var
   //---------------------------------------------------------------------
 var
   //
-  glCompressedTexImage2D: procedure(target: GLenum; level, internalformat: GLint; width, height: GLsizei; border: GLint; imageSize: GLsizei; const pixels: Pointer); stdcall;
+//  glCompressedTexImage2D: procedure(target: GLenum; level, internalformat: GLint; width, height: GLsizei; border: GLint; imageSize: GLsizei; const pixels: Pointer); stdcall;
   // FBO
   glIsRenderbuffer: function(renderbuffer: GLuint): GLboolean; stdcall;
   glBindRenderbuffer: procedure(target: GLenum; renderbuffer: GLuint); stdcall;
@@ -517,7 +517,7 @@ var
   wglReleasePbufferDCARB: function(hPbuffer: THandle; hDC: HDC): GLint; stdcall;
   wglDestroyPbufferARB: function(hPbuffer: THandle): BOOL; stdcall;
 {$ENDIF}
-{$IFDEF MACOSX}
+{$IFDEF MACOSX}{$IfNDef MAC_COCOA}
 const
   AGL_NONE         = 0;
   AGL_BUFFER_SIZE  = 2;
@@ -576,13 +576,13 @@ var
   aglCreatePBuffer: function(width:GLint; height:GLint; target:GLenum; internalFormat:GLenum; max_level:longint; pbuffer:PAGLPbuffer):GLboolean;cdecl;
   aglDestroyPBuffer: function(pbuffer:TAGLPbuffer):GLboolean;cdecl;
   aglSetPBuffer: function(ctx:TAGLContext; pbuffer:TAGLPbuffer; face:GLint; level:GLint; screen:GLint):GLboolean;cdecl;
-{$ENDIF}
+{$ENDIF}{$EndIf}
 
 var
   oglLibrary: {$IFDEF UNIX} Pointer {$ENDIF} {$IFDEF WINDOWS} HMODULE {$ENDIF};
-  {$IFDEF MACOSX}
+  {$IFDEF MACOSX}{$IfNDef MAC_COCOA}
   aglLibrary: Pointer;
-  {$ENDIF}
+  {$ENDIF}{$EndIf}
 
 implementation
 uses
@@ -618,7 +618,7 @@ begin
   dlclose(oglLibrary);
 end;
 
-{$IFDEF MACOSX}
+{$IFDEF MACOSX}{$IfNDef MAC_COCOA}
 function aglSetInt;
   var
     i: Integer;
@@ -657,7 +657,7 @@ procedure FreeAGL;
 begin
   dlclose(aglLibrary);
 end;
-{$ENDIF}
+{$ENDIF}{$EndIf}
 
 function gl_GetProc(const Proc: UTF8String): Pointer;
 begin

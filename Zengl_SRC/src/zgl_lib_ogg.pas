@@ -54,9 +54,9 @@ unit zgl_lib_ogg;
   {$IFDEF UNIX}
     {$LINKLIB m}
   {$ENDIF}
-  {$IFDEF MACOSX}
+  {$IFDEF MACOSX}{$IfNDef MAC_COCOA}
     {$LINKLIB libgcc.a}
-  {$ENDIF}
+  {$ENDIF}{$EndIf}
 {$ENDIF}
 
 {$IF DEFINED(USE_TREMOLO)}
@@ -381,15 +381,21 @@ begin
 {$IFDEF USE_OGG_STATIC}
   Result := TRUE;
 {$ELSE}
-  {$IFDEF UNIX}
+  {$IFDEF UNIX}{$IfNDef MAC_COCOA}
   oggLibrary := dlopen(libogg, $001);
-  {$ENDIF}
+  {$ENDIF}{$EndIf}
   {$IFDEF WINDOWS}
   oggLibrary := dlopen(libogg);
   {$ENDIF}
-  {$IFDEF MACOSX}
+  {$IFDEF MACOSX}{$IfDef MAC_COCOA}
+  {$IfDef NO_USE_STATIC_LIBRARY}
+  oggLibrary := dlopen(PAnsiChar(libogg), 1);
+  {$Else}
+  oggLibrary := dlopen(PAnsiChar('/usr/local/lib/' + libogg), 1);
+  {$EndIf}
+  {$Else}
   oggLibrary := dlopen(PAnsiChar(appWorkDir + 'Contents/Frameworks/' + libogg), $001);
-  {$ENDIF}
+  {$ENDIF}{$EndIf}
 
   if oggLibrary <> LIB_ERROR Then
   begin
@@ -423,6 +429,22 @@ begin
   if not oggInit Then exit;
 
   dlclose(oggLibrary);
+  ogg_sync_init         := nil;
+  ogg_sync_reset        := nil;
+  ogg_sync_clear        := nil;
+  ogg_sync_buffer       := nil;
+  ogg_sync_wrote        := nil;
+  ogg_sync_pageseek     := nil;
+  ogg_sync_pageout      := nil;
+  ogg_stream_pagein     := nil;
+  ogg_stream_packetout  := nil;
+  ogg_stream_packetpeek := nil;
+  ogg_stream_init       := nil;
+  ogg_stream_reset      := nil;
+  ogg_stream_clear      := nil;
+  ogg_page_bos          := nil;
+  ogg_page_serialno     := nil;
+  ogg_page_granulepos   := nil;
   oggInit := FALSE;
 {$ENDIF}
 end;
@@ -434,18 +456,21 @@ begin
 {$ELSE}
   if InitOgg() Then
   begin
-    {$IFDEF UNIX}
+    {$IFDEF UNIX}{$IfNDef MAC_COCOA}
     vorbisLibrary     := dlopen(libvorbis, $001);
     vorbisfileLibrary := dlopen(libvorbisfile, $001);
-    {$ENDIF}
+    {$ENDIF}{$EndIf}
     {$IFDEF WINDOWS}
     vorbisLibrary     := dlopen(libvorbis);
     vorbisfileLibrary := dlopen(libvorbisfile);
     {$ENDIF}
-    {$IFDEF MACOSX}
+    {$IFDEF MACOSX}{$IfDef MAC_COCOA}
+    vorbisLibrary := dlopen(PAnsiChar({'/usr/local/lib/' + }libvorbis), 1);
+    vorbisfileLibrary := dlopen(PAnsiChar({'/usr/local/lib/' + }libvorbisfile), 1);
+    {$Else}
     vorbisLibrary     := dlopen(PAnsiChar(appWorkDir + 'Contents/Frameworks/' + libvorbis), $001);
     vorbisfileLibrary := dlopen(PAnsiChar(appWorkDir + 'Contents/Frameworks/' + libvorbisfile), $001);
-    {$ENDIF}
+    {$EndIf}{$EndIf}
 
     if (vorbisLibrary <> LIB_ERROR) and (vorbisfileLibrary <> LIB_ERROR) Then
     begin
@@ -475,6 +500,13 @@ begin
 
   dlclose(vorbisLibrary);
   dlclose(vorbisfileLibrary);
+  ov_clear          := nil;
+  ov_open_callbacks := nil;
+  ov_info           := nil;
+  ov_read           := nil;
+  ov_pcm_seek       := nil;
+  ov_pcm_total      := nil;
+  ov_time_seek      := nil;
   vorbisInit := FALSE;
 {$ENDIF}
 end;

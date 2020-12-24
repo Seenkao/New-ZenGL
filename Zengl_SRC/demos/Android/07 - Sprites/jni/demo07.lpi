@@ -43,7 +43,7 @@
       <IncludeFiles Value="..\..\..\..\headers;..\..\..\..\headers\android;$(ProjOutDir);..\..\..\..\src"/>
       <Libraries Value="..\libs\armeabi;..\..\..\..\bin\Android\armv6;E:\SDK_manadger\android-ndk-r9c\platforms\android-14\arch-arm\usr\lib\"/>
       <OtherUnitFiles Value="..\..\..\..\src;..\..\..\..\extra;..\..\..\..\lib\zlib\arm-linux;..\..\..\..\lib\zip\arm-linux;..\..\..\..\lib\theora\arm-linux;..\..\..\..\lib\ogg\arm-linux"/>
-      <UnitOutputDirectory Value="D:\programming\Zengl_SRC\demos\Android\07 - Sprites\jni\tmp"/>
+      <UnitOutputDirectory Value="\tmp"/>
     </SearchPaths>
     <CodeGeneration>
       <RelocatableUnit Value="True"/>

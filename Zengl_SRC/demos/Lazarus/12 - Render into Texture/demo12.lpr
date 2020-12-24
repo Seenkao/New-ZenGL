@@ -6,13 +6,12 @@ program demo12;
   {$R *.res}
 {$ENDIF}
 
+  // MacOS Cocoa not work. Deprecated.
 uses
   {$IFDEF UNIX}
   cthreads,
   {$ENDIF}
   {$IFDEF USE_ZENGL_STATIC}
-  zgl_main,
-  zgl_application,
   zgl_screen,
   zgl_window,
   zgl_timers,
@@ -34,10 +33,12 @@ uses
 
 var
   dirRes    : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
-  fntMain   : zglPFont;
+  fntMain   : Byte;
   texTux    : zglPTexture;
   rtFull    : zglPRenderTarget;
   rtDefault : zglPRenderTarget;
+
+  TimeStart  : Byte = 0;
 
 procedure Init;
 begin
@@ -45,6 +46,7 @@ begin
   tex_SetFrameSize( texTux, 64, 64 );
 
   fntMain := font_LoadFromFile( dirRes + 'font.zfi' );
+  setTextScale(15, fntMain);
 
   // RU: Создаем RenderTarget и "цепляем" пустую текстуру. В процессе текстуру можно сменить присвоив rtarget.Surface другую zglPTexture, главное что бы совпадали размеры с теми, что указаны в
   //     tex_CreateZero. Таргету также указан флаг RT_FULL_SCREEN, отвечающий за то, что бы в текстуру помещалось все содержимое экрана а не область 256x256(как с флагом RT_DEFAULT).
@@ -55,7 +57,6 @@ begin
   // RU: Для сравнения создадим ещё один RenderTarget с флагом RT_DEFAULT.
   // EN: Create one more RenderTarget with flag RT_DEFAULT for comparison.
   rtDefault := rtarget_Add( tex_CreateZero( 256, 256 ), RT_DEFAULT );
-  setTextScale(1.5);
 end;
 
 procedure Draw;
@@ -94,7 +95,7 @@ Begin
 
   randomize();
 
-  timer_Add( @Timer, 16 );
+  TimeStart := timer_Add( @Timer, 16, Start );
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );

@@ -4,7 +4,6 @@ library demo14;
 
 uses
   zgl_application,
-  zgl_main,
   zgl_file,
   zgl_memory,
   zgl_screen,
@@ -22,7 +21,7 @@ uses
   zgl_sound,
   zgl_sound_wav,
   zgl_sound_ogg,
-  zgl_math_2d,
+  zgl_types,
   zgl_collision_2d,
   zgl_utils
   ;
@@ -33,7 +32,7 @@ const
 
 var
   dirRes  : UTF8String = 'assets/';
-  fntMain : zglPFont;
+  fntMain : Byte;
   icon    : array[ 0..1 ] of zglPTexture;
   sound   : zglPSound;
   audio   : Integer;
@@ -43,6 +42,7 @@ var
 
   // добавляем номер звука, пока для одного звука
   IDSound: Integer;
+  TimeStart: Byte;
 
 // RU: Т.к. звуковая подсистема нацелена на 3D, для позиционирования звуков в 2D нужны некоторые ухищрения.
 // EN: Because sound subsystem using 3D, there is some tricky way to calculate sound position in 2D.
@@ -83,7 +83,7 @@ begin
   mem_LoadFromFile( musicMem, dirRes + 'music.ogg' );
 
   file_CloseArchive();
-  setTextScale(1.5);
+  setTextScale(15, fntMain);
 end;
 
 procedure Draw;
@@ -195,7 +195,7 @@ procedure Java_zengl_android_ZenGL_Main( var env; var thiz ); cdecl;
 begin
   randomize();
 
-  timer_Add( @Timer, 16 );
+  TimeStart := timer_Add( @Timer, 16, Start );
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );

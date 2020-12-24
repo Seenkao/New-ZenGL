@@ -89,6 +89,9 @@ var
   mouseDblCTime: array[0..2] of Double;
   mouseDblCInt : Integer = 250;
   mouseLock    : Boolean;
+  {$IfDef MAC_COCOA}
+  gMouseX, gMouseY: Integer;
+  {$EndIf}
 
 implementation
 uses

@@ -4,7 +4,6 @@ library demo13;
 
 uses
   zgl_application,
-  zgl_main,
   zgl_file,
   zgl_screen,
   zgl_window,
@@ -14,25 +13,25 @@ uses
   zgl_fx,
   zgl_textures,
   zgl_textures_png,
-  zgl_textures_jpg,
   zgl_sprite_2d,
   zgl_particles_2d,
   zgl_primitives_2d,
   zgl_font,
   zgl_text,
-  zgl_math_2d,
+  zgl_types,
   zgl_utils
   ;
 
 var
   dirRes         : UTF8String = 'assets/';
-  fntMain        : zglPFont;
+  fntMain        : Byte;
   texBack        : zglPTexture;
   debug          : Boolean;
   particles      : zglTPEngine2D;
   emitterFire    : array[ 0..2 ] of zglPEmitter2D;
   emitterDiamond : zglPEmitter2D;
   emitterRain    : zglPEmitter2D;
+  TimeStart      : Byte;
 
 procedure Init;
   var
@@ -76,14 +75,14 @@ begin
   pengine2d_AddEmitter( emitterRain, nil );
 
   file_CloseArchive();
-  setTextScale(1.5);
+  setTextScale(15, fntMain);
 end;
 
 procedure Draw;
   var
     i : Integer;
 begin
-//  batch2d_Begin();
+  batch2d_Begin();
 
   ssprite2d_Draw( texBack, 0, 0, 800, 600, 0 );
 
@@ -100,7 +99,7 @@ begin
   text_Draw( fntMain, 0, 20, 'Particles: ' + u_IntToStr( particles.Count.Particles ) );
   text_Draw( fntMain, 0, 40, 'Debug(tap): ' + u_BoolToStr( debug ) );
 
-//  batch2d_End();
+  batch2d_End();
 end;
 
 procedure Timer;
@@ -144,7 +143,7 @@ procedure Java_zengl_android_ZenGL_Main( var env; var thiz ); cdecl;
 begin
   randomize();
 
-  timer_Add( @Timer, 16 );
+  TimeStart := timer_Add( @Timer, 16, Start );
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );

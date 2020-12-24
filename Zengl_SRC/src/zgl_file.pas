@@ -63,7 +63,7 @@ const
   FSM_CUR    = $02;
   FSM_END    = $03;
 
-function  file_Open(out FileHandle: zglTFile; const FileName: UTF8String; Mode: Byte): Boolean;
+function  file_Open(out FileHandle: zglTFile; const FileName: UTF8String; Mode: Byte{$IfDef MAC_COCOA}; log: Boolean = false{$EndIf}): Boolean;
 function  file_MakeDir(const Directory: UTF8String): Boolean;
 function  file_Remove(const Name: UTF8String): Boolean;
 function  file_Exists(const Name: UTF8String): Boolean;
@@ -135,7 +135,9 @@ begin
     Result := utf8_Copy(Path);
 end;
 
-function file_Open(out FileHandle: zglTFile; const FileName: UTF8String; Mode: Byte): Boolean;
+function file_Open(out FileHandle: zglTFile; const FileName: UTF8String; Mode: Byte{$IfDef MAC_COCOA}; log: Boolean = false{$EndIf}): Boolean;
+var
+  s: UTF8String;
 begin
   {$IFDEF USE_ZIP}
   if Assigned(zipCurrent) Then
@@ -159,13 +161,13 @@ begin
   end;
   {$ENDIF}
 
-{$IfDef UNIX}
+{$IfDef UNIX}{$IfNDef DARWIN}
   case Mode of
     FOM_CREATE: FileHandle := FpOpen(filePath + FileName, O_Creat or O_Trunc or O_RdWr);
     FOM_OPENR:  FileHandle := FpOpen(filePath + FileName, O_RdOnly);
     FOM_OPENRW: FileHandle := FpOpen(filePath + FileName, O_RdWr);
   end;
-{$ENDIF}
+{$ENDIF}{$EndIf}
 {$IFDEF WINDOWS}
   wideStr := utf8_GetPWideChar(filePath + FileName);
   case Mode of
@@ -175,13 +177,23 @@ begin
   end;
   FreeMem(wideStr);
 {$ENDIF}
-{$IFDEF DARWIN}
+{$IFDEF DARWIN}{$IfDef MAC_COCOA}
+  if log then
+    s := appLogDir
+  else
+    s := filePath;
+  case Mode of
+    FOM_CREATE: FileHandle := FpOpen(platform_GetRes(s + FileName), O_Creat or O_Trunc or O_RdWr);
+    FOM_OPENR:  FileHandle := FpOpen(platform_GetRes(s + FileName), O_RdOnly);
+    FOM_OPENRW: FileHandle := FpOpen(platform_GetRes(s + FileName), O_RdWr);
+  end;
+{$Else}
   case Mode of
     FOM_CREATE: FileHandle := FpOpen(platform_GetRes(filePath + FileName), O_Creat or O_Trunc or O_RdWr);
     FOM_OPENR:  FileHandle := FpOpen(platform_GetRes(filePath + FileName), O_RdOnly);
     FOM_OPENRW: FileHandle := FpOpen(platform_GetRes(filePath + FileName), O_RdWr);
   end;
-{$ENDIF}
+{$ENDIF}{$EndIf}
   Result := FileHandle <> FILE_ERROR;
 end;
 
@@ -195,9 +207,9 @@ begin
     end;
   {$ENDIF}
 
-{$IfDef UNIX}
+{$IfDef UNIX}{$IfNDef DARWIN}
   Result := FpMkdir(filePath + Directory, MODE_MKDIR) = FILE_ERROR;
-{$ENDIF}
+{$ENDIF}{$EndIf}
 {$IFDEF WINDOWS}
   wideStr := utf8_GetPWideChar(filePath + Directory);
   Result := CreateDirectoryW(wideStr, nil);
@@ -235,10 +247,10 @@ begin
       exit;
     end;
 
-{$IfDef UNIX}
+{$IfDef UNIX}{$IfNDef DARWIN}
   FpStat(filePath + Name, status);
   dir := fpS_ISDIR(status.st_mode);
-{$ENDIF}
+{$ENDIF}{$EndIf}
 {$IFDEF WINDOWS}
   wideStr := utf8_GetPWideChar(filePath + Name);
   dir := GetFileAttributesW(wideStr) and FILE_ATTRIBUTE_DIRECTORY > 0;
@@ -264,9 +276,9 @@ begin
       for i := 2 to list.Count - 1 do
         file_Remove(path + list.Items[i]);
 
-      {$IfDef UNIX}
+      {$IfDef UNIX}{$IfNDef DARWIN}
       Result := FpRmdir(filePath + Name) = 0;
-      {$ENDIF}
+      {$ENDIF}{$EndIf}
       {$IFDEF WINDOWS}
       wideStr := utf8_GetPWideChar(filePath + Name);
       Result  := RemoveDirectoryW(wideStr);
@@ -279,9 +291,9 @@ begin
       Result := iosFileManager.removeItemAtPath_error(utf8_GetNSString(platform_GetRes(filePath + Name)), error);
       {$ENDIF}
     end else
-      {$IfDef UNIX}
+      {$IfDef UNIX}{$IfNDef DARWIN}
       Result := FpUnlink(filePath + Name) = 0;
-      {$ENDIF}
+      {$ENDIF}{$EndIf}
       {$IFDEF WINDOWS}
       begin
         wideStr := utf8_GetPWideChar(filePath + Name);
@@ -315,9 +327,9 @@ begin
     end;
   {$ENDIF}
 
-{$IfDef UNIX}
+{$IfDef UNIX}{$IfNDef DARWIN}
   Result := FpStat(filePath + Name, status) = 0;
-{$ENDIF}
+{$ENDIF}{$EndIf}
 {$IFDEF WINDOWS}
   wideStr := utf8_GetPWideChar(filePath + Name);
   Result  := GetFileAttributesW(wideStr) <> $FFFFFFFF;
@@ -564,7 +576,7 @@ begin
   else
     type_ := 8;
 
-  {$IfDef UNIX}
+  {/$IfDef UNIX}{$IfNDef MACOSX}
   dir := FpOpenDir(filePath + Directory);
   {$ELSE}
   dir := FpOpenDir(platform_GetRes(filePath + Directory));

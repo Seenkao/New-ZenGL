@@ -12,13 +12,14 @@ uses
   zgl_fx,
   zgl_render_2d,
   zgl_primitives_2d,
+  zgl_types,
   zgl_math_2d,
-  zgl_utils
-  ;
+  zgl_utils;
 
 var
   calc   : Integer;
   points : array[ 0..359 ] of zglTPoint2D;
+  TimeStart: Byte;
 
 procedure Init;
   var
@@ -67,13 +68,11 @@ end;
 
 procedure Timer;
 begin
-//  if key_Press( K_ESCAPE ) Then winOn := false;
-
   key_ClearState();
 end;
 
 Begin
-  timer_Add( @Timer, 16 );
+  TimeStart := timer_Add( @Timer, 16, Start );
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );

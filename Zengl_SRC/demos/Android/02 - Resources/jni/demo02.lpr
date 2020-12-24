@@ -5,7 +5,6 @@ library demo02;
 uses
   zgl_application,
   zgl_types,
-  zgl_main,
   zgl_screen,
   zgl_window,
   zgl_timers,
@@ -44,7 +43,7 @@ var
 
   // RU: У каждого ресурса есть свой определённый тип, который является указателем на структуру.
   // EN: Every resource has its own typem which is just a pointer to structure.
-  fntMain  : zglPFont;
+  fntMain  : Byte;
   //
   texLogo  : zglPTexture;
   texTest  : array[ 0..3 ] of zglPTexture;

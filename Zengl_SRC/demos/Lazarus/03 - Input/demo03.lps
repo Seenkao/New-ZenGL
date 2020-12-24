@@ -4,32 +4,30 @@
     <PathDelim Value="\"/>
     <Version Value="11"/>
     <BuildModes Active="Release"/>
-    <Units Count="1">
+    <Units Count="2">
       <Unit0>
         <Filename Value="demo03.lpr"/>
         <IsPartOfProject Value="True"/>
         <IsVisibleTab Value="True"/>
-        <TopLine Value="127"/>
-        <CursorPos Y="157"/>
-        <UsageCount Value="33"/>
+        <CursorPos X="26" Y="11"/>
+        <UsageCount Value="161"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit0>
+      <Unit1>
+        <Filename Value="..\..\..\extra\zglglutm.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="zglGLUTM"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="745"/>
+        <CursorPos X="19" Y="739"/>
+        <UsageCount Value="27"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit1>
     </Units>
     <RunParams>
       <FormatVersion Value="2"/>
       <Modes Count="0" ActiveMode="default"/>
     </RunParams>
   </ProjectSession>
-  <Debugging>
-    <BreakPoints Count="1">
-      <Item1>
-        <Kind Value="bpkSource"/>
-        <WatchScope Value="wpsLocal"/>
-        <WatchKind Value="wpkWrite"/>
-        <Source Value="..\..\..\src\zgl_application.pas"/>
-        <Line Value="676"/>
-      </Item1>
-    </BreakPoints>
-  </Debugging>
 </CONFIG>

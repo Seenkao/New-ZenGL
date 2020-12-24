@@ -75,11 +75,16 @@
         <Mode0 Name="default"/>
       </Modes>
     </RunParams>
-    <Units Count="1">
+    <Units Count="2">
       <Unit0>
         <Filename Value="demo03.lpr"/>
         <IsPartOfProject Value="True"/>
       </Unit0>
+      <Unit1>
+        <Filename Value="../../../extra/zglglutm.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="zglGLUTM"/>
+      </Unit1>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -107,7 +112,6 @@
       <Debugging>
         <GenerateDebugInfo Value="False"/>
         <StripSymbols Value="True"/>
-        <UseExternalDbgSyms Value="True"/>
       </Debugging>
       <LinkSmart Value="True"/>
       <Options>

@@ -4,7 +4,6 @@ library demo03;
 
 uses
   zgl_application,
-  zgl_main,
   zgl_file,
   zgl_screen,
   zgl_window,
@@ -15,7 +14,7 @@ uses
   zgl_font,
   zgl_text,
   zgl_textures_png,
-  zgl_math_2d,
+  zgl_types,
   zgl_collision_2d,
   zgl_utils
   ;
@@ -23,12 +22,14 @@ uses
 var
   dirRes  : UTF8String = 'assets/';
 
-  fntMain   : zglPFont;
+  fntMain   : Byte;
 
   userInput  : UTF8String;
   trackInput : Boolean;
   inputRect  : zglTRect;
   lineAlpha  : Byte;
+
+  TimerStart: Byte;
 
 procedure Init;
 begin
@@ -45,7 +46,7 @@ begin
   inputRect.Y := 300 - 100 - 32;
   inputRect.W := 384;
   inputRect.H := 96;
-  setTextScale(1.5);
+  setTextScale(15, fntMain);
 end;
 
 procedure Draw;
@@ -123,7 +124,7 @@ end;
 
 procedure Java_zengl_android_ZenGL_Main( var env; var thiz ); cdecl;
 begin
-  timer_Add( @Timer, 16 );
+  TimerStart := timer_Add( @Timer, 16, Start );
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );

@@ -76,6 +76,9 @@ uses
   MacOSAll,
   {$ENDIF}
    zgl_types,
+  zgl_log,
+  zgl_file,
+  zgl_utils,
   zgl_primitives_2d;
 
 
@@ -89,13 +92,15 @@ const
 {$IFDEF WINDOWS}
   libChipmunk = 'chipmunk.dll';
 {$ENDIF}
-{$IFDEF MACOSX}
+{$IFDEF MACOSX}{$If (not defined(CPUi386))}
+  libChipmunk = 'libchipmunk.7.0.3.dylib';
+{$Else}
   libChipmunk = 'libchipmunk.5.3.2.dylib';
-{$ENDIF}
+{$IfEnd}{$EndIf}
 
 // компиляция врутри???
 {$IF ( not DEFINED( USE_CHIPMUNK_STATIC ) ) and ( not DEFINED( USE_CHIPMUNK_LINK ) )}
-function  cpLoad( LibraryName : AnsiString; Error : Boolean = TRUE ) : Boolean;
+function  cpLoad( LibraryName : AnsiString ) : Boolean;
 procedure cpFree;
 {$IFEND}
 
@@ -783,13 +788,15 @@ const
   cpvzero : cpVect = ( x: 0; y : 0 );
   cpFalse : cpBool = FALSE;
   cpTrue  : cpBool = TRUE;
-  INFINITY                    = 1e1000;
+  INFINITY                    = $1e1000;
   CP_MAX_CONTACTS_PER_ARBITER = 6;
 
 // компиляция внутри???
 {$IF ( not DEFINED( USE_CHIPMUNK_STATIC ) ) and ( not DEFINED( USE_CHIPMUNK_LINK ) )}
 var
+  {$If not(defined(MACOSX) and not defined(CPUi386))}
   cpInitChipmunk : procedure; cdecl;
+  {$IfEnd}
   cpMomentForCircle : function( m : cpFloat; r1 : cpFloat; r2 : cpFloat; offset : cpVect ) : cpFloat; cdecl;
   cpMomentForSegment : function( m : cpFloat; a : cpVect; b : cpVect ) : cpFloat; cdecl;
   cpMomentForPoly : function( m : cpFloat; numVerts : Integer; verts : PcpVect; offset : cpVect ) : cpFloat; cdecl;
@@ -797,6 +804,7 @@ var
 
 // VECT
   // Returns the length of v.
+  {$If not(defined(MACOSX) and not defined(CPUi386))}
   cpvlength : function( v : cpVect ) : cpFloat; cdecl;
 
   // Spherical linearly interpolate between v1 and v2.
@@ -819,27 +827,34 @@ var
 // ARRAY
   cpArrayAlloc : function : PcpArray; cdecl;
   cpArrayInit : function( arr : PcpArray; size : Integer ) : PcpArray; cdecl;
+  {$IfEnd}
   cpArrayNew : function( size : Integer ) : PcpArray; cdecl;
-
+  {$If not(defined(MACOSX) and not defined(CPUi386))}
   cpArrayDestroy : procedure( arr : PcpArray); cdecl;
+  {$IfEnd}
   cpArrayFree : procedure( arr : PcpArray ); cdecl;
-
+  {$If not(defined(MACOSX) and not defined(CPUi386))}
   cpArrayClear : procedure( arr : PcpArray ); cdecl;
+  {$IfEnd}
 
   cpArrayPush : procedure( arr : PcpArray; _object : Pointer ); cdecl;
   cpArrayPop : function( arr : PcpArray ) : Pointer; cdecl;
+  {$If not(defined(MACOSX) and not defined(CPUi386))}
   cpArrayDeleteIndex : procedure( arr : PcpArray; idx : Integer ); cdecl;
+  {$IfEnd}
   cpArrayDeleteObj : procedure( arr : PcpArray; obj : Pointer ); cdecl;
-
+  {$If not(defined(MACOSX) and not defined(CPUi386))}
   cpArrayAppend : procedure( arr : PcpArray; other : PcpArray ); cdecl;
 
   cpArrayEach : procedure( arr : PcpArray; iterFunc : cpArrayIter; data : Pointer ); cdecl;
+  {$IfEnd}
   cpArrayContains : function( arr : PcpArray; ptr : Pointer ) : cpBool; cdecl;
 
 // ARBITER
   // Contacts are always allocated in groups.
+  {$If not(defined(MACOSX) and not defined(CPUi386))}
   cpContactInit : function( con : PcpContact; p : cpVect; n : cpVect; dist : cpFloat; hasg : cpHashValue ) : PcpContact; cdecl;
-
+  {$IfEnd}
   // Arbiters are allocated in large buffers by the space and don't require a destroy function
   cpArbiterInit : function( arb : PcpArbiter; a : PcpShape; b : PcpShape ) : PcpArbiter; cdecl;
 
@@ -854,7 +869,9 @@ var
 
   // Arbiter Helper Functions
   cpArbiterTotalImpulse : function( arb : PcpArbiter ) : cpVect; cdecl;
+  {$If not(defined(MACOSX) and not defined(CPUi386))}
   cpArbiterTotalImpulseWithFriction : function( arb : PcpArbiter ) : cpVect; cdecl;
+  {$IfEnd}
   cpArbiterIgnore : procedure( arb : PcpArbiter ); cdecl;
 
 // SHAPE
@@ -882,8 +899,9 @@ var
   cpSegmentShapeAlloc : function : PcpSegmentShape; cdecl;
   cpSegmentShapeInit : function( seg : PcpSegmentShape; body : PcpBody; a : cpVect; b : cpVect; radius : cpFloat ) : PcpSegmentShape; cdecl;
   cpSegmentShapeNew : function( body : PcpBody; a : cpVect; b : cpVect; radius : cpFloat ) : PcpShape; cdecl;
-
+  {$If not(defined(MACOSX) and not defined(CPUi386))}
   cpResetShapeIdCounter : procedure; cdecl;
+  {$IfEnd}
 
   cpShapeSegmentQuery : function( shape : PcpShape; a : cpVect; b : cpVect; info : PcpSegmentQueryInfo ) : cpBool; cdecl;
 
@@ -897,9 +915,11 @@ var
   cpBoxShapeNew : function( body : PcpBody; width : cpFloat; height : cpFloat ) : PcpShape; cdecl;
 
   // Check that a set of vertexes has a correct winding and that they are convex
+  {$If not(defined(MACOSX) and not defined(CPUi386))}
   cpPolyValidate : function( verts : PcpVect; numVerts : Integer ) : cpBool; cdecl;
 
   cpPolyShapeGetNumVerts : function( shape : PcpShape ) : Integer; cdecl;
+  {$IfEnd}
   cpPolyShapeGetVert : function( shape : PcpShape; idx : Integer ) : cpVect; cdecl;
 
 // BODY
@@ -923,13 +943,16 @@ var
 
   //  Modify the velocity of the body so that it will move to the specified absolute coordinates in the next timestep.
   // Intended for objects that are moved manually with a custom velocity integration function.
+  {$If not(defined(MACOSX) and not defined(CPUi386))}
   cpBodySlew : procedure( body : PcpBody; pos : cpVect; dt : cpFloat ); cdecl;
+  {$IfEnd}
 
   // Default Integration functions.
   cpBodyUpdateVelocity : procedure( body : PcpBody; gravity : cpVect; damping : cpFloat; dt : cpFloat ); cdecl;
   cpBodyUpdatePosition : procedure( body : PcpBody; dt : cpFloat ); cdecl;
 
   // Zero the forces on a body.
+  {$If not(defined(MACOSX) and not defined(CPUi386))}
   cpBodyResetForces : procedure( body : PcpBody ); cdecl;
   // Apply a force (in world coordinates) to a body at a point relative to the center of gravity (also in world coordinates).
   cpBodyApplyForce : procedure( body : PcpBody; f : cpVect; r : cpVect ); cdecl;
@@ -937,61 +960,72 @@ var
   // Apply a damped spring force between two bodies.
   // Warning: Large damping values can be unstable. Use a cpDampedSpring constraint for this instead.
   cpApplyDampedSpring : procedure( a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect; rlen : cpFloat; k : cpFloat; dmp : cpFloat; dt : cpFloat ); cdecl;
+  {$IfEnd}
 
 // CONSTRAINTS
   cpConstraintDestroy : procedure( constraint : PcpConstraint ); cdecl;
   cpConstraintFree : procedure( constraint : PcpConstraint ); cdecl;
-
+  {$If not(defined(MACOSX) and not defined(CPUi386))}
   cpPinJointGetClass: function: PcpConstraintClass; cdecl;
+  {$IfEnd}
   cpPinJointAlloc : function : PcpPinJoint; cdecl;
   cpPinJointInit : function( joint : PcpPinJoint; a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect ) : PcpPinJoint; cdecl;
   cpPinJointNew : function( a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect ) : PcpConstraint; cdecl;
-
+  {$If not(defined(MACOSX) and not defined(CPUi386))}
   cpSlideJointGetClass: function: PcpConstraintClass; cdecl;
+  {$IfEnd}
   cpSlideJointAlloc : function : PcpSlideJoint; cdecl;
   cpSlideJointInit : function( joint : PcpSlideJoint; a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect; min : cpFloat; max : cpFloat ) : PcpSlideJoint; cdecl;
   cpSlideJointNew : function( a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect; min : cpFloat; max : cpFloat ) : PcpConstraint; cdecl;
-
+  {$If not(defined(MACOSX) and not defined(CPUi386))}
   cpPivotJointGetClass: function: PcpConstraintClass; cdecl;
+  {$IfEnd}
   cpPivotJointAlloc : function : PcpPivotJoint; cdecl;
   cpPivotJointInit : function( joint : PcpPivotJoint; a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect ) : PcpPivotJoint; cdecl;
   cpPivotJointNew : function( a : PcpBody; b : PcpBody; pivot : cpVect ) : PcpConstraint; cdecl;
   cpPivotJointNew2 : function( a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect ) : PcpConstraint; cdecl;
-
+  {$If not(defined(MACOSX) and not defined(CPUi386))}
   cpGrooveJointGetClass: function: PcpConstraintClass; cdecl;
+  {$IfEnd}
   cpGrooveJointAlloc : function : PcpGrooveJoint; cdecl;
   cpGrooveJointInit : function( joint : PcpGrooveJoint; a : PcpBody; b : PcpBody; groove_a : cpVect; groove_b : cpVect; anchr2 : cpVect ) : PcpGrooveJoint; cdecl;
   cpGrooveJointNew : function( a : PcpBody; b : PcpBody; groove_a : cpVect; groove_b : cpVect; anchr2 : cpVect ) : PcpConstraint; cdecl;
 
   cpGrooveJointSetGrooveA : procedure( constraint : PcpConstraint; value : cpVect ); cdecl;
   cpGrooveJointSetGrooveB : procedure( constraint : PcpConstraint; value : cpVect ); cdecl;
-
+  {$If not(defined(MACOSX) and not defined(CPUi386))}
   cpDampedSpringGetClass: function : PcpConstraintClass; cdecl;
+  {$IfEnd}
   cpDampedSpringAlloc : function : PcpDampedSpring; cdecl;
   cpDampedSpringInit : function( joint : PcpDampedSpring; a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect; restLength : cpFloat; stiffness : cpFloat; damping : cpFloat ) : PcpDampedSpring; cdecl;
   cpDampedSpringNew : function( a : PcpBody; b : PcpBody; anchr1 : cpVect; anchr2 : cpVect; restLength : cpFloat; stiffness : cpFloat; damping : cpFloat ) : PcpConstraint; cdecl;
-
+  {$If not(defined(MACOSX) and not defined(CPUi386))}
   cpDampedRotarySpringGetClass: function : PcpConstraintClass; cdecl;
+  {$IfEnd}
   cpDampedRotarySpringAlloc : function : PcpDampedRotarySpring; cdecl;
   cpDampedRotarySpringInit : function( joint : PcpDampedRotarySpring; a : PcpBody; b : PcpBody; restAngle : cpFloat; stiffness : cpFloat; damping : cpFloat ) : PcpDampedRotarySpring; cdecl;
   cpDampedRotarySpringNew : function( a : PcpBody; b : PcpBody; restAngle : cpFloat; stiffness : cpFloat; damping : cpFloat ) : PcpConstraint; cdecl;
-
+  {$If not(defined(MACOSX) and not defined(CPUi386))}
   cpRotaryLimitJointGetClass: function : PcpConstraintClass; cdecl;
+  {$IfEnd}
   cpRotaryLimitJointAlloc : function : PcpRotaryLimitJoint; cdecl;
   cpRotaryLimitJointInit : function( joint : PcpRotaryLimitJoint; a : PcpBody; b : PcpBody; min : cpFloat; max : cpFloat ) : PcpRotaryLimitJoint; cdecl;
   cpRotaryLimitJointNew : function( a : PcpBody; b : PcpBody; min : cpFloat; max : cpFloat ) : PcpConstraint; cdecl;
-
+  {$If not(defined(MACOSX) and not defined(CPUi386))}
   cpRatchetJointGetClass: function : PcpConstraintClass; cdecl;
+  {$IfEnd}
   cpRatchetJointAlloc : function : PcpRatchetJoint; cdecl;
   cpRatchetJointInit : function( joint : PcpRatchetJoint; a : PcpBody; b : PcpBody; phase : cpFloat; ratchet : cpFloat ) : PcpRatchetJoint; cdecl;
   cpRatchetJointNew : function( a : PcpBody; b : PcpBody; phase : cpFloat; ratchet : cpFloat ) : PcpConstraint; cdecl;
-
+  {$If not(defined(MACOSX) and not defined(CPUi386))}
   cpGearJointGetClass: function : PcpConstraintClass; cdecl;
+  {$IfEnd}
   cpGearJointAlloc : function : PcpGearJoint; cdecl;
   cpGearJointInit : function( joint : PcpGearJoint; a : PcpBody; b : PcpBody; phase : cpFloat; ratio : cpFloat ) : PcpGearJoint; cdecl;
   cpGearJointNew : function( a : PcpBody; b : PcpBody; phase : cpFloat; ratio : cpFloat ) : PcpConstraint; cdecl;
-
+  {$If not(defined(MACOSX) and not defined(CPUi386))}
   cpSimpleMotorGetClass: function : PcpConstraintClass; cdecl;
+  {$IfEnd}
   cpSimpleMotorAlloc : function : PcpSimpleMotor; cdecl;
   cpSimpleMotorInit : function( joint : PcpSimpleMotor; a : PcpBody; b : PcpBody; rate : cpFloat ) : PcpSimpleMotor; cdecl;
   cpSimpleMotorNew : function( a : PcpBody; b : PcpBody; rate : cpFloat ) : PcpConstraint; cdecl;
@@ -1006,21 +1040,30 @@ var
   cpSpaceFree : procedure( space : PcpSpace ); cdecl;
 
   // Convenience function. Frees all referenced entities. (bodies, shapes and constraints)
+  {$If not(defined(MACOSX) and not defined(CPUi386))}
   cpSpaceFreeChildren : procedure( space : PcpSpace ); cdecl;
+
 
 // Collision handler management functions.
   cpSpaceSetDefaultCollisionHandler : procedure( space : PcpSpace; _begin : cpCollisionBeginFunc; preSolve : cpCollisionPreSolveFunc; postSolve : cpCollisionPostSolveFunc; separate : cpCollisionSeparateFunc; data : Pointer ); cdecl;
+  {$IfEnd}
   cpSpaceAddCollisionHandler : procedure( space : PcpSpace; a : cpCollisionType; b : cpCollisionType; _begin : cpCollisionBeginFunc; preSolve : cpCollisionPreSolveFunc; postSolve : cpCollisionPostSolveFunc;  separate : cpCollisionSeparateFunc; data : Pointer ); cdecl;
+  {$If not(defined(MACOSX) and not defined(CPUi386))}
   cpSpaceRemoveCollisionHandler : procedure( space : PcpSpace; a : cpCollisionType; b : cpCollisionType ); cdecl;
+  {$IfEnd}
 
   // Add and remove entities from the system.
   cpSpaceAddShape : function( space : PcpSpace; shape : PcpShape ) : PcpShape; cdecl;
+  {$If not(defined(MACOSX) and not defined(CPUi386))}
   cpSpaceAddStaticShape : function( space : PcpSpace; shape : PcpShape ) : PcpShape; cdecl;
+  {$IfEnd}
   cpSpaceAddBody : function( space : PcpSpace; body : PcpBody ) : PcpBody; cdecl;
   cpSpaceAddConstraint : function( space : PcpSpace; constraint : PcpConstraint ) : PcpConstraint; cdecl;
 
   cpSpaceRemoveShape : procedure( space : PcpSpace; shape : PcpShape ); cdecl;
+  {$If not(defined(MACOSX) and not defined(CPUi386))}
   cpSpaceRemoveStaticShape : procedure( space : PcpSpace; shape : PcpShape ); cdecl;
+  {$IfEnd}
   cpSpaceRemoveBody : procedure( space : PcpSpace; body : PcpBody ); cdecl;
   cpSpaceRemoveConstraint : procedure( space : PcpSpace; constraint : PcpConstraint );  cdecl;
 
@@ -1030,7 +1073,9 @@ var
 
   // Point query callback function
   cpSpacePointQuery : procedure( space : PcpSpace; point : cpVect; layers : cpLayers; group : cpGroup; func : cpSpacePointQueryFunc; data : Pointer ); cdecl;
+  {$If not(defined(MACOSX) and not defined(CPUi386))}
   cpSpacePointQueryFirst : function( space : PcpSpace; point : cpVect; layers : cpLayers; group : cpGroup ) : PcpShape; cdecl;
+  {$IfEnd}
 
   // Segment query callback function
   cpSpaceSegmentQuery : procedure( space : PcpSpace; start : cpVect; _end : cpVect; layers : cpLayers; group : cpGroup; func : cpSpaceSegmentQueryFunc; data : Pointer ); cdecl;
@@ -1043,22 +1088,27 @@ var
   cpSpaceEachBody : procedure( space : PcpSpace; func : cpSpaceBodyIterator; data : Pointer ); cdecl;
 
   // Spatial hash management functions.
+  {$If not(defined(MACOSX) and not defined(CPUi386))}
   cpSpaceResizeStaticHash : procedure( space : PcpSpace; dim : cpFloat; count : Integer ); cdecl;
   cpSpaceResizeActiveHash : procedure( space : PcpSpace; dim : cpFloat; count : Integer ); cdecl;
   cpSpaceRehashStatic : procedure( space : PcpSpace ); cdecl;
 
   cpSpaceRehashShape : procedure( space : PcpSpace; shape : PcpShape ); cdecl;
+  {$IfEnd}
 
   // Update the space.
   cpSpaceStep : procedure( space : PcpSpace; dt : cpFloat ); cdecl;
 
 // HASHSET
   // Basic allocation/destruction functions.
+  {$If not(defined(MACOSX) and not defined(CPUi386))}
   cpHashSetDestroy : procedure( _set : PcpHashSet ); cdecl;
+  {$IfEnd}
   cpHashSetFree : procedure( _set : PcpHashSet ); cdecl;
-
+  {$If not(defined(MACOSX) and not defined(CPUi386))}
   cpHashSetAlloc : function : PcpHashSet; cdecl;
   cpHashSetInit : function( _set : PcpHashSet; size : Integer; eqlFunc : cpHashSetEqlFunc; trans : cpHashSetTransFunc ) : PcpHashSet; cdecl;
+  {$IfEnd}
   cpHashSetNew : function( size : Integer; eqlFunc : cpHashSetEqlFunc; trans : cpHashSetTransFunc ) : PcpHashSet; cdecl;
 
   // Insert an element into the set, returns the element.
@@ -1078,14 +1128,16 @@ var
   cpSpaceHashAlloc : function : PcpSpaceHash; cdecl;
   cpSpaceHashInit : function( hash : PcpSpaceHash; clldim : cpFloat; cells : Integer; bbfunc : cpSpaceHashBBFunc ) : PcpSpaceHash; cdecl;
   cpSpaceHashNew : function( clldim : cpFloat; cells : Integer; bbfunc : cpSpaceHashBBFunc ) : PcpSpaceHash; cdecl;
-
+  {$If not(defined(MACOSX) and not defined(CPUi386))}
   cpSpaceHashDestroy : procedure( hash : PcpSpaceHash ); cdecl;
   cpSpaceHashFree : procedure( hash : PcpSpaceHash ); cdecl;
+  {$IfEnd}
 
   // Resize the hashtable. (Does not rehash! You must call cpSpaceHashRehash() if needed.)
   cpSpaceHashResize : procedure( hash : PcpSpaceHash; celldim : cpFloat; numcells : Integer ); cdecl;
 
   // Add an object to the hash.
+  {$If not(defined(MACOSX) and not defined(CPUi386))}
   cpSpaceHashInsert : procedure( hash : PcpSpaceHash; obj : Pointer; id : cpHashValue; _deprecated_ignored : cpBB ); cdecl;
   // Remove an object from the hash.
   cpSpaceHashRemove : procedure( hash : PcpSpaceHash; obj : Pointer; id : cpHashValue ); cdecl;
@@ -1115,6 +1167,7 @@ var
   // which should be at least CP_MAX_CONTACTS_PER_ARBITER in length.
   // This function was very lonely in cpCollision.h :)
   cpCollideShapes : function( a : PcpShape; b : PcpShape; arr : PcpContact ) : Integer; cdecl;
+  {$IfEnd}
 {$ELSE}
   procedure cpInitChipmunk; cdecl;{$IFDEF USE_CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
   function cpMomentForCircle( m : cpFloat; r1 : cpFloat; r2 : cpFloat; offset : cpVect ) : cpFloat; cdecl;{$IFDEF USE_CHIPMUNK_LINK} external libChipmunk; {$ELSE} external; {$ENDIF}
@@ -1317,6 +1370,9 @@ function cpvrotate( v1 : cpVect; v2 : cpVect ) : cpVect;
 function cpvunrotate( v1 : cpVect; v2 : cpVect ) : cpVect;
 // Returns the squared length of v. Faster than cpvlength() when you only need to compare lengths.
 function cpvlengthsq( v : cpVect ) : cpFloat;
+{$If (defined(MACOSX) and not defined(CPUi386))}
+function cpvlength(v: cpVect): cpFloat;
+{$IfEnd}
 // Linearly interpolate between v1 and v2.
 function cpvlerp( v1 : cpVect; v2 : cpVect; t : cpFloat ) : cpVect;
 // Returns a normalized copy of v.
@@ -1490,6 +1546,13 @@ function cpvlengthsq( v : cpVect ) : cpFloat;
 begin
   Result := cpvdot( v, v );
 end;
+
+{$If (defined(MACOSX) and not defined(CPUi386))}
+function cpvlength(v: cpVect): cpFloat;
+begin
+  Result := sqrt(cpvdot(v, v));
+end;
+{$IfEnd}
 
 function cpvlerp( v1 : cpVect; v2 : cpVect; t : cpFloat ) : cpVect;
 begin
@@ -1796,8 +1859,8 @@ procedure cpDrawSpace;
 begin
   if not Assigned( space ) Then exit;
 
-  cpSpaceHashEach( space.staticShapes, cpDrawShape, @cpColorStatic );
-  cpSpaceHashEach( space.activeShapes, cpDrawShape, @cpColorActive );
+  cpSpaceEachBody( space.staticShapes, cpDrawShape, @cpColorStatic );
+  cpSpaceEachBody( space.activeShapes, cpDrawShape, @cpColorActive );
 
   if DrawCollisions Then
     cpArrayEach( space.arbiters, cpDrawCollision, @cpColorCollision );
@@ -1805,14 +1868,22 @@ end;
 
 // Это компиляция внутри программы?
 {$IF ( not DEFINED( USE_CHIPMUNK_STATIC ) ) and ( not DEFINED( USE_CHIPMUNK_LINK ) )}
-function cpLoad( LibraryName : AnsiString; Error : Boolean = TRUE ) : Boolean;
+function cpLoad( LibraryName : AnsiString) : Boolean;
+  function GetAddr(name: PChar): Pointer;
+  begin
+    Result := dlsym(cpLib, name);
+    if Result = nil then
+      log_Add(utf8_Copy(name + ' not loaded'))
+    else
+      log_Add(utf8_Copy('loaded ' + name));
+  end;
+
 begin
-  Result := FALSE;
-  {$IFDEF UNIX}
+  {$IFDEF UNIX}{$IfNDef MACOSX}
   cpLib := dlopen( PAnsiChar( './' + LibraryName ), $001 );
   if not Assigned( cpLib ) Then
-  {$ENDIF}
-  {$IFDEF MACOSX}
+  {$Else}
+  {$IfDef CPUi386}
   mainBundle  := CFBundleGetMainBundle;
   tmpCFURLRef := CFBundleCopyBundleURL( mainBundle );
   tmpCFString := CFURLCopyFileSystemPath( tmpCFURLRef, kCFURLPOSIXPathStyle );
@@ -1820,218 +1891,415 @@ begin
   mainPath    := tmpPath + '/Contents/';
   LibraryName := mainPath + 'Frameworks/' + LibraryName;
   {$ENDIF}
+  {$EndIf}
+  {$EndIf}
   cpLib := dlopen( PAnsiChar( LibraryName ) {$IFDEF UNIX}, $001 {$ENDIF} );
 
   if cpLib <> {$IFDEF UNIX} nil {$ENDIF} {$IFDEF WINDOWS} 0 {$ENDIF} Then
-    begin
-      Result := TRUE;
+  begin
+    Result := TRUE;
 
-      cpInitChipmunk := dlsym( cpLib, 'cpInitChipmunk' );
-      cpMomentForCircle := dlsym( cpLib, 'cpMomentForCircle' );
-      cpMomentForSegment := dlsym( cpLib, 'cpMomentForSegment' );
-      cpMomentForPoly := dlsym( cpLib, 'cpMomentForPoly' );
-      cpMomentForBox := dlsym( cpLib, 'cpMomentForBox' );
+    cpInitChipmunk                    := GetAddr('cpInitChipmunk' );
+    cpMomentForCircle                 := GetAddr('cpMomentForCircle' );
+    cpMomentForSegment                := GetAddr('cpMomentForSegment' );
+    cpMomentForPoly                   := GetAddr('cpMomentForPoly' );
+    cpMomentForBox                    := GetAddr('cpMomentForBox' );
 
-      cpvlength := dlsym( cpLib, 'cpvlength' );
-      cpvslerp := dlsym( cpLib, 'cpvslerp' );
-      cpvslerpconst := dlsym( cpLib, 'cpvslerpconst' );
-      cpvforangle := dlsym( cpLib, 'cpvforangle' );
-      cpvtoangle := dlsym( cpLib, 'cpvtoangle' );
+//    cpvlength                         := GetAddr('cpvlength' );
+    cpvslerp                          := GetAddr('cpvslerp' );
+    cpvslerpconst                     := GetAddr('cpvslerpconst' );
+    cpvforangle                       := GetAddr('cpvforangle' );
+    cpvtoangle                        := GetAddr('cpvtoangle' );
 
-      cpBBClampVect := dlsym( cpLib, 'cpBBClampVect' );
-      cpBBWrapVect := dlsym( cpLib, 'cpBBWrapVect' );
+    cpBBClampVect                     := GetAddr('cpBBClampVect' );
+    cpBBWrapVect                      := GetAddr('cpBBWrapVect' );
 
-      cpArrayAlloc := dlsym( cpLib, 'cpArrayAlloc' );
-      cpArrayInit := dlsym( cpLib, 'cpArrayInit' );
-      cpArrayNew := dlsym( cpLib, 'cpArrayNew' );
-      cpArrayDestroy := dlsym( cpLib, 'cpArrayDestroy' );
-      cpArrayFree := dlsym( cpLib, 'cpArrayFree' );
-      cpArrayClear := dlsym( cpLib, 'cpArrayClear' );
-      cpArrayPush := dlsym( cpLib, 'cpArrayPush' );
-      cpArrayPop := dlsym( cpLib, 'cpArrayPop' );
-      cpArrayDeleteIndex := dlsym( cpLib, 'cpArrayDeleteIndex' );
-      cpArrayDeleteObj := dlsym( cpLib, 'cpArrayDeleteObj' );
-      cpArrayAppend := dlsym( cpLib, 'cpArrayAppend' );
-      cpArrayEach := dlsym( cpLib, 'cpArrayEach' );
-      cpArrayContains := dlsym( cpLib, 'cpArrayContains' );
+    cpArrayAlloc                      := GetAddr('cpArrayAlloc' );
+    cpArrayInit                       := GetAddr('cpArrayInit' );
+    cpArrayNew                        := GetAddr('cpArrayNew' );
+    cpArrayDestroy                    := GetAddr('cpArrayDestroy' );
+    cpArrayFree                       := GetAddr('cpArrayFree' );
+    cpArrayClear                      := GetAddr('cpArrayClear' );
+    cpArrayPush                       := GetAddr('cpArrayPush' );
+    cpArrayPop                        := GetAddr('cpArrayPop' );
+    cpArrayDeleteIndex                := GetAddr('cpArrayDeleteIndex' );
+    cpArrayDeleteObj                  := GetAddr('cpArrayDeleteObj' );
+    cpArrayAppend                     := GetAddr('cpArrayAppend' );
+    cpArrayEach                       := GetAddr('cpArrayEach' );
+    cpArrayContains                   := GetAddr('cpArrayContains' );
 
-      cpContactInit := dlsym( cpLib, 'cpContactInit' );
-      cpArbiterInit := dlsym( cpLib, 'cpArbiterInit' );
-      cpArbiterUpdate := dlsym( cpLib, 'cpArbiterUpdate' );
-      cpArbiterPreStep := dlsym( cpLib, 'cpArbiterPreStep' );
-      cpArbiterApplyCachedImpulse := dlsym( cpLib, 'cpArbiterApplyCachedImpulse' );
-      cpArbiterApplyImpulse := dlsym( cpLib, 'cpArbiterApplyImpulse' );
-      cpArbiterTotalImpulse := dlsym( cpLib, 'cpArbiterTotalImpulse' );
-      cpArbiterTotalImpulseWithFriction := dlsym( cpLib, 'cpArbiterTotalImpulseWithFriction' );
-      cpArbiterIgnore := dlsym( cpLib, 'cpArbiterIgnore' );
+    cpContactInit                     := GetAddr('cpContactInit' );
+    cpArbiterInit                     := GetAddr('cpArbiterInit' );
+    cpArbiterUpdate                   := GetAddr('cpArbiterUpdate' );
+    cpArbiterPreStep                  := GetAddr('cpArbiterPreStep' );
+    cpArbiterApplyCachedImpulse       := GetAddr('cpArbiterApplyCachedImpulse' );
+    cpArbiterApplyImpulse             := GetAddr('cpArbiterApplyImpulse' );
+    cpArbiterTotalImpulse             := GetAddr('cpArbiterTotalImpulse' );
+    cpArbiterTotalImpulseWithFriction := GetAddr('cpArbiterTotalImpulseWithFriction' );
+    cpArbiterIgnore                   := GetAddr('cpArbiterIgnore' );
 
-      cpShapeInit := dlsym( cpLib, 'cpShapeInit' );
-      cpShapeDestroy := dlsym( cpLib, 'cpShapeDestroy' );
-      cpShapeFree := dlsym( cpLib, 'cpShapeFree' );
-      cpShapeCacheBB := dlsym( cpLib, 'cpShapeCacheBB' );
-      cpShapePointQuery := dlsym( cpLib, 'cpShapePointQuery' );
+    cpShapeInit                       := GetAddr('cpShapeInit' );
+    cpShapeDestroy                    := GetAddr('cpShapeDestroy' );
+    cpShapeFree                       := GetAddr('cpShapeFree' );
+    cpShapeCacheBB                    := GetAddr('cpShapeCacheBB' );
+    cpShapePointQuery                 := GetAddr('cpShapePointQuery' );
 
-      cpCircleShapeAlloc := dlsym( cpLib, 'cpCircleShapeAlloc' );
-      cpCircleShapeInit := dlsym( cpLib, 'cpCircleShapeInit' );
-      cpCircleShapeNew := dlsym( cpLib, 'cpCircleShapeNew' );
+    cpCircleShapeAlloc                := GetAddr('cpCircleShapeAlloc' );
+    cpCircleShapeInit                 := GetAddr('cpCircleShapeInit' );
+    cpCircleShapeNew                  := GetAddr('cpCircleShapeNew' );
 
-      cpSegmentShapeAlloc := dlsym( cpLib, 'cpSegmentShapeAlloc' );
-      cpSegmentShapeInit := dlsym( cpLib, 'cpSegmentShapeInit' );
-      cpSegmentShapeNew := dlsym( cpLib, 'cpSegmentShapeNew' );
+    cpSegmentShapeAlloc               := GetAddr('cpSegmentShapeAlloc' );
+    cpSegmentShapeInit                := GetAddr('cpSegmentShapeInit' );
+    cpSegmentShapeNew                 := GetAddr('cpSegmentShapeNew' );
 
-      cpResetShapeIdCounter := dlsym( cpLib, 'cpResetShapeIdCounter' );
-      cpShapeSegmentQuery := dlsym( cpLib, 'cpShapeSegmentQuery' );
+    cpResetShapeIdCounter             := GetAddr('cpResetShapeIdCounter' );
+    cpShapeSegmentQuery               := GetAddr('cpShapeSegmentQuery' );
 
-      cpPolyShapeAlloc := dlsym( cpLib, 'cpPolyShapeAlloc' );
-      cpPolyShapeInit := dlsym( cpLib, 'cpPolyShapeInit' );
-      cpPolyShapeNew := dlsym( cpLib, 'cpPolyShapeNew' );
-      cpBoxShapeInit := dlsym( cpLib, 'cpBoxShapeInit' );
-      cpBoxShapeNew := dlsym( cpLib, 'cpBoxShapeNew' );
-      cpPolyValidate := dlsym( cpLib, 'cpPolyValidate' );
-      cpPolyShapeGetNumVerts := dlsym( cpLib, 'cpPolyShapeGetNumVerts' );
-      cpPolyShapeGetVert := dlsym( cpLib, 'cpPolyShapeGetVert' );
+    cpPolyShapeAlloc                  := GetAddr('cpPolyShapeAlloc' );
+    cpPolyShapeInit                   := GetAddr('cpPolyShapeInit' );
+    cpPolyShapeNew                    := GetAddr('cpPolyShapeNew' );
+    cpBoxShapeInit                    := GetAddr('cpBoxShapeInit' );
+    cpBoxShapeNew                     := GetAddr('cpBoxShapeNew' );
+    cpPolyValidate                    := GetAddr('cpPolyValidate' );
+    cpPolyShapeGetNumVerts            := GetAddr('cpPolyShapeGetNumVerts' );
+    cpPolyShapeGetVert                := GetAddr('cpPolyShapeGetVert' );
 
-      cpBodyAlloc :=  dlsym( cpLib, 'cpBodyAlloc' );
-      cpBodyInit := dlsym( cpLib, 'cpBodyInit' );
-      cpBodyNew := dlsym( cpLib, 'cpBodyNew' );
-      cpBodyDestroy := dlsym( cpLib, 'cpBodyDestroy' );
-      cpBodyFree := dlsym( cpLib, 'cpBodyFree' );
-      cpBodyActivate := dlsym( cpLib, 'cpBodyActivate' );
-      cpBodySleep := dlsym( cpLib, 'cpBodySleep' );
-      cpBodySetMass := dlsym( cpLib, 'cpBodySetMass' );
-      cpBodySetMoment := dlsym( cpLib, 'cpBodySetMoment' );
-      cpBodySetAngle := dlsym( cpLib, 'cpBodySetAngle' );
-      cpBodySlew := dlsym( cpLib, 'cpBodySlew' );
-      cpBodyUpdateVelocity := dlsym( cpLib, 'cpBodyUpdateVelocity' );
-      cpBodyUpdatePosition := dlsym( cpLib, 'cpBodyUpdatePosition' );
-      cpBodyResetForces := dlsym( cpLib, 'cpBodyResetForces' );
-      cpBodyApplyForce := dlsym( cpLib, 'cpBodyApplyForce' );
-      cpApplyDampedSpring := dlsym( cpLib, 'cpApplyDampedSpring' );
+    cpBodyAlloc                       := GetAddr('cpBodyAlloc' );
+    cpBodyInit                        := GetAddr('cpBodyInit' );
+    cpBodyNew                         := GetAddr('cpBodyNew' );
+    cpBodyDestroy                     := GetAddr('cpBodyDestroy' );
+    cpBodyFree                        := GetAddr('cpBodyFree' );
+    cpBodyActivate                    := GetAddr('cpBodyActivate' );
+    cpBodySleep                       := GetAddr('cpBodySleep' );
+    cpBodySetMass                     := GetAddr('cpBodySetMass' );
+    cpBodySetMoment                   := GetAddr('cpBodySetMoment' );
+    cpBodySetAngle                    := GetAddr('cpBodySetAngle' );
+    cpBodySlew                        := GetAddr('cpBodySlew' );
+    cpBodyUpdateVelocity              := GetAddr('cpBodyUpdateVelocity' );
+    cpBodyUpdatePosition              := GetAddr('cpBodyUpdatePosition' );
+    cpBodyResetForces                 := GetAddr('cpBodyResetForces' );
+    cpBodyApplyForce                  := GetAddr('cpBodyApplyForce' );
+    cpApplyDampedSpring               := GetAddr('cpApplyDampedSpring' );
 
-      cpConstraintDestroy := dlsym( cpLib, 'cpConstraintDestroy' );
-      cpConstraintFree := dlsym( cpLib, 'cpConstraintFree' );
-      cpPinJointGetClass := dlsym( cpLib, 'cpPinJointGetClass' );
-      cpPinJointAlloc := dlsym( cpLib, 'cpPinJointAlloc' );
-      cpPinJointInit := dlsym( cpLib, 'cpPinJointInit' );
-      cpPinJointNew := dlsym( cpLib, 'cpPinJointNew' );
-      cpSlideJointGetClass := dlsym( cpLib, 'cpSlideJointGetClass' );
-      cpSlideJointAlloc := dlsym( cpLib, 'cpSlideJointAlloc' );
-      cpSlideJointInit := dlsym( cpLib, 'cpSlideJointInit' );
-      cpSlideJointNew := dlsym( cpLib, 'cpSlideJointNew' );
-      cpPivotJointGetClass := dlsym( cpLib, 'cpPivotJointGetClass' );
-      cpPivotJointAlloc := dlsym( cpLib, 'cpPivotJointAlloc' );
-      cpPivotJointInit := dlsym( cpLib, 'cpPivotJointInit' );
-      cpPivotJointNew := dlsym( cpLib, 'cpPivotJointNew' );
-      cpPivotJointNew2 := dlsym( cpLib, 'cpPivotJointNew2' );
-      cpGrooveJointGetClass := dlsym( cpLib, 'cpGrooveJointGetClass' );
-      cpGrooveJointAlloc := dlsym( cpLib, 'cpGrooveJointAlloc' );
-      cpGrooveJointInit := dlsym( cpLib, 'cpGrooveJointInit' );
-      cpGrooveJointNew := dlsym( cpLib, 'cpGrooveJointNew' );
-      cpGrooveJointSetGrooveA := dlsym( cpLib, 'cpGrooveJointSetGrooveA' );
-      cpGrooveJointSetGrooveB := dlsym( cpLib, 'cpGrooveJointSetGrooveB' );
-      cpDampedSpringGetClass := dlsym( cpLib, 'cpDampedSpringGetClass' );
-      cpDampedSpringAlloc := dlsym( cpLib, 'cpDampedSpringAlloc' );
-      cpDampedSpringInit := dlsym( cpLib, 'cpDampedSpringInit' );
-      cpDampedSpringNew := dlsym( cpLib, 'cpDampedSpringNew' );
-      cpDampedRotarySpringGetClass := dlsym( cpLib, 'cpDampedRotarySpringGetClass' );
-      cpDampedRotarySpringAlloc := dlsym( cpLib, 'cpDampedRotarySpringAlloc' );
-      cpDampedRotarySpringInit := dlsym( cpLib, 'cpDampedRotarySpringInit' );
-      cpDampedRotarySpringNew := dlsym( cpLib, 'cpDampedRotarySpringNew' );
-      cpRotaryLimitJointGetClass := dlsym( cpLib, 'cpRotaryLimitJointGetClass' );
-      cpRotaryLimitJointAlloc := dlsym( cpLib, 'cpRotaryLimitJointAlloc' );
-      cpRotaryLimitJointInit := dlsym( cpLib, 'cpRotaryLimitJointInit' );
-      cpRotaryLimitJointNew := dlsym( cpLib, 'cpRotaryLimitJointNew' );
-      cpRatchetJointGetClass := dlsym( cpLib, 'cpRatchetJointGetClass' );
-      cpRatchetJointAlloc := dlsym( cpLib, 'cpRatchetJointAlloc' );
-      cpRatchetJointInit := dlsym( cpLib, 'cpRatchetJointInit' );
-      cpRatchetJointNew := dlsym( cpLib, 'cpRatchetJointNew' );
-      cpGearJointGetClass := dlsym( cpLib, 'cpGearJointGetClass' );
-      cpGearJointAlloc := dlsym( cpLib, 'cpGearJointAlloc' );
-      cpGearJointInit := dlsym( cpLib, 'cpGearJointInit' );
-      cpGearJointNew := dlsym( cpLib, 'cpGearJointNew' );
-      cpSimpleMotorGetClass := dlsym( cpLib, 'cpSimpleMotorGetClass' );
-      cpSimpleMotorAlloc := dlsym( cpLib, 'cpSimpleMotorAlloc' );
-      cpSimpleMotorInit := dlsym( cpLib, 'cpSimpleMotorInit' );
-      cpSimpleMotorNew := dlsym( cpLib, 'cpSimpleMotorNew' );
+    cpConstraintDestroy               := GetAddr('cpConstraintDestroy' );
+    cpConstraintFree                  := GetAddr('cpConstraintFree' );
+    cpPinJointGetClass                := GetAddr('cpPinJointGetClass' );
+    cpPinJointAlloc                   := GetAddr('cpPinJointAlloc' );
+    cpPinJointInit                    := GetAddr('cpPinJointInit' );
+    cpPinJointNew                     := GetAddr('cpPinJointNew' );
+    cpSlideJointGetClass              := GetAddr('cpSlideJointGetClass' );
+    cpSlideJointAlloc                 := GetAddr('cpSlideJointAlloc' );
+    cpSlideJointInit                  := GetAddr('cpSlideJointInit' );
+    cpSlideJointNew                   := GetAddr('cpSlideJointNew' );
+    cpPivotJointGetClass              := GetAddr('cpPivotJointGetClass' );
+    cpPivotJointAlloc                 := GetAddr('cpPivotJointAlloc' );
+    cpPivotJointInit                  := GetAddr('cpPivotJointInit' );
+    cpPivotJointNew                   := GetAddr('cpPivotJointNew' );
+    cpPivotJointNew2                  := GetAddr('cpPivotJointNew2' );
+    cpGrooveJointGetClass             := GetAddr('cpGrooveJointGetClass' );
+    cpGrooveJointAlloc                := GetAddr('cpGrooveJointAlloc' );
+    cpGrooveJointInit                 := GetAddr('cpGrooveJointInit' );
+    cpGrooveJointNew                  := GetAddr('cpGrooveJointNew' );
+    cpGrooveJointSetGrooveA           := GetAddr('cpGrooveJointSetGrooveA' );
+    cpGrooveJointSetGrooveB           := GetAddr('cpGrooveJointSetGrooveB' );
+    cpDampedSpringGetClass            := GetAddr('cpDampedSpringGetClass' );
+    cpDampedSpringAlloc               := GetAddr('cpDampedSpringAlloc' );
+    cpDampedSpringInit                := GetAddr('cpDampedSpringInit' );
+    cpDampedSpringNew                 := GetAddr('cpDampedSpringNew' );
+    cpDampedRotarySpringGetClass      := GetAddr('cpDampedRotarySpringGetClass' );
+    cpDampedRotarySpringAlloc         := GetAddr('cpDampedRotarySpringAlloc' );
+    cpDampedRotarySpringInit          := GetAddr('cpDampedRotarySpringInit' );
+    cpDampedRotarySpringNew           := GetAddr('cpDampedRotarySpringNew' );
+    cpRotaryLimitJointGetClass        := GetAddr('cpRotaryLimitJointGetClass' );
+    cpRotaryLimitJointAlloc           := GetAddr('cpRotaryLimitJointAlloc' );
+    cpRotaryLimitJointInit            := GetAddr('cpRotaryLimitJointInit' );
+    cpRotaryLimitJointNew             := GetAddr('cpRotaryLimitJointNew' );
+    cpRatchetJointGetClass            := GetAddr('cpRatchetJointGetClass' );
+    cpRatchetJointAlloc               := GetAddr('cpRatchetJointAlloc' );
+    cpRatchetJointInit                := GetAddr('cpRatchetJointInit' );
+    cpRatchetJointNew                 := GetAddr('cpRatchetJointNew' );
+    cpGearJointGetClass               := GetAddr('cpGearJointGetClass' );
+    cpGearJointAlloc                  := GetAddr('cpGearJointAlloc' );
+    cpGearJointInit                   := GetAddr('cpGearJointInit' );
+    cpGearJointNew                    := GetAddr('cpGearJointNew' );
+    cpSimpleMotorGetClass             := GetAddr('cpSimpleMotorGetClass' );
+    cpSimpleMotorAlloc                := GetAddr('cpSimpleMotorAlloc' );
+    cpSimpleMotorInit                 := GetAddr('cpSimpleMotorInit' );
+    cpSimpleMotorNew                  := GetAddr('cpSimpleMotorNew' );
 
-      cpSpaceAlloc := dlsym( cpLib, 'cpSpaceAlloc' );
-      cpSpaceInit := dlsym( cpLib, 'cpSpaceInit' );
-      cpSpaceNew := dlsym( cpLib, 'cpSpaceNew' );
-      cpSpaceDestroy := dlsym( cpLib, 'cpSpaceDestroy' );
-      cpSpaceFree := dlsym( cpLib, 'cpSpaceFree' );
-      cpSpaceFreeChildren := dlsym( cpLib, 'cpSpaceFreeChildren' );
-      cpSpaceSetDefaultCollisionHandler := dlsym( cpLib, 'cpSpaceSetDefaultCollisionHandler' );
-      cpSpaceAddCollisionHandler := dlsym( cpLib, 'cpSpaceAddCollisionHandler' );
-      cpSpaceRemoveCollisionHandler := dlsym( cpLib, 'cpSpaceRemoveCollisionHandler' );
-      cpSpaceAddShape := dlsym( cpLib, 'cpSpaceAddShape' );
-      cpSpaceAddStaticShape := dlsym( cpLib, 'cpSpaceAddStaticShape' );
-      cpSpaceAddBody := dlsym( cpLib, 'cpSpaceAddBody' );
-      cpSpaceAddConstraint := dlsym( cpLib, 'cpSpaceAddConstraint' );
-      cpSpaceRemoveShape := dlsym( cpLib, 'cpSpaceRemoveShape' );
-      cpSpaceRemoveStaticShape := dlsym( cpLib, 'cpSpaceRemoveStaticShape' );
-      cpSpaceRemoveBody := dlsym( cpLib, 'cpSpaceRemoveBody' );
-      cpSpaceRemoveConstraint := dlsym( cpLib, 'cpSpaceRemoveConstraint' );
-      cpSpaceAddPostStepCallback := dlsym( cpLib, 'cpSpaceAddPostStepCallback' );
-      cpSpacePointQuery := dlsym( cpLib, 'cpSpacePointQuery' );
-      cpSpacePointQueryFirst := dlsym( cpLib, 'cpSpacePointQueryFirst' );
-      cpSpaceSegmentQuery := dlsym( cpLib, 'cpSpaceSegmentQuery' );
-      cpSpaceSegmentQueryFirst := dlsym( cpLib, 'cpSpaceSegmentQueryFirst' );
-      cpSpaceBBQuery := dlsym( cpLib, 'cpSpaceBBQuery' );
-      cpSpaceEachBody := dlsym( cpLib, 'cpSpaceEachBody' );
-      cpSpaceResizeStaticHash := dlsym( cpLib, 'cpSpaceResizeStaticHash' );
-      cpSpaceResizeActiveHash := dlsym( cpLib, 'cpSpaceResizeActiveHash' );
-      cpSpaceRehashStatic := dlsym( cpLib, 'cpSpaceRehashStatic' );
-      cpSpaceRehashShape := dlsym( cpLib, 'cpSpaceRehashShape' );
-      cpSpaceStep := dlsym( cpLib, 'cpSpaceStep' );
+    cpSpaceAlloc                      := GetAddr('cpSpaceAlloc' );
+    cpSpaceInit                       := GetAddr('cpSpaceInit' );
+    cpSpaceNew                        := GetAddr('cpSpaceNew' );
+    cpSpaceDestroy                    := GetAddr('cpSpaceDestroy' );
+    cpSpaceFree                       := GetAddr('cpSpaceFree' );
+    cpSpaceFreeChildren               := GetAddr('cpSpaceFreeChildren' );
+    cpSpaceSetDefaultCollisionHandler := GetAddr('cpSpaceSetDefaultCollisionHandler' );
+    cpSpaceAddCollisionHandler        := GetAddr('cpSpaceAddCollisionHandler' );
+    cpSpaceRemoveCollisionHandler     := GetAddr('cpSpaceRemoveCollisionHandler' );
+    cpSpaceAddShape                   := GetAddr('cpSpaceAddShape' );
+    cpSpaceAddStaticShape             := GetAddr('cpSpaceAddStaticShape' );
+    cpSpaceAddBody                    := GetAddr('cpSpaceAddBody' );
+    cpSpaceAddConstraint              := GetAddr('cpSpaceAddConstraint' );
+    cpSpaceRemoveShape                := GetAddr('cpSpaceRemoveShape' );
+    cpSpaceRemoveStaticShape          := GetAddr('cpSpaceRemoveStaticShape' );
+    cpSpaceRemoveBody                 := GetAddr('cpSpaceRemoveBody' );
+    cpSpaceRemoveConstraint           := GetAddr('cpSpaceRemoveConstraint' );
+    cpSpaceAddPostStepCallback        := GetAddr('cpSpaceAddPostStepCallback' );
+    cpSpacePointQuery                 := GetAddr('cpSpacePointQuery' );
+    cpSpacePointQueryFirst            := GetAddr('cpSpacePointQueryFirst' );
+    cpSpaceSegmentQuery               := GetAddr('cpSpaceSegmentQuery' );
+    cpSpaceSegmentQueryFirst          := GetAddr('cpSpaceSegmentQueryFirst' );
+    cpSpaceBBQuery                    := GetAddr('cpSpaceBBQuery' );
+    cpSpaceEachBody                   := GetAddr('cpSpaceEachBody' );
+    cpSpaceResizeStaticHash           := GetAddr('cpSpaceResizeStaticHash' );
+    cpSpaceResizeActiveHash           := GetAddr('cpSpaceResizeActiveHash' );
+    cpSpaceRehashStatic               := GetAddr('cpSpaceRehashStatic' );
+    cpSpaceRehashShape                := GetAddr('cpSpaceRehashShape' );
+    cpSpaceStep                       := GetAddr('cpSpaceStep' );
 
-      cpHashSetDestroy := dlsym( cpLib, 'cpHashSetDestroy' );
-      cpHashSetFree := dlsym( cpLib, 'cpHashSetFree' );
-      cpHashSetAlloc := dlsym( cpLib, 'cpHashSetAlloc' );
-      cpHashSetInit := dlsym( cpLib, 'cpHashSetInit' );
-      cpHashSetNew := dlsym( cpLib, 'cpHashSetNew' );
-      cpHashSetInsert := dlsym( cpLib, 'cpHashSetInsert' );
-      cpHashSetRemove := dlsym( cpLib, 'cpHashSetRemove' );
-      cpHashSetFind := dlsym( cpLib, 'cpHashSetFind' );
-      cpHashSetEach := dlsym( cpLib, 'cpHashSetEach' );
-      cpHashSetFilter := dlsym( cpLib, 'cpHashSetFilter' );
+    cpHashSetDestroy                  := GetAddr('cpHashSetDestroy' );
+    cpHashSetFree                     := GetAddr('cpHashSetFree' );
+    cpHashSetAlloc                    := GetAddr('cpHashSetAlloc' );
+    cpHashSetInit                     := GetAddr('cpHashSetInit' );
+    cpHashSetNew                      := GetAddr('cpHashSetNew' );
+    cpHashSetInsert                   := GetAddr('cpHashSetInsert' );
+    cpHashSetRemove                   := GetAddr('cpHashSetRemove' );
+    cpHashSetFind                     := GetAddr('cpHashSetFind' );
+    cpHashSetEach                     := GetAddr('cpHashSetEach' );
+    cpHashSetFilter                   := GetAddr('cpHashSetFilter' );
 
-      cpSpaceHashAlloc := dlsym( cpLib, 'cpSpaceHashAlloc' );
-      cpSpaceHashInit := dlsym( cpLib, 'cpSpaceHashInit' );
-      cpSpaceHashNew := dlsym( cpLib, 'cpSpaceHashNew' );
-      cpSpaceHashDestroy := dlsym( cpLib, 'cpSpaceHashDestroy' );
-      cpSpaceHashFree := dlsym( cpLib, 'cpSpaceHashFree' );
-      cpSpaceHashResize := dlsym( cpLib, 'cpSpaceHashResize' );
-      cpSpaceHashInsert := dlsym( cpLib, 'cpSpaceHashInsert' );
-      cpSpaceHashRemove := dlsym( cpLib, 'cpSpaceHashRemove' );
-      cpSpaceHashEach := dlsym( cpLib, 'cpSpaceHashEach' );
-      cpSpaceHashRehash := dlsym( cpLib, 'cpSpaceHashRehash' );
-      cpSpaceHashRehashObject := dlsym( cpLib, 'cpSpaceHashRehashObject' );
-      cpSpaceHashPointQuery := dlsym( cpLib, 'cpSpaceHashPointQuery' );
-      cpSpaceHashQuery := dlsym( cpLib, 'cpSpaceHashQuery' );
-      cpSpaceHashQueryInsert := dlsym( cpLib, 'cpSpaceHashQueryInsert' );
-      cpSpaceHashQueryRehash := dlsym( cpLib, 'cpSpaceHashQueryRehash' );
-      cpSpaceHashSegmentQuery := dlsym( cpLib, 'cpSpaceHashSegmentQuery' );
+    cpSpaceHashAlloc                  := GetAddr('cpSpaceHashAlloc' );
+    cpSpaceHashInit                   := GetAddr('cpSpaceHashInit' );
+    cpSpaceHashNew                    := GetAddr('cpSpaceHashNew' );
+    cpSpaceHashDestroy                := GetAddr('cpSpaceHashDestroy' );
+    cpSpaceHashFree                   := GetAddr('cpSpaceHashFree' );
+    cpSpaceHashResize                 := GetAddr('cpSpaceHashResize' );
+    cpSpaceHashInsert                 := GetAddr('cpSpaceHashInsert' );
+    cpSpaceHashRemove                 := GetAddr('cpSpaceHashRemove' );
+    cpSpaceHashEach                   := GetAddr('cpSpaceHashEach' );
+    cpSpaceHashRehash                 := GetAddr('cpSpaceHashRehash' );
+    cpSpaceHashRehashObject           := GetAddr('cpSpaceHashRehashObject' );
+    cpSpaceHashPointQuery             := GetAddr('cpSpaceHashPointQuery' );
+    cpSpaceHashQuery                  := GetAddr('cpSpaceHashQuery' );
+    cpSpaceHashQueryInsert            := GetAddr('cpSpaceHashQueryInsert' );
+    cpSpaceHashQueryRehash            := GetAddr('cpSpaceHashQueryRehash' );
+    cpSpaceHashSegmentQuery           := GetAddr('cpSpaceHashSegmentQuery' );
 
-      cpCollideShapes := dlsym( cpLib, 'cpCollideShapes' );
-    end else
-      if Error Then
-        begin
-          {$IFDEF UNIX}
-          WriteLn( 'Error while loading Chipmunk' );
-          {$ENDIF}
-          {$IFDEF WINDOWS}
-          MessageBoxA( 0, 'Error while loading Chipmunk', 'Error', $00000010 );
-          {$ENDIF}
-          {$IFDEF MACOSX}
-          StandardAlert( kAlertNoteAlert, 'Error', 'Error while loading Chipmunk', nil, outItemHit );
-          {$ENDIF}
-        end;
+    cpCollideShapes                   := GetAddr('cpCollideShapes' );
+  end else
+  begin
+    {$IFDEF UNIX}{$IfNDef MACOSX}
+    WriteLn( 'Error while loading Chipmunk' );
+    {$ENDIF}{$EndIf}
+    {$IFDEF WINDOWS}
+    MessageBoxA( 0, 'Error while loading Chipmunk', 'Error', $00000010 );
+    {$ENDIF}
+    {$IFDEF MACOSX}{$IfnDef CPUi386}
+
+    {$Else}
+    StandardAlert( kAlertNoteAlert, 'Error', 'Error while loading Chipmunk', nil, outItemHit );
+    {$ENDIF}{$EndIf}
+    Result := False;
+  end;
 end;
 
 procedure cpFree;
 begin
   dlclose( cpLib );
+  cpInitChipmunk                     := nil;
+  cpMomentForCircle                  := nil;
+  cpMomentForSegment                 := nil;
+  cpMomentForPoly                    := nil;
+  cpMomentForBox                     := nil;
+
+//  cpvlength                          := nil;
+//  cpvslerp                           := nil;
+//  cpvslerpconst                      := nil;
+  cpvforangle                        := nil;
+  cpvtoangle                         := nil;
+
+  cpBBClampVect                      := nil;
+  cpBBWrapVect                       := nil;
+
+  cpArrayAlloc                       := nil;
+  cpArrayInit                        := nil;
+  cpArrayNew                         := nil;
+  cpArrayDestroy                     := nil;
+  cpArrayFree                        := nil;
+  cpArrayClear                       := nil;
+  cpArrayPush                        := nil;
+  cpArrayPop                         := nil;
+  cpArrayDeleteIndex                 := nil;
+  cpArrayDeleteObj                   := nil;
+  cpArrayAppend                      := nil;
+  cpArrayEach                        := nil;
+  cpArrayContains                    := nil;
+
+  cpContactInit                      := nil;
+  cpArbiterInit                      := nil;
+  cpArbiterUpdate                    := nil;
+  cpArbiterPreStep                   := nil;
+  cpArbiterApplyCachedImpulse        := nil;
+  cpArbiterApplyImpulse              := nil;
+  cpArbiterTotalImpulse              := nil;
+  cpArbiterTotalImpulseWithFriction  := nil;
+  cpArbiterIgnore                    := nil;
+
+  cpShapeInit                        := nil;
+  cpShapeDestroy                     := nil;
+  cpShapeFree                        := nil;
+  cpShapeCacheBB                     := nil;
+  cpShapePointQuery                  := nil;
+
+  cpCircleShapeAlloc                 := nil;
+  cpCircleShapeInit                  := nil;
+  cpCircleShapeNew                   := nil;
+
+  cpSegmentShapeAlloc                := nil;
+  cpSegmentShapeInit                 := nil;
+  cpSegmentShapeNew                  := nil;
+
+  cpResetShapeIdCounter              := nil;
+  cpShapeSegmentQuery                := nil;
+
+  cpPolyShapeAlloc                   := nil;
+  cpPolyShapeInit                    := nil;
+  cpPolyShapeNew                     := nil;
+  cpBoxShapeInit                     := nil;
+  cpBoxShapeNew                      := nil;
+  cpPolyValidate                     := nil;
+  cpPolyShapeGetNumVerts             := nil;
+  cpPolyShapeGetVert                 := nil;
+
+  cpBodyAlloc                        := nil;
+  cpBodyInit                         := nil;
+  cpBodyNew                          := nil;
+  cpBodyDestroy                      := nil;
+  cpBodyFree                         := nil;
+  cpBodyActivate                     := nil;
+  cpBodySleep                        := nil;
+  cpBodySetMass                      := nil;
+  cpBodySetMoment                    := nil;
+  cpBodySetAngle                     := nil;
+  cpBodySlew                         := nil;
+  cpBodyUpdateVelocity               := nil;
+  cpBodyUpdatePosition               := nil;
+  cpBodyResetForces                  := nil;
+  cpBodyApplyForce                   := nil;
+  cpApplyDampedSpring                := nil;
+
+  cpConstraintDestroy                := nil;
+  cpConstraintFree                   := nil;
+  cpPinJointGetClass                 := nil;
+  cpPinJointAlloc                    := nil;
+  cpPinJointInit                     := nil;
+  cpPinJointNew                      := nil;
+  cpSlideJointGetClass               := nil;
+  cpSlideJointAlloc                  := nil;
+  cpSlideJointInit                   := nil;
+  cpSlideJointNew                    := nil;
+  cpPivotJointGetClass               := nil;
+  cpPivotJointAlloc                  := nil;
+  cpPivotJointInit                   := nil;
+  cpPivotJointNew                    := nil;
+  cpPivotJointNew2                   := nil;
+  cpGrooveJointGetClass              := nil;
+  cpGrooveJointAlloc                 := nil;
+  cpGrooveJointInit                  := nil;
+  cpGrooveJointNew                   := nil;
+  cpGrooveJointSetGrooveA            := nil;
+  cpGrooveJointSetGrooveB            := nil;
+  cpDampedSpringGetClass             := nil;
+  cpDampedSpringAlloc                := nil;
+  cpDampedSpringInit                 := nil;
+  cpDampedSpringNew                  := nil;
+  cpDampedRotarySpringGetClass       := nil;
+  cpDampedRotarySpringAlloc          := nil;
+  cpDampedRotarySpringInit           := nil;
+  cpDampedRotarySpringNew            := nil;
+  cpRotaryLimitJointGetClass         := nil;
+  cpRotaryLimitJointAlloc            := nil;
+  cpRotaryLimitJointInit             := nil;
+  cpRotaryLimitJointNew              := nil;
+  cpRatchetJointGetClass             := nil;
+  cpRatchetJointAlloc                := nil;
+  cpRatchetJointInit                 := nil;
+  cpRatchetJointNew                  := nil;
+  cpGearJointGetClass                := nil;
+  cpGearJointAlloc                   := nil;
+  cpGearJointInit                    := nil;
+  cpGearJointNew                     := nil;
+  cpSimpleMotorGetClass              := nil;
+  cpSimpleMotorAlloc                 := nil;
+  cpSimpleMotorInit                  := nil;
+  cpSimpleMotorNew                   := nil;
+
+  cpSpaceAlloc                       := nil;
+  cpSpaceInit                        := nil;
+  cpSpaceNew                         := nil;
+  cpSpaceDestroy                     := nil;
+  cpSpaceFree                        := nil;
+  cpSpaceFreeChildren                := nil;
+  cpSpaceSetDefaultCollisionHandler  := nil;
+  cpSpaceAddCollisionHandler         := nil;
+  cpSpaceRemoveCollisionHandler      := nil;
+  cpSpaceAddShape                    := nil;
+  cpSpaceAddStaticShape              := nil;
+  cpSpaceAddBody                     := nil;
+  cpSpaceAddConstraint               := nil;
+  cpSpaceRemoveShape                 := nil;
+  cpSpaceRemoveStaticShape           := nil;
+  cpSpaceRemoveBody                  := nil;
+  cpSpaceRemoveConstraint            := nil;
+  cpSpaceAddPostStepCallback         := nil;
+  cpSpacePointQuery                  := nil;
+  cpSpacePointQueryFirst             := nil;
+  cpSpaceSegmentQuery                := nil;
+  cpSpaceSegmentQueryFirst           := nil;
+  cpSpaceBBQuery                     := nil;
+  cpSpaceEachBody                    := nil;
+  cpSpaceResizeStaticHash            := nil;
+  cpSpaceResizeActiveHash            := nil;
+  cpSpaceRehashStatic                := nil;
+  cpSpaceRehashShape                 := nil;
+  cpSpaceStep                        := nil;
+
+  cpHashSetDestroy                   := nil;
+  cpHashSetFree                      := nil;
+  cpHashSetAlloc                     := nil;
+  cpHashSetInit                      := nil;
+  cpHashSetNew                       := nil;
+  cpHashSetInsert                    := nil;
+  cpHashSetRemove                    := nil;
+  cpHashSetFind                      := nil;
+  cpHashSetEach                      := nil;
+  cpHashSetFilter                    := nil;
+
+  cpSpaceHashAlloc                   := nil;
+  cpSpaceHashInit                    := nil;
+  cpSpaceHashNew                     := nil;
+  cpSpaceHashDestroy                 := nil;
+  cpSpaceHashFree                    := nil;
+  cpSpaceHashResize                  := nil;
+  cpSpaceHashInsert                  := nil;
+  cpSpaceHashRemove                  := nil;
+  cpSpaceHashEach                    := nil;
+  cpSpaceHashRehash                  := nil;
+  cpSpaceHashRehashObject            := nil;
+  cpSpaceHashPointQuery              := nil;
+  cpSpaceHashQuery                   := nil;
+  cpSpaceHashQueryInsert             := nil;
+  cpSpaceHashQueryRehash             := nil;
+  cpSpaceHashSegmentQuery            := nil;
+
+  cpCollideShapes                    := nil;
 end;
+
+initialization
+//  cpLoad({$if defined(MACOSX) and not defined(CPUi386)}'/usr/local/lib/' + {$IfEnd}libChipmunk);
+
+finalization
+  cpFree;
 {$IFEND}
 
 end.

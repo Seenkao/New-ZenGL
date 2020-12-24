@@ -23,9 +23,10 @@ uses
 
 var
   dirRes   : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
-  fntMain  : zglPFont;
+  fntMain  : Byte;
   video    : zglPVideoStream;
   videoSeek: Boolean;
+  TimeStart: Byte;
 
 procedure Init;
 begin
@@ -35,7 +36,7 @@ begin
   // RU: Открыть видео файл.
   video := video_OpenFile(dirRes + 'video.ogv');
 
-  setTextScale(1.5);
+  setTextScale(15, fntMain);
 end;
 
 procedure Draw;
@@ -83,7 +84,7 @@ end;
 Begin
   randomize();
 
-  timer_Add(@Timer, 16);
+  TimeStart := timer_Add(@Timer, 16, Start);
 
   zgl_Reg(SYS_LOAD, @Init);
   zgl_Reg(SYS_DRAW, @Draw);
