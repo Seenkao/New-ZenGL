@@ -462,8 +462,10 @@ begin
     mouseX := xmouse;
     mouseY := ymouse;
   end;  
-
+{$IfDef USE_MENUGUI}
   key_ClearState;
+{$Endif} 
+
 {$IfNDef USE_INIT_HANDLE}
 {$IFDEF USE_X11}
   app_ProcessMessages();
