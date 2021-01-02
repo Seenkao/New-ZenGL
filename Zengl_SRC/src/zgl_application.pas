@@ -462,9 +462,6 @@ begin
     mouseX := xmouse;
     mouseY := ymouse;
   end;  
-{$IfDef USE_MENUGUI}
-  key_ClearState;
-{$Endif} 
 
 {$IfNDef USE_INIT_HANDLE}
 {$IFDEF USE_X11}
@@ -541,9 +538,9 @@ begin
         TouchKey.FlagsKeyb := TouchKey.FlagsKeyb and (255 - keyboardShift);
         TouchKeySymb.Flags := TouchKeySymb.Flags and (255 - keyboardShift);
       end;
-      if keysUp[K_F1] then
+      if (keysUp[K_F1]) and ((TouchKey.FlagsKeyb and keyboardLatinRus) > 0) then
         TouchKey.FlagsKeyb := TouchKey.FlagsKeyb and (255 - keyboardLatinRus);
-      if keysUp[K_F2] then
+      if (keysUp[K_F2]) and ((TouchKey.FlagsKeyb and keyboardSymbol) > 0) then
       begin
         TouchKey.FlagsKeyb := TouchKey.FlagsKeyb and (255 - keyboardSymbol);
         if MenuChange = 3 then
