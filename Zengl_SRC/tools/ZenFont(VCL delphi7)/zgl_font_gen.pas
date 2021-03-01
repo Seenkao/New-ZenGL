@@ -23,7 +23,7 @@
 }
 unit zgl_font_gen;
 
-{$DEFINE USE_PNG}
+{.$DEFINE USE_PNG}
 
 interface
 uses
@@ -47,12 +47,12 @@ type
     child : array[0..1] of zglPSymbolNode;
   end;
 
-function  fontgen_Init : Boolean;
-procedure fontgen_BuildFont(var Font : zglPFont; const FontName : String);
-procedure fontgen_SaveFont(Font : zglPFont; const FileName : String);
+function  fontgen_Init: Boolean;
+procedure fontgen_BuildFont(var Font: Byte; const FontName: String);
+procedure fontgen_SaveFont(Font: Byte; const FileName: String);
 
 var
-  fg_Font        : zglPFont;
+  fg_Font        : Byte = 0;
   fg_FontNodes   : array of zglTSymbolNode;
   fg_CharsUse    : array[0..65535] of Boolean;
   fg_CharsUID    : array of WORD;
@@ -71,7 +71,6 @@ var
 
 implementation
 uses
-  zgl_main,
   zgl_log,
   zgl_screen,
   zgl_window,
@@ -96,10 +95,10 @@ begin
   end;
 end;
 
-function fontgen_InsertSymbol(node : zglPSymbolNode; const r : zglTRect; ID : Integer) : zglPSymbolNode;
-  var
-    dw, dh : Single;
-    c1, c2 : zglPSymbolNode;
+function fontgen_InsertSymbol(node : zglPSymbolNode; const r : zglTRect; ID : Integer): zglPSymbolNode;
+var
+  dw, dh : Single;
+  c1, c2 : zglPSymbolNode;
 begin
   if not node.leaf Then
   begin
@@ -275,7 +274,7 @@ begin
     end;
 end;
 
-procedure fontgen_BuildFont(var Font : zglPFont; const FontName : String);
+procedure fontgen_BuildFont(var Font: Byte; const FontName: String);
   var
     pData    : Pointer;
     i, j     : Integer;
@@ -298,23 +297,27 @@ procedure fontgen_BuildFont(var Font : zglPFont; const FontName : String);
     Rect       : TRect;
     minX, minY : Integer;
 begin
-  if length(Font.Pages) > 0 Then
-    for i := 0 to length(Font.Pages) - 1 do
-      tex_Del(Font.Pages[i]);
-  for i := 0 to 65535 do
-    if Assigned(Font.CharDesc[i]) Then
-    begin
-      Freememory(Font.CharDesc[i]);
-      Font.CharDesc[i] := nil;
-    end;
+  if (managerFont.Font[Font].Flags and Enable) > 0 then
+  begin
+    for i := 0 to Length(managerFont.Font[Font].Pages) - 1 do
+      tex_Del(managerFont.Font[Font].Pages[i]);
+
+    for i := 0 to 65535 do
+      if Assigned(managerFont.Font[Font].CharDesc[i]) then
+      begin
+        Freememory(managerFont.Font[Font].CharDesc[i]);
+        managerFont.Font[Font].CharDesc[i] := nil;
+      end;
+    SetLength(managerFont.Font[Font].Pages, 0);
+  end;        
 
   MaxWidth := 0;
 
   // установка размерностей
-  SetLength(fg_CharsSize,  Font.Count.Chars);
-  SetLength(fg_CharsUID,   Font.Count.Chars);
-  SetLength(fg_CharsImage, Font.Count.Chars);
-  SetLength(fg_CharsP,     Font.Count.Chars);
+  SetLength(fg_CharsSize,  managerFont.Font[Font].Count.Chars);
+  SetLength(fg_CharsUID,   managerFont.Font[Font].Count.Chars);
+  SetLength(fg_CharsImage, managerFont.Font[Font].Count.Chars);
+  SetLength(fg_CharsP,     managerFont.Font[Font].Count.Chars);
 
   j := 0;
   for i := 0 to 65535 do
@@ -356,7 +359,7 @@ begin
   SelectObject(WDC, DIB);
   SetRect(Rect, 0, 0, Bitmap.bmiHeader.biWidth, -Bitmap.bmiHeader.biHeight);
 
-  for i := 0 to Font.Count.Chars - 1 do
+  for i := 0 to managerFont.Font[Font].Count.Chars - 1 do
   begin
     Windows.FillRect(WDC, Rect, GetStockObject(BLACK_BRUSH));
     TextOutW(WDC, TextMetric.tmMaxCharWidth div 2, TextMetric.tmHeight div 2, @fg_CharsUID[i], 1);
@@ -393,18 +396,18 @@ begin
     for i := 0 to length(fg_FontNodes) - 1 do
       fontgen_FreeSymbolNode(@fg_FontNodes[i], TRUE);
 
-    Font.Count.Pages := 1;
+    managerFont.Font[Font].Count.Pages := 1;
     zgl_GetMem(pData, sqr(fg_PageSize) * 4);
-    SetLength(Font.Pages, Font.Count.Pages);
-    Font.Pages[0]        := tex_Add;
-    Font.Pages[0].Format := TEX_FORMAT_RGBA;
-    Font.Pages[0].Width  := fg_PageSize;
-    Font.Pages[0].Height := fg_PageSize;
-    Font.Pages[0].U      := 1;
-    Font.Pages[0].V      := 1;
-    Font.Pages[0].Flags  := TEX_CLAMP or TEX_FILTER_LINEAR;
+    SetLength(managerFont.Font[Font].Pages, managerFont.Font[Font].Count.Pages);
+    managerFont.Font[Font].Pages[0]        := tex_Add;
+    managerFont.Font[Font].Pages[0].Format := TEX_FORMAT_RGBA;
+    managerFont.Font[Font].Pages[0].Width  := fg_PageSize;
+    managerFont.Font[Font].Pages[0].Height := fg_PageSize;
+    managerFont.Font[Font].Pages[0].U      := 1;
+    managerFont.Font[Font].Pages[0].V      := 1;
+    managerFont.Font[Font].Pages[0].Flags  := TEX_CLAMP or TEX_FILTER_LINEAR;
 
-    SetLength(fg_FontNodes, Font.Count.Pages);
+    SetLength(fg_FontNodes, managerFont.Font[Font].Count.Pages);
     fg_FontNodes[0].leaf   := TRUE;
     fg_FontNodes[0].ID     := -1;
     fg_FontNodes[0].rect.X := 0;
@@ -415,73 +418,73 @@ begin
     u := 1 / fg_PageSize;
     v := 1 / fg_PageSize;
 
-    Font.MaxHeight := 0;
-    Font.MaxShiftY := 0;
+    managerFont.Font[Font].MaxHeight := 0;
+    managerFont.Font[Font].MaxShiftY := 0;
 
     i    := 0;
     sr.X := 0;
     sr.Y := 0;
-    while i < Font.Count.Chars do
+    while i < managerFont.Font[Font].Count.Chars do
     begin
       CharUID := fg_CharsUID[i];
 
       sr.W := fg_CharsSize[i].W + fg_FontPadding[0] + fg_FontPadding[2];
       sr.H := fg_CharsSize[i].H + fg_FontPadding[1] + fg_FontPadding[3];
 
-      sn := fontgen_InsertSymbol(@fg_FontNodes[Font.Count.Pages - 1], sr, CharUID);
+      sn := fontgen_InsertSymbol(@fg_FontNodes[managerFont.Font[Font].Count.Pages - 1], sr, CharUID);
       if not Assigned(sn) Then
       begin
         image_FlipVertically(pData, fg_PageSize, fg_PageSize, 4);
-        Font.Pages[Font.Count.Pages - 1] := tex_Create(PByteArray(pData), fg_PageSize, fg_PageSize, TEX_FORMAT_RGBA, TEX_DEFAULT_2D);
+        managerFont.Font[Font].Pages[managerFont.Font[Font].Count.Pages - 1] := tex_Create(PByteArray(pData), fg_PageSize, fg_PageSize, TEX_FORMAT_RGBA, TEX_DEFAULT_2D);
         zgl_FreeMem(pData);
 
         zgl_GetMem(pData, sqr(fg_PageSize) * 4);
-        INC(Font.Count.Pages);
-        SetLength(Font.Pages, Font.Count.Pages);
-        Font.Pages[Font.Count.Pages - 1]        := tex_Add();
-        Font.Pages[Font.Count.Pages - 1].Format := TEX_FORMAT_RGBA;
-        Font.Pages[Font.Count.Pages - 1].Width  := fg_PageSize;
-        Font.Pages[Font.Count.Pages - 1].Height := fg_PageSize;
-        Font.Pages[Font.Count.Pages - 1].U      := 1;
-        Font.Pages[Font.Count.Pages - 1].V      := 1;
-        Font.Pages[Font.Count.Pages - 1].Flags  := TEX_CLAMP or TEX_FILTER_LINEAR;
+        INC(managerFont.Font[Font].Count.Pages);
+        SetLength(managerFont.Font[Font].Pages, managerFont.Font[Font].Count.Pages);
+        managerFont.Font[Font].Pages[managerFont.Font[Font].Count.Pages - 1]        := tex_Add();
+        managerFont.Font[Font].Pages[managerFont.Font[Font].Count.Pages - 1].Format := TEX_FORMAT_RGBA;
+        managerFont.Font[Font].Pages[managerFont.Font[Font].Count.Pages - 1].Width  := fg_PageSize;
+        managerFont.Font[Font].Pages[managerFont.Font[Font].Count.Pages - 1].Height := fg_PageSize;
+        managerFont.Font[Font].Pages[managerFont.Font[Font].Count.Pages - 1].U      := 1;
+        managerFont.Font[Font].Pages[managerFont.Font[Font].Count.Pages - 1].V      := 1;
+        managerFont.Font[Font].Pages[managerFont.Font[Font].Count.Pages - 1].Flags  := TEX_CLAMP or TEX_FILTER_LINEAR;
 
-        SetLength(fg_FontNodes, Font.Count.Pages);
-        fg_FontNodes[Font.Count.Pages - 1].leaf   := TRUE;
-        fg_FontNodes[Font.Count.Pages - 1].ID     := -1;
-        fg_FontNodes[Font.Count.Pages - 1].rect.X := 0;
-        fg_FontNodes[Font.Count.Pages - 1].rect.Y := 0;
-        fg_FontNodes[Font.Count.Pages - 1].rect.W := fg_PageSize;
-        fg_FontNodes[Font.Count.Pages - 1].rect.H := fg_PageSize;
+        SetLength(fg_FontNodes, managerFont.Font[Font].Count.Pages);
+        fg_FontNodes[managerFont.Font[Font].Count.Pages - 1].leaf   := TRUE;
+        fg_FontNodes[managerFont.Font[Font].Count.Pages - 1].ID     := -1;
+        fg_FontNodes[managerFont.Font[Font].Count.Pages - 1].rect.X := 0;
+        fg_FontNodes[managerFont.Font[Font].Count.Pages - 1].rect.Y := 0;
+        fg_FontNodes[managerFont.Font[Font].Count.Pages - 1].rect.W := fg_PageSize;
+        fg_FontNodes[managerFont.Font[Font].Count.Pages - 1].rect.H := fg_PageSize;
       end else
       begin
         fontgen_PutChar(pData, Round(sn.rect.X + fg_FontPadding[0]), Round(sn.rect.Y + fg_FontPadding[1]), i);
         SetLength(fg_CharsImage[i], 0);
 
-        zgl_GetMem(Pointer(Font.CharDesc[CharUID]), SizeOf(zglTCharDesc));
-        Font.CharDesc[CharUID].Page   := Font.Count.Pages - 1;
-        Font.CharDesc[CharUID].Width  := Round(fg_CharsSize[i].W);
-        Font.CharDesc[CharUID].Height := Round(fg_CharsSize[i].H);
-        Font.CharDesc[CharUID].ShiftX := Round(fg_CharsSize[i].X);
-        Font.CharDesc[CharUID].ShiftY := Round(fg_CharsSize[i].Y);
-        Font.CharDesc[CharUID].ShiftP := fg_CharsP[i];
+        zgl_GetMem(Pointer(managerFont.Font[Font].CharDesc[CharUID]), SizeOf(zglTCharDesc));
+        managerFont.Font[Font].CharDesc[CharUID].Page   := managerFont.Font[Font].Count.Pages - 1;
+        managerFont.Font[Font].CharDesc[CharUID].Width  := Round(fg_CharsSize[i].W);
+        managerFont.Font[Font].CharDesc[CharUID].Height := Round(fg_CharsSize[i].H);
+        managerFont.Font[Font].CharDesc[CharUID].ShiftX := Round(fg_CharsSize[i].X);
+        managerFont.Font[Font].CharDesc[CharUID].ShiftY := Round(fg_CharsSize[i].Y);
+        managerFont.Font[Font].CharDesc[CharUID].ShiftP := fg_CharsP[i];
 
-        Font.CharDesc[CharUID].TexCoords[0].X := (sn.rect.X) * u;
-        Font.CharDesc[CharUID].TexCoords[0].Y := 1 - (sn.rect.Y) * v;
-        Font.CharDesc[CharUID].TexCoords[1].X := (sn.rect.X + sn.rect.W) * u;
-        Font.CharDesc[CharUID].TexCoords[1].Y := 1 - (sn.rect.Y) * v;
-        Font.CharDesc[CharUID].TexCoords[2].X := (sn.rect.X + sn.rect.W) * u;
-        Font.CharDesc[CharUID].TexCoords[2].Y := 1 - (sn.rect.Y + sn.rect.H) * v;
-        Font.CharDesc[CharUID].TexCoords[3].X := (sn.rect.X) * u;
-        Font.CharDesc[CharUID].TexCoords[3].Y := 1 - (sn.rect.Y + sn.rect.H) * v;
+        managerFont.Font[Font].CharDesc[CharUID].TexCoords[0].X := (sn.rect.X) * u;
+        managerFont.Font[Font].CharDesc[CharUID].TexCoords[0].Y := 1 - (sn.rect.Y) * v;
+        managerFont.Font[Font].CharDesc[CharUID].TexCoords[1].X := (sn.rect.X + sn.rect.W) * u;
+        managerFont.Font[Font].CharDesc[CharUID].TexCoords[1].Y := 1 - (sn.rect.Y) * v;
+        managerFont.Font[Font].CharDesc[CharUID].TexCoords[2].X := (sn.rect.X + sn.rect.W) * u;
+        managerFont.Font[Font].CharDesc[CharUID].TexCoords[2].Y := 1 - (sn.rect.Y + sn.rect.H) * v;
+        managerFont.Font[Font].CharDesc[CharUID].TexCoords[3].X := (sn.rect.X) * u;
+        managerFont.Font[Font].CharDesc[CharUID].TexCoords[3].Y := 1 - (sn.rect.Y + sn.rect.H) * v;
 
-        Font.MaxHeight := Round(Max(Font.MaxHeight, fg_CharsSize[i].H));
-        Font.MaxShiftY := Round(Max(Font.MaxShiftY, Font.CharDesc[CharUID].ShiftY));
+        managerFont.Font[Font].MaxHeight := Round(Max(managerFont.Font[Font].MaxHeight, fg_CharsSize[i].H));
+        managerFont.Font[Font].MaxShiftY := Round(Max(managerFont.Font[Font].MaxShiftY, managerFont.Font[Font].CharDesc[CharUID].ShiftY));
         INC(i);
       end;
     end;
     image_FlipVertically(pData, fg_PageSize, fg_PageSize, 4);
-    Font.Pages[Font.Count.Pages - 1] := tex_Create(PByteArray(pData), fg_PageSize, fg_PageSize, TEX_FORMAT_RGBA, TEX_DEFAULT_2D);
+    managerFont.Font[Font].Pages[managerFont.Font[Font].Count.Pages - 1] := tex_Create(PByteArray(pData), fg_PageSize, fg_PageSize, TEX_FORMAT_RGBA, TEX_DEFAULT_2D);
     zgl_FreeMem(pData);
   end else
   begin
@@ -490,11 +493,11 @@ begin
     fg_PageChars := fg_PageSize div MaxWidth;
     cs := fg_PageSize div fg_PageChars;
 
-    Font.Count.Pages := Font.Count.Chars div sqr(fg_PageChars) + 1;
-    SetLength(Font.Pages, Font.Count.Pages);
-    Font.MaxHeight := 0;
-    Font.MaxShiftY := 0;
-    for i := 0 to Font.Count.Pages - 1 do
+    managerFont.Font[Font].Count.Pages := managerFont.Font[Font].Count.Chars div sqr(fg_PageChars) + 1;
+    SetLength(managerFont.Font[Font].Pages, managerFont.Font[Font].Count.Pages);
+    managerFont.Font[Font].MaxHeight := 0;
+    managerFont.Font[Font].MaxShiftY := 0;
+    for i := 0 to managerFont.Font[Font].Count.Pages - 1 do
     begin
       u := 1 / fg_PageSize;
       v := 1 / fg_PageSize;
@@ -503,7 +506,7 @@ begin
       for j := 0 to sqr(fg_PageChars) - 1 do
       begin
         CharID := j + i * sqr(fg_PageChars);
-        if CharID > Font.Count.Chars - 1 Then
+        if CharID > managerFont.Font[Font].Count.Chars - 1 Then
           break;
         cy  := j div fg_PageChars;
         cx  := j - cy * fg_PageChars;
@@ -512,40 +515,40 @@ begin
         SetLength(fg_CharsImage[CharID], 0);
 
         CharUID := fg_CharsUID[CharID];
-        zgl_GetMem(Pointer(Font.CharDesc[CharUID]), SizeOf(zglTCharDesc));
-        Font.CharDesc[CharUID].Page   := i;
-        Font.CharDesc[CharUID].Width  := Round(fg_CharsSize[CharID].W);
-        Font.CharDesc[CharUID].Height := Round(fg_CharsSize[CharID].H);
-        Font.CharDesc[CharUID].ShiftX := Round(fg_CharsSize[CharID].X);
-        Font.CharDesc[CharUID].ShiftY := Round(fg_CharsSize[CharID].Y);
-        Font.CharDesc[CharUID].ShiftP := fg_CharsP[CharID];
+        zgl_GetMem(Pointer(managerFont.Font[Font].CharDesc[CharUID]), SizeOf(zglTCharDesc));
+        managerFont.Font[Font].CharDesc[CharUID].Page   := i;
+        managerFont.Font[Font].CharDesc[CharUID].Width  := Round(fg_CharsSize[CharID].W);
+        managerFont.Font[Font].CharDesc[CharUID].Height := Round(fg_CharsSize[CharID].H);
+        managerFont.Font[Font].CharDesc[CharUID].ShiftX := Round(fg_CharsSize[CharID].X);
+        managerFont.Font[Font].CharDesc[CharUID].ShiftY := Round(fg_CharsSize[CharID].Y);
+        managerFont.Font[Font].CharDesc[CharUID].ShiftP := fg_CharsP[CharID];
 
         sx := Round(fg_CharsSize[CharID].W);
         sy := Round(fg_CharsSize[CharID].H);
-        Font.CharDesc[CharUID].TexCoords[0].X := (cx * cs + (cs - sx) div 2 - fg_FontPadding[0]) * u;
-        Font.CharDesc[CharUID].TexCoords[0].Y := 1 - (cy * cs + (cs - sy) div 2 - fg_FontPadding[1]) * v;
-        Font.CharDesc[CharUID].TexCoords[1].X := (cx * cs + (cs - sx) div 2 + sx + fg_FontPadding[2]) * u;
-        Font.CharDesc[CharUID].TexCoords[1].Y := 1 - (cy * cs + (cs - sy) div 2 - fg_FontPadding[1]) * v;
-        Font.CharDesc[CharUID].TexCoords[2].X := (cx * cs + (cs - sx) div 2 + sx + fg_FontPadding[2]) * u;
-        Font.CharDesc[CharUID].TexCoords[2].Y := 1 - (cy * cs + (cs - sy) div 2 + sy + fg_FontPadding[3]) * v;
-        Font.CharDesc[CharUID].TexCoords[3].X := (cx * cs + (cs - sx) div 2 - fg_FontPadding[0]) * u;
-        Font.CharDesc[CharUID].TexCoords[3].Y := 1 - (cy * cs + (cs - sy) div 2 + sy + fg_FontPadding[3]) * v;
+        managerFont.Font[Font].CharDesc[CharUID].TexCoords[0].X := (cx * cs + (cs - sx) div 2 - fg_FontPadding[0]) * u;
+        managerFont.Font[Font].CharDesc[CharUID].TexCoords[0].Y := 1 - (cy * cs + (cs - sy) div 2 - fg_FontPadding[1]) * v;
+        managerFont.Font[Font].CharDesc[CharUID].TexCoords[1].X := (cx * cs + (cs - sx) div 2 + sx + fg_FontPadding[2]) * u;
+        managerFont.Font[Font].CharDesc[CharUID].TexCoords[1].Y := 1 - (cy * cs + (cs - sy) div 2 - fg_FontPadding[1]) * v;
+        managerFont.Font[Font].CharDesc[CharUID].TexCoords[2].X := (cx * cs + (cs - sx) div 2 + sx + fg_FontPadding[2]) * u;
+        managerFont.Font[Font].CharDesc[CharUID].TexCoords[2].Y := 1 - (cy * cs + (cs - sy) div 2 + sy + fg_FontPadding[3]) * v;
+        managerFont.Font[Font].CharDesc[CharUID].TexCoords[3].X := (cx * cs + (cs - sx) div 2 - fg_FontPadding[0]) * u;
+        managerFont.Font[Font].CharDesc[CharUID].TexCoords[3].Y := 1 - (cy * cs + (cs - sy) div 2 + sy + fg_FontPadding[3]) * v;
 
-        Font.MaxHeight := Round(Max(Font.MaxHeight, fg_CharsSize[CharID].H));
-        Font.MaxShiftY := Round(Max(Font.MaxShiftY, Font.CharDesc[CharUID].ShiftY));
+        managerFont.Font[Font].MaxHeight := Round(Max(managerFont.Font[Font].MaxHeight, fg_CharsSize[CharID].H));
+        managerFont.Font[Font].MaxShiftY := Round(Max(managerFont.Font[Font].MaxShiftY, managerFont.Font[Font].CharDesc[CharUID].ShiftY));
       end;
       image_FlipVertically(pData, fg_PageSize, fg_PageSize, 4);
-      Font.Pages[i] := tex_Create(PByteArray(pData), fg_PageSize, fg_PageSize, TEX_FORMAT_RGBA, TEX_DEFAULT_2D);
+      managerFont.Font[Font].Pages[i] := tex_Create(PByteArray(pData), fg_PageSize, fg_PageSize, TEX_FORMAT_RGBA, TEX_DEFAULT_2D);
       zgl_FreeMem(pData);
     end;
   end;
-  Font.Padding[0] := fg_FontPadding[0];
-  Font.Padding[1] := fg_FontPadding[1];
-  Font.Padding[2] := fg_FontPadding[2];
-  Font.Padding[3] := fg_FontPadding[3];
+  managerFont.Font[Font].Padding[0] := fg_FontPadding[0];
+  managerFont.Font[Font].Padding[1] := fg_FontPadding[1];
+  managerFont.Font[Font].Padding[2] := fg_FontPadding[2];
+  managerFont.Font[Font].Padding[3] := fg_FontPadding[3];
 end;
 
-procedure fontgen_SaveFont(Font : zglPFont; const FileName : String);
+procedure fontgen_SaveFont(Font: Byte; const FileName: String);
   type
     zglPTGAHeader = ^zglTTGAHeader;
     zglTTGAHeader = packed record
@@ -577,27 +580,27 @@ procedure fontgen_SaveFont(Font : zglPFont; const FileName : String);
 begin
   file_Open(F, FileName + '.zfi', FOM_CREATE);
   file_Write(F, ZGL_FONT_INFO, 13);
-  file_Write(F, Font.Count.Pages, 2);
-  file_Write(F, Font.Count.Chars, 2);
-  file_Write(F, Font.MaxHeight,   4);
-  file_Write(F, Font.MaxShiftY,   4);
+  file_Write(F, managerFont.Font[Font].Count.Pages, 2);
+  file_Write(F, managerFont.Font[Font].Count.Chars, 2);
+  file_Write(F, managerFont.Font[Font].MaxHeight,   4);
+  file_Write(F, managerFont.Font[Font].MaxShiftY,   4);
   file_Write(F, fg_FontPadding[0],  4);
   // сохраняем .zfi
-  for i := 0 to Font.Count.Chars - 1 do
+  for i := 0 to managerFont.Font[Font].Count.Chars - 1 do
   begin
     c := fg_CharsUID[i];
     file_Write(F, c, 4);
-    file_Write(F, Font.CharDesc[c].Page, 4);
-    file_Write(F, Font.CharDesc[c].Width, 1);
-    file_Write(F, Font.CharDesc[c].Height, 1);
-    file_Write(F, Font.CharDesc[c].ShiftX, 4);
-    file_Write(F, Font.CharDesc[c].ShiftY, 4);
-    file_Write(F, Font.CharDesc[c].ShiftP, 4);
-    file_Write(F, Font.CharDesc[c].TexCoords[0], SizeOf(zglTPoint2D) * 4);
+    file_Write(F, managerFont.Font[Font].CharDesc[c].Page, 4);
+    file_Write(F, managerFont.Font[Font].CharDesc[c].Width, 1);
+    file_Write(F, managerFont.Font[Font].CharDesc[c].Height, 1);
+    file_Write(F, managerFont.Font[Font].CharDesc[c].ShiftX, 4);
+    file_Write(F, managerFont.Font[Font].CharDesc[c].ShiftY, 4);
+    file_Write(F, managerFont.Font[Font].CharDesc[c].ShiftP, 4);
+    file_Write(F, managerFont.Font[Font].CharDesc[c].TexCoords[0], SizeOf(zglTPoint2D) * 4);
   end;
   file_Close(F);
   // сохраняем сам фонт
-  for i := 0 to Font.Count.Pages - 1 do
+  for i := 0 to managerFont.Font[Font].Count.Pages - 1 do
   begin
     FillChar(TGA, SizeOf(zglTTGAHeader), 0);
     TGA.ImageType      := 2;
@@ -606,7 +609,7 @@ begin
     TGA.ImgSpec.Depth  := 32;
     TGA.ImgSpec.Desc   := 8;
 
-    tex_GetData(Font.Pages[i], PByteArray(Data));
+    tex_GetData(managerFont.Font[Font].Pages[i], PByteArray(Data));
 
     file_Open(F, FileName + '-page' + u_IntToStr(i) + '.tga', FOM_CREATE);
     file_Write(F, TGA, SizeOf(zglTTGAHeader));

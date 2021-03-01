@@ -171,7 +171,6 @@ type
 
   zglNSView = objcclass(NSView)
     public
-//      procedure drawRect(rect: NSRect); override;
       procedure windowWillClose(note: NSNotification); message 'windowWillClose:';
   end;
 {$EndIf}
@@ -321,7 +320,6 @@ function LoadCursorW(hInstance: HINST; lpCursorName: PWideChar): HCURSOR; stdcal
 procedure zglNSWindow.close;
 begin
   winOn := false;
-//  inherited;
 end;
 
 procedure zglNSWindow.resignMainWindow;
@@ -339,7 +337,6 @@ end;
 procedure zglNSView.windowWillClose(note: NSNotification);
 begin
   winOn := False;
-//  NSApp.terminate(nil);
 end;
 
 {$EndIf}
@@ -515,14 +512,13 @@ begin
   else begin
     viewNSRect.origin.x := wndX;
     viewNSRect.origin.y := wndY;
-    viewNSRect.size.width := { wndx +} wndWidth;
-    viewNSRect.size.height := {wndY +} wndHeight + 0;
+    viewNSRect.size.width := wndWidth;
+    viewNSRect.size.height := wndHeight + 0;
     createFlags := NSTitledWindowMask or NSClosableWindowMask;
   end;
   wndHandle := zglNSWindow.alloc;
   wndHandle.initWithContentRect_styleMask_backing_defer(viewNSRect, createFlags, NSBackingStoreBuffered, False).autorelease;
 
-  // ???  zdes ili net
   zglView := zglNSView.alloc;
   zglView.initWithFrame(viewNSRect);
   wndHandle.setContentView(zglView);
@@ -795,8 +791,8 @@ begin
     wnd_SetPos(wndX, wndY);
   {$ENDIF}
   {$IFDEF MACOSX}{$IfDef MAC_COCOA}
-  viewNSRect.size.width := { wndx +} wndWidth;
-  viewNSRect.size.height := {wndY +} wndHeight;
+  viewNSRect.size.width := wndWidth;
+  viewNSRect.size.height := wndHeight;
   {$Else}
   if Assigned(wndHandle) Then
     begin

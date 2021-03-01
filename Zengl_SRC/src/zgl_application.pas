@@ -462,6 +462,9 @@ begin
     mouseX := xmouse;
     mouseY := ymouse;
   end;  
+{$IfDef USE_MENUGUI}
+  key_ClearState;
+{$Endif} 
 
 {$IfNDef USE_INIT_HANDLE}
 {$IFDEF USE_X11}
@@ -538,9 +541,9 @@ begin
         TouchKey.FlagsKeyb := TouchKey.FlagsKeyb and (255 - keyboardShift);
         TouchKeySymb.Flags := TouchKeySymb.Flags and (255 - keyboardShift);
       end;
-      if (keysUp[K_F1]) and ((TouchKey.FlagsKeyb and keyboardLatinRus) > 0) then
+      if keysUp[K_F1] then
         TouchKey.FlagsKeyb := TouchKey.FlagsKeyb and (255 - keyboardLatinRus);
-      if (keysUp[K_F2]) and ((TouchKey.FlagsKeyb and keyboardSymbol) > 0) then
+      if keysUp[K_F2] then
       begin
         TouchKey.FlagsKeyb := TouchKey.FlagsKeyb and (255 - keyboardSymbol);
         if MenuChange = 3 then
@@ -999,17 +1002,10 @@ begin
 {$ENDIF}
 {$IFDEF MACOSX}{$IfDef MAC_COCOA}
   flagTrue := 0;
-//  pool := NSAutoreleasePool.alloc.init;
 eventLoop:
   ev := wndHandle.nextEventMatchingMask_untilDate_inMode_dequeue(NSAnyEventMask, nil, NSDefaultRunLoopMode, true);
   if ev = nil then
   begin
-//    NSApp.updateWindows;
-//    pool.release;
-    exit;
-  end;
-//  if ev.type_ <> 33 then
-//    flagTrue := flagTrue or KEYUPDOWN; ;
   case ev.type_ of
     NSMouseMoved, NSLeftMouseDragged, NSRightMouseDragged, NSOtherMouseDragged:
       begin
@@ -1019,16 +1015,6 @@ eventLoop:
           gMouseY := Trunc(ev.locationInWindow.y);
           flagTrue := flagTrue or MOUSEMOVE;
         end;
- {       wndMouseIn := (mouseX >= 0) and (mouseX <= wndWidth) and (mouseY >= 0) and (mouseY <= wndHeight);
-        if wndMouseIn Then
-        begin
-          if (not appShowCursor) and (CGCursorIsVisible = 1) Then
-            CGDisplayHideCursor(scrDisplay);
-          if (appShowCursor) and (CGCursorIsVisible = 0) Then
-            CGDisplayShowCursor(scrDisplay);
-          end else
-            if CGCursorIsVisible = 0 Then
-              CGDisplayShowCursor(scrDisplay);      }
       end;
     NSLeftMouseDown:
       begin
@@ -1203,31 +1189,6 @@ eventLoop:
         flagTrue := flagTrue or KEYUPDOWN;
         key := mackey_to_scancode(ev.keyCode);
         key_WorkDown(key);
-
-(*        if keysCanText Then                     izmenit? polnostyu
-          case key of
-            K_SYSRQ, K_PAUSE,
-            K_ESCAPE, K_ENTER, K_KP_ENTER,
-            K_UP, K_DOWN, K_LEFT, K_RIGHT,
-            K_INSERT, K_DELETE, K_HOME, K_END,
-            K_PAGEUP, K_PAGEDOWN,
-            K_CTRL_L, K_CTRL_R,
-            K_ALT_L, K_ALT_R,
-            K_SHIFT_L, K_SHIFT_R,
-            K_SUPER_L, K_SUPER_R,
-            K_APP_MENU,
-            K_CAPSLOCK, K_NUMLOCK, K_SCROLL:;
-            K_BACKSPACE: utf8_Backspace(keysText);
-            K_TAB:       key_InputText('  ');
-          else
- //           GetEventParameter(inEvent, kEventParamKeyUnicodes, typeUTF8Text, nil, 6, @len, @c[0]);
- //           if len > 0 Then
-            begin
-  //            SetLength(str, len);
-  //            System.Move(c[0], str[1], len);
-              key_InputText(str);
-            end;
-          end;         *)
       end;
     NSKeyUp, NSKeyUpMask:
       begin
@@ -1239,7 +1200,6 @@ eventLoop:
   if (flagTrue and KEYUPDOWN) = 0 then
   begin
     NSApp.sendEvent(ev);
-//    NSApp.updateWindows;
   end;
   goto eventLoop;
 {$Else}
