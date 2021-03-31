@@ -88,14 +88,12 @@ Flags - указывает какой таймер запускаем. Start/Sto
 
 в файле "zgl_config.cfg" выставить
 
-Code: Pascal  [Select]
-[+]
+Code: 
 
     {$DEFINE MAC_COCOA}
 
 и выключить
-Code: Pascal  [Select]
-[+]
+Code: 
 
     {$IFDEF MAC_COCOA}
       {$DEFINE NO_USE_STATIC_LIBRARY} // -> {.$DEFINE NO_USE_STATIC_LIBRARY}
