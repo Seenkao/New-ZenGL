@@ -351,7 +351,11 @@ toJmp:
         if nCode = K_SUPER then keybFlags := keybFlags or keyboardCommand;
       end;
     K_APP_MENU: ;
+    {$IfNDef MAC_COCOA}
     K_CAPSLOCK: keybFlags := keybFlags or keyboardCapsDown;
+    {$Else}
+    K_CAPSLOCK: keybFlags := keybFlags xor keyboardCaps;
+    {$EndIf}  
     K_NUMLOCK:  keybFlags := keybFlags or keyboardNumLockDown;
     K_SCROLL:   keybFlags := keybFlags or keyboardScrollLockDown;
     K_F1, K_F2, K_F3, K_F4, K_F5, K_F6, K_F7, K_F8, K_F9, K_F10, K_F11, K_F12: ;
@@ -410,8 +414,10 @@ begin
     K_INSERT:   if ((keybFlags and keyboardInsertDown) > 0) then
                   keybFlags := keybFlags xor keyboardInsertDown xor keyboardInsert;
     K_APP_MENU: ;
+    {$IfNDef MAC_COCOA}
     K_CAPSLOCK: if ((keybFlags and keyboardCapsDown) > 0)  then
                   keybFlags := keybFlags xor keyboardCapsDown xor keyboardCaps;
+    {$EndIf}
     K_NUMLOCK:  if ((keybFlags and keyboardNumLockDown) > 0) then
                   keybFlags := keybFlags xor keyboardNumLock xor keyboardNumLockDown;
     K_SCROLL: if ((keybFlags and keyboardScrollLockDown) > 0) then
