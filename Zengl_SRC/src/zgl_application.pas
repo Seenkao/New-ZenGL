@@ -1063,10 +1063,8 @@ eventLoop:
     NSFlagsChanged:
       begin
         modFlags := ev.modifierFlags;
-        if (modFlags and NSAlphaShiftKeyMask) > 0 then
-          key_WorkDown(K_CAPSLOCK)
-        else
-          key_WorkUp(K_CAPSLOCK);
+        if ((modFlags and NSAlphaShiftKeyMask) > 0) or ((modFlags and 256) > 0) then
+          key_WorkDown(K_CAPSLOCK);
         if (modFlags and NSShiftKeyMask) > 0 then
         begin
           if (modFlags and 2) > 0 then
