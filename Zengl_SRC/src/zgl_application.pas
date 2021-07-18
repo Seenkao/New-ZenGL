@@ -1005,7 +1005,7 @@ begin
 eventLoop:
   ev := wndHandle.nextEventMatchingMask_untilDate_inMode_dequeue(NSAnyEventMask, nil, NSDefaultRunLoopMode, true);
   if ev = nil then
-  begin
+    exit;
   case ev.type_ of
     NSMouseMoved, NSLeftMouseDragged, NSRightMouseDragged, NSOtherMouseDragged:
       begin
