@@ -3,6 +3,10 @@ program demo11;
 {$I zglCustomConfig.cfg}
 
 uses
+  {$IFDEF UNIX}
+  cthreads,
+  {$ENDIF}
+  {$IFDEF USE_ZENGL_STATIC}
   zgl_screen,
   zgl_window,
   zgl_timers,
@@ -16,83 +20,88 @@ uses
   zgl_text,
   zgl_math_2d,
   zgl_utils
+  {$ELSE}
+  zglHeader
+  {$ENDIF}
   ;
 
 var
-  dirRes     : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
-  fntMain    : Byte;
-  texBack    : zglPTexture;
-  grid       : zglTGrid2D;
-  wave       : Single;
-  TimeStart  : Byte;
+  dirRes      : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
+  fntMain     : Byte;
+  texBack     : zglPTexture;
+  grid        : zglTGrid2D;
+  wave        : Single;
+
+  TimeStart  : Byte = 0;
 
 procedure Init;
   var
-    i, j: Integer;
+    i, j : Integer;
 begin
-  texBack := tex_LoadFromFile(dirRes + 'back04.jpg');
+  texBack := tex_LoadFromFile( dirRes + 'back04.jpg' );
 
-  fntMain := font_LoadFromFile(dirRes + 'font.zfi');
+  fntMain := font_LoadFromFile( dirRes + 'font.zfi' );
 
-  // RU: Инициализация сетки размером 21x16. Основная идея - каждый узел сетки это смещение относительно её верхнего левого угла.
+  // RU: РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ СЃРµС‚РєРё СЂР°Р·РјРµСЂРѕРј 21x16. РћСЃРЅРѕРІРЅР°СЏ РёРґРµСЏ - РєР°Р¶РґС‹Р№ СѓР·РµР» СЃРµС‚РєРё СЌС‚Рѕ СЃРјРµС‰РµРЅРёРµ РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅРѕ РµС‘ РІРµСЂС…РЅРµРіРѕ Р»РµРІРѕРіРѕ СѓРіР»Р°.
   // EN: Initialization of grid with size 21x16. Main idea - every node of grid is an offset from the top left corner.
   grid.Cols := 21;
   grid.Rows := 16;
-  SetLength(grid.Grid, grid.Cols, grid.Rows);
+  SetLength( grid.Grid, grid.Cols, grid.Rows );
   for i := 0 to grid.Cols - 1 do
     for j := 0 to grid.Rows - 1 do
       begin
-        grid.Grid[i, j].X := i * 40;
-        grid.Grid[i, j].Y := j * 40;
+        grid.Grid[ i, j ].X := i * 40;
+        grid.Grid[ i, j ].Y := j * 40;
       end;
-
-  setTextScale(15, fntMain);
+  setFontTextScale(15, fntMain);
 end;
 
 procedure Draw;
 begin
-  // RU: Рендерим сетку в координатах 0,0.
+  // RU: Р РµРЅРґРµСЂРёРј СЃРµС‚РєСѓ РІ РєРѕРѕСЂРґРёРЅР°С‚Р°С… 0,0.
   // EN: Render grid in coordinates 0,0.
-  sgrid2d_Draw(texBack, 0, 0, @grid);
+  sgrid2d_Draw( texBack, 0, 0, @grid );
 
-  text_Draw(fntMain, 0, 0, 'FPS: ' + u_IntToStr(zgl_Get(RENDER_FPS)));
+  text_Draw( fntMain, 0, 0, 'FPS: ' + u_IntToStr( zgl_Get( RENDER_FPS ) ) );
 end;
 
 procedure Timer;
   var
-    i, j: Integer;
-    cwave, swave: Single;
+    i, j : Integer;
+    cwave, swave : Single;
 begin
-  wave  := wave + random(1000) / 10000;
-  cwave := cos(wave);
-  swave := sin(wave);
+  wave  := wave + random( 1000 ) / 10000;
+  cwave := cos( wave );
+  swave := sin( wave );
 
-  // RU: Симуляция простого эффекта под водой.
+  // RU: РЎРёРјСѓР»СЏС†РёСЏ РїСЂРѕСЃС‚РѕРіРѕ СЌС„С„РµРєС‚Р° РїРѕРґ РІРѕРґРѕР№.
   // EN: Simulation of simple underwater effect.
   for i := 1 to grid.Cols - 2 do
     for j := 1 to grid.Rows - 2 do
-    begin
-      if (i mod 2 = 0) and (j mod 2 = 0) Then
       begin
-        grid.Grid[i, j].X := i * 40 + cwave;
-        grid.Grid[i, j].Y := j * 40 + swave;
-      end else
-      begin
-        grid.Grid[i, j].X := i * 40 - cwave;
-        grid.Grid[i, j].Y := j * 40 - swave;
+        if ( i mod 2 = 0 ) and ( j mod 2 = 0 ) Then
+          begin
+            grid.Grid[ i, j ].X := i * 40 + cwave;
+            grid.Grid[ i, j ].Y := j * 40 + swave;
+          end else
+            begin
+              grid.Grid[ i, j ].X := i * 40 - cwave;
+              grid.Grid[ i, j ].Y := j * 40 - swave;
+            end;
       end;
-    end;
-
-  key_ClearState();
 end;
 
 Begin
+  {$IFNDEF USE_ZENGL_STATIC}
+  if not zglLoad( libZenGL ) Then exit;
+  {$ENDIF}
+
   randomize();
 
-  TimeStart := timer_Add(@Timer, 16, SleepToStart, 3);
+  TimeStart := timer_Add( @Timer, 16, Start );
 
-  zgl_Reg(SYS_LOAD, @Init);
-  zgl_Reg(SYS_DRAW, @Draw);
+  zgl_Reg( SYS_LOAD, @Init );
+  zgl_Reg( SYS_DRAW, @Draw );
 
   wnd_SetCaption(utf8_Copy('11 - Grid'));
 

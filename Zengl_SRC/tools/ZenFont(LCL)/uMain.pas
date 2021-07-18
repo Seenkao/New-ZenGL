@@ -1,4 +1,4 @@
-﻿unit uMain;
+unit uMain;
 
 interface
 
@@ -162,15 +162,14 @@ begin
   FillChar(fg_CharsUse, 65536, 0);                             // очищаем булевы значения
   managerFont.Font[fg_Font].Count.Chars := 0;                  // нулевое значение
 
-
   while i <= len do
     begin
-      c := utf8_toUnicode(EditChars.Text, i, @j);                  // получаем ID символа, в (J - I)  - количество байт
+      c := utf8_toUnicode(EditChars.Text, i, @j);              // получаем ID символа, в (J - I)  - количество байт
       if not fg_CharsUse[c] Then
       begin
-        fg_CharsUse[c] := TRUE;                              // и начинаем заново заполнять булевы значения
-        FillChar(utf8chars[ c, 0], 6, 0);                    // а это как раз очистка символики UTF8
-        Move(EditChars.Text[i], utf8chars[c, 0], j - i);     // просто перебрасываем...
+        fg_CharsUse[c] := TRUE;                                // и начинаем заново заполнять булевы значения
+        FillChar(utf8chars[ c, 0], 6, 0);                      // а это как раз очистка символики UTF8
+        Move(EditChars.Text[i], utf8chars[c, 0], j - i);       // просто перебрасываем...
         inc(managerFont.Font[fg_Font].Count.Chars);
       end;
       i := j;
@@ -416,7 +415,7 @@ begin
   if not zgl_Inited then
   begin
     zgl_Inited := True;
-    zgl_Disable( APP_USE_LOG );
+//    zgl_Disable( APP_USE_LOG );
 
     zgl_Reg( SYS_LOAD, @Init );
     zgl_Reg( SYS_DRAW, @Draw );

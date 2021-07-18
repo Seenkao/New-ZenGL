@@ -3,6 +3,10 @@ program demo13;
 {$I zglCustomConfig.cfg}
 
 uses
+  {$IFDEF UNIX}
+  cthreads,
+  {$ENDIF}
+  {$IFDEF USE_ZENGL_STATIC}
   zgl_screen,
   zgl_window,
   zgl_timers,
@@ -19,111 +23,114 @@ uses
   zgl_text,
   zgl_math_2d,
   zgl_utils
+  {$ELSE}
+  zglHeader
+  {$ENDIF}
   ;
 
 var
-  dirRes        : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
-  fntMain       : Byte;
-  texBack       : zglPTexture;
-  debug         : Boolean;
-  particles     : zglTPEngine2D;
-  emitterFire   : array[0..2] of zglPEmitter2D;
-  emitterDiamond: zglPEmitter2D;
-  emitterRain   : zglPEmitter2D;
-  TimeStart     : Byte;
+  dirRes         : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
+  fntMain        : Byte;
+  texBack        : zglPTexture;
+  debug          : Boolean;
+  particles      : zglTPEngine2D;
+  emitterFire    : array[ 0..2 ] of zglPEmitter2D;
+  emitterDiamond : zglPEmitter2D;
+  emitterRain    : zglPEmitter2D;
 
 procedure Init;
+  var
+    i : Integer;
 begin
-  texBack := tex_LoadFromFile(dirRes + 'back02.png');
+  texBack := tex_LoadFromFile( dirRes + 'back02.png' );
 
-  fntMain := font_LoadFromFile(dirRes + 'font.zfi');
+  fntMain := font_LoadFromFile( dirRes + 'font.zfi' );
+  setFontTextScale(15, fntMain);
 
   // EN: Load three types of fire emitters.
-  // RU: Загрузка трёх разных видов эмиттеров огня.
-  emitterFire[0] := emitter2d_LoadFromFile(dirRes + 'emitter_fire00.zei');
-  emitterFire[1] := emitter2d_LoadFromFile(dirRes + 'emitter_fire01.zei');
-  emitterFire[2] := emitter2d_LoadFromFile(dirRes + 'emitter_fire02.zei');
+  // RU: Р—Р°РіСЂСѓР·РєР° С‚СЂС‘С… СЂР°Р·РЅС‹С… РІРёРґРѕРІ СЌРјРёС‚С‚РµСЂРѕРІ РѕРіРЅСЏ.
+  emitterFire[ 0 ] := emitter2d_LoadFromFile( dirRes + 'emitter_fire00.zei' );
+  emitterFire[ 1 ] := emitter2d_LoadFromFile( dirRes + 'emitter_fire01.zei' );
+  emitterFire[ 2 ] := emitter2d_LoadFromFile( dirRes + 'emitter_fire02.zei' );
 
   // EN: Set own particels engine.
-  // RU: Установка собственного движка эмиттеров.
-  pengine2d_Set(@particles);
+  // RU: РЈСЃС‚Р°РЅРѕРІРєР° СЃРѕР±СЃС‚РІРµРЅРЅРѕРіРѕ РґРІРёР¶РєР° СЌРјРёС‚С‚РµСЂРѕРІ.
+  pengine2d_Set( @particles );
 
   // EN: Add 6 fire emitters to particles engine. Second parameter of function returns pointer to instance of new emitter, which can be processed manually.
   //     This instance will be nil after the death, so check everything.
-  // RU: Добавляем в движок 6 эмиттеров огня. Второй параметр функции позволяет получить указатель на конкретный экземпляр эмиттера, который можно будет обрабатывать вручную.
-  //     Данный экземпляр после смерти будет содержать nil, поэтому используйте проверку.
-  pengine2d_AddEmitter(emitterFire[0], nil, 642, 190);
-  pengine2d_AddEmitter(emitterFire[0], nil, 40, 368);
-  pengine2d_AddEmitter(emitterFire[0], nil, 246, 368);
-  pengine2d_AddEmitter(emitterFire[1], nil, 532, 244);
-  pengine2d_AddEmitter(emitterFire[1], nil, 318, 422);
-  pengine2d_AddEmitter(emitterFire[1], nil, 583, 420);
-  pengine2d_AddEmitter(emitterFire[2], nil, 740, 525);
+  // RU: Р”РѕР±Р°РІР»СЏРµРј РІ РґРІРёР¶РѕРє 6 СЌРјРёС‚С‚РµСЂРѕРІ РѕРіРЅСЏ. Р’С‚РѕСЂРѕР№ РїР°СЂР°РјРµС‚СЂ С„СѓРЅРєС†РёРё РїРѕР·РІРѕР»СЏРµС‚ РїРѕР»СѓС‡РёС‚СЊ СѓРєР°Р·Р°С‚РµР»СЊ РЅР° РєРѕРЅРєСЂРµС‚РЅС‹Р№ СЌРєР·РµРјРїР»СЏСЂ СЌРјРёС‚С‚РµСЂР°, РєРѕС‚РѕСЂС‹Р№ РјРѕР¶РЅРѕ Р±СѓРґРµС‚ РѕР±СЂР°Р±Р°С‚С‹РІР°С‚СЊ РІСЂСѓС‡РЅСѓСЋ.
+  //     Р”Р°РЅРЅС‹Р№ СЌРєР·РµРјРїР»СЏСЂ РїРѕСЃР»Рµ СЃРјРµСЂС‚Рё Р±СѓРґРµС‚ СЃРѕРґРµСЂР¶Р°С‚СЊ nil, РїРѕСЌС‚РѕРјСѓ РёСЃРїРѕР»СЊР·СѓР№С‚Рµ РїСЂРѕРІРµСЂРєСѓ.
+  pengine2d_AddEmitter( emitterFire[ 0 ], nil, 642, 190 );
+  pengine2d_AddEmitter( emitterFire[ 0 ], nil, 40, 368 );
+  pengine2d_AddEmitter( emitterFire[ 0 ], nil, 246, 368 );
+  pengine2d_AddEmitter( emitterFire[ 1 ], nil, 532, 244 );
+  pengine2d_AddEmitter( emitterFire[ 1 ], nil, 318, 422 );
+  pengine2d_AddEmitter( emitterFire[ 1 ], nil, 583, 420 );
+  pengine2d_AddEmitter( emitterFire[ 2 ], nil, 740, 525 );
 
-  emitterDiamond := emitter2d_LoadFromFile(dirRes + 'emitter_diamond.zei');
-  pengine2d_AddEmitter(emitterDiamond, nil);
+  emitterDiamond := emitter2d_LoadFromFile( dirRes + 'emitter_diamond.zei' );
+  pengine2d_AddEmitter( emitterDiamond, nil );
 
-  emitterRain := emitter2d_LoadFromFile(dirRes + 'emitter_rain.zei');
-  pengine2d_AddEmitter(emitterRain, nil);
-
-  setTextScale(15, fntMain);
+  emitterRain := emitter2d_LoadFromFile( dirRes + 'emitter_rain.zei' );
+  pengine2d_AddEmitter( emitterRain, nil );
 end;
 
 procedure Draw;
   var
-    i: Integer;
+    i : Integer;
 begin
-  batch2d_Begin();
+//  batch2d_Begin();
 
-  ssprite2d_Draw(texBack, 0, 0, 800, 600, 0);
+  ssprite2d_Draw( texBack, 0, 0, 800, 600, 0 );
 
   // EN: Rendering of all emitters in current particles engine.
-  // RU: Рендеринг всех эмиттеров в текущем движке частиц.
+  // RU: Р РµРЅРґРµСЂРёРЅРі РІСЃРµС… СЌРјРёС‚С‚РµСЂРѕРІ РІ С‚РµРєСѓС‰РµРј РґРІРёР¶РєРµ С‡Р°СЃС‚РёС†.
   pengine2d_Draw();
 
   if debug Then
     for i := 0 to particles.Count.Emitters - 1 do
-      with particles.List[i].BBox do
-        pr2d_Rect(MinX, MinY, MaxX - MinX, MaxY - MinY, $FF0000, 255);
+      with particles.List[ i ].BBox do
+        pr2d_Rect( MinX, MinY, MaxX - MinX, MaxY - MinY, $FF0000, 255 );
 
-  text_Draw(fntMain, 0, 0, 'FPS: ' + u_IntToStr(zgl_Get(RENDER_FPS)));
-  text_Draw(fntMain, 0, 20, 'Particles: ' + u_IntToStr(particles.Count.Particles));
-  text_Draw(fntMain, 0, 40, 'Debug(F1): ' + u_BoolToStr(debug));
+  text_Draw( fntMain, 0, 0, 'FPS: ' + u_IntToStr( zgl_Get( RENDER_FPS ) ) );
+  text_Draw( fntMain, 0, 20, 'Particles: ' + u_IntToStr( particles.Count.Particles ) );
+  text_Draw( fntMain, 0, 40, 'Debug(F1): ' + u_BoolToStr( debug ) );
 
-  batch2d_End();
+//  batch2d_End();
 end;
 
-procedure Timer;
+procedure KeyMouseEvent;
 begin
-  if key_Press(K_F1) Then debug := not debug;
-
-  key_ClearState();
+  if key_Press( K_F1 ) Then debug := not debug;
 end;
 
-procedure Update(dt: Double);
+procedure Update( dt : Double );
 begin
   // EN: Process all emitters in current particles engine.
-  // RU: Обработка всех эмиттеров в текущем движке частиц.
-  pengine2d_Proc(dt);
+  // RU: РћР±СЂР°Р±РѕС‚РєР° РІСЃРµС… СЌРјРёС‚С‚РµСЂРѕРІ РІ С‚РµРєСѓС‰РµРј РґРІРёР¶РєРµ С‡Р°СЃС‚РёС†.
+  pengine2d_Proc( dt );
 end;
 
 procedure Quit;
 begin
-  // RU: Очищаем память от созданных эмиттеров.
+  // RU: РћС‡РёС‰Р°РµРј РїР°РјСЏС‚СЊ РѕС‚ СЃРѕР·РґР°РЅРЅС‹С… СЌРјРёС‚С‚РµСЂРѕРІ.
   // EN: Free allocated memory for emitters.
-  pengine2d_Set(@particles);
+  pengine2d_Set( @particles );
   pengine2d_ClearAll();
 end;
 
 Begin
+  {$IFnDEF USE_ZENGL_STATIC}
+  if not zglLoad( libZenGL ) Then exit;
+  {$ENDIF}
   randomize();
 
-  TimeStart := timer_Add(@Timer, 16, Start);
-
-  zgl_Reg(SYS_LOAD, @Init);
-  zgl_Reg(SYS_DRAW, @Draw);
-  zgl_Reg(SYS_UPDATE, @Update);
-  zgl_Reg(SYS_EXIT, @Quit);
+  zgl_Reg(SYS_EVENTS, @KeyMouseEvent);
+  zgl_Reg( SYS_LOAD, @Init );
+  zgl_Reg( SYS_DRAW, @Draw );
+  zgl_Reg( SYS_UPDATE, @Update );
+  zgl_Reg( SYS_EXIT, @Quit );
 
   wnd_SetCaption(utf8_Copy('13 - Particles'));
 

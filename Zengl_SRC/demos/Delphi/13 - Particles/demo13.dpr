@@ -68,15 +68,13 @@ begin
   emitterRain := emitter2d_LoadFromFile(dirRes + 'emitter_rain.zei');
   pengine2d_AddEmitter(emitterRain, nil);
 
-  setTextScale(15, fntMain);
+  setFontTextScale(15, fntMain);
 end;
 
 procedure Draw;
   var
     i: Integer;
 begin
-  batch2d_Begin();
-
   ssprite2d_Draw(texBack, 0, 0, 800, 600, 0);
 
   // EN: Rendering of all emitters in current particles engine.
@@ -91,15 +89,12 @@ begin
   text_Draw(fntMain, 0, 0, 'FPS: ' + u_IntToStr(zgl_Get(RENDER_FPS)));
   text_Draw(fntMain, 0, 20, 'Particles: ' + u_IntToStr(particles.Count.Particles));
   text_Draw(fntMain, 0, 40, 'Debug(F1): ' + u_BoolToStr(debug));
-
-  batch2d_End();
 end;
 
-procedure Timer;
+procedure KeyMouseEvent;
 begin
-  if key_Press(K_F1) Then debug := not debug;
-
-  key_ClearState();
+  if key_Press(K_F1) Then
+    debug := not debug;
 end;
 
 procedure Update(dt: Double);
@@ -120,8 +115,7 @@ end;
 Begin
   randomize();
 
-  TimeStart := timer_Add(@Timer, 16, Start);
-
+  zgl_Reg(SYS_EVENTS, @KeyMouseEvent);
   zgl_Reg(SYS_LOAD, @Init);
   zgl_Reg(SYS_DRAW, @Draw);
   zgl_Reg(SYS_UPDATE, @Update);

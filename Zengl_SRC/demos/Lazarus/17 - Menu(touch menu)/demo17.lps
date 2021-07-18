@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectSession>
-    <Version Value="11"/>
+    <Version Value="12"/>
     <BuildModes Active="Default"/>
-    <Units Count="32">
+    <Units Count="33">
       <Unit0>
         <Filename Value="demo17.lpr"/>
         <IsPartOfProject Value="True"/>
         <IsVisibleTab Value="True"/>
-        <CursorPos X="24"/>
-        <UsageCount Value="181"/>
+        <TopLine Value="28"/>
+        <CursorPos X="39" Y="29"/>
+        <UsageCount Value="212"/>
         <Loaded Value="True"/>
       </Unit0>
       <Unit1>
@@ -17,233 +18,246 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="425"/>
         <CursorPos Y="459"/>
-        <UsageCount Value="6"/>
+        <UsageCount Value="3"/>
       </Unit1>
       <Unit2>
         <Filename Value="../../../src/zgl_application.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="479"/>
-        <CursorPos X="26" Y="492"/>
-        <UsageCount Value="90"/>
+        <TopLine Value="238"/>
+        <CursorPos X="35" Y="245"/>
+        <UsageCount Value="105"/>
       </Unit2>
       <Unit3>
         <Filename Value="../03 - Input/demo03.lpr"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="102"/>
         <CursorPos X="34" Y="113"/>
-        <UsageCount Value="81"/>
+        <UsageCount Value="78"/>
       </Unit3>
       <Unit4>
         <Filename Value="../../../extra/sw_draw_gui.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="284"/>
         <CursorPos X="57" Y="304"/>
-        <UsageCount Value="83"/>
+        <UsageCount Value="80"/>
       </Unit4>
       <Unit5>
         <Filename Value="../../../extra/sw_touch_menu.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="1048"/>
         <CursorPos X="27" Y="1043"/>
-        <UsageCount Value="83"/>
+        <UsageCount Value="80"/>
       </Unit5>
       <Unit6>
         <Filename Value="../../../src/zgl_config.cfg"/>
         <EditorIndex Value="-1"/>
-        <CursorPos X="22" Y="12"/>
-        <UsageCount Value="48"/>
+        <CursorPos X="14" Y="4"/>
+        <UsageCount Value="45"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit6>
       <Unit7>
         <Filename Value="../../../src/zgl_keyboard.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="334"/>
-        <CursorPos X="32" Y="348"/>
-        <UsageCount Value="86"/>
+        <TopLine Value="639"/>
+        <CursorPos X="18" Y="671"/>
+        <UsageCount Value="101"/>
       </Unit7>
       <Unit8>
         <Filename Value="../../../src/zgl_timers.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="145"/>
         <CursorPos X="3" Y="147"/>
-        <UsageCount Value="68"/>
+        <UsageCount Value="65"/>
       </Unit8>
       <Unit9>
         <Filename Value="../../../src/zgl_main.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="270"/>
         <CursorPos X="12" Y="302"/>
-        <UsageCount Value="68"/>
+        <UsageCount Value="65"/>
       </Unit9>
       <Unit10>
-        <Filename Value="../../../src/zgl_sprite_2d.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="422"/>
-        <CursorPos X="3" Y="437"/>
-        <UsageCount Value="1"/>
-      </Unit10>
-      <Unit11>
         <Filename Value="../../../src/zgl_opengles.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="8"/>
-        <UsageCount Value="6"/>
-      </Unit11>
-      <Unit12>
+        <UsageCount Value="3"/>
+      </Unit10>
+      <Unit11>
         <Filename Value="../../../src/zgl_fpc.cfg"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="34"/>
+        <UsageCount Value="31"/>
         <DefaultSyntaxHighlighter Value="None"/>
-      </Unit12>
-      <Unit13>
+      </Unit11>
+      <Unit12>
         <Filename Value="../../../src/zgl_screen.pas"/>
         <EditorIndex Value="-1"/>
-        <CursorPos X="13" Y="28"/>
-        <UsageCount Value="37"/>
-      </Unit13>
-      <Unit14>
+        <TopLine Value="169"/>
+        <CursorPos X="9" Y="182"/>
+        <UsageCount Value="53"/>
+      </Unit12>
+      <Unit13>
         <Filename Value="../../../src/zgl_render_2d.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="88"/>
         <CursorPos Y="113"/>
-        <UsageCount Value="28"/>
-      </Unit14>
-      <Unit15>
+        <UsageCount Value="25"/>
+      </Unit13>
+      <Unit14>
         <Filename Value="../../../src/zgl_mouse.pas"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="8" Y="28"/>
-        <UsageCount Value="29"/>
-      </Unit15>
-      <Unit16>
+        <UsageCount Value="26"/>
+      </Unit14>
+      <Unit15>
         <Filename Value="../../../src/zgl_utils.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="24"/>
         <CursorPos X="12" Y="40"/>
-        <UsageCount Value="26"/>
-      </Unit16>
-      <Unit17>
+        <UsageCount Value="23"/>
+      </Unit15>
+      <Unit16>
         <Filename Value="../../../../FreePas/fpcsrc/packages/univint/src/Dialogs.pas"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="24"/>
-        <UsageCount Value="6"/>
-      </Unit17>
-      <Unit18>
+        <UsageCount Value="3"/>
+      </Unit16>
+      <Unit17>
         <Filename Value="../../../../FreePas/fpcsrc/packages/univint/src/MacOSAll.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="2242"/>
-        <UsageCount Value="6"/>
-      </Unit18>
-      <Unit19>
+        <UsageCount Value="3"/>
+      </Unit17>
+      <Unit18>
         <Filename Value="../../../src/zgl_opengl_all.pas"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="48" Y="11"/>
-        <UsageCount Value="10"/>
-      </Unit19>
-      <Unit20>
+        <UsageCount Value="7"/>
+      </Unit18>
+      <Unit19>
         <Filename Value="../16 - Physics/demo16.lpr"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="28"/>
         <CursorPos X="26" Y="44"/>
-        <UsageCount Value="9"/>
-      </Unit20>
-      <Unit21>
+        <UsageCount Value="6"/>
+      </Unit19>
+      <Unit20>
         <Filename Value="../../../srcGEGL/gegl_touch_menu.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="137"/>
-        <CursorPos X="13" Y="175"/>
-        <UsageCount Value="15"/>
-      </Unit21>
-      <Unit22>
+        <UsageCount Value="31"/>
+      </Unit20>
+      <Unit21>
         <Filename Value="../../../srcGEGL/gegl_draw_gui.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="25"/>
-        <CursorPos X="53" Y="150"/>
-        <UsageCount Value="15"/>
-      </Unit22>
-      <Unit23>
+        <TopLine Value="143"/>
+        <CursorPos Y="162"/>
+        <UsageCount Value="21"/>
+      </Unit21>
+      <Unit22>
         <Filename Value="../../../src/zgl_font.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="41"/>
         <CursorPos X="3" Y="41"/>
-        <UsageCount Value="14"/>
-      </Unit23>
-      <Unit24>
+        <UsageCount Value="11"/>
+      </Unit22>
+      <Unit23>
         <Filename Value="../../../src/zgl_lib_zip.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="115"/>
         <CursorPos X="9" Y="226"/>
-        <UsageCount Value="13"/>
-      </Unit24>
-      <Unit25>
+        <UsageCount Value="10"/>
+      </Unit23>
+      <Unit24>
         <Filename Value="../../../../projects/Zengl_SRC/src/zgl_lib_zip.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="167"/>
         <CursorPos X="81" Y="178"/>
-        <UsageCount Value="9"/>
-      </Unit25>
-      <Unit26>
+        <UsageCount Value="6"/>
+      </Unit24>
+      <Unit25>
         <Filename Value="../../../src/zgl_log.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="64"/>
         <CursorPos X="37" Y="83"/>
-        <UsageCount Value="10"/>
-      </Unit26>
-      <Unit27>
+        <UsageCount Value="7"/>
+      </Unit25>
+      <Unit26>
         <Filename Value="../../../../projects/Zengl_SRC/src/zgl_log.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="60"/>
         <CursorPos X="30" Y="78"/>
-        <UsageCount Value="10"/>
-      </Unit27>
-      <Unit28>
+        <UsageCount Value="7"/>
+      </Unit26>
+      <Unit27>
         <Filename Value="../../../src/zgl_file.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="47"/>
         <CursorPos X="11" Y="66"/>
-        <UsageCount Value="10"/>
-      </Unit28>
-      <Unit29>
+        <UsageCount Value="7"/>
+      </Unit27>
+      <Unit28>
         <Filename Value="../../../../projects/Zengl_SRC/src/zgl_file.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="138"/>
         <CursorPos X="3" Y="140"/>
-        <UsageCount Value="10"/>
-      </Unit29>
-      <Unit30>
+        <UsageCount Value="7"/>
+      </Unit28>
+      <Unit29>
         <Filename Value="../../../src/zgl_opengl.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="49"/>
         <CursorPos X="21" Y="69"/>
-        <UsageCount Value="9"/>
-      </Unit30>
-      <Unit31>
+        <UsageCount Value="6"/>
+      </Unit29>
+      <Unit30>
         <Filename Value="../../../src/zgl_window.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="1039"/>
         <CursorPos X="21" Y="1048"/>
+        <UsageCount Value="7"/>
+      </Unit30>
+      <Unit31>
+        <Filename Value="../../../srcGEGL/gegl_menu_gui.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="4"/>
+        <CursorPos X="11" Y="26"/>
         <UsageCount Value="10"/>
       </Unit31>
+      <Unit32>
+        <Filename Value="../../../srcGEGL/gegl_config.cfg"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="3" Y="5"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit32>
     </Units>
-    <JumpHistory Count="4" HistoryIndex="3">
+    <JumpHistory Count="3" HistoryIndex="2">
       <Position1>
         <Filename Value="demo17.lpr"/>
         <Caret Line="11" Column="11"/>
       </Position1>
       <Position2>
         <Filename Value="demo17.lpr"/>
-        <Caret Line="13" Column="11"/>
+        <Caret Line="12" Column="9"/>
       </Position2>
       <Position3>
         <Filename Value="demo17.lpr"/>
-        <Caret Line="14" Column="9"/>
-      </Position3>
-      <Position4>
-        <Filename Value="demo17.lpr"/>
         <Caret Line="12" Column="9"/>
-      </Position4>
+      </Position3>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>
-      <Modes Count="0" ActiveMode=""/>
+      <Modes ActiveMode=""/>
     </RunParams>
   </ProjectSession>
+  <Debugging>
+    <BreakPoints>
+      <Item>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Source Value="demo17.lpr"/>
+        <Line Value="125"/>
+      </Item>
+    </BreakPoints>
+  </Debugging>
 </CONFIG>

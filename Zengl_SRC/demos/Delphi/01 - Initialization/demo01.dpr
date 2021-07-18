@@ -39,6 +39,8 @@ begin
   // EN: This function is the best way to implement smooth moving of something, because accuracy of timers are restricted by FPS.
 end;
 
+// RU: Пример использования таймера.
+// EN: An example of using a timer.
 procedure Timer;
 begin
   // RU: Будем в заголовке показывать количество кадров в секунду.
@@ -46,9 +48,18 @@ begin
   wnd_SetCaption(utf8_Copy('01 - Initialization[ FPS: ' + u_IntToStr(zgl_Get(RENDER_FPS)) + ' ]'));
 end;
 
+procedure KeyMouseEvent;
+begin
+  // RU: Функция обработки клавиатуры, мыши, джойстика и тачпада. Все события связанные с ними очищаются после её обработки.
+  //     Все попытки обработать клавиатуру, мышь и тачпад, могут привести к непредвиденным ситуациям.
+  // EN: Keyboard, mouse and touchpad handling function. All events associated with them are cleared after processing it.
+  //     Any attempt to handle the keyboard, mouse, or touchpad in other functions may lead to unexpected situations.
+end;
+
 procedure Quit;
 begin
- //
+ // RU: События которые надо произвести по завершению программы.
+ // EN: Events to be performed at the end of the program.
 end;
 
 Begin
@@ -56,6 +67,13 @@ Begin
   // EN: For loading/creating your own options/profiles/etc. you can get path to user home directory, or to executable file(not works for GNU/Linux).
   DirApp  := utf8_Copy(PAnsiChar(zgl_Get(DIRECTORY_APPLICATION)));
   DirHome := utf8_Copy(PAnsiChar(zgl_Get(DIRECTORY_HOME)));
+
+  // RU: Устанавливаем интервал на обработку событий клавиатуры, мыши, тачпада. И регистрируем процедуру.
+  //     Вызывать zgl_SetEventInterval не обязательно. Значение 16 стоит по умолчанию.
+  // EN: We set the interval for processing keyboard, mouse, touchpad events. And we register the procedure.
+  //     Calling zgl_SetEventInterval is optional. The default is 16.
+  zgl_SetEventsInterval(16);
+  zgl_Reg(SYS_EVENTS, @KeyMouseEvent);
 
   // RU: Создаем таймер с интервалом 1000мс.
   // EN: Create a timer with interval 1000ms.

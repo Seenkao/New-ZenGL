@@ -21,7 +21,7 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 18.12.2020
+ !!! modification from Serge 16.07.2021
 }
 unit zgl_types;
 
@@ -69,18 +69,51 @@ type
   zglPPoints2D = ^zglTPoints2D;
   zglTPoints2D = array[0..0] of zglTPoint2D;
 
-  zglPLine = ^zglTLine;
-  zglTLine = record
-    x0, y0: Single;
+  zglPLine2D = ^zglTLine2D;
+  // то же самое что и вектор
+  zglTLine2D = record
     x1, y1: Single;
+    x2, y2: Single;
+  end;
+
+  zglPVector2D = ^zglTVector2D;
+  // добавил для вектора, чтоб не путались
+  zglTVector2D = record
+    x1, y1: Single;
+    x2, y2: Single;
+  end;
+
+  zglPLine3D = ^zglTLine3D;
+  // то же самое что и вектор
+  zglTLine3D = record
+    x1, y1: Single;
+    x2, y2: Single;
+    x3, y3: Single;
+  end;
+
+  zglPVector3D = ^zglTVector3D;
+  // добавил для вектора, чтоб не путались
+  zglTVector3D = record
+    x1, y1: Single;
+    x2, y2: Single;
+    x3, y3: Single;
   end;
 
   zglPRect = ^zglTRect;
+  // это только для прямоугольника
   zglTRect = record
     X, Y, W, H: Single;
   end;
 
+  zglPRectPoints = ^zglTRectPoints;
+  // произвольный четырёхугольник
+  zglTRectPoints = record
+    x1, y1, x2, y2: Single;
+    x3, y3, x4, y4: Single;
+  end;
+
   zglPWordRect = ^zglTWordRect;
+  // это только для прямоугольника
   zglTWordRect = record
     X, Y, W, H: Word;
   end;

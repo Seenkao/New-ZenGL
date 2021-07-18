@@ -35,7 +35,7 @@ uses
   zgl_memory;
 
 const
-  // ��������
+  // òåêñòóðû
   TEX_FORMAT_RGBA       = $01;
   TEX_FORMAT_RGBA_4444  = $02;
   TEX_FORMAT_RGBA_PVR2  = $10;
@@ -44,7 +44,7 @@ const
   TEX_FORMAT_RGBA_DXT3  = $21;
   TEX_FORMAT_RGBA_DXT5  = $22;
 
-  TEX_NO_COLORKEY       = $FF000000;
+  TEX_NO_COLORKEY       = $FF000000;               // áåç ðàñ÷¸òà ïðîçðà÷íîñòè
 
   TEX_MIPMAP            = $000001;
   TEX_CLAMP             = $000002;
@@ -79,7 +79,7 @@ type
 type
   zglPTexture = ^zglTTexture;
   zglTTexture = record
-    ID           : LongWord;
+    ID           : LongWord;              // вынести ID для всех отдельно? И работать от текстуры
     Width, Height: Word;
     Format       : Word;
     U, V         : Single;
@@ -113,10 +113,14 @@ end;
 function  tex_Add: zglPTexture;
 procedure tex_Del(var Texture: zglPTexture);
 
+(* ñîçäàíèå GL-òåêñòóðû *)
 function  tex_CreateGL(var Texture: zglTTexture; pData: PByteArray): Boolean;
+(* çàïóñê ñîçäàíèÿ òåêñòóðû *)
 function  tex_Create(var Data: PByteArray; Width, Height: Word; Format: Word = TEX_FORMAT_RGBA;
     Flags: LongWord = TEX_DEFAULT_2D): zglPTexture;
+(* ñîçäàíèå ïóñòîé òåêñòóðû *)
 function  tex_CreateZero(Width, Height: Word; Color: LongWord = $000000; Flags: LongWord = TEX_DEFAULT_2D): zglPTexture;
+(* Ñïîñîáû çàãðóçêè íîâîé òåêñòóðû èç ôàéëà è èç ïàìÿòè       *)
 function  tex_LoadFromFile(const FileName: UTF8String; TransparentColor: LongWord = TEX_NO_COLORKEY;
     Flags: LongWord = TEX_DEFAULT_2D): zglPTexture;
 function  tex_LoadFromMemory(const Memory: zglTMemory; const Extension: UTF8String;
@@ -138,6 +142,7 @@ procedure tex_CalcFlags(var Texture: zglTTexture; var pData: PByteArray);
 procedure tex_CalcPOT(var pData: PByteArray; var Width, Height: Word; var U, V: Single; PixelSize: Integer);
 procedure tex_CalcGrayScale(pData: PByteArray; Width, Height: Word);
 procedure tex_CalcInvert(pData: PByteArray; Width, Height: Word);
+(* ðàñ÷¸ò ïðîçðà÷íîñòè òåêñòóðû, ïðè ñîâïàäåíèè öâåòà è öâåòà â TransparentColor àëüôà ïåðåâîäèòñÿ â íóëü   *)
 procedure tex_CalcTransparent(pData: PByteArray; TransparentColor: LongWord; Width, Height: Word);
 procedure tex_CalcAlpha(pData: PByteArray; Width, Height: Word);
 

@@ -74,7 +74,7 @@ var
   Form1: TForm1;
 
 //-----------------------------------------
-  dirRes  : UTF8String {$IFNDEF MACOSX} = 'data/' {$ENDIF};
+  dirRes  : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
 
   fntMain : Byte;
   MyIcon    : array[ 0..1 ] of zglPTexture;
@@ -112,7 +112,7 @@ end;
 
 procedure Draw;
 begin
-  setTextScale(15, fntMain);
+  setFontTextScale(15, fntMain);
   text_Draw( fntMain, 0, 0, 'Escape - Exit' );
 
   // RU: Координаты мыши можно получить при помощи функций mouse_X и mouse_Y.

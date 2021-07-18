@@ -103,6 +103,10 @@ begin
   // RU: Загружаем шрифт.
   // EN: Load the font.
   fntMain := font_LoadFromFile( dirRes + 'font.zfi' );
+  setFontTextScale(15, fntMain);
+
+  // RU: Устанавливаем FPS.
+  // EN: Set FPS.
   scr_SetFPS(60);
 end;
 
@@ -112,11 +116,10 @@ procedure Draw;
     t : Single;
     ScaleF: LongWord;
 begin
-  batch2d_Begin();
+//  batch2d_Begin();
   ScaleF := 15;
   if time > 255 Then
     begin
-      setTextScale(10, fntMain);
       // RU: Для увеличения быстродействия можно отключить очистку буфера цвета, учитывая что экран полностью заполнен.
       // EN: Rendering perfomance can be increased by disabling clearing the color buffer. This is a good idea because screen is full of objects.
       zgl_Disable( COLOR_BUFFER_CLEAR );
@@ -143,7 +146,7 @@ begin
           begin
             // RU: Рисуем надпись в "рамочке" над пингвином.
             // EN: Render the text in frame over penguins.
-            t := text_GetWidth( fntMain, 'I''m so red...' ) * 1 + 4;
+            t := text_GetWidth( fntMain, 'I''m so red...' ) * 0.75;
             pr2d_Rect( tux[ i ].Pos.X - 2, tux[ i ].Pos.Y - ScaleF + 4, t, ScaleF, $000000, 200, PR2D_FILL );
             pr2d_Rect( tux[ i ].Pos.X - 2, tux[ i ].Pos.Y - ScaleF + 3, t, ScaleF + 1, $FFFFFF );
             text_DrawEx( fntMain, tux[ i ].Pos.X, tux[ i ].Pos.Y - ScaleF + 4, 1, 0, 'I''m so red...' );
@@ -154,7 +157,7 @@ begin
           end else
             if i = 7 Then
               begin
-                t := text_GetWidth( fntMain, '???' ) * 1 + 4;
+                t := text_GetWidth( fntMain, '???' ) * 0.75;
                 pr2d_Rect( tux[ i ].Pos.X + 32 - t / 2, tux[ i ].Pos.Y - ScaleF + 4, t, ScaleF, $000000, 200, PR2D_FILL );
                 pr2d_Rect( tux[ i ].Pos.X + 32 - t / 2, tux[ i ].Pos.Y - ScaleF + 3, t, ScaleF + 1, $FFFFFF );
                 text_DrawEx( fntMain, tux[ i ].Pos.X + 32, tux[ i ].Pos.Y - ScaleF + 4, 1, 0, '???', 255, $FFFFFF, TEXT_HALIGN_CENTER );
@@ -174,7 +177,7 @@ begin
       for i := 10 to 19 do
         if i = 13 Then
           begin
-            t := text_GetWidth( fntMain, 'I''m so big...' ) * 1 + 4;
+            t := text_GetWidth( fntMain, 'I''m so big...' ) * 0.75;
             pr2d_Rect( tux[ i ].Pos.X - 2, tux[ i ].Pos.Y - ScaleF - 10, t, ScaleF, $000000, 200, PR2D_FILL );
             pr2d_Rect( tux[ i ].Pos.X - 2, tux[ i ].Pos.Y - ScaleF - 10, t, ScaleF + 1, $FFFFFF{, 255, PR2D_SMOOTH });
             text_DrawEx( fntMain, tux[ i ].Pos.X, tux[ i ].Pos.Y - ScaleF - 8, 1, 0, 'I''m so big...' );
@@ -202,9 +205,9 @@ begin
       asprite2d_Draw( texGround, 12 * 32, 300 - 16, 32, 32, 0, 2 );
       asprite2d_Draw( texGround, 13 * 32, 300 - 16, 32, 32, 0, 3 );
 
-      t := text_GetWidth( fntMain, 'o_O' ) * 1 + 4;
-      pr2d_Rect( tux[ 20 ].Pos.X + 32 - t / 2, tux[ 20 ].Pos.Y - ScaleF + 4, t, ScaleF, $000000, 200, PR2D_FILL );
-      pr2d_Rect( tux[ 20 ].Pos.X + 32 - t / 2, tux[ 20 ].Pos.Y - ScaleF + 3, t, ScaleF + 1, $FFFFFF );
+      t := text_GetWidth( fntMain, 'o_O' ) * 0.75;
+      pr2d_Rect( tux[ 20 ].Pos.X + 32 - t / 2 -1, tux[ 20 ].Pos.Y - ScaleF + 3, t + 2, ScaleF + 2, $000000, 200, PR2D_FILL );
+      pr2d_Rect( tux[ 20 ].Pos.X + 32 - t / 2 - 2, tux[ 20 ].Pos.Y - ScaleF + 2, t + 4, ScaleF + 4, $FFFFFF );
       text_DrawEx( fntMain, tux[ 20 ].Pos.X + 32, tux[ 20 ].Pos.Y - ScaleF + 4, 1, 0, 'o_O', 255, $FFFFFF, TEXT_HALIGN_CENTER );
       asprite2d_Draw( tux[ 20 ].Texture, tux[ 20 ].Pos.X, tux[ 20 ].Pos.Y, 64, 64, 0, tux[ 20 ].Frame div 2 );
     end;
@@ -220,10 +223,9 @@ begin
 
   if time > 255 Then
   begin
-    setTextScale(15, fntMain);
     text_Draw( fntMain, 0, 0, 'FPS: ' + u_IntToStr( zgl_Get( RENDER_FPS ) ) );
   end;
-  batch2d_End();
+//  batch2d_End();
 end;
 
 procedure Timer;
@@ -252,8 +254,6 @@ begin
       if tux[ i ].Pos.X < -96 Then
         tux[ i ].Pos.X := 864;
     end;
-
-  key_ClearState();
 end;
 
 Begin

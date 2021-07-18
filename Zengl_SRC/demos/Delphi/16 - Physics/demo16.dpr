@@ -29,7 +29,7 @@ var
   bCount : Integer;
   Bodies : array of PcpBody;
   Shapes : array of PcpShape;
-  TimeStart: Byte;
+
   TimePhisics: Byte;
 
 // RU: Добавить объект "шар"
@@ -158,7 +158,7 @@ begin
   ground.u := u;
   cpSpaceAddStaticShape(space, ground);
 
-  setTextScale(15, fntMain);
+  setFontTextScale(15, fntMain);
 end;
 
 procedure Draw;
@@ -174,7 +174,7 @@ begin
 //  batch2d_End();
 end;
 
-procedure Proc;
+procedure KeyMouseEvent;
 begin
   // проверяем одиночное касание левой или правой клавиши мыши
   if mBClickCanClick(M_BLEFT_CLICK) Then
@@ -186,9 +186,6 @@ begin
     if (mouseClickCanClick and M_BLEFT_CLICK) > 0 then
       cpAddBox(mouse_X() - 10, mouse_Y() - 10, 48, 32, 1, 0.5, 0.5);
   *)
-
-  key_ClearState();
-  mouse_ClearState();
 end;
 
 procedure Phisics;
@@ -213,9 +210,9 @@ Begin
   if not cpLoad(libChipmunk) Then exit;
   {$ENDIF}
 
-  TimeStart := timer_Add(@Proc, 16, Start);
   TimePhisics := timer_Add(@Phisics, 16, Start);
 
+  zgl_Reg(SYS_EVENTS, @KeyMouseEvent);
   zgl_Reg(SYS_LOAD, @Init);
   zgl_Reg(SYS_DRAW, @Draw);
   zgl_Reg(SYS_EXIT, @Quit);

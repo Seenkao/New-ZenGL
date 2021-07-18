@@ -138,51 +138,57 @@ begin
 //    AddMiku();
 
   fntMain := font_LoadFromFile(dirRes + 'font.zfi');
+
+  setFontTextScale(15, fntMain);
 end;
 
 procedure Draw;
 begin
-  setTextScale(15, fntMain);
-//  batch2d_Begin();
   // RU: Рисуем все спрайты находящиеся в текущем спрайтовом менеджере.
   // EN: Render all sprites contained in current sprite engine.
   if time > 255 Then
     sengine2d.Draw();
 
   if time <= 255 Then
+  begin
+    pr2d_Rect(0, 0, 800, 600, $7FAF7F, 255, PR2D_FILL);
     ssprite2d_Draw(texLogo, 400 - 256, 300 - 128, 512, 256, 0, time)
+  end
   else
     if time < 510 Then
       begin
-        pr2d_Rect(0, 0, 800, 600, $000000, 510 - time, PR2D_FILL);
+        pr2d_Rect(0, 0, 800, 600, $AFAFAF, 510 - time, PR2D_FILL);
         ssprite2d_Draw(texLogo, 400 - 256, 300 - 128, 512, 256, 0, 510 - time);
       end;
 
   if time > 255 Then
     begin
-      pr2d_Rect(0, 0, 256, 64, $000000, 200, PR2D_FILL);
+      pr2d_Rect(0, 0, 256, 64, $80A080, 200, PR2D_FILL);
       text_Draw(fntMain, 0, 0, 'FPS: ' + u_IntToStr(zgl_Get(RENDER_FPS)));
       text_Draw(fntMain, 0, 20, 'Sprites: ' + u_IntToStr(sengine2d.Count));
       text_Draw(fntMain, 0, 40, 'Up/Down - Add/Delete Miku :)');
     end;
-//  batch2d_End();
 end;
 
 procedure Timer;
 begin
-  INC(time, 2);
+  INC(time);
 
   // RU: Выполняем обработку всех спрайтов в текущем спрайтовом менеджере.
   // EN: Process all sprites contained in current sprite engine.
   sengine2d.Proc();
+end;
 
+procedure KeyMouseEvent;
+begin
   // RU: По нажатию пробела очистить все спрайты.
   // EN: Delete all sprites if space was pressed.
-  if key_Press(K_SPACE) Then sengine2d.ClearAll();
-  if key_Press(K_UP) Then AddMiku();
-  if key_Press(K_DOWN) Then DelMiku();
-
-  key_ClearState();
+  if key_Press(K_SPACE) Then
+    sengine2d.ClearAll();
+  if key_Press(K_UP) Then
+    AddMiku();
+  if key_Press(K_DOWN) Then
+    DelMiku();
 end;
 
 procedure Quit;
@@ -196,8 +202,9 @@ Begin
   randomize();
 
   TimeStart := timer_Add( @Timer, 16, Start );
-  TimeMiku := timer_Add( @AddMiku, 1000, SleepToStart, 10 );
+  TimeMiku := timer_Add( @AddMiku, 1000, SleepToStart, 6 );
 
+  zgl_Reg(SYS_EVENTS, @KeyMouseEvent);
   zgl_Reg(SYS_LOAD, @Init);
   zgl_Reg(SYS_DRAW, @Draw);
   zgl_Reg(SYS_EXIT, @Quit);

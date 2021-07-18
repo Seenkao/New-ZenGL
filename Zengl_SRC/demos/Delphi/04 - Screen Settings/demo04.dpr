@@ -23,13 +23,12 @@ var
 
   fntMain : Byte;
   texBack : zglPTexture;
-  TimeStart: Byte;
 
 procedure Init;
 begin
   fntMain := font_LoadFromFile(dirRes + 'font.zfi');
   texBack := tex_LoadFromFile(dirRes + 'back03.jpg');
-  setTextScale(15, fntMain);
+  setFontTextScale(15, fntMain);
 end;
 
 procedure Draw;
@@ -43,7 +42,7 @@ begin
   text_Draw(fntMain, 0, 20 * 4, 'F4 - Windowed mode');
 end;
 
-procedure Timer;
+procedure KeyMouseEvent;
 begin
   // RU: –екомендуемый к использованию полноэкранный режим. ќсновна€ иде€ - переключитьс€ в полноэкранный режим
   // использу€ текущее разрешение рабочего стола пользовател€, но при этом
@@ -79,7 +78,7 @@ begin
     wndHeight := zgl_Get(DESKTOP_HEIGHT);
     wndFullScreen := true; }
     zgl_SetParam(zgl_Get(DESKTOP_WIDTH), zgl_Get(DESKTOP_HEIGHT), True, false);
-     scr_SetOptions();
+    scr_SetOptions();
   end;
 
   // RU: ѕереключение в полноэкранный режим использу€ указанные размеры. ¬ наше врем€ такой подход имеет два больших недостатка на LCD:
@@ -110,14 +109,10 @@ begin
     zgl_SetParam(800, 600, False, false);
     scr_SetOptions();
   end;
-
-//  if key_Press(K_ESCAPE) Then winOn := false;     // по умолчанию
-
-  key_ClearState();
 end;
 
 Begin
-  TimeStart := timer_Add( @Timer, 16, Start );
+  zgl_Reg(SYS_EVENTS, @KeyMouseEvent);
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );

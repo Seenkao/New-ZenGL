@@ -42,8 +42,6 @@ var
   emitterDiamond : zglPEmitter2D;
   emitterRain    : zglPEmitter2D;
 
-  TimeStart      : Byte = 0;
-
 procedure Init;
   var
     i : Integer;
@@ -51,7 +49,7 @@ begin
   texBack := tex_LoadFromFile( dirRes + 'back02.png' );
 
   fntMain := font_LoadFromFile( dirRes + 'font.zfi' );
-  setTextScale(15, fntMain);
+  setFontTextScale(15, fntMain);
 
   // EN: Load three types of fire emitters.
   // RU: Загрузка трёх разных видов эмиттеров огня.
@@ -86,7 +84,7 @@ procedure Draw;
   var
     i : Integer;
 begin
-  batch2d_Begin();
+//  batch2d_Begin();
 
   ssprite2d_Draw( texBack, 0, 0, 800, 600, 0 );
 
@@ -103,14 +101,12 @@ begin
   text_Draw( fntMain, 0, 20, 'Particles: ' + u_IntToStr( particles.Count.Particles ) );
   text_Draw( fntMain, 0, 40, 'Debug(F1): ' + u_BoolToStr( debug ) );
 
-  batch2d_End();
+//  batch2d_End();
 end;
 
-procedure Timer;
+procedure KeyMouseEvent;
 begin
   if key_Press( K_F1 ) Then debug := not debug;
-
-  key_ClearState();
 end;
 
 procedure Update( dt : Double );
@@ -134,8 +130,7 @@ Begin
   {$ENDIF}
   randomize();
 
-  TimeStart := timer_Add( @Timer, 16, Start );
-
+  zgl_Reg(SYS_EVENTS, @KeyMouseEvent);
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );
   zgl_Reg( SYS_UPDATE, @Update );

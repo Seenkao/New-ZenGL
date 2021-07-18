@@ -31,7 +31,7 @@
         <PackageName Value="LCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="3">
+    <Units Count="2">
       <Unit0>
         <Filename Value="ZenFont.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -43,13 +43,6 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
       </Unit1>
-      <Unit2>
-        <Filename Value="uProcessing.pas"/>
-        <IsPartOfProject Value="True"/>
-        <ComponentName Value="Form2"/>
-        <HasResources Value="True"/>
-        <ResourceBaseClass Value="Form"/>
-      </Unit2>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -58,7 +51,7 @@
       <Filename Value="ZenFont"/>
     </Target>
     <SearchPaths>
-      <IncludeFiles Value="$(ProjOutDir);../../Vampire"/>
+      <IncludeFiles Value="$(ProjOutDir);../../src;../../srcGEGL"/>
       <OtherUnitFiles Value="../../src;../../lib/jpeg/$(TargetCPU)-$(TargetOS);../../lib/msvcrt/$(TargetCPU);../../lib/ogg/$(TargetCPU)-$(TargetOS);../../lib/theora/$(TargetCPU)-$(TargetOS);../../lib/zlib/$(TargetCPU)-$(TargetOS);../../lib/zip/$(TargetCPU)-$(TargetOS);../../Vampire;../../Vampire/JpegLib;../../Vampire/ZLib"/>
       <UnitOutputDirectory Value="tmp/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
@@ -75,9 +68,7 @@
     </CodeGeneration>
     <Linking>
       <Debugging>
-        <GenerateDebugInfo Value="False"/>
         <StripSymbols Value="True"/>
-        <UseExternalDbgSyms Value="True"/>
       </Debugging>
       <LinkSmart Value="True"/>
       <Options>

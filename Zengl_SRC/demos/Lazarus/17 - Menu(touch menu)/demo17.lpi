@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
-    <Version Value="11"/>
+    <Version Value="12"/>
     <General>
       <Flags>
         <MainUnitHasCreateFormStatements Value="False"/>
         <MainUnitHasTitleStatement Value="False"/>
         <MainUnitHasScaledStatement Value="False"/>
+        <CompatibilityMode Value="True"/>
       </Flags>
       <SessionStorage Value="InProjectDir"/>
-      <MainUnit Value="0"/>
       <Title Value="demo17"/>
       <UseAppBundle Value="False"/>
       <ResourceType Value="res"/>
@@ -23,7 +23,6 @@
     </PublishOptions>
     <RunParams>
       <FormatVersion Value="2"/>
-      <Modes Count="0"/>
     </RunParams>
     <Units Count="1">
       <Unit0>
@@ -38,7 +37,7 @@
       <Filename Value="../../../bin/$(TargetCPU)-$(TargetOS)/demo17"/>
     </Target>
     <SearchPaths>
-      <IncludeFiles Value="$(ProjOutDir);../../../headers"/>
+      <IncludeFiles Value="$(ProjOutDir);../../../headers;../../../srcGEGL;../../../src"/>
       <OtherUnitFiles Value="../../../src;../../../lib/zlib/$(TargetCPU)-$(TargetOS);../../../lib/zip/$(TargetCPU)-$(TargetOS);../../../lib/theora/$(TargetCPU)-$(TargetOS);../../../lib/ogg/$(TargetCPU)-$(TargetOS);../../../lib/msvcrt/$(TargetCPU);../../../lib/jpeg/$(TargetCPU)-$(TargetOS);../../../lib/chipmunk/$(TargetCPU)-$(TargetOS);../../../extra;../../../srcGEGL"/>
       <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>

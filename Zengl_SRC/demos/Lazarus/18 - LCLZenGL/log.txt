@@ -1,0 +1,46 @@
+========================================
+=== ZenGL - test 0.3.28 (2021.07.16) ===
+========================================
+[00000001ms] Begin
+[00000050ms] XOpenIM - ok
+[00000050ms] XCreateIC - ok
+[00000050ms] Current mode: 1366 x 768
+[00000052ms] GLX Extension - ok
+[00000052ms] glXChooseVisual: zDepth = 24; stencil = 0; fsaa = 0
+[00000127ms] GL_VERSION: 3.0 Mesa 18.3.6
+[00000127ms] GL_RENDERER: Mesa DRI Intel(R) Ivybridge Mobile 
+[00000127ms] GL_MAX_TEXTURE_SIZE: 16384
+[00000127ms] GL_EXT_TEXTURE_COMPRESSION_S3TC: TRUE
+[00000128ms] GL_SGIS_GENERATE_MIPMAP: TRUE
+[00000128ms] GL_MAX_TEXTURE_UNITS_ARB: 8
+[00000128ms] GL_EXT_TEXTURE_FILTER_ANISOTROPIC: TRUE
+[00000128ms] GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT: 16
+[00000128ms] GL_EXT_BLEND_FUNC_SEPARATE: TRUE
+[00000128ms] GL_MAX_RENDERBUFFER_SIZE: 16384
+[00000128ms] GL_EXT_FRAMEBUFFER_OBJECT: TRUE
+[00000128ms] GLX_PBUFFER: TRUE
+[00000128ms] Support WaitVSync: TRUE
+[00000128ms] Ogg: Initialized
+[00000138ms] Theora: Initialized
+[00000142ms] OpenAL: load libopenal.so
+[00000175ms] OpenAL: opening "ALSA Software"
+[00000281ms] OpenAL: opening default device - "OpenAL Soft"
+[00000281ms] OpenAL: creating context
+[00000289ms] OpenAL: sound system initialized
+[00000289ms] OpenAL: generated 64 source
+[00000290ms] Joy: Couldn't find joysticks
+[00000322ms] Texture loaded: "data/audio-stop.png"
+[00000327ms] Texture loaded: "data/audio-play.png"
+[00000368ms] Texture loaded: "data/font-page0.png"
+[00000380ms] Sound loaded: "data/click.wav"
+[00000431ms] Sound loaded: "data/music.ogg"
+[00015482ms] Timers to free: 1
+[00015482ms] Fonts to free: 1
+[00015482ms] Font to free
+[00015483ms] Render Targets not free!!!
+[00015483ms] Textures to free: 3
+[00015483ms] Sounds to free: 2
+[00015484ms] OpenAL: destroying current sound context
+[00015485ms] OpenAL: closing sound device
+[00015487ms] OpenAL: sound system finalized
+[00015503ms] End

@@ -94,7 +94,7 @@ OutputDir=../../../bin/i386-win32
 UnitOutputDir=../tmp
 PackageDLLOutputDir=
 PackageDCPOutputDir=
-SearchPath=../../../headers;../../../extra;../../../src;../../../lib/theora/delphi;../../../lib/zlib/delphi;../../../lib/zip/delphi
+SearchPath=../../../headers;../../../extra;../../../src;../../../lib/theora/delphi;../../../lib/zlib/delphi;../../../lib/zip/delphi;../../../srcGEGL;
 Packages=vcl;rtl;vclx;indy;inet;xmlrtl;vclie;inetdbbde;inetdbxpress;dbrtl;dsnap;dsnapcon;vcldb;soaprtl;VclSmp;dbexpress;dbxcds;inetdb;bdertl;vcldbx;webdsnap;websnap;adortl;ibxpress;teeui;teedb;tee;dss;visualclx;visualdbclx;vclactnband;vclshlctrls;IntrawebDB_50_70;Intraweb_50_70;Rave50CLX;Rave50VCL;dclOfficeXP
 Conditionals=
 DebugSourceDirs=
@@ -134,8 +134,15 @@ OriginalFilename=
 ProductName=
 ProductVersion=1.0.0.0
 Comments=
-[Excluded Packages]
-c:\program files\borland\delphi7\Bin\dclnet70.bpl=Borland Internet Components
-c:\program files\borland\delphi7\Bin\dclsoap70.bpl=Borland SOAP Components
-c:\program files\borland\delphi7\Bin\dclwbm70.bpl=Borland InternetExpress Components
-c:\program files\borland\delphi7\Bin\dclwebsnap70.bpl=Borland WebSnap Components
+[HistoryLists\hlUnitAliases]
+Count=1
+Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;
+[HistoryLists\hlSearchPath]
+Count=1
+Item0=../../../headers;../../../extra;../../../src;../../../lib/theora/delphi;../../../lib/zlib/delphi;../../../lib/zip/delphi;../../../srcGEGL;
+[HistoryLists\hlUnitOutputDirectory]
+Count=1
+Item0=../tmp
+[HistoryLists\hlOutputDirectorry]
+Count=1
+Item0=../../../bin/i386-win32

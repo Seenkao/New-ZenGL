@@ -21,7 +21,7 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 20.12.2020
+ !!! modification from Serge 16.07.2021
 }
 unit zgl_application;
 
@@ -57,6 +57,9 @@ procedure app_Init;
 {$IfNDef ANDROID}
 procedure app_MainLoop;
 procedure app_ProcessOS;
+{$EndIf}
+{$IfDef USE_VKEYBOARD}
+procedure app_VirtualKeyboard;
 {$EndIf}
 
 {$IFDEF WINDOWS}
@@ -165,6 +168,9 @@ var
   app_PExit      : procedure;
   app_PUpdate    : procedure(dt: Double);
   app_PActivate  : procedure(activate: Boolean);
+  app_PEvents    : procedure;
+
+  app_PostPDraw  : procedure;
 
   {$IFDEF iOS}
   app_PMemoryWarn : procedure;
@@ -174,16 +180,15 @@ var
   app_PRestore: procedure;
   {$ENDIF}
 
-  {$IfDef USE_MENUGUI}
+  {$IfDef USE_VKEYBOARD}
   app_TouchMenu: procedure;
   app_UseMenuDown: procedure;
   app_UseMenuUp: procedure;
   app_DrawGui: procedure;
 
-  MenuChange: Byte = 0;                                   
+  MenuChange: Byte = 0;
   VisibleMenuChange: Boolean = true;
-  MenuTimerSleep: Byte;
-  MaxNumMenu: Byte = 4;                                 
+  MaxNumMenu: Byte = 4;
   {$EndIf}
 
   {$IFDEF USE_X11}
@@ -223,6 +228,7 @@ var
 
   //appIsLibrary   : Byte public name 'TC_SYSTEM_ISLIBRARY'; // workaround for the latest revisions of FreePascal 2.6.x
   {$ENDIF}
+
   appShowCursor: Boolean = true;
 
   appdt: Double;
@@ -230,13 +236,16 @@ var
   appFPS     : LongWord;
   appFPSCount: LongWord;
   appFPSAll  : LongWord;
+  timeCalcFPS: Byte;
 
-  appFlags: LongWord;
+  appFlags   : LongWord;
 
   {$IfNDef USE_INIT_HANDLE}
   newTimeDraw, oldTimeDraw: Double;
   useFPS: Byte = 30;
   maxFPS: Single = 1000 / 30;
+  timeAppEvents: Byte;
+  appEventsTime: Cardinal = 8;
   {$EndIf}
 
 implementation
@@ -261,16 +270,23 @@ uses
   zgl_timers,
   zgl_resources,
   zgl_textures,
-  zgl_font,
+  zgl_log,
   {$IFDEF USE_SOUND}
   zgl_sound,
   {$ENDIF}
-  {$IfDef USE_MENUGUI}
-  gegl_touch_menu,
+  {$IfNDef OLD_METHODS}
+  gegl_VElements,
+  gegl_drawElement,
+  gegl_Types,
+  {$EndIf}
+  {$IfDef USE_VKEYBOARD}
+  gegl_menu_gui,
   {$EndIf}
   zgl_utils;
 
 procedure app_Draw;
+var
+  i: Word;
 begin
   if scrViewPort then
     SetCurrentMode();
@@ -278,7 +294,15 @@ begin
   if Assigned(app_PDraw) Then
   begin
     app_PDraw();
-    {$IfDef USE_MENUGUI}
+    {$IfNDef OLD_METHODS}
+    if managerSetOfTools.count > 0 then
+      for i := 0 to managerSetOfTools.count - 1 do
+      begin
+        if managerSetOfTools.propElement[i].Element = _Edit then
+          EditDraw(i);
+      end;
+    {$EndIf}
+    {$IfDef USE_VKEYBOARD}
     if VisibleMenuChange then
       if Assigned(app_DrawGui) then
         app_DrawGui;
@@ -290,6 +314,9 @@ begin
   {$ENDIF}
   if not appPause Then
     INC(appFPSCount);
+
+  if Assigned(app_PostPDraw) then
+    app_PostPDraw;
 end;
 
 procedure app_CalcFPS;
@@ -300,10 +327,75 @@ begin
   INC(appWorkTime);
 end;
 
+{$IfNDef USE_INIT_HANDLE}
+procedure app_Events;
+var
+  i: Word;
+begin
+  if keysDown[K_F12] then
+  begin
+    keybFlags := keybFlags or keyboardLatRusDown;
+  end;
+  if keysUp[K_F12] then
+  begin
+    keybFlags := keybFlags and ($FFFFFFFF - keyboardLatRusDown) xor keyboardLatinRus;
+  end;
+  {$IfDef USE_VKEYBOARD}
+  if keysUp[K_F2] then
+  begin
+    if MenuChange = 3 then
+    begin
+      SetMenuProcess(4);
+      MenuChange := 4;
+      keybFlags := keybFlags or keyboardSymbol;
+    end
+    else begin
+      SetMenuProcess(3);
+      MenuChange := 3;
+      keybFlags := keybFlags xor keyboardSymbol;
+    end;
+  end;
+  {$EndIf}
+
+  if Assigned(app_PEvents) then
+    app_PEvents;
+
+  {$IfDef USE_EXIT_ESCAPE}
+  if keysDown[K_ESCAPE] = True then
+  begin
+    winOn := False;
+    log_Add('Terminate program');
+  end;
+  {$EndIf}
+
+  {$IfNDef OLD_METHODS}
+  if managerSetOfTools.count > 0 then
+    for i := 0 to managerSetOfTools.count - 1 do
+    begin
+      if managerSetOfTools.propElement[i].Element = _Edit then
+        EventsEdit(i);
+      if managerSetOfTools.propElement[i].Element = _Memo then
+        ;
+    end;
+  {$EndIf}
+
+  key_ClearState;
+  mouse_ClearState;
+  {$IFDEF USE_JOYSTICK}
+  joy_ClearState;
+  {$EndIf}
+  {$If (defined(ANDROID) or defined(iOS))}
+  touch_ClearState;
+  {$IfEnd}
+end;
+{$EndIf}
+
 procedure app_Init;
 begin
   managerZeroTexture := tex_CreateZero(4, 4, $FFFFFFFF, TEX_DEFAULT_2D);
-
+  managerSetOfTools.count := 0;
+  managerSetOfTools.maxPossibleEl := 0;
+  managerSetOfTools.ActiveElement := 65535;
   if scrViewPort then
     SetCurrentMode();
   scr_Clear();
@@ -313,13 +405,16 @@ begin
 
 
   timer_Reset();
-  timer_Add(@app_CalcFPS, 1000, Start);
+  timeCalcFPS := timer_Add(@app_CalcFPS, 1000, Start);
+  {$IfNDef USE_INIT_HANDLE}
+  timeAppEvents := timer_Add(@app_Events, appEventsTime, Start);
+  {$EndIf}
 end;
 
 {$IfNDef ANDROID}
 procedure app_MainLoop;
 var
-  t: Double;
+  timeLoop: Double;
 begin
   {$IfNDef USE_INIT_HANDLE}
   while winOn do
@@ -329,10 +424,6 @@ begin
     if (keysDown[K_SUPER_L] or keysDown[K_SUPER_R]) then
       if keysDown[K_Q] then
         winOn := False;
-    {$EndIf}
-    {$IfDef USE_EXIT_ESCAPE}
-    if keysDown[K_ESCAPE] = True then
-      winOn := False;
     {$EndIf}
   {$EndIf}
     res_Proc();
@@ -347,7 +438,7 @@ begin
     if appPause Then
     begin
       timer_Reset();
-      u_Sleep(10);
+      u_Sleep(15);
 
       continue;
 
@@ -357,7 +448,7 @@ begin
     end;
     {$EndIf}
 
-    t := timer_GetTicks();
+    timeLoop := timer_GetTicks();
     {$IFDEF WINDOWS}
       // Workaround for a bug with unstable time between frames(happens when videocard trying to reclock GPU frequency/etc.)...
     if Assigned(app_PUpdate) and (scrVSync) and (appFPS > 0) and (appFPS = scrRefresh) and (appFlags and APP_USE_DT_CORRECTION > 0) Then
@@ -366,11 +457,10 @@ begin
     {$ENDIF}
       if Assigned(app_PUpdate) Then
         app_PUpdate(timer_GetTicks() - appdt);
-
-    appdt := t;
+    appdt := timeLoop;
 
     {$IfNDef USE_INIT_HANDLE}
-    t := newTimeDraw;
+    timeLoop := newTimeDraw;
     newTimeDraw := timer_GetTicks;
 
     if newTimeDraw >= (oldTimeDraw + maxFPS) then
@@ -379,10 +469,7 @@ begin
       oldTimeDraw := oldTimeDraw + maxFPS;
     end
     else begin
-      if (newTimeDraw - t) < 2 then
-      begin
-        u_Sleep(1);
-      end;
+      u_Sleep(1);
     end;
     {$Else}
     app_Draw;
@@ -461,10 +548,7 @@ begin
   begin
     mouseX := xmouse;
     mouseY := ymouse;
-  end;  
-{$IfDef USE_MENUGUI}
-  key_ClearState;
-{$Endif} 
+  end;
 
 {$IfNDef USE_INIT_HANDLE}
 {$IFDEF USE_X11}
@@ -487,81 +571,43 @@ begin
 {$IFDEF iOS}
   while CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.01, TRUE) = kCFRunLoopRunHandledSource do;
 {$ENDIF}
-  {$IfDef USE_MENUGUI}
-  if Assigned(app_DrawGui) then
+  {$IfDef USE_VKEYBOARD}
+  if not lockVirtualKeyboard then
   begin
-    if (keysDown[K_F12]) and (MenuTimerSleep = 0) then
+    app_VirtualKeyboard;
+  end
+  else begin
+    if timer_GetTicks - startTimeLockVK > timeLockVK then
     begin
-      VisibleMenuChange := not VisibleMenuChange;
-      MenuTimerSleep := 90;
-    end;
-    if MenuTimerSleep > 0 then
-      dec(MenuTimerSleep);
-    if VisibleMenuChange then
-    begin
-      if ((mouseUpDown and M_BLEFT_DOWN) > 0) and ((mouseClickCanClick and M_BLEFT_CLICK) > 0) then
-        app_UseMenuDown;
-
-      if ((mouseUpDown and M_BLEFT_UP) > 0) and ((mouseClickCanClick and M_BLEFT_CANCLICK) > 0) then
-        app_UseMenuUp;
-
-      if (keysDown[K_CAPSLOCK]) and ((TouchKey.FlagsKeyb and keyboardCaps) = 0) then
-      begin
-        TouchKey.FlagsKeyb := TouchKey.FlagsKeyb or keyboardCaps;
-        TouchKey.Flags := TouchKey.Flags xor keyboardCaps;
-      end;
-      if (keysDown[K_SHIFT]) and ((TouchKey.FlagsKeyb and keyboardShift) = 0) then
-      begin
-        TouchKey.FlagsKeyb := TouchKey.FlagsKeyb or keyboardShift;
-        TouchKey.Flags := TouchKey.Flags or keyboardShift;
-        TouchKeySymb.Flags := TouchKeySymb.Flags or keyboardShift;
-      end;
-      if (keysDown[K_F1]) and ((TouchKey.FlagsKeyb and keyboardLatinRus) = 0) then
-      begin
-        TouchKey.FlagsKeyb := TouchKey.FlagsKeyb or keyboardLatinRus;
-        TouchKey.Flags := TouchKey.Flags xor keyboardLatinRus;
-      end;
-      if (keysDown[K_F2]) and ((TouchKey.FlagsKeyb and keyboardSymbol) = 0) then
-      begin
-        TouchKey.FlagsKeyb := TouchKey.FlagsKeyb or keyboardSymbol;
-        TouchKey.Flags := TouchKey.Flags xor keyboardSymbol;
-      end;
-      if (keysDown[K_INSERT]) and ((TouchKey.FlagsKeyb and keyboardInsert) = 0) then
-      begin
-        TouchKey.FlagsKeyb := TouchKey.FlagsKeyb or keyboardInsert;
-        TouchKey.Flags := TouchKey.Flags xor keyboardInsert;
-        TouchKeySymb.Flags := TouchKeySymb.Flags xor keyboardInsert;
-      end;
-
-      if keysUp[K_CAPSLOCK] then
-        TouchKey.FlagsKeyb := TouchKey.FlagsKeyb and (255 - keyboardCaps);
-      if keysUp[K_SHIFT] then
-      begin
-        TouchKey.Flags := TouchKey.Flags and (255 - keyboardShift);
-        TouchKey.FlagsKeyb := TouchKey.FlagsKeyb and (255 - keyboardShift);
-        TouchKeySymb.Flags := TouchKeySymb.Flags and (255 - keyboardShift);
-      end;
-      if keysUp[K_F1] then
-        TouchKey.FlagsKeyb := TouchKey.FlagsKeyb and (255 - keyboardLatinRus);
-      if keysUp[K_F2] then
-      begin
-        TouchKey.FlagsKeyb := TouchKey.FlagsKeyb and (255 - keyboardSymbol);
-        if MenuChange = 3 then
-        begin
-          SetMenuProcess(4);
-          MenuChange := 4;
-        end
-        else begin
-          SetMenuProcess(3);
-          MenuChange := 3;
-        end;
-      end;
-      if keysUp[K_INSERT] then
-        TouchKey.FlagsKeyb := TouchKey.FlagsKeyb and (255 - keyboardInsert);
+      prevLockVK := False;
+      lockVirtualKeyboard := false;
     end;
   end;
   {$EndIf}
 end;
+
+{$IfDef USE_VKEYBOARD}
+procedure app_VirtualKeyboard;
+begin
+  if Assigned(app_DrawGui) then
+  begin
+    if keysDown[K_F11] then
+    begin
+      VisibleMenuChange := not VisibleMenuChange;
+      lockVirtualKeyboard := true;
+      startTimeLockVK := timer_GetTicks;
+    end;
+    if VisibleMenuChange then
+    begin
+      if (mouseUpDown and M_BLEFT_DOWN) > 0 then
+        app_UseMenuDown;
+      if (mouseUpDown and M_BLEFT_UP) > 0 then
+        app_UseMenuUp;
+    end;
+  end;
+end;
+
+{$EndIf}
 
 {$IFNDEF iOS}
 {$IfDef WND_USE}
@@ -731,16 +777,17 @@ begin
             begin
               INC(keysRepeat);
               key := xkey_to_scancode(XLookupKeysym(@event.xkey, 0), event.xkey.keycode);
-              keysDown[key]     := TRUE;
-              keysUp  [key]     := FALSE;
-              keysLast[KA_DOWN] := key;
-              doKeyPress(key);
 
-              key := SCA(key);
-              keysDown[key] := TRUE;
-              keysUp  [key] := FALSE;
-              doKeyPress(key);
+              keyboardDown(key);
+              {$IfDef USE_VKEYBOARD}
+              if prevLockVK then
+              begin
+                lockVirtualKeyboard := True;
+                startTimeLockVK := timer_GetTicks;
+              end;
+              {$EndIf}
 
+              {$IfDef OLD_METHODS}
               if keysCanText Then
               case key of
                 K_SYSRQ, K_PAUSE,
@@ -765,18 +812,21 @@ begin
                   key_InputText(str);
                 end;
               end;
+              {$EndIf}
             end;
         KeyRelease:
             begin
               INC(keysRepeat);
               key := xkey_to_scancode(XLookupKeysym(@event.xkey, 0), event.xkey.keycode);
-              keysDown[key]   := FALSE;
-              keysUp  [key]   := TRUE;
-              keysLast[KA_UP] := key;
 
-              key := SCA(key);
-              keysDown[key] := FALSE;
-              keysUp  [key] := TRUE;
+              keyboardUp(key);
+              {$IfDef USE_VKEYBOARD}
+              if prevLockVK then
+              begin
+                lockVirtualKeyboard := True;
+                startTimeLockVK := timer_GetTicks;
+              end;
+              {$EndIf}
             end;
     end
   end;
@@ -807,7 +857,7 @@ begin
     WM_SETFOCUS:
       begin
         {$IfNDef USE_INIT_HANDLE}
-        if (wndFullScreen) and (not wndFirst) Then
+        if (wndFullScreen)(* and (not wndFirst*) Then
           scr_SetOptions();
         {$EndIf}
       end;
@@ -831,7 +881,7 @@ begin
             begin
               if Assigned(app_PActivate) Then
                 app_PActivate(FALSE);
-              if (wndFullScreen) and (not wndFirst) Then
+              if (wndFullScreen) (*and (not wndFirst*) Then
               begin
                 scr_Reset();
                 {$IfNDef USE_INIT_HANDLE}
@@ -949,30 +999,32 @@ begin
     WM_KEYDOWN, WM_SYSKEYDOWN:
       begin
         key := winkey_to_scancode(wParam);
-        keysDown[key]     := TRUE;
-        keysUp  [key]     := FALSE;
-        keysLast[KA_DOWN] := key;
-        doKeyPress(key);
-
-        key := SCA(key);
-        keysDown[key] := TRUE;
-        keysUp  [key] := FALSE;
-        doKeyPress(key);
+        keyboardDown(key);
+        {$IfDef USE_VKEYBOARD}
+        if prevLockVK then
+        begin
+          lockVirtualKeyboard := True;
+          startTimeLockVK := timer_GetTicks;
+        end;
+        {$EndIf}
 
         if (Msg = WM_SYSKEYDOWN) and (key = K_F4) Then
           winOn := false;
       end;
+
     WM_KEYUP, WM_SYSKEYUP:
       begin
         key := winkey_to_scancode(wParam);
-        keysDown[key]   := FALSE;
-        keysUp  [key]   := TRUE;
-        keysLast[KA_UP] := key;
-
-        key := SCA(key);
-        keysDown[key] := FALSE;
-        keysUp  [key] := TRUE;
+        keyboardUp(key);
+        {$IfDef USE_VKEYBOARD}
+        if prevLockVK then
+        begin
+          lockVirtualKeyboard := True;
+          startTimeLockVK := timer_GetTicks;
+        end;
+        {$EndIf}
       end;
+    {$IfDef OLD_METHODS}
     WM_CHAR:
       begin
         if keysCanText Then
@@ -991,6 +1043,7 @@ begin
             end;
         end;
       end;
+    {$EndIf}
     WM_SYSCOMMAND:
       begin
         if wParam <> SC_KEYMENU then
@@ -1006,6 +1059,8 @@ eventLoop:
   ev := wndHandle.nextEventMatchingMask_untilDate_inMode_dequeue(NSAnyEventMask, nil, NSDefaultRunLoopMode, true);
   if ev = nil then
   begin
+    exit;
+  end;
   case ev.type_ of
     NSMouseMoved, NSLeftMouseDragged, NSRightMouseDragged, NSOtherMouseDragged:
       begin
@@ -1064,123 +1119,75 @@ eventLoop:
       begin
         modFlags := ev.modifierFlags;
         if (modFlags and NSAlphaShiftKeyMask) > 0 then
-          key_WorkDown(K_CAPSLOCK)
+          keyboardDown(K_CAPSLOCK)
         else
-          key_WorkUp(K_CAPSLOCK);
+          keyboardUp(K_CAPSLOCK);
         if (modFlags and NSShiftKeyMask) > 0 then
         begin
           if (modFlags and 2) > 0 then
           begin
-            key_WorkDown(K_SHIFT_L);
-            key := SCA(K_SHIFT_L);
-            keysDown[key] := TRUE;
-            keysUp  [key] := FALSE;
+            keyboardDown(K_SHIFT_L);
           end
           else begin
-            key_WorkUp(K_SHIFT_L);
-            key := SCA(K_SHIFT_L);
-            keysDown[key] := False;
-            keysUp  [key] := True;
+            keyboardUp(K_SHIFT_L);
           end;
           if (modFlags and 4) > 0 then
           begin
-            key_WorkDown(K_SHIFT_R);
-            key := SCA(K_SHIFT_R);
-            keysDown[key] := TRUE;
-            keysUp  [key] := FALSE;
+            keyboardDown(K_SHIFT_R);
           end
           else begin
-            key_WorkUp(K_SHIFT_R);
-            key := SCA(K_SHIFT_R);
-            keysDown[key] := False;
-            keysUp  [key] := True;
+            keyboardUp(K_SHIFT_R);
           end;
         end;
         if (modFlags and NSControlKeyMask) > 0 then
         begin
           if (modFlags and 1) > 0 then
           begin
-            key_WorkDown(K_CTRL_L);
-            key := SCA(K_CTRL_L);
-            keysDown[key] := TRUE;
-            keysUp  [key] := FALSE;
+            keyboardDown(K_CTRL_L);
           end
           else begin
-            key_WorkUp(K_CTRL_L);
-            key := SCA(K_CTRL_L);
-            keysDown[key] := False;
-            keysUp  [key] := True;
+            keyboardUp(K_CTRL_L);
           end;
           if (modFlags and $2000) > 0 then
           begin
-            key_WorkDown(K_CTRL_R);
-            key := SCA(K_CTRL_R);
-            keysDown[key] := TRUE;
-            keysUp  [key] := FALSE;
+            keyboardDown(K_CTRL_R);
           end
           else begin
-            key_WorkUp(K_CTRL_R);
-            key := SCA(K_CTRL_R);
-            keysDown[key] := False;
-            keysUp  [key] := True;
+            keyboardUp(K_CTRL_R);
           end;
         end;
         if (modFlags and NSAlternateKeyMask) > 0 then
         begin
           if (modFlags and $20) > 0 then
           begin
-            key_WorkDown(K_ALT_L);
-            key := SCA(K_ALT_L);
-            keysDown[key] := TRUE;
-            keysUp  [key] := FALSE;
+            keyboardDown(K_ALT_L);
           end
           else begin
-            key_WorkUp(K_ALT_L);
-            key := SCA(K_ALT_L);
-            keysDown[key] := False;
-            keysUp  [key] := True;
+            keyboardUp(K_ALT_L);
           end;
           if (modFlags and $40) > 0 then
           begin
-            key_WorkDown(K_ALT_R);
-            key := SCA(K_ALT_R);
-            keysDown[key] := TRUE;
-            keysUp  [key] := FALSE;
+            keyboardDown(K_ALT_R);
           end
           else begin
-            key_WorkUp(K_ALT_R);
-            key := SCA(K_ALT_R);
-            keysDown[key] := False;
-            keysUp  [key] := True;
+            keyboardUp(K_ALT_R);
           end;
         end;
         if (modFlags and NSCommandKeyMask) > 0 then
         begin
           if (modFlags and 8) > 0 then
           begin
-            key_WorkDown(K_SUPER_L);
-            key := SCA(K_SUPER_L);
-            keysDown[key] := TRUE;
-            keysUp  [key] := FALSE;
+            keyboardDown(K_SUPER_L);
           end
           else begin
-            key_WorkUp(K_SUPER_L);
-            key := SCA(K_SUPER_L);
-            keysDown[key] := False;
-            keysUp  [key] := True;
+            keyboardUp(K_SUPER_L);
           end;
           if (modFlags and 16) > 0 then
           begin
-            key_WorkDown(K_SUPER_R);
-            key := SCA(K_SUPER_R);
-            keysDown[key] := TRUE;
-            keysUp  [key] := FALSE;
+            keyboardDown(K_SUPER_R);
           end
           else begin
-            key_WorkUp(K_SUPER_R);
-            key := SCA(K_SUPER_R);
-            keysDown[key] := False;
-            keysUp  [key] := True;
+            keyboardUp(K_SUPER_R);
           end;
         end;
       end;
@@ -1188,13 +1195,27 @@ eventLoop:
       begin
         flagTrue := flagTrue or KEYUPDOWN;
         key := mackey_to_scancode(ev.keyCode);
-        key_WorkDown(key);
+        keyboardDown(key);
+        {$IfDef USE_VKEYBOARD}
+        if prevLockVK then
+        begin
+          lockVirtualKeyboard := True;
+          startTimeLockVK := timer_GetTicks;
+        end;
+        {$EndIf}
       end;
     NSKeyUp, NSKeyUpMask:
       begin
         flagTrue := flagTrue or KEYUPDOWN;
         key := mackey_to_scancode(ev.keyCode);
-        key_WorkUp(key);
+        keyboardUp(key);
+        {$IfDef USE_VKEYBOARD}
+        if prevLockVK then
+        begin
+          lockVirtualKeyboard := True;
+          startTimeLockVK := timer_GetTicks;
+        end;
+        {$EndIf}
       end;
   end;
   if (flagTrue and KEYUPDOWN) = 0 then
@@ -1321,6 +1342,7 @@ eventLoop:
               if eKind <> kEventRawKeyRepeat Then
                 doKeyPress(key);
 
+              {$IfDef OLD_METHODS}
               if keysCanText Then
               case key of
                 K_SYSRQ, K_PAUSE,
@@ -1345,6 +1367,7 @@ eventLoop:
                   key_InputText(str);
                 end;
               end;
+              {$EndIf}
             end;
           kEventRawKeyUp:
             begin
@@ -2077,7 +2100,7 @@ begin
     begin
       mouseUpDown := mouseUpDown or M_BLEFT_DOWN;
 
-      {$IfDef USE_MENUGUI}
+      {$IfDef USE_VKEYBOARD}
       if (MenuChange and 255) > 0 then
         app_UseMenuDown;
       {$EndIf}
@@ -2099,7 +2122,7 @@ begin
       begin
         mouseUpDown := (mouseUpDown and (255 - M_BLEFT_DOWN)) or M_BLEFT_UP;
 
-        {$IfDef USE_MENUGUI}
+        {$IfDef USE_VKEYBOARD}
         if (MenuChange and 255) > 0 then            
           app_UseMenuUp;
         {$EndIf}

@@ -36,8 +36,6 @@ var
   map      : zglTTiles2D;
   texTiles : zglPTexture;
 
-  TimeStart: Byte = 0;
-
 procedure Init;
   var
     i, j : Integer;
@@ -67,7 +65,7 @@ begin
   for i := 0 to map.X - 1 do
     file_Read( f, map.Tiles[ i, 0 ], map.Y * SizeOf( Integer ) );
   file_Close( f );
-  setTextScale(15, fntMain);
+  setFontTextScale(15, fntMain);
 end;
 
 procedure Draw;
@@ -81,19 +79,12 @@ begin
   text_Draw( fntMain, 180, 30, 'This is a tarrible example of tile map, but main idea should be clear :)' );
 end;
 
-procedure Timer;
-begin
-  key_ClearState();
-end;
-
 Begin
   {$IFNDEF USE_ZENGL_STATIC}
   if not zglLoad( libZenGL ) Then exit;
   {$ENDIF}
 
   randomize();
-
-  TimeStart := timer_Add( @Timer, 17, Start );
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );

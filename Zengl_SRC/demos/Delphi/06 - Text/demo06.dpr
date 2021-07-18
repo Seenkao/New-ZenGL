@@ -18,17 +18,14 @@ uses
   zgl_text,
   zgl_types,
   zgl_utils,
-  AsctoUtf;             // для перевода текста в UTF-8
+  gegl_utils;             // для перевода текста в UTF-8
 
 var
   dirRes  : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
   fntMain : Byte;
-  TimeStart: Byte;
   MyText: UTF8String;
 
 procedure Init;
-  //var
-  //  i : Integer;
 begin
   // RU: Загружаем данные о шрифте.
   // EN: Load the font.
@@ -52,10 +49,8 @@ begin
   // EN: ZenGL works only with UTF-8 encoding, so all text should be encoded with UTF-8. If you want to write some text(not English) using strings
   //     inside pas-files and version of Delphi is lower than 2009, then you need to use external files with UTF-8 strings inside and type UTF8String.
 
-  setTextScale(20, fntMain);                                    // шрифт размерность 20 pix
-  text_Draw( fntMain, 400, 65, 'Scaling', TEXT_HALIGN_CENTER );
 
-  setTextScale(15, fntMain);                                    // шрифт размерность 15 pix
+  text_DrawEx( fntMain, 400, 65, 3, 0, 'Scaling', 255, $FFFFFF, TEXT_HALIGN_CENTER );
 
   text_Draw( fntMain, 400, 25, 'String with center alignment', TEXT_HALIGN_CENTER );
 
@@ -66,7 +61,7 @@ begin
   r.Y := 300 - 128;
   r.W := 192;
   r.H := 256;
-  text_DrawInRect( fntMain, r, 'Simple text rendering in rectangle. ' + MyText);
+  text_DrawInRect( fntMain, r, 'Simple text rendering in rectangle. ' + #10 + MyText);
   pr2d_Rect( r.X, r.Y, r.W, r.H, $FF0000 );
 
   r.X := 800 - 192;
@@ -101,15 +96,8 @@ begin
 //  batch2d_End();
 end;
 
-procedure Timer;
-begin
-  key_ClearState();
-end;
-
 Begin
   randomize();
-
-  TimeStart := timer_Add( @Timer, 16, Start );
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );

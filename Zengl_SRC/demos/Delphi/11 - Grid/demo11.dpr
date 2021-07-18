@@ -48,7 +48,7 @@ begin
         grid.Grid[i, j].Y := j * 40;
       end;
 
-  setTextScale(15, fntMain);
+  setFontTextScale(15, fntMain);
 end;
 
 procedure Draw;
@@ -84,8 +84,6 @@ begin
         grid.Grid[i, j].Y := j * 40 - swave;
       end;
     end;
-
-  key_ClearState();
 end;
 
 Begin

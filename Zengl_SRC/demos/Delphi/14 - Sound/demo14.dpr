@@ -43,6 +43,7 @@ var
   // добавляем номер звука, пока для одного звука
   IDSound: Integer;
   TimeStart: Byte;
+  p : Integer;
 
 // RU: Т.к. звуковая подсистема нацелена на 3D, для позиционирования звуков в 2D нужны некоторые ухищрения.
 // EN: Because sound subsystem using 3D, there is some tricky way to calculate sound position in 2D.
@@ -72,7 +73,7 @@ begin
   icon[1] := tex_LoadFromFile(dirRes + 'audio-play.png');
 
   fntMain := font_LoadFromFile(dirRes + 'font.zfi');
-  setTextScale(15, fntMain);
+  setFontTextScale(15, fntMain);
 end;
 
 procedure Draw;
@@ -95,9 +96,6 @@ begin
 end;
 
 procedure Timer;
-  var
-    r: zglTRect;
-    p: Integer;
 begin
   // RU: Проверяем играет ли музыка(1 - играет, 0 - не играет). Так же можно проверить и звуки - подставив zglPSound и ID вот так:
   //     snd_Get(Sound, ID...
@@ -106,10 +104,23 @@ begin
   // EN: Check if music playing(1 - playing, 0 - not playing). Sounds also can be checked this way - just use zglPSound and ID:
   //     snd_Get(Sound, ID...
   //     ID returns by function snd_Play.
-  state := snd_Get(SND_STREAM, audio, SND_STATE_PLAYING);
+  state := snd_Get( SND_STREAM, audio, SND_STATE_PLAYING );
   if state = 0 Then
     audio := 0;
 
+  // RU: Получаем в процентах позицию проигрывания аудиопотока и ставим громкость для плавных переходов.
+  // EN: Get position in percent's for audio stream and set volume for smooth playing.
+  p := snd_Get( SND_STREAM, audio, SND_STATE_PERCENT );
+  if ( p >= 0 ) and ( p < 25 ) Then
+    snd_SetVolume( SND_STREAM, audio, ( 1 / 24 ) * p );
+  if ( p >= 75 ) and ( p < 100 ) Then
+    snd_SetVolume( SND_STREAM, audio, 1 - ( 1 / 24 ) * ( p - 75 ) );
+end;
+
+procedure KeyMouseEvent;
+var
+    r : zglTRect;
+begin
   if mBClickCanClick(M_BLEFT_CLICK) Then
   begin
       // RU: В данном случае мы начинаем воспроизводить звук сразу в указанных координатах, но их можно менять и в процессе используя процедуру snd_SetPos.
@@ -121,38 +132,27 @@ begin
 // эта часть изменена!!! Теперь можно заново воспроизводить звуки, даже если они не закончили играть.
     if snd_Get(sound, IDSound, SND_STATE_PLAYING) = IDSound then
       snd_Stop(sound, IDSound);
-    IDSound := snd_Play(sound, FALSE, CalcX2D(mouse_X), CalcY2D(mouse_Y));
+    IDSound := snd_Play(sound, FALSE, CalcX2D(mouseX), CalcY2D(mouseY));
 // ------------------------------------------------------------------------------------------
 
-    r.X := (SCREEN_WIDTH - 128) / 2;
-    r.Y := (SCREEN_HEIGHT - 128) / 2;
+    snd_Play( sound, FALSE, CalcX2D( mouse_X ), CalcY2D( mouse_Y ) );
+
+    r.X := ( SCREEN_WIDTH - 128 ) / 2;
+    r.Y := ( SCREEN_HEIGHT - 128 ) / 2;
     r.W := 128;
     r.H := 128;
 
 // добавляем проверку на проигрывание звука, только если много развных звуков/музыки, то номера надо менять (не только 1!!!)
-    if col2d_PointInRect(mouse_X, mouse_Y, r) and (audio = 1) Then
+    if col2d_PointInRect(mouseX, mouseY, r) and (audio = 1) Then
     begin
       p := snd_Get(SND_STREAM, audio, SND_STATE_PLAYING);
       if p = 1 then
         snd_StopStream(audio);
     end;
 // ---------------------------------------------------------------------------------------------------------------
-
-    if col2d_PointInRect(mouse_X, mouse_Y, r) and (audio = 0) Then
-      audio := snd_PlayFile(dirRes + 'music.ogg');
-
+    if col2d_PointInRect( mouse_X, mouse_Y, r ) and ( audio = 0 ) Then
+      audio := snd_PlayFile( dirRes + 'music.ogg');
   end;
-
-  // RU: Получаем в процентах позицию проигрывания аудиопотока и ставим громкость для плавных переходов.
-  // EN: Get position in percent's for audio stream and set volume for smooth playing.
-  p := snd_Get(SND_STREAM, audio, SND_STATE_PERCENT);
-  if (p >= 0) and (p < 25) Then
-    snd_SetVolume(SND_STREAM, audio, (1 / 24) * p);
-  if (p >= 75) and (p < 100) Then
-    snd_SetVolume(SND_STREAM, audio, 1 - (1 / 24) * (p - 75));
-
-  key_ClearState();
-  mouse_ClearState();
 end;
 
 Begin
@@ -160,6 +160,7 @@ Begin
 
   TimeStart := timer_Add(@Timer, 16, Start);
 
+  zgl_Reg(SYS_EVENTS, @KeyMouseEvent);
   zgl_Reg(SYS_LOAD, @Init);
   zgl_Reg(SYS_DRAW, @Draw);
 

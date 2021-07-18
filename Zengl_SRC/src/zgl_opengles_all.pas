@@ -48,6 +48,7 @@ uses
   {$IFDEF iOS}
   iPhoneAll,
   {$ENDIF}
+  //egl, gles        mypath = /home/mirrel/fpc_3_2/lazarus/lcl/interfaces/customdrawn/android
   math;
 
 

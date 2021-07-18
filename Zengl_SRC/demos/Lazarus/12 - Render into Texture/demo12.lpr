@@ -38,15 +38,13 @@ var
   rtFull    : zglPRenderTarget;
   rtDefault : zglPRenderTarget;
 
-  TimeStart  : Byte = 0;
-
 procedure Init;
 begin
   texTux := tex_LoadFromFile( dirRes + 'tux_stand.png' );
   tex_SetFrameSize( texTux, 64, 64 );
 
   fntMain := font_LoadFromFile( dirRes + 'font.zfi' );
-  setTextScale(15, fntMain);
+  setFontTextScale(15, fntMain);
 
   // RU: Создаем RenderTarget и "цепляем" пустую текстуру. В процессе текстуру можно сменить присвоив rtarget.Surface другую zglPTexture, главное что бы совпадали размеры с теми, что указаны в
   //     tex_CreateZero. Таргету также указан флаг RT_FULL_SCREEN, отвечающий за то, что бы в текстуру помещалось все содержимое экрана а не область 256x256(как с флагом RT_DEFAULT).
@@ -83,19 +81,12 @@ begin
   text_Draw( fntMain, 0, 0, 'FPS: ' + u_IntToStr( zgl_Get( RENDER_FPS ) ) );
 end;
 
-procedure Timer;
-begin
-  key_ClearState();
-end;
-
 Begin
   {$IFnDEF USE_ZENGL_STATIC}
   if not zglLoad( libZenGL ) Then exit;
   {$ENDIF}
 
   randomize();
-
-  TimeStart := timer_Add( @Timer, 16, Start );
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );

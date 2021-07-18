@@ -21,7 +21,7 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 20.12.2020
+ !!! modification from Serge 16.07.2021
 }
 unit zgl_screen;
 
@@ -517,7 +517,7 @@ begin
 
   mainMenu := NSMenu.alloc.init.autorelease;
   NSApp.setMainMenu(mainMenu);
-  mainMenu.setMenuBarVisible(false);        // menu not visible
+  mainMenu.setMenuBarVisible(false);
 
   pool.dealloc;
 
@@ -561,10 +561,11 @@ end;
 procedure scr_Clear;
 begin
   batch2d_Flush();
-  glClear(GL_COLOR_BUFFER_BIT * Byte(appFlags and COLOR_BUFFER_CLEAR > 0) or GL_DEPTH_BUFFER_BIT * Byte(appFlags and DEPTH_BUFFER_CLEAR > 0) or
-           GL_STENCIL_BUFFER_BIT * Byte(appFlags and STENCIL_BUFFER_CLEAR > 0));
   if scrClearColor then
     glClearColor(scr_UseClearColor.R, scr_UseClearColor.G, scr_UseClearColor.b, scr_UseClearColor.A);
+  glClear(GL_COLOR_BUFFER_BIT * Byte(appFlags and COLOR_BUFFER_CLEAR > 0) or GL_DEPTH_BUFFER_BIT * Byte(appFlags and DEPTH_BUFFER_CLEAR > 0) or
+           GL_STENCIL_BUFFER_BIT * Byte(appFlags and STENCIL_BUFFER_CLEAR > 0));
+
 end;
 
 procedure scr_Flush;
@@ -708,10 +709,6 @@ begin
   begin
     if wndFullScreen then
     begin
-//      wndX := 0;
-//      wndY := 0;
-//      wndWidth := scrDesktopW;
-//      wndHeight := scrDesktopH;
       viewNSRect.origin.x := 0;
       viewNSRect.origin.y := 0;
       viewNSRect.size.width := scrDesktopW;
@@ -720,19 +717,13 @@ begin
       wndHandle.setFrame_display(viewNSRect, True);
     end
     else begin
-{      if (not wndFullScreen) and (appFlags and WND_USE_AUTOCENTER > 0) Then
-      begin
-        wndX := (zgl_Get(DESKTOP_WIDTH) - wndWidth) div 2;
-        wndY := (zgl_Get(DESKTOP_HEIGHT) - wndHeight) div 2;
-      end;         }
       viewNSRect.origin.x := wndX;
       viewNSRect.origin.y := wndY;
-      viewNSRect.size.width := { wndx +} wndWidth;
-      viewNSRect.size.height := {wndY +} wndHeight + 0;
+      viewNSRect.size.width := wndWidth;
+      viewNSRect.size.height := wndHeight + 0;
       wndHandle.setStyleMask(NSTitledWindowMask or NSClosableWindowMask);
       wndHandle.setFrame_display(viewNSRect, True);
     end;
-//    zglView.setFrame(viewNSRect);
   end;
 {$Else}
   if wndFullScreen Then
@@ -888,7 +879,6 @@ begin
     wglSwapInterval(Integer(scrVSync));
   {$ENDIF}
   {$IFDEF MACOSX}{$IfDef MAC_COCOA}
-//  oglContext.setValues_forParameter(30, NSOpenGLCPSwapInterval);
   {$Else}
   if Assigned(oglContext) Then
     aglSetInt(oglContext, AGL_SWAP_INTERVAL, Byte(scrVSync));

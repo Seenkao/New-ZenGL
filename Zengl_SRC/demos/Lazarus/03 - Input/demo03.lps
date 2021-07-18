@@ -2,17 +2,16 @@
 <CONFIG>
   <ProjectSession>
     <PathDelim Value="\"/>
-    <Version Value="11"/>
+    <Version Value="12"/>
     <BuildModes Active="Release"/>
     <Units Count="2">
       <Unit0>
         <Filename Value="demo03.lpr"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
-        <CursorPos X="26" Y="11"/>
-        <UsageCount Value="161"/>
+        <TopLine Value="5"/>
+        <CursorPos X="8" Y="30"/>
+        <UsageCount Value="176"/>
         <Loaded Value="True"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit0>
       <Unit1>
         <Filename Value="..\..\..\extra\zglglutm.pas"/>
@@ -21,13 +20,13 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="745"/>
         <CursorPos X="19" Y="739"/>
-        <UsageCount Value="27"/>
+        <UsageCount Value="42"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit1>
     </Units>
     <RunParams>
       <FormatVersion Value="2"/>
-      <Modes Count="0" ActiveMode="default"/>
+      <Modes ActiveMode="default"/>
     </RunParams>
   </ProjectSession>
 </CONFIG>

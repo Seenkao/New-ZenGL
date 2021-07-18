@@ -1,6 +1,7 @@
 program demo03;
 
 {$I zglCustomConfig.cfg}
+{$I zgl_config.cfg}
 
 {$IFDEF WINDOWS}
   {$R *.res}
@@ -21,32 +22,108 @@ uses
   zgl_text,
   zgl_textures_png,
   zgl_types,
+  {$IfDef OLD_METHODS}
   zgl_collision_2d,
+  {$Else}
+  gegl_VElements,
+  {$EndIf}
   zgl_utils
   ;
 
 var
   dirRes  : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
 
-  fntMain    : Byte;
+  fntMain, fntEdit: Byte;
 
   joyCount   : Integer;
+  // RU: строка для получения значения из поля ввода
+  // EN: string to get value from input field
   userInput  : UTF8String;
+  {$IfDef OLD_METHODS}
   trackInput : Boolean;
   inputRect  : zglTRect;
   lineAlpha  : Byte;
 
   TimeStart  : Byte;
+  {$Else}
+  // RU: прямоугольник описывающий поле ввода
+  // EN: rectangle describing the input field
+  myRect: zglTRect;
+
+  // "перепись" полей ввода для того, чтоб знать с каким полем работаем.
+  // RU: объявляем переменную для работы с полем ввода
+  // EN: we declare a variable to work with the input field
+  myEdit, myEdit2: Word;
+
+// RU: прорисовываем основание поля ввода. Всё ограничено только вашим воображением. )))
+// EN: draw the base of the input field. Everything is limited only by your imagination. )))
+procedure EditCont;
+begin
+  // RU: при прорисовке поля ввода, смешениt и поворот уже будут сделаны. Я показываю как нарисовать рамку.
+  // Текст будет выведен поверх того, что вы здесь нарисуете.
+  // EN: displacement and rotation will be done prior to performing the procedure. I am showing you how to draw a frame.
+  // The text will be drawn on top of what you draw here.
+  pr2d_Rect(- 2, - 1, myRect.W + 5, myRect.H, $FFFFFF, 128, PR2D_FILL);
+end;
+  {$EndIf}
 
 procedure Init;
+{$IfNDef OLD_METHODS}
+var
+  TextColor: zglTColor;
+  EScale: Word;
+{$EndIf}
 begin
   fntMain := font_LoadFromFile( dirRes + 'font.zfi' );
-  setTextScale(15, fntMain);
+  {$IfNDef OLD_METHODS}
+  // RU: Загружаем данные о шрифте.
+  // EN: Load the font.
+  fntEdit := font_LoadFromFile( dirRes + 'CalibriBold50pt.zfi');
+  // RU: устанавливаем размеры шрифтов
+  // EN: set font sizes
+  setFontTextScale(15, fntMain);
+  // RU: размер шрифта поля ввода (для понимания что происходит). Изменяя размер шрифта, мы должны менять и
+  //     размеры поля ввода - myRect в данном случае. Сами они не изменятся.
+  // EN: the font size of the input field (to understand what's going on). By changing the font size,
+  //     we must also change the size of the input field - myRect in this case. They themselves will not change.
+  EScale := 20;
+  setFontTextScale(EScale, fntEdit);
+  // RU: указываем размеры поля ввода
+  // EN: specify the size of the input field
+  myRect.X := 200;
+  myRect.Y := 150;
+  myRect.W := 200;
+  myRect.H := 33;
+  // RU: указываем точку вращения, в данном случае центр поля ввода (по необходимости) и угол поворота (например 45)
+  // EN: specify the point of rotation, in this case the center of the input field (if necessary) and the angle of rotation (for example 45)
+  SetOfRotateAngleAndPoint(myRect.x + myRect.W / 2, myRect.y + myRect.H / 2, 30);
+  // RU: указываем цвет текста
+  // EN: specify the color of the text
+  TextColor.R := 0.1;
+  TextColor.G := 0.5;
+  TextColor.B := 0.3;
+  TextColor.A := 1;            // max = 1, min = 0
+  // RU: передаём цвет в данные менеджера
+  // EN: transfer the color to the manager data
+  SetColorElementText(@TextColor);
+  // RU: создаём само поле ввода с данными указанными выше и передаваемыми данными
+  // EN: create the input field itself with the data specified above and the data that needs to be transferred
+  myEdit := CreateEdit(myRect, fntEdit, EScale, @EditCont);
 
+  // RU: корректируем курсор
+  // EN: adjust the cursor
+  CorrectEditCursor(myEdit, 2);
+
+  // RU: задаём очистку экрана заданным цветом
+  // EN: set the screen to clear with a specified color
+  scr_SetClearColor(true, $7090af);
+
+  {$Else}
   inputRect.X := 400 - 192;
   inputRect.Y := 300 - 100 - 32;
   inputRect.W := 384;
   inputRect.H := 96;
+  {$EndIf}
 
   // RU: Инициализируем обработку ввода джойстиков и получаем количество подключенных джойстиков.
   // EN: Initialize processing joystick input and get count of plugged joysticks.
@@ -54,8 +131,10 @@ begin
 end;
 
 procedure Draw;
-  var
-    w : Single;
+{$IfDef OLD_METHODS}
+var
+  w : Single;
+{$EndIf}
 begin
   text_Draw( fntMain, 0, 0, 'Escape - Exit' );
 
@@ -63,6 +142,7 @@ begin
   // EN: Mouse coordinates can be got using functions mouse_X and mouse_Y.
   text_Draw( fntMain, 0, 18, 'Mouse X, Y: ' + u_IntToStr( mouseX ) + '; ' + u_IntToStr( mouseY ) );
 
+  {$IfDef OLD_METHODS}
   // RU: Выводим введённый пользователем текст.
   // EN: Show the inputted text.
   pr2d_Rect( inputRect.X, inputRect.Y, inputRect.W, inputRect.H, $FFFFFF, 255 );
@@ -74,7 +154,12 @@ begin
     end else
       text_Draw( fntMain, 400, 300 - 100, 'Click here to enter text(maximum - 24 symbols):', TEXT_HALIGN_CENTER );
   text_Draw( fntMain, 400, 300 - 70, userInput, TEXT_HALIGN_CENTER );
-
+  {$Else}
+  text_Draw(fntMain, 0, 36, 'Press F5 to copy from Edit and draw');  // какой я нафиг англичанин? ))))
+  text_Draw(fntMain, 0, 54, 'Press F12 - Rus/Eng');
+  if userInput <> '' then
+    text_Draw(fntMain, 400, 300 - 70, userInput, TEXT_HALIGN_CENTER);
+  {$EndIf}
 
   // RU: Вывод состояния осей и кнопок первого джойстика в системе.
   // EN: Show the state of axes and buttons of first joystick in the system.
@@ -107,13 +192,19 @@ begin
   text_Draw( fntMain, 550, 540, 'Button16: ' + u_BoolToStr( joy_Down( 0, 15 ) ) );
 end;
 
+{$IfDef OLD_METHODS}
 procedure Timer;
 begin
   if lineAlpha > 5 Then
     DEC( lineAlpha, 10 )
   else
     lineAlpha := 255;
+end;
+{$EndIf}
 
+procedure KeyMouseEvent;
+begin
+  {$IfDef OLD_METHODS}
   // RU: Проверить нажата ли левая кнопка мыши в пределах inputRect и начать отслеживать ввод текста.
   // EN: Check if left mouse button was pressed inside inputRect and start to track text input.
   if mBClickCanClick( M_BLEFT_CLICK ) and col2d_PointInRect( mouseX, mouseY, inputRect ) Then
@@ -134,24 +225,22 @@ begin
   // EN: Get inputted by user text.
   if trackInput Then
     userInput := key_GetText();
-
-  // RU: По нажатию Escape завершить приложение.
-  // EN: If Escape was pressed - shutdown the application.
-
-  // if key_Press( K_ESCAPE ) Then zgl_Exit;
-                   // больше не нужно это делать, но если для чего-то понадобится клавиша Escape, надо
-                   // отключить дефайн (USE_EXIT_ESCAPE) на её обработку
-
-  // RU: Обязательно очищаем состояния всех подсистем ввода.
-  // EN: Necessarily clear all the states of input subsystems.
-  mouse_ClearState();
-  key_ClearState();
-  joy_ClearState();
+  {$Else}
+  // RU: по нажатию F5 копируем то, что написано в поле ввода
+  // EN: by pressing F5, copy what is written in the input field
+  if keysDown[K_F5] then
+  begin
+    userInput := GetEditToText(myEdit);
+  end;
+  {$EndIf}
 end;
 
 Begin
+  {$IfDef OLD_METHODS}
   TimeStart := timer_Add( @Timer, 16, Start );
+  {$EndIf}
 
+  zgl_Reg(SYS_EVENTS, @KeyMouseEvent);
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );
 

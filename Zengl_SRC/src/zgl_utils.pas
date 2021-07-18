@@ -21,7 +21,7 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 15.12.2020
+ !!! modification from Serge 16.07.2021
 }
 unit zgl_utils;
 
@@ -86,6 +86,7 @@ function u_Hash(const Str: UTF8String): LongWord;
 procedure u_Error(const ErrStr: UTF8String);
 procedure u_Warning(const ErrStr: UTF8String);
 
+(* дополнение до ближайшего верхнего 2^ (2, 4, 8, 16, 32 и т. д.) *)
 function u_GetPOT(Value: Integer): Integer;
 
 procedure u_Sleep(Milliseconds: LongWord);
@@ -578,19 +579,8 @@ end;
 
 // пауза
 procedure u_Sleep(Milliseconds: LongWord);
-(*  {$IFDEF UNIX}
-  var
-    tv: TimeVal;
-  {$ENDIF}       *)
 begin
-(*{$IFDEF UNIX}
-  tv.tv_sec  := Milliseconds div 1000;
-  tv.tv_usec := (Milliseconds mod 1000) * 1000;
-  select(0, nil, nil, nil, tv);
-{$ENDIF}
-{$IFDEF WINDOWS}      *)
   Sleep(Milliseconds);
-//{$ENDIF}
 end;
 
 {$IF DEFINED(LINUX) and DEFINED(CPUx86_64)}

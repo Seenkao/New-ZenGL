@@ -30,7 +30,7 @@ uses
   {$IFDEF LINUX}
   X, XLib, XRender,
   {$ENDIF}
-  {$IFDEF WIN32}
+  {$IFDEF WINDOWS}
   Windows,
   {$ENDIF}
   {$IFDEF USE_PNG}
@@ -57,7 +57,7 @@ procedure fontgen_SaveFont(Font: Byte; const FileName: String );
 
 var
   fg_Font        : Byte;
-  fg_FontNodes   : array of zglTSymbolNode;
+  fg_FontNodes   : array of zglTSymbolNode;                     // походу перепись страниц, где существует фонт
   fg_CharsUse    : array[ 0..65535 ] of Boolean;
   fg_CharsUID    : array of WORD;
   fg_CharsSize   : array of zglTRect;
@@ -301,7 +301,7 @@ begin
     FreeMem(node);
 end;
 
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
 {$IFNDEF FPC}
 type NEWTEXTMETRICEX = NEWTEXTMETRICEXW;
 {$ENDIF}
@@ -425,9 +425,12 @@ begin
     for j := 0 to fh - 1 do
       begin
         pixel  := PByte(Ptr(pData) + (i + X) * 4 + (j + Y) * fg_PageSize * 4);
-        pixel^ := 255; INC(pixel);
-        pixel^ := 255; INC(pixel);
-        pixel^ := 255; INC(pixel);
+        pixel^ := 255;
+        INC(pixel);
+        pixel^ := 255;
+        INC(pixel);
+        pixel^ := 255;
+        INC(pixel);
         pixel^ := fg_CharsImage[ ID, i + j * fw ];
       end;
 end;
@@ -464,7 +467,7 @@ procedure fontgen_BuildFont( var Font : Byte; const FontName : String );
     color   : DWORD;
     r, g, b : DWORD;
     {$ENDIF}
-    {$IFDEF WIN32}
+    {$IFDEF WINDOWS}
     WDC        : HDC;
     WFont      : HFONT;
     Bitmap     : BITMAPINFO;
@@ -499,6 +502,7 @@ begin
     if fg_CharsUse[ i ] Then
     begin
       SetLength( fg_CharsUID, j + 1 );
+//      log_Add(u_IntToStr(i) + ' ' + u_IntToStr(j));
       fg_CharsUID[ j ] := i;
       INC( j );
     end;
@@ -575,7 +579,7 @@ begin
   XftFontClose( scrDisplay, XFont );
   FcPatternDestroy( Pattern );
 {$ENDIF}
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
   if fg_FontBold Then
     cs := FW_BOLD
   else
@@ -612,21 +616,36 @@ begin
   for i := 0 to managerFont.Font[Font].Count.Chars - 1 do
     begin
       Windows.FillRect( WDC, Rect, GetStockObject( BLACK_BRUSH ) );
+
+      if (i >= 71) and (i <= 75) then
+        log_Add(u_IntToStr(fg_CharsUID[i]));
       TextOutW( WDC, TextMetric.tmMaxCharWidth div 2, TextMetric.tmHeight div 2, @fg_CharsUID[ i ], 1 );
 
-      GetTextExtentPoint32W( WDC, @fg_CharsUID[ i ], 1, CharSize );
+      GetTextExtentPoint32W( WDC, @fg_CharsUID[ i ], 1, CharSize );        // в CharSize возвращаются значения символа
       // Microsoft Sucks...
       FontGetSize( pData, Bitmap.bmiHeader.biWidth, -Bitmap.bmiHeader.biHeight, cx, cy, minX, minY );
       INC( cx, 1 + Byte( fg_FontAA ) );
       INC( cy, 1 + Byte( fg_FontAA ) );
+      if (i >= 71) and (i <= 75) then
+        log_Add('cx = ' + u_IntToStr(cx) + '; cy = ' + u_IntToStr(cy) + '; minX = ' + u_IntToStr(minX) + '; minY = ' + u_IntToStr(minY));
 
       fg_CharsSize[ i ].X := minX - TextMetric.tmMaxCharWidth div 2;
       fg_CharsSize[ i ].Y := cy - ( TextMetric.tmAscent - ( minY - TextMetric.tmHeight div 2 ) );
       fg_CharsSize[ i ].W := cx;
       fg_CharsSize[ i ].H := cy;
-      fg_CharsP   [ i ]   := CharSize.cx;
+      if (i >= 71) and (i <= 75) then
+        log_Add('x = ' + u_FloatToStr(fg_CharsSize[ i ].X) + '; y = ' + u_FloatToStr(fg_CharsSize[ i ].Y) + '; width = ' + u_FloatToStr(fg_CharsSize[ i ].W) + '; height = ' + u_FloatToStr(fg_CharsSize[ i ].H));
+      if cx - minX > CharSize.cx then
+        fg_CharsP[i] := cx - minX
+      else
+        fg_CharsP[i] := CharSize.cx;
+      if (i >= 71) and (i <= 75) then
+        log_Add(u_IntToStr(CharSize.cx));
+
       SetLength( fg_CharsImage[ i ], cx * cy );
       FillChar( fg_CharsImage[ i, 0 ], cx * cy, $FF );
+
+      // максимальное значение ширины или высоты
       MaxWidth := Trunc( Max( MaxWidth, fg_CharsSize[ i ].W + fg_FontPadding[ 0 ] + fg_FontPadding[ 2 ] + Byte( fg_FontAA ) ) );
       MaxWidth := Trunc( Max( MaxWidth, fg_CharsSize[ i ].H + fg_FontPadding[ 1 ] + fg_FontPadding[ 3 ] + Byte( fg_FontAA ) ) );
 
@@ -758,21 +777,23 @@ begin
                 if CharID > managerFont.Font[Font].Count.Chars - 1 Then break;
                 cy  := j div fg_PageChars;
                 cx  := j - cy * fg_PageChars;
-                fontgen_PutChar( pData, cx * cs + ( cs - Round( fg_CharsSize[ CharID ].W ) ) div 2,
-                                        cy * cs + ( cs - Round( fg_CharsSize[ CharID ].H ) ) div 2, CharID );
+
+                sx := Round( fg_CharsSize[ CharID ].W );
+                sy := Round( fg_CharsSize[ CharID ].H );
+
+                fontgen_PutChar( pData, cx * cs + ( cs - sx ) div 2, cy * cs + ( cs - sy ) div 2, CharID );
                 SetLength( fg_CharsImage[ CharID ], 0 );
 
                 CharUID := fg_CharsUID[ CharID ];
                 zgl_GetMem( Pointer( managerFont.Font[Font].CharDesc[ CharUID ] ), SizeOf( zglTCharDesc ) );
                 managerFont.Font[Font].CharDesc[ CharUID ]^.Page   := i;
-                managerFont.Font[Font].CharDesc[ CharUID ]^.Width  := Round( fg_CharsSize[ CharID ].W );
-                managerFont.Font[Font].CharDesc[ CharUID ]^.Height := Round( fg_CharsSize[ CharID ].H );
+                managerFont.Font[Font].CharDesc[ CharUID ]^.Width  := sx;
+                managerFont.Font[Font].CharDesc[ CharUID ]^.Height := sy;
                 managerFont.Font[Font].CharDesc[ CharUID ]^.ShiftX := Round( fg_CharsSize[ CharID ].X );
                 managerFont.Font[Font].CharDesc[ CharUID ]^.ShiftY := Round( fg_CharsSize[ CharID ].Y );
                 managerFont.Font[Font].CharDesc[ CharUID ]^.ShiftP := fg_CharsP[ CharID ];
 
-                sx := Round( fg_CharsSize[ CharID ].W );
-                sy := Round( fg_CharsSize[ CharID ].H );
+
                 managerFont.Font[Font].CharDesc[ CharUID ]^.TexCoords[ 0 ].X := ( cx * cs + ( cs - sx ) div 2 - fg_FontPadding[ 0 ] ) * u;
                 managerFont.Font[Font].CharDesc[ CharUID ]^.TexCoords[ 0 ].Y := 1 - ( cy * cs + ( cs - sy ) div 2 - fg_FontPadding[ 1 ] ) * v;
                 managerFont.Font[Font].CharDesc[ CharUID ]^.TexCoords[ 1 ].X := ( cx * cs + ( cs - sx ) div 2 + sx + fg_FontPadding[ 2 ] ) * u;

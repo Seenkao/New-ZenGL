@@ -27,7 +27,6 @@ var
   texTux   : zglPTexture;
   rtFull   : zglPRenderTarget;
   rtDefault: zglPRenderTarget;
-  TimeStart: Byte;
 
 procedure Init;
 begin
@@ -46,7 +45,7 @@ begin
   // EN: Create one more RenderTarget with flag RT_DEFAULT for comparison.
   rtDefault := rtarget_Add(tex_CreateZero(256, 256), RT_DEFAULT);
 
-  setTextScale(15, fntMain);
+  setFontTextScale(15, fntMain);
 end;
 
 procedure Draw;
@@ -73,15 +72,8 @@ begin
   text_Draw(fntMain, 0, 0, 'FPS: ' + u_IntToStr(zgl_Get(RENDER_FPS)));
 end;
 
-procedure Timer;
-begin
-  key_ClearState();
-end;
-
 Begin
   randomize();
-
-  TimeStart := timer_Add(@Timer, 16, Start);
 
   zgl_Reg(SYS_LOAD, @Init);
   zgl_Reg(SYS_DRAW, @Draw);

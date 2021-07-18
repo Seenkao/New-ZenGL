@@ -26,7 +26,6 @@ var
   fntMain  : Byte;
   video    : zglPVideoStream;
   videoSeek: Boolean;
-  TimeStart: Byte;
 
 procedure Init;
 begin
@@ -36,7 +35,7 @@ begin
   // RU: Открыть видео файл.
   video := video_OpenFile(dirRes + 'video.ogv');
 
-  setTextScale(15, fntMain);
+  setFontTextScale(15, fntMain);
 end;
 
 procedure Draw;
@@ -60,7 +59,7 @@ begin
     end;
 end;
 
-procedure Timer;
+procedure KeyMouseEvent;
 begin
     // EN: If left mouse button is down on progress bar, then seek the video.
   // RU: Если зажата левая кнопка мыши над полосой прогресса - перемещаться по видео.
@@ -70,9 +69,6 @@ begin
     video_Seek(video, (mouse_X / 800) * video.Info.Duration);
   end else
     videoSeek := FALSE;
-
-  key_ClearState();
-  mouse_ClearState();
 end;
 
 procedure Update(dt: Double);
@@ -84,7 +80,7 @@ end;
 Begin
   randomize();
 
-  TimeStart := timer_Add(@Timer, 16, Start);
+  zgl_Reg(SYS_EVENTS, @KeyMouseEvent);
 
   zgl_Reg(SYS_LOAD, @Init);
   zgl_Reg(SYS_DRAW, @Draw);

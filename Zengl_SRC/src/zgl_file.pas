@@ -21,7 +21,7 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 04.08.2020
+ !!! modification from Serge 16.07.2021
 }
 unit zgl_file;
 
@@ -56,7 +56,9 @@ const
   // Open Mode
   FOM_CREATE = $01; // Create
   FOM_OPENR  = $02; // Read
-  FOM_OPENRW = $03; // Read&Write
+  FOM_OPENW  = $03; // Write
+  FOM_OPENRW = $04; // Read&Write
+
 
   // Seek Mode
   FSM_SET    = $01;
@@ -142,7 +144,7 @@ begin
   {$IFDEF USE_ZIP}
   if Assigned(zipCurrent) Then
   begin
-    if (Mode = FOM_CREATE) or (Mode = FOM_OPENRW) Then
+    if (Mode = FOM_CREATE) or (Mode = FOM_OPENRW) or (Mode = FOM_OPENW) Then
     begin
       FileHandle := 0;
       Result := FALSE;
@@ -166,6 +168,7 @@ begin
     FOM_CREATE: FileHandle := FpOpen(filePath + FileName, O_Creat or O_Trunc or O_RdWr);
     FOM_OPENR:  FileHandle := FpOpen(filePath + FileName, O_RdOnly);
     FOM_OPENRW: FileHandle := FpOpen(filePath + FileName, O_RdWr);
+    FOM_OPENW:  FileHandle := FpOpen(filePath + FileName, O_WRONLY);
   end;
 {$ENDIF}{$EndIf}
 {$IFDEF WINDOWS}
@@ -174,6 +177,7 @@ begin
     FOM_CREATE: FileHandle := CreateFileW(wideStr, GENERIC_READ or GENERIC_WRITE, 0, nil, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
     FOM_OPENR:  FileHandle := CreateFileW(wideStr, GENERIC_READ, FILE_SHARE_READ, nil, OPEN_EXISTING, 0, 0);
     FOM_OPENRW: FileHandle := CreateFileW(wideStr, GENERIC_READ or GENERIC_WRITE, FILE_SHARE_READ or FILE_SHARE_WRITE, nil, OPEN_EXISTING, 0, 0);
+    FOM_OPENW:  FileHandle := CreateFileW(wideStr, GENERIC_READ, FILE_SHARE_WRITE, nil, OPEN_EXISTING, 0, 0);
   end;
   FreeMem(wideStr);
 {$ENDIF}
@@ -186,12 +190,14 @@ begin
     FOM_CREATE: FileHandle := FpOpen(platform_GetRes(s + FileName), O_Creat or O_Trunc or O_RdWr);
     FOM_OPENR:  FileHandle := FpOpen(platform_GetRes(s + FileName), O_RdOnly);
     FOM_OPENRW: FileHandle := FpOpen(platform_GetRes(s + FileName), O_RdWr);
+    FOM_OPENW:  FileHandle := FpOpen(platform_GetRes(s + FileName), O_WRONLY);;
   end;
 {$Else}
   case Mode of
     FOM_CREATE: FileHandle := FpOpen(platform_GetRes(filePath + FileName), O_Creat or O_Trunc or O_RdWr);
     FOM_OPENR:  FileHandle := FpOpen(platform_GetRes(filePath + FileName), O_RdOnly);
     FOM_OPENRW: FileHandle := FpOpen(platform_GetRes(filePath + FileName), O_RdWr);
+    FOM_OPENW:  FileHandle := FpOpen(platform_GetRes(filePath + FileName), O_WRONLY);;
   end;
 {$ENDIF}{$EndIf}
   Result := FileHandle <> FILE_ERROR;
@@ -207,9 +213,11 @@ begin
     end;
   {$ENDIF}
 
-{$IfDef UNIX}{$IfNDef DARWIN}
+{$IfDef UNIX}
+{$IfDef DARWIN}
   Result := FpMkdir(filePath + Directory, MODE_MKDIR) = FILE_ERROR;
-{$ENDIF}{$EndIf}
+{$ENDIF}
+{$EndIf}
 {$IFDEF WINDOWS}
   wideStr := utf8_GetPWideChar(filePath + Directory);
   Result := CreateDirectoryW(wideStr, nil);
@@ -685,11 +693,20 @@ end;
 
 function file_GetDirectory(const FileName: UTF8String): UTF8String;
 begin
+
+  {$IfNDef USE_INIT_HANDLE}
   Result := GetStr(FileName, '/', TRUE);
   {$IFDEF WINDOWS}
   if Result = '' Then
     Result := GetStr(FileName, '\', TRUE);
   {$ENDIF}
+  {$Else}
+  {$IfDef WINDOWS}
+  Result := GetStr(FileName, '\', TRUE);
+  {$Else}
+  Result := GetStr(FileName, '/', TRUE);
+  {$EndIf}
+  {$EndIf}
 end;
 
 procedure file_SetPath(const Path: UTF8String);

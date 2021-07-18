@@ -20,6 +20,7 @@ uses
   zgl_primitives_2d,
   zgl_textures,
   zgl_textures_png,
+  zgl_textures_jpg,
   zgl_font,
   zgl_text,
   zgl_file,
@@ -35,19 +36,17 @@ var
   dirRes  : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};            // в демо-версиях!!!
   fntMain : Byte;
 
-  TimeStart  : Byte = 0;
-
 procedure Init;
 begin
-//  file_SetPath('');                       // если dirRes = '../data/'   !!!!!     в демо-версиях!!!
   // RU: Загружаем данные о шрифте.
   // EN: Load the font.
-
   fntMain := font_LoadFromFile( dirRes + 'font.zfi' );
   // RU: Если же текстуры именуются без использования маски вида "$(имя_шрифта)FontName-page$(номер).$(расширение)", то загрузку можно произвести следующим образом(для png):
   // EN: If textures were named without special mask - "$(font_name)-page$(number).$(extension)", then use this method to load them(for png):
   //for i := 0 to fntMain.Count.Pages - 1 do
   //  fntMain.Pages[ i ] := tex_LoadFromFile( dirRes + 'font-page' + u_IntToStr( i ) + '.png' );
+
+  setFontTextScale(15, fntMain);              // установка шкалы размерности шрифта
 end;
 
 procedure Draw;
@@ -55,17 +54,13 @@ procedure Draw;
     r : zglTRect;
     s : UTF8String;
 begin
-  batch2d_Begin();
-//  setTextScale(1.5, fntMain);
-
+//  batch2d_Begin();       требуется только для мобильных систем в данное время
   // RU: ZenGL работает исключительно с кодировкой UTF-8, поэтому весь текст должен быть в UTF-8.
   // EN: ZenGL works only with UTF-8 encoding, so all text should be encoded with UTF-8.
-
   text_Draw( fntMain, 400, 25, 'String with center alignment', TEXT_HALIGN_CENTER );
 
   text_DrawEx( fntMain, 400, 65, 3, 0, 'Scaling', 255, $FFFFFF, TEXT_HALIGN_CENTER );
 
-  setTextScale(15, fntMain);
   fx2d_SetVCA( $FF0000, $00FF00, $0000FF, $FFFFFF, 255, 255, 255, 255 );
   text_Draw( fntMain, 400, 125, 'Gradient color for every symbol', TEXT_FX_VCA or TEXT_HALIGN_CENTER );
 
@@ -106,14 +101,7 @@ begin
   // EN: Render FPS in the top right corner using text_GetWidth.
   s := 'FPS: ' + u_IntToStr( zgl_Get( RENDER_FPS ) );
   text_Draw( fntMain, 800 - text_GetWidth( fntMain, s ), 0, s );
-
-  batch2d_End();
-end;
-
-procedure Timer;
-begin
-
-  key_ClearState();
+//  batch2d_End();    требуется для мобильных систем
 end;
 
 Begin
@@ -121,8 +109,6 @@ Begin
   if not zglLoad( libZenGL ) Then exit;
   {$ENDIF}
   randomize();
-
-  timer_Add( @Timer, 16, TimeStart, Start );
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );

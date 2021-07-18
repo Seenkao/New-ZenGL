@@ -121,7 +121,9 @@ begin
   texLogo := tex_LoadFromFile( 'zengl.png' );
   file_CloseArchive();
 
-  setTextScale(15, fntMain);
+  // RU: Устанавливаем размер шрифта fntMain (в пикселях).
+  // EN: Set the fntMain font size (in pixels).
+  setFontTextScale(15, fntMain);
 end;
 
 procedure Draw;
@@ -129,11 +131,11 @@ begin
   // RU: К ресурсам, которые загружаются в многопоточном режиме, можно обращаться только после завершения загрузки. Код ниже рисует экран загрузки если ресурсы ещё не загрузились.
   // EN: Resources which are loading in multithreaded mode can be used only after finishing the loading process. Code below renders loading screen if resources are not loaded yet.
   if res_GetCompleted() < 100 Then
-    begin
-      ssprite2d_Draw( texLogo, ( 800 - texLogo.Width ) / 2, ( 600 - texLogo.Height ) / 2, texLogo.Width, texLogo.Height, 0 );
-      text_Draw( fntMain, 400, 300 + texLogo.Height / 4, 'Loading... ' + u_IntToStr( res_GetCompleted() ) + '%', TEXT_HALIGN_CENTER );
-      exit;
-    end;
+  begin
+    ssprite2d_Draw( texLogo, ( 800 - texLogo.Width ) / 2, ( 600 - texLogo.Height ) / 2, texLogo.Width, texLogo.Height, 0 );
+    text_Draw( fntMain, 400, 300 + texLogo.Height / 4, 'Loading... ' + u_IntToStr( res_GetCompleted() ) + '%', TEXT_HALIGN_CENTER );
+    exit;
+  end;
 
   ssprite2d_Draw( texTest, 0, 0, 800, 600, 0 );
   text_Draw( fntMain, 0, 0, 'FPS: ' + u_IntToStr( zgl_Get( RENDER_FPS ) ) );

@@ -334,7 +334,7 @@ begin
   wglMakeCurrent(wndDC, 0);
   wglDeleteContext(oglContext);
   wnd_Destroy();
-  wndFirst := FALSE;
+//  wndFirst := FALSE;
 {$ENDIF}
 {$IFDEF MACOSX}{$IfDef MAC_COCOA}
 

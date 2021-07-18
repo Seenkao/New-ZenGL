@@ -3,6 +3,10 @@ program demo14;
 {$I zglCustomConfig.cfg}
 
 uses
+  {$IFDEF UNIX}
+  cthreads,
+  {$ENDIF}
+  {$IFDEF USE_ZENGL_STATIC}
   zgl_screen,
   zgl_window,
   zgl_timers,
@@ -20,8 +24,10 @@ uses
   zgl_sound_ogg,
   zgl_types,
   zgl_collision_2d,
-  zgl_utils,
-  zgl_memory
+  zgl_utils
+  {$ELSE}
+  zglHeader
+  {$ENDIF}
   ;
 
 const
@@ -29,137 +35,142 @@ const
   SCREEN_HEIGHT = 600;
 
 var
-  dirRes : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
-  fntMain: Byte;
-  icon   : array[0..1] of zglPTexture;
-  sound  : zglPSound;
-  audio  : Integer;
-  state  : Integer;
+  dirRes  : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
+  fntMain : Byte;
+  icon    : array[ 0..1 ] of zglPTexture;
+  sound   : zglPSound;
+  audio   : Integer;
+  state   : Integer;
 
-  musicMem: zglTMemory;
+  // Ğ´Ğ¾Ğ±Ğ°Ğ²Ğ»ÑĞµĞ¼ Ğ½Ğ¾Ğ¼ĞµÑ€ Ğ·Ğ²ÑƒĞºĞ°, Ğ¿Ğ¾ĞºĞ° Ğ´Ğ»Ñ Ğ¾Ğ´Ğ½Ğ¾Ğ³Ğ¾ Ğ·Ğ²ÑƒĞºĞ°
+  IDSound : Integer;
 
-  // äîáàâëÿåì íîìåğ çâóêà, ïîêà äëÿ îäíîãî çâóêà
-  IDSound: Integer;
-  TimeStart: Byte;
+  TimeStart: Byte = 0;
 
-// RU: Ò.ê. çâóêîâàÿ ïîäñèñòåìà íàöåëåíà íà 3D, äëÿ ïîçèöèîíèğîâàíèÿ çâóêîâ â 2D íóæíû íåêîòîğûå óõèùğåíèÿ.
+  p : Integer;
+
+// RU: Ğ¢.Ğº. Ğ·Ğ²ÑƒĞºĞ¾Ğ²Ğ°Ñ Ğ¿Ğ¾Ğ´ÑĞ¸ÑÑ‚ĞµĞ¼Ğ° Ğ½Ğ°Ñ†ĞµĞ»ĞµĞ½Ğ° Ğ½Ğ° 3D, Ğ´Ğ»Ñ Ğ¿Ğ¾Ğ·Ğ¸Ñ†Ğ¸Ğ¾Ğ½Ğ¸Ñ€Ğ¾Ğ²Ğ°Ğ½Ğ¸Ñ Ğ·Ğ²ÑƒĞºĞ¾Ğ² Ğ² 2D Ğ½ÑƒĞ¶Ğ½Ñ‹ Ğ½ĞµĞºĞ¾Ñ‚Ğ¾Ñ€Ñ‹Ğµ ÑƒÑ…Ğ¸Ñ‰Ñ€ĞµĞ½Ğ¸Ñ.
 // EN: Because sound subsystem using 3D, there is some tricky way to calculate sound position in 2D.
-function CalcX2D(const X: Single): Single;
+function CalcX2D( const X : Single ) : Single;
 begin
-  Result := (X - SCREEN_WIDTH / 2) * (20 / SCREEN_WIDTH / 2);          // ñìåíèë ñìåùåíèå ïî X è Y, òåïåğü áîëåå ÿâíî ìîæíî
-end;                                                                    // îòäàëèòü/ïğèáëèçèòü çâóê
+  Result := ( X - SCREEN_WIDTH / 2 ) * ( 10 / SCREEN_WIDTH / 2 );             // ÑĞ¼ĞµĞ½Ğ¸Ğ» ÑĞ¼ĞµÑ‰ĞµĞ½Ğ¸Ğµ Ğ¿Ğ¾ X Ğ¸ Y, Ñ‚ĞµĞ¿ĞµÑ€ÑŒ Ğ±Ğ¾Ğ»ĞµĞµ ÑĞ²Ğ½Ğ¾ Ğ¼Ğ¾Ğ¶Ğ½Ğ¾
+end;                                                                           // Ğ¾Ñ‚Ğ´Ğ°Ğ»Ğ¸Ñ‚ÑŒ/Ğ¿Ñ€Ğ¸Ğ±Ğ»Ğ¸Ğ·Ğ¸Ñ‚ÑŒ Ğ·Ğ²ÑƒĞº
 
-function CalcY2D(const Y: Single): Single;
+function CalcY2D( const Y : Single ) : Single;
 begin
-  Result := (Y - SCREEN_HEIGHT / 2) * (20 / SCREEN_HEIGHT / 2);
+  Result := ( Y - SCREEN_HEIGHT / 2 ) * ( 10 / SCREEN_HEIGHT / 2 );
 end;
 
 procedure Init;
 begin
-  // RU: Èíèöèàëèçèğóåì çâóêîâóş ïîäñèñòåìó. Äëÿ Windows ìîæíî ñäåëàòü âûáîğ ìåæäó DirectSound è OpenAL îòğåäàêòèğîâàâ ôàéë zgl_config.cfg.
+  // RU: Ğ˜Ğ½Ğ¸Ñ†Ğ¸Ğ°Ğ»Ğ¸Ğ·Ğ¸Ñ€ÑƒĞµĞ¼ Ğ·Ğ²ÑƒĞºĞ¾Ğ²ÑƒÑ Ğ¿Ğ¾Ğ´ÑĞ¸ÑÑ‚ĞµĞ¼Ñƒ. Ğ”Ğ»Ñ Windows Ğ¼Ğ¾Ğ¶Ğ½Ğ¾ ÑĞ´ĞµĞ»Ğ°Ñ‚ÑŒ Ğ²Ñ‹Ğ±Ğ¾Ñ€ Ğ¼ĞµĞ¶Ğ´Ñƒ DirectSound Ğ¸ OpenAL Ğ¾Ñ‚Ñ€ĞµĞ´Ğ°ĞºÑ‚Ğ¸Ñ€Ğ¾Ğ²Ğ°Ğ² Ñ„Ğ°Ğ¹Ğ» zgl_config.cfg.
   // EN: Initializing sound subsystem. For Windows can be used DirectSound or OpenAL, see zgl_config.cfg.
   snd_Init();
 
-  // RU: Çàãğóæàåì çâóêîâîé ôàéë è óñòàíàâëèâàåì äëÿ íåãî ìàêñèìàëüíîe êîëè÷åñòâî ïğîèãğûâàåìûõ èñòî÷íèêîâ â 2.
+  // RU: Ğ—Ğ°Ğ³Ñ€ÑƒĞ¶Ğ°ĞµĞ¼ Ğ·Ğ²ÑƒĞºĞ¾Ğ²Ğ¾Ğ¹ Ñ„Ğ°Ğ¹Ğ» Ğ¸ ÑƒÑÑ‚Ğ°Ğ½Ğ°Ğ²Ğ»Ğ¸Ğ²Ğ°ĞµĞ¼ Ğ´Ğ»Ñ Ğ½ĞµĞ³Ğ¾ Ğ¼Ğ°ĞºÑĞ¸Ğ¼Ğ°Ğ»ÑŒĞ½Ğ¾e ĞºĞ¾Ğ»Ğ¸Ñ‡ĞµÑÑ‚Ğ²Ğ¾ Ğ¿Ñ€Ğ¾Ğ¸Ğ³Ñ€Ñ‹Ğ²Ğ°ĞµĞ¼Ñ‹Ñ… Ğ¸ÑÑ‚Ğ¾Ñ‡Ğ½Ğ¸ĞºĞ¾Ğ² Ğ² 2.
   // EN: Load the sound file and set maximum count of sources that can be played to 2.
-  sound := snd_LoadFromFile(dirRes + 'click.wav', 2);
+  sound := snd_LoadFromFile( dirRes + 'click.wav', 2 );
 
-  // RU: Çàãğóæàåì òåêñòóğû, êîòîğûå áóäóò èíäèêàòîğàìè.
+  // RU: Ğ—Ğ°Ğ³Ñ€ÑƒĞ¶Ğ°ĞµĞ¼ Ñ‚ĞµĞºÑÑ‚ÑƒÑ€Ñ‹, ĞºĞ¾Ñ‚Ğ¾Ñ€Ñ‹Ğµ Ğ±ÑƒĞ´ÑƒÑ‚ Ğ¸Ğ½Ğ´Ğ¸ĞºĞ°Ñ‚Ğ¾Ñ€Ğ°Ğ¼Ğ¸.
   // EN: Load the textures, that will be indicators.
-  icon[0] := tex_LoadFromFile(dirRes + 'audio-stop.png');
-  icon[1] := tex_LoadFromFile(dirRes + 'audio-play.png');
+  icon[ 0 ] := tex_LoadFromFile( dirRes + 'audio-stop.png' );
+  icon[ 1 ] := tex_LoadFromFile( dirRes + 'audio-play.png' );
 
-  fntMain := font_LoadFromFile(dirRes + 'font.zfi');
-  setTextScale(15, fntMain);
+  fntMain := font_LoadFromFile( dirRes + 'font.zfi' );
+  setFontTextScale(15, fntMain);
 end;
 
 procedure Draw;
   var
-    r: zglTRect;
+    r : zglTRect;
 begin
-  ssprite2d_Draw(icon[state], (SCREEN_WIDTH - 128) / 2, (SCREEN_HEIGHT - 128) / 2, 128, 128, 0);
-  text_Draw(fntMain, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 64, 'Skillet - Comatose - Whispers In The Dark', TEXT_HALIGN_CENTER);
+  ssprite2d_Draw( icon[ state ], ( SCREEN_WIDTH - 128 ) / 2, ( SCREEN_HEIGHT - 128 ) / 2, 128, 128, 0 );
+  text_Draw( fntMain, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 64, 'Skillet - Comatose - Whispers In The Dark', TEXT_HALIGN_CENTER );
 
-  r.X := (SCREEN_WIDTH - 128) / 2;
-  r.Y := (SCREEN_HEIGHT - 128) / 2;
+  r.X := ( SCREEN_WIDTH - 128 ) / 2;
+  r.Y := ( SCREEN_HEIGHT - 128 ) / 2;
   r.W := 128;
   r.H := 128;
-  if col2d_PointInRect(mouseX, mouseY, r) Then
+  if col2d_PointInRect( mouse_X, mouse_Y, r ) Then
     begin
-      fx_SetBlendMode(FX_BLEND_ADD);
-      ssprite2d_Draw(icon[state], (SCREEN_WIDTH - 132) / 2, (SCREEN_HEIGHT - 132) / 2, 132, 132, 0, 155);
-      fx_SetBlendMode(FX_BLEND_NORMAL);
+      fx_SetBlendMode( FX_BLEND_ADD );
+      ssprite2d_Draw( icon[ state ], ( SCREEN_WIDTH - 132 ) / 2, ( SCREEN_HEIGHT - 132 ) / 2, 132, 132, 0, 155 );
+      fx_SetBlendMode( FX_BLEND_NORMAL );
     end;
 end;
 
 procedure Timer;
-  var
-    r: zglTRect;
-    p: Integer;
 begin
-  // RU: Ïğîâåğÿåì èãğàåò ëè ìóçûêà(1 - èãğàåò, 0 - íå èãğàåò). Òàê æå ìîæíî ïğîâåğèòü è çâóêè - ïîäñòàâèâ zglPSound è ID âîò òàê:
-  //     snd_Get(Sound, ID...
-  //     ID âîçâğàùàåòñÿ ôóíêöèåé snd_Play
+  // RU: ĞŸÑ€Ğ¾Ğ²ĞµÑ€ÑĞµĞ¼ Ğ¸Ğ³Ñ€Ğ°ĞµÑ‚ Ğ»Ğ¸ Ğ¼ÑƒĞ·Ñ‹ĞºĞ°(1 - Ğ¸Ğ³Ñ€Ğ°ĞµÑ‚, 0 - Ğ½Ğµ Ğ¸Ğ³Ñ€Ğ°ĞµÑ‚). Ğ¢Ğ°Ğº Ğ¶Ğµ Ğ¼Ğ¾Ğ¶Ğ½Ğ¾ Ğ¿Ñ€Ğ¾Ğ²ĞµÑ€Ğ¸Ñ‚ÑŒ Ğ¸ Ğ·Ğ²ÑƒĞºĞ¸ - Ğ¿Ğ¾Ğ´ÑÑ‚Ğ°Ğ²Ğ¸Ğ² zglPSound Ğ¸ ID Ğ²Ğ¾Ñ‚ Ñ‚Ğ°Ğº:
+  //     snd_Get( Sound, ID...
+  //     ID Ğ²Ğ¾Ğ·Ğ²Ñ€Ğ°Ñ‰Ğ°ĞµÑ‚ÑÑ Ñ„ÑƒĞ½ĞºÑ†Ğ¸ĞµĞ¹ snd_Play
   //
   // EN: Check if music playing(1 - playing, 0 - not playing). Sounds also can be checked this way - just use zglPSound and ID:
-  //     snd_Get(Sound, ID...
+  //     snd_Get( Sound, ID...
   //     ID returns by function snd_Play.
-  state := snd_Get(SND_STREAM, audio, SND_STATE_PLAYING);
+  state := snd_Get( SND_STREAM, audio, SND_STATE_PLAYING );
   if state = 0 Then
     audio := 0;
 
+  // RU: ĞŸĞ¾Ğ»ÑƒÑ‡Ğ°ĞµĞ¼ Ğ² Ğ¿Ñ€Ğ¾Ñ†ĞµĞ½Ñ‚Ğ°Ñ… Ğ¿Ğ¾Ğ·Ğ¸Ñ†Ğ¸Ñ Ğ¿Ñ€Ğ¾Ğ¸Ğ³Ñ€Ñ‹Ğ²Ğ°Ğ½Ğ¸Ñ Ğ°ÑƒĞ´Ğ¸Ğ¾Ğ¿Ğ¾Ñ‚Ğ¾ĞºĞ° Ğ¸ ÑÑ‚Ğ°Ğ²Ğ¸Ğ¼ Ğ³Ñ€Ğ¾Ğ¼ĞºĞ¾ÑÑ‚ÑŒ Ğ´Ğ»Ñ Ğ¿Ğ»Ğ°Ğ²Ğ½Ñ‹Ñ… Ğ¿ĞµÑ€ĞµÑ…Ğ¾Ğ´Ğ¾Ğ².
+  // EN: Get position in percent's for audio stream and set volume for smooth playing.
+  p := snd_Get( SND_STREAM, audio, SND_STATE_PERCENT );
+  if ( p >= 0 ) and ( p < 25 ) Then
+    snd_SetVolume( SND_STREAM, audio, ( 1 / 24 ) * p );
+  if ( p >= 75 ) and ( p < 100 ) Then
+    snd_SetVolume( SND_STREAM, audio, 1 - ( 1 / 24 ) * ( p - 75 ) );
+end;
+
+procedure KeyMouseEvent;
+var
+    r : zglTRect;
+begin
   if mBClickCanClick(M_BLEFT_CLICK) Then
   begin
-      // RU: Â äàííîì ñëó÷àå ìû íà÷èíàåì âîñïğîèçâîäèòü çâóê ñğàçó â óêàçàííûõ êîîğäèíàòàõ, íî èõ ìîæíî ìåíÿòü è â ïğîöåññå èñïîëüçóÿ ïğîöåäóğó snd_SetPos.
-      //     Âàæíî: Äëÿ OpenAL ìîæíî ïîçèöèîíèğîâàòü òîëüêî mono-çâóêè
+      // RU: Ğ’ Ğ´Ğ°Ğ½Ğ½Ğ¾Ğ¼ ÑĞ»ÑƒÑ‡Ğ°Ğ¸ Ğ¼Ñ‹ Ğ½Ğ°Ñ‡Ğ¸Ğ½Ğ°ĞµĞ¼ Ğ²Ğ¾ÑĞ¿Ñ€Ğ¾Ğ¸Ğ·Ğ²Ğ¾Ğ´Ğ¸Ñ‚ÑŒ Ğ·Ğ²ÑƒĞº ÑÑ€Ğ°Ğ·Ñƒ Ğ² ÑƒĞºĞ°Ğ·Ğ°Ğ½Ğ½Ñ‹Ñ… ĞºĞ¾Ğ¾Ñ€Ğ´Ğ¸Ğ½Ğ°Ñ‚Ğ°Ñ…, Ğ½Ğ¾ Ğ¸Ñ… Ğ¼Ğ¾Ğ¶Ğ½Ğ¾ Ğ¼ĞµĞ½ÑÑ‚ÑŒ Ğ¸ Ğ² Ğ¿Ñ€Ğ¾Ñ†ĞµÑÑĞµ Ğ¸ÑĞ¿Ğ¾Ğ»ÑŒĞ·ÑƒÑ Ğ¿Ñ€Ğ¾Ñ†ĞµĞ´ÑƒÑ€Ñƒ snd_SetPos.
+      //     Ğ’Ğ°Ğ¶Ğ½Ğ¾: Ğ”Ğ»Ñ OpenAL Ğ¼Ğ¾Ğ¶Ğ½Ğ¾ Ğ¿Ğ¾Ğ·Ğ¸Ñ†Ğ¸Ğ¾Ğ½Ğ¸Ñ€Ğ¾Ğ²Ğ°Ñ‚ÑŒ Ñ‚Ğ¾Ğ»ÑŒĞºĞ¾ mono-Ğ·Ğ²ÑƒĞºĞ¸
       //
       // EN: In this case, we begin to play the sound directly in these coordinates, but they can be changed later using procedure snd_SetPos.
       //     Important: OpenAL can position only mono-sounds.
 
-// ıòà ÷àñòü èçìåíåíà!!! Òåïåğü ìîæíî çàíîâî âîñïğîèçâîäèòü çâóêè, äàæå åñëè îíè íå çàêîí÷èëè èãğàòü.
+// ÑÑ‚Ğ° Ñ‡Ğ°ÑÑ‚ÑŒ Ğ¸Ğ·Ğ¼ĞµĞ½ĞµĞ½Ğ°!!! Ğ¢ĞµĞ¿ĞµÑ€ÑŒ Ğ¼Ğ¾Ğ¶Ğ½Ğ¾ Ğ·Ğ°Ğ½Ğ¾Ğ²Ğ¾ Ğ²Ğ¾ÑĞ¿Ñ€Ğ¾Ğ¸Ğ·Ğ²Ğ¾Ğ´Ğ¸Ñ‚ÑŒ Ğ·Ğ²ÑƒĞºĞ¸, Ğ´Ğ°Ğ¶Ğµ ĞµÑĞ»Ğ¸ Ğ¾Ğ½Ğ¸ Ğ½Ğµ Ğ·Ğ°ĞºĞ¾Ğ½Ñ‡Ğ¸Ğ»Ğ¸ Ğ¸Ğ³Ñ€Ğ°Ñ‚ÑŒ.
     if snd_Get(sound, IDSound, SND_STATE_PLAYING) = IDSound then
       snd_Stop(sound, IDSound);
-    IDSound := snd_Play(sound, FALSE, CalcX2D(mouse_X), CalcY2D(mouse_Y));
+    IDSound := snd_Play(sound, FALSE, CalcX2D(mouseX), CalcY2D(mouseY));
 // ------------------------------------------------------------------------------------------
 
-    r.X := (SCREEN_WIDTH - 128) / 2;
-    r.Y := (SCREEN_HEIGHT - 128) / 2;
+    snd_Play( sound, FALSE, CalcX2D( mouse_X ), CalcY2D( mouse_Y ) );
+
+    r.X := ( SCREEN_WIDTH - 128 ) / 2;
+    r.Y := ( SCREEN_HEIGHT - 128 ) / 2;
     r.W := 128;
     r.H := 128;
 
-// äîáàâëÿåì ïğîâåğêó íà ïğîèãğûâàíèå çâóêà, òîëüêî åñëè ìíîãî ğàçâíûõ çâóêîâ/ìóçûêè, òî íîìåğà íàäî ìåíÿòü (íå òîëüêî 1!!!)
-    if col2d_PointInRect(mouse_X, mouse_Y, r) and (audio = 1) Then
+// Ğ´Ğ¾Ğ±Ğ°Ğ²Ğ»ÑĞµĞ¼ Ğ¿Ñ€Ğ¾Ğ²ĞµÑ€ĞºÑƒ Ğ½Ğ° Ğ¿Ñ€Ğ¾Ğ¸Ğ³Ñ€Ñ‹Ğ²Ğ°Ğ½Ğ¸Ğµ Ğ·Ğ²ÑƒĞºĞ°, Ñ‚Ğ¾Ğ»ÑŒĞºĞ¾ ĞµÑĞ»Ğ¸ Ğ¼Ğ½Ğ¾Ğ³Ğ¾ Ñ€Ğ°Ğ·Ğ²Ğ½Ñ‹Ñ… Ğ·Ğ²ÑƒĞºĞ¾Ğ²/Ğ¼ÑƒĞ·Ñ‹ĞºĞ¸, Ñ‚Ğ¾ Ğ½Ğ¾Ğ¼ĞµÑ€Ğ° Ğ½Ğ°Ğ´Ğ¾ Ğ¼ĞµĞ½ÑÑ‚ÑŒ (Ğ½Ğµ Ñ‚Ğ¾Ğ»ÑŒĞºĞ¾ 1!!!)
+    if col2d_PointInRect(mouseX, mouseY, r) and (audio = 1) Then
     begin
       p := snd_Get(SND_STREAM, audio, SND_STATE_PLAYING);
       if p = 1 then
         snd_StopStream(audio);
     end;
 // ---------------------------------------------------------------------------------------------------------------
-
-    if col2d_PointInRect(mouse_X, mouse_Y, r) and (audio = 0) Then
-      audio := snd_PlayFile(dirRes + 'music.ogg');
-
+    if col2d_PointInRect( mouse_X, mouse_Y, r ) and ( audio = 0 ) Then
+      audio := snd_PlayFile( dirRes + 'music.ogg');
   end;
-
-  // RU: Ïîëó÷àåì â ïğîöåíòàõ ïîçèöèş ïğîèãğûâàíèÿ àóäèîïîòîêà è ñòàâèì ãğîìêîñòü äëÿ ïëàâíûõ ïåğåõîäîâ.
-  // EN: Get position in percent's for audio stream and set volume for smooth playing.
-  p := snd_Get(SND_STREAM, audio, SND_STATE_PERCENT);
-  if (p >= 0) and (p < 25) Then
-    snd_SetVolume(SND_STREAM, audio, (1 / 24) * p);
-  if (p >= 75) and (p < 100) Then
-    snd_SetVolume(SND_STREAM, audio, 1 - (1 / 24) * (p - 75));
-
-  key_ClearState();
-  mouse_ClearState();
 end;
 
 Begin
+  {$IFNDEF USE_ZENGL_STATIC}
+  if not zglLoad( libZenGL ) Then exit;
+  {$ENDIF}
+
   randomize();
 
-  TimeStart := timer_Add(@Timer, 16, Start);
+  TimeStart := timer_Add( @Timer, 16, Start );
 
-  zgl_Reg(SYS_LOAD, @Init);
-  zgl_Reg(SYS_DRAW, @Draw);
+  zgl_Reg(SYS_EVENTS, @KeyMouseEvent);
+  zgl_Reg( SYS_LOAD, @Init );
+  zgl_Reg( SYS_DRAW, @Draw );
 
   wnd_SetCaption(utf8_Copy('14 - Sound'));
 

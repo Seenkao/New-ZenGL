@@ -21,7 +21,7 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 04.08.2020
+ !!! modification from Serge 16.07.2021
 }
 unit zgl_mouse;
 
@@ -64,16 +64,28 @@ const
   M_BRIGHT  = 2;
 
 {$IfDef LIBRARY_COMPILE}
-function mouse_X : Integer;
-function mouse_Y : Integer;
-function mouse_DX : Integer;
-function mouse_DY : Integer;
+// возвращаем координату "X"
+function mouse_X : Integer; {$IfDef FPC}inline;{$EndIf}
+// возвращаем координату "Y"
+function mouse_Y : Integer; {$IfDef FPC}inline;{$EndIf}
+// возвращаем "DX"
+function mouse_DX : Integer; {$IfDef FPC}inline;{$EndIf}
+// возвращаем "DY"
+function mouse_DY : Integer; {$IfDef FPC}inline;{$EndIf}
 {$EndIf}
 
-function mBUpDown(action: Byte): Boolean;
-function mBClickCanClick(action: Byte): Boolean;
-function mBDblClickWheel(action: Byte): Boolean;
-procedure mouse_ClearState;
+// обработка клавишь мыши на нажатие/отжатие.
+// состояния: action = M_BLEFT_DOWN или M_BMIDDLE_DOWN или M_BRIGHT_DOWN или M_BLEFT_UP или M_BMIDDLE_UP или M_BRIGHT_UP
+function mBUpDown(action: Byte): Boolean; {$IfDef FPC}inline;{$EndIf}
+// обработка клавишь мыши на клик/отклик.
+// состояния: action = M_BLEFT_CLICK или M_BMIDDLE_CLICK или M_BRIGHT_CLICK или M_BLEFT_CANCLICK или M_BMIDDLE_CANCLICK или M_BRIGHT_CANCLICK
+function mBClickCanClick(action: Byte): Boolean; {$IfDef FPC}inline;{$EndIf}
+// обработка двойного нажатия клавишь мыши и работа ролика.
+// состояния: action = M_BLEFT_DBLCLICK или M_BMIDDLE_DBLCLICK или M_BRIGHT_DBLCLICK или M_WHEEL_UP или M_WHEEL_DOWN
+function mBDblClickWheel(action: Byte): Boolean; {$IfDef FPC}inline;{$EndIf}
+// очистка состояний мыши
+procedure mouse_ClearState; {$IfDef FPC}inline;{$EndIf}
+// блокирование координат мыши
 procedure mouse_Lock(X: Integer = -1; Y: Integer = -1);
 
 var
@@ -91,6 +103,9 @@ var
   mouseLock    : Boolean;
   {$IfDef MAC_COCOA}
   gMouseX, gMouseY: Integer;
+  {$EndIf}
+  {$IfDef USE_VKEYBOARD}
+  mouseLastVKey: array[0..3] of Byte;
   {$EndIf}
 
 implementation
@@ -137,9 +152,9 @@ end;
 
 procedure mouse_ClearState;
 begin
-  mouseClickCanClick := 0;//M_BLEFT_CANCLICK or M_BRIGHT_CANCLICK or M_BMIDDLE_CANCLICK;
+  mouseClickCanClick := 0;
   mouseDblClickWheel := 0;
-//  mouseUpDown := mouseUpDown and (255 - M_BLEFT_UP - M_BRIGHT_UP - M_BMIDDLE_UP);
+  mouseUpDown := mouseUpDown and (255 - M_BLEFT_UP - M_BRIGHT_UP - M_BMIDDLE_UP);
 end;
 
 procedure mouse_Lock(X: Integer = -1; Y: Integer = -1);

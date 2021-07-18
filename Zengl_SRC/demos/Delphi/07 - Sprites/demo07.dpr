@@ -30,8 +30,8 @@ type
 end;
 
 var
-  dirRes      : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};    // директория ресурсов
-  fntMain     : Byte;                                             // это фонт
+  dirRes      : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
+  fntMain     : Byte;
   texLogo     : zglPTexture;
   texBack     : zglPTexture;
   texGround   : zglPTexture;
@@ -92,7 +92,11 @@ begin
   // RU: Загружаем шрифт.
   // EN: Load the font.
   fntMain := font_LoadFromFile(dirRes + 'font.zfi');
-  setTextScale(15, fntMain);
+  setFontTextScale(15, fntMain);
+
+  // RU: Устанавливаем FPS.
+  // EN: Set FPS.
+  scr_SetFPS(60);
 end;
 
 procedure Draw;
@@ -222,26 +226,24 @@ begin
 
   camMain.Angle := camMain.Angle + cos(time / 1000) / 10;
 
-  for i := 0 to 20 do                       // кадры
+  for i := 0 to 20 do
     begin
       INC(tux[i].Frame );
       if tux[i].Frame > 20 Then
         tux[i].Frame := 2;
     end;
-  for i := 0 to 9 do                        // смещение в одну сторону
+  for i := 0 to 9 do
     begin
       tux[i].Pos.X := tux[i].Pos.X + 1.5;
       if tux[i].Pos.X > 864 Then
         tux[i].Pos.X := - 96;
     end;
-  for i := 10 to 19 do                      // смещение в другую сторону
+  for i := 10 to 19 do                      
     begin
       tux[i].Pos.X := tux[i].Pos.X - 1.5;
       if tux[i].Pos.X < - 96 Then
         tux[i].Pos.X := 864;
     end;
-
-  key_ClearState();
 end;
 
 Begin

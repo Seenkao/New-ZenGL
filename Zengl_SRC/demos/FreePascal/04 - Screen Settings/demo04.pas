@@ -34,14 +34,12 @@ var
   fntMain : Byte;
   texBack : zglPTexture;
 
-  TimeStart  : Byte = 0;
-
 procedure Init;
 begin
   fntMain := font_LoadFromFile( dirRes + 'font.zfi' );
   texBack := tex_LoadFromFile( dirRes + 'back03.jpg' );
 
-  setTextScale(15, fntMain);                  // razmery shrifta
+  setFontTextScale(15, fntMain);                  // razmery shrifta
 end;
 
 procedure Draw;
@@ -55,7 +53,7 @@ begin
   text_Draw( fntMain, 0, 20 * 4, 'F4 - Windowed mode' );
 end;
 
-procedure Timer;
+procedure KeyMouseEvent;
 begin
   // RU: Рекомендуемый к использованию полноэкранный режим. Основная идея - переключиться в полноэкранный режим используя текущее разрешение рабочего стола пользователя, но при этом
   //     сохранить пропорции изображения. Это позволит избежать некоторых проблем с LCD.
@@ -132,8 +130,6 @@ begin
    -------------------------------------------------------------------- *)
       scr_SetOptions();
     end;
-
-  key_ClearState();
 end;
 
 Begin
@@ -141,7 +137,7 @@ Begin
   if not zglLoad( libZenGL ) Then exit;
   {$ENDIF}
 
-  TimeStart := timer_Add( @Timer, 16, Start );
+  zgl_Reg(SYS_EVENTS, @KeyMouseEvent);
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );

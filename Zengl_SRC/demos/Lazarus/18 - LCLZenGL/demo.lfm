@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 257
+  Left = 255
   Height = 600
-  Top = 130
+  Top = 81
   Width = 800
   BorderStyle = bsSingle
   Caption = 'demo LCL'
@@ -12,7 +12,7 @@ object Form1: TForm1
   OnMouseDown = FormMouseDown
   OnMouseMove = FormMouseMove
   Position = poScreenCenter
-  LCLVersion = '2.0.10.0'
+  LCLVersion = '2.1.0.0'
   object Timer1: TTimer
     Interval = 10
     OnTimer = Timer1Timer

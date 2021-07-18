@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectSession>
-    <Version Value="11"/>
+    <Version Value="12"/>
     <BuildModes Active="Default"/>
-    <Units Count="72">
+    <Units Count="73">
       <Unit0>
         <Filename Value="demoLCL.lpr"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
         <CursorPos Y="20"/>
-        <UsageCount Value="77"/>
+        <UsageCount Value="92"/>
       </Unit0>
       <Unit1>
         <Filename Value="demo.pas"/>
@@ -18,9 +18,9 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <IsVisibleTab Value="True"/>
-        <TopLine Value="20"/>
-        <CursorPos X="9" Y="30"/>
-        <UsageCount Value="77"/>
+        <TopLine Value="63"/>
+        <CursorPos X="47" Y="77"/>
+        <UsageCount Value="92"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit1>
@@ -29,7 +29,7 @@
         <UnitName Value="Interfaces"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="7" Y="32"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="7"/>
       </Unit2>
       <Unit3>
         <Filename Value="../../../FreePas/lazarus/lcl/interfaces/gtk2/gtk2int.pas"/>
@@ -37,35 +37,35 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="249"/>
         <CursorPos X="15" Y="270"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit3>
       <Unit4>
         <Filename Value="../../../FreePas/fpcsrc/rtl/objpas/classes/classesh.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="91"/>
         <CursorPos X="21" Y="112"/>
-        <UsageCount Value="8"/>
+        <UsageCount Value="6"/>
       </Unit4>
       <Unit5>
         <Filename Value="../../../FreePas/lazarus/lcl/include/application.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="373"/>
         <CursorPos X="20" Y="382"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="7"/>
       </Unit5>
       <Unit6>
         <Filename Value="../../../FreePas/lazarus/lcl/include/interfacebase.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="33"/>
         <CursorPos X="96" Y="42"/>
-        <UsageCount Value="8"/>
+        <UsageCount Value="6"/>
       </Unit6>
       <Unit7>
         <Filename Value="../../../FreePas/lazarus/lcl/interfaces/gtk2/gtk2widgetset.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="2330"/>
         <CursorPos X="3" Y="2330"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit7>
       <Unit8>
         <Filename Value="../../../FreePas/lazarus/lcl/interfaces/gtk2/gtk2msgqueue.pp"/>
@@ -73,14 +73,14 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="136"/>
         <CursorPos X="85" Y="142"/>
-        <UsageCount Value="8"/>
+        <UsageCount Value="6"/>
       </Unit8>
       <Unit9>
         <Filename Value="../../../FreePas/lazarus/lcl/interfaces/gtk2/gtk2proc.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="1866"/>
         <CursorPos X="28" Y="1887"/>
-        <UsageCount Value="8"/>
+        <UsageCount Value="6"/>
       </Unit9>
       <Unit10>
         <Filename Value="../../../FreePas/lazarus/components/lazutils/lazmethodlist.pas"/>
@@ -88,35 +88,35 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="169"/>
         <CursorPos Y="203"/>
-        <UsageCount Value="8"/>
+        <UsageCount Value="6"/>
       </Unit10>
       <Unit11>
         <Filename Value="../../../FreePas/lazarus/lcl/include/screen.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="604"/>
         <CursorPos Y="638"/>
-        <UsageCount Value="8"/>
+        <UsageCount Value="6"/>
       </Unit11>
       <Unit12>
         <Filename Value="../../../FreePas/lazarus/lcl/include/control.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="2222"/>
         <CursorPos Y="2242"/>
-        <UsageCount Value="8"/>
+        <UsageCount Value="6"/>
       </Unit12>
       <Unit13>
         <Filename Value="../../../FreePas/lazarus/lcl/include/wincontrol.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="5392"/>
         <CursorPos Y="5412"/>
-        <UsageCount Value="8"/>
+        <UsageCount Value="6"/>
       </Unit13>
       <Unit14>
         <Filename Value="../../../FreePas/lazarus/lcl/include/customform.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="1458"/>
         <CursorPos Y="1478"/>
-        <UsageCount Value="8"/>
+        <UsageCount Value="6"/>
       </Unit14>
       <Unit15>
         <Filename Value="../../../FreePas/lazarus/lcl/lclmessageglue.pas"/>
@@ -124,7 +124,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="66"/>
         <CursorPos X="20" Y="66"/>
-        <UsageCount Value="8"/>
+        <UsageCount Value="6"/>
       </Unit15>
       <Unit16>
         <Filename Value="../../../FreePas/lazarus/lcl/lclclasses.pp"/>
@@ -132,7 +132,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="135"/>
         <CursorPos Y="157"/>
-        <UsageCount Value="8"/>
+        <UsageCount Value="6"/>
       </Unit16>
       <Unit17>
         <Filename Value="../../../FreePas/lazarus/lcl/interfaces/gtk2/gtk2proc.pp"/>
@@ -140,54 +140,54 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="428"/>
         <CursorPos X="28" Y="449"/>
-        <UsageCount Value="8"/>
+        <UsageCount Value="6"/>
       </Unit17>
       <Unit18>
         <Filename Value="../Zengl_SRC/demos/Lazarus/01 - Initialization LCL/demo01.pas"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="25" Y="3"/>
-        <UsageCount Value="21"/>
+        <UsageCount Value="19"/>
       </Unit18>
       <Unit19>
         <Filename Value="../Zengl_SRC/src/zgl_window.pas"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="20" Y="938"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="18"/>
       </Unit19>
       <Unit20>
         <Filename Value="../Zengl_SRC/src/zgl_screen.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="520"/>
         <CursorPos X="3" Y="456"/>
-        <UsageCount Value="19"/>
+        <UsageCount Value="17"/>
       </Unit20>
       <Unit21>
         <Filename Value="../Zengl_SRC/src/zgl_opengl.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="292"/>
         <CursorPos X="18" Y="312"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="18"/>
       </Unit21>
       <Unit22>
         <Filename Value="../Zengl_SRC/src/zgl_application.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="763"/>
         <CursorPos X="8" Y="287"/>
-        <UsageCount Value="12"/>
+        <UsageCount Value="10"/>
       </Unit22>
       <Unit23>
         <Filename Value="../Zengl_SRC/src/zgl_mouse.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="86"/>
         <CursorPos X="3" Y="80"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit23>
       <Unit24>
         <Filename Value="../Zengl_SRC/src/zgl_resources.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="326"/>
         <CursorPos Y="349"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="7"/>
       </Unit24>
       <Unit25>
         <Filename Value="../../../FreePas/lazarus/lcl/customtimer.pas"/>
@@ -195,21 +195,21 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="130"/>
         <CursorPos Y="151"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="7"/>
       </Unit25>
       <Unit26>
         <Filename Value="../../../FreePas/lazarus/lcl/interfaces/gtk2/gtk2callback.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="2720"/>
         <CursorPos Y="2740"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="7"/>
       </Unit26>
       <Unit27>
         <Filename Value="../Zengl_SRC/demos/Lazarus/03 - Input/demo03.lpr"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="40"/>
         <CursorPos X="16" Y="81"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit27>
       <Unit28>
         <Filename Value="../../../FreePas/lazarus/lcl/forms.pp"/>
@@ -217,7 +217,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="1488"/>
         <CursorPos X="15" Y="1506"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit28>
       <Unit29>
         <Filename Value="../../../FreePas/lazarus/lcl/interfacebase.pp"/>
@@ -225,49 +225,49 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="118"/>
         <CursorPos X="33" Y="136"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="7"/>
       </Unit29>
       <Unit30>
         <Filename Value="../Zengl_SRC/src/zgl_font.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="152"/>
         <CursorPos Y="185"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit30>
       <Unit31>
         <Filename Value="../Zengl_SRC/src/zgl_file.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="165"/>
         <CursorPos Y="186"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="7"/>
       </Unit31>
       <Unit32>
         <Filename Value="../Zengl_SRC/src/zgl_memory.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="42"/>
         <CursorPos Y="75"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit32>
       <Unit33>
         <Filename Value="../Zengl_SRC/src/zgl_text.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="231"/>
         <CursorPos Y="261"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="7"/>
       </Unit33>
       <Unit34>
         <Filename Value="../Zengl_SRC/src/zgl_timers.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="147"/>
         <CursorPos X="3" Y="153"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="7"/>
       </Unit34>
       <Unit35>
         <Filename Value="../Zengl_SRC/demos/Lazarus/14 - Sound/demo14.lpr"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="92"/>
         <CursorPos X="17" Y="108"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit35>
       <Unit36>
         <Filename Value="../../../FreePas/lazarus/lcl/controls.pp"/>
@@ -275,18 +275,18 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="166"/>
         <CursorPos X="19" Y="187"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="7"/>
       </Unit36>
       <Unit37>
         <Filename Value="../Zengl_SRC/demos/Lazarus/01 - Initialization LCL/demo01LCL.lpr"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="12" Y="10"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="7"/>
       </Unit37>
       <Unit38>
         <Filename Value="zglCustomConfig.cfg"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="7"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit38>
       <Unit39>
@@ -294,28 +294,28 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="75"/>
         <CursorPos X="50" Y="119"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="7"/>
       </Unit39>
       <Unit40>
         <Filename Value="../Zengl_SRC/src/zgl_sound.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="14"/>
         <CursorPos X="9" Y="26"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="7"/>
       </Unit40>
       <Unit41>
         <Filename Value="../Zengl_SRC/src/zgl_sound_wav.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="64"/>
         <CursorPos X="3" Y="71"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="7"/>
       </Unit41>
       <Unit42>
         <Filename Value="../Zengl_SRC/src/zgl_config.cfg"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="50"/>
         <CursorPos X="22" Y="78"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="7"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit42>
       <Unit43>
@@ -323,61 +323,63 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="24"/>
         <CursorPos X="11" Y="28"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit43>
       <Unit44>
         <Filename Value="../../../src/zgl_window.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="172"/>
-        <CursorPos X="14" Y="185"/>
-        <UsageCount Value="14"/>
+        <TopLine Value="302"/>
+        <CursorPos X="3" Y="319"/>
+        <UsageCount Value="13"/>
       </Unit44>
       <Unit45>
         <Filename Value="../../../src/zgl_config.cfg"/>
-        <EditorIndex Value="-1"/>
-        <CursorPos X="3" Y="18"/>
-        <UsageCount Value="19"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="19"/>
+        <CursorPos X="126" Y="35"/>
+        <UsageCount Value="18"/>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit45>
       <Unit46>
         <Filename Value="../../../src/zgl_application.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="367"/>
-        <CursorPos X="13" Y="389"/>
-        <UsageCount Value="13"/>
+        <TopLine Value="13"/>
+        <CursorPos X="12" Y="28"/>
+        <UsageCount Value="12"/>
       </Unit46>
       <Unit47>
         <Filename Value="../../../src/zgl_textures.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="656"/>
-        <CursorPos X="62" Y="665"/>
-        <UsageCount Value="10"/>
+        <TopLine Value="336"/>
+        <CursorPos Y="353"/>
+        <UsageCount Value="9"/>
       </Unit47>
       <Unit48>
         <Filename Value="../../../src/zgl_textures_png.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="373"/>
         <CursorPos Y="398"/>
-        <UsageCount Value="12"/>
+        <UsageCount Value="11"/>
       </Unit48>
       <Unit49>
         <Filename Value="../../../src/zgl_memory.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="47"/>
+        <TopLine Value="48"/>
         <CursorPos Y="75"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit49>
       <Unit50>
         <Filename Value="../../../src/zgl_file.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="639"/>
-        <CursorPos Y="672"/>
-        <UsageCount Value="12"/>
+        <TopLine Value="675"/>
+        <CursorPos X="42" Y="681"/>
+        <UsageCount Value="11"/>
       </Unit50>
       <Unit51>
         <Filename Value="../../../../lazarus/lcl/include/wincontrol.inc"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="6493"/>
+        <TopLine Value="6492"/>
         <CursorPos Y="6510"/>
         <UsageCount Value="9"/>
       </Unit51>
@@ -386,13 +388,13 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="189"/>
         <CursorPos X="36" Y="211"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit52>
       <Unit53>
         <Filename Value="../../../src/zgl_log.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="110"/>
-        <CursorPos Y="125"/>
+        <TopLine Value="111"/>
+        <CursorPos Y="128"/>
         <UsageCount Value="9"/>
       </Unit53>
       <Unit54>
@@ -400,56 +402,56 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="103"/>
         <CursorPos Y="119"/>
-        <UsageCount Value="11"/>
+        <UsageCount Value="9"/>
       </Unit54>
       <Unit55>
         <Filename Value="../../../src/zgl_font.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="259"/>
         <CursorPos X="23" Y="278"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit55>
       <Unit56>
         <Filename Value="../../../src/zgl_sound_ogg.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="191"/>
         <CursorPos X="20" Y="213"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit56>
       <Unit57>
         <Filename Value="../../../src/zgl_sound_wav.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="52"/>
         <CursorPos X="34" Y="72"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit57>
       <Unit58>
         <Filename Value="../../../src/zgl_text.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="116"/>
-        <CursorPos Y="130"/>
-        <UsageCount Value="10"/>
+        <TopLine Value="133"/>
+        <CursorPos X="22" Y="143"/>
+        <UsageCount Value="9"/>
       </Unit58>
       <Unit59>
         <Filename Value="../../../src/zgl_sprite_2d.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="381"/>
         <CursorPos Y="420"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="7"/>
       </Unit59>
       <Unit60>
         <Filename Value="../../../src/zgl_screen.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="814"/>
         <CursorPos X="9" Y="849"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit60>
       <Unit61>
         <Filename Value="../../../src/zgl_render_2d.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="73"/>
         <CursorPos Y="113"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="7"/>
       </Unit61>
       <Unit62>
         <Filename Value="../../../../FreePas/lazarus/lcl/customtimer.pas"/>
@@ -457,51 +459,51 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="152"/>
         <CursorPos Y="176"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="7"/>
       </Unit62>
       <Unit63>
         <Filename Value="../../../src/zgl_resources.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="58"/>
         <CursorPos X="47" Y="66"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit63>
       <Unit64>
         <Filename Value="../../../src/zgl_timers.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="69"/>
         <CursorPos X="131" Y="79"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="7"/>
       </Unit64>
       <Unit65>
         <Filename Value="../../../src/zgl_sound_dsound.pas"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="44" Y="100"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="7"/>
       </Unit65>
       <Unit66>
         <Filename Value="/usr/lib/lazarus/2.0.0/lcl/interfaces/gtk2/interfaces.pas"/>
         <UnitName Value="Interfaces"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="7"/>
       </Unit66>
       <Unit67>
         <Filename Value="../../../src/zgl_collision_2d.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="10"/>
         <CursorPos X="13" Y="26"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="7"/>
       </Unit67>
       <Unit68>
         <Filename Value="../../../src/zgl_mouse.pas"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="12" Y="28"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="7"/>
       </Unit68>
       <Unit69>
         <Filename Value="../../../tools/ZenFont(LCL)/uMain.lfm"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="7"/>
         <DefaultSyntaxHighlighter Value="LFM"/>
       </Unit69>
       <Unit70>
@@ -512,125 +514,60 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="423"/>
         <CursorPos X="30" Y="438"/>
-        <UsageCount Value="17"/>
+        <UsageCount Value="15"/>
       </Unit70>
       <Unit71>
         <Filename Value="../../../tools/ZenFont(LCL)/zgl_font_gen.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="473"/>
         <CursorPos Y="473"/>
-        <UsageCount Value="17"/>
+        <UsageCount Value="15"/>
       </Unit71>
+      <Unit72>
+        <Filename Value="../../../srcGEGL/gegl_VElements.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="8"/>
+        <CursorPos X="2" Y="25"/>
+        <UsageCount Value="10"/>
+      </Unit72>
     </Units>
-    <JumpHistory Count="26" HistoryIndex="25">
+    <JumpHistory Count="8" HistoryIndex="7">
       <Position1>
         <Filename Value="demo.pas"/>
-        <Caret Line="32" Column="22" TopLine="13"/>
+        <Caret Line="152" TopLine="136"/>
       </Position1>
       <Position2>
         <Filename Value="demo.pas"/>
-        <Caret Line="64" Column="46" TopLine="44"/>
+        <Caret Line="212" TopLine="196"/>
       </Position2>
       <Position3>
         <Filename Value="demo.pas"/>
-        <Caret Line="179" Column="45" TopLine="160"/>
+        <Caret Line="212" TopLine="196"/>
       </Position3>
       <Position4>
         <Filename Value="demo.pas"/>
-        <Caret Line="29" Column="15" TopLine="21"/>
+        <Caret Line="115" TopLine="98"/>
       </Position4>
       <Position5>
         <Filename Value="demo.pas"/>
-        <Caret Line="177" Column="55" TopLine="157"/>
+        <Caret Line="212" TopLine="197"/>
       </Position5>
       <Position6>
         <Filename Value="demo.pas"/>
-        <Caret Line="179" Column="18" TopLine="154"/>
+        <Caret Line="29" Column="12" TopLine="25"/>
       </Position6>
       <Position7>
-        <Filename Value="demo.pas"/>
-        <Caret Line="179" Column="17" TopLine="154"/>
+        <Filename Value="../../../src/zgl_config.cfg"/>
+        <Caret Line="43" Column="2" TopLine="22"/>
       </Position7>
       <Position8>
-        <Filename Value="demo.pas"/>
-        <Caret Line="193" Column="22" TopLine="182"/>
+        <Filename Value="../../../src/zgl_config.cfg"/>
+        <Caret Line="4" Column="4"/>
       </Position8>
-      <Position9>
-        <Filename Value="demo.pas"/>
-        <Caret Line="219" Column="22" TopLine="190"/>
-      </Position9>
-      <Position10>
-        <Filename Value="demo.pas"/>
-        <Caret Line="218" Column="11" TopLine="183"/>
-      </Position10>
-      <Position11>
-        <Filename Value="demo.pas"/>
-        <Caret Line="177" Column="43" TopLine="161"/>
-      </Position11>
-      <Position12>
-        <Filename Value="demo.pas"/>
-        <Caret Line="37" Column="15" TopLine="17"/>
-      </Position12>
-      <Position13>
-        <Filename Value="demo.pas"/>
-        <Caret Line="40" Column="13" TopLine="22"/>
-      </Position13>
-      <Position14>
-        <Filename Value="demo.pas"/>
-        <Caret Line="30" Column="9" TopLine="19"/>
-      </Position14>
-      <Position15>
-        <Filename Value="demo.pas"/>
-        <Caret Line="34" Column="7" TopLine="25"/>
-      </Position15>
-      <Position16>
-        <Filename Value="demo.pas"/>
-        <Caret Line="200" Column="10" TopLine="197"/>
-      </Position16>
-      <Position17>
-        <Filename Value="demo.pas"/>
-        <Caret Line="23" Column="13" TopLine="12"/>
-      </Position17>
-      <Position18>
-        <Filename Value="demo.pas"/>
-        <Caret Line="200" Column="26" TopLine="178"/>
-      </Position18>
-      <Position19>
-        <Filename Value="demo.pas"/>
-        <Caret Line="164" Column="25" TopLine="40"/>
-      </Position19>
-      <Position20>
-        <Filename Value="demo.pas"/>
-        <Caret Line="29" Column="9" TopLine="13"/>
-      </Position20>
-      <Position21>
-        <Filename Value="demo.pas"/>
-        <Caret Line="28" Column="32" TopLine="13"/>
-      </Position21>
-      <Position22>
-        <Filename Value="demo.pas"/>
-        <Caret Line="120" TopLine="110"/>
-      </Position22>
-      <Position23>
-        <Filename Value="demo.pas"/>
-        <Caret Line="120" TopLine="110"/>
-      </Position23>
-      <Position24>
-        <Filename Value="demo.pas"/>
-        <Caret Line="79" Column="19"/>
-      </Position24>
-      <Position25>
-        <Filename Value="demo.pas"/>
-        <Caret Line="29" Column="9" TopLine="20"/>
-      </Position25>
-      <Position26>
-        <Filename Value="demo.pas"/>
-        <Caret Line="30" Column="9" TopLine="20"/>
-      </Position26>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>
-      <Modes Count="0" ActiveMode=""/>
+      <Modes ActiveMode=""/>
     </RunParams>
   </ProjectSession>
 </CONFIG>

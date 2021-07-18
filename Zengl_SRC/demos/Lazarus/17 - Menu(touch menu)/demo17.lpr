@@ -8,7 +8,7 @@ uses
   cthreads,
   {$ENDIF}
   {$IFDEF USE_ZENGL_STATIC}
-  gegl_touch_menu,
+  gegl_menu_gui,
   zgl_screen,
   zgl_window,
   zgl_timers,
@@ -34,8 +34,6 @@ uses
 var
   //  dirRes  : UTF8String {$IFNDEF MACOSX} = 'data/' {$ENDIF};             // вне демо-версий
   dirRes  : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};            // в демо-версиях!!!
-  TimeStart: Byte = 0;
-
 
 procedure Init;
 begin
@@ -61,8 +59,7 @@ procedure Draw;
     r : zglTRect;
     s : UTF8String;
 begin
-  batch2d_Begin();
-  setTextScale(15, fontUse);
+//  setFontTextScale(15, fontUse);
 
   // RU: ZenGL работает исключительно с кодировкой UTF-8, поэтому весь текст должен быть в UTF-8.
   // EN: ZenGL works only with UTF-8 encoding, so all text should be encoded with UTF-8.
@@ -71,7 +68,7 @@ begin
 
   text_DrawEx( fontUse, 400, 65, 3, 0, 'Scaling', 255, $FFFFFF, TEXT_HALIGN_CENTER );
 
-  setTextScale(15, fontUse);
+  setFontTextScale(15, fontUse);
   fx2d_SetVCA( $FF0000, $00FF00, $0000FF, $FFFFFF, 255, 255, 255, 255 );
   text_Draw( fontUse, 400, 125, 'Gradient color for every symbol', TEXT_FX_VCA or TEXT_HALIGN_CENTER );
 
@@ -112,15 +109,6 @@ begin
   // EN: Render FPS in the top right corner using text_GetWidth.
   s := 'FPS: ' + u_IntToStr( zgl_Get( RENDER_FPS ) );
   text_Draw( fontUse, 800 - text_GetWidth( fontUse, s ), 0, s );
-
-  batch2d_End();
-end;
-
-procedure Timer;
-begin
-
-  key_ClearState();
-  mouse_ClearState;
 end;
 
 begin
@@ -128,8 +116,6 @@ begin
   if not zglLoad( libZenGL ) Then exit;
   {$ENDIF}
   randomize();
-
-  timer_Add( @Timer, 16, TimeStart, Start );
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );

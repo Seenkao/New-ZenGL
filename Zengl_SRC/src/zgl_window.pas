@@ -21,7 +21,7 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 20.12.2020
+ !!! modification from Serge 16.07.2021
 }
 unit zgl_window;
 
@@ -54,11 +54,11 @@ uses
   zgl_types;
 
 const
-  cs_ZenGL    = 'ZenGL - test 0.3.27';
-  cs_Date     = '2020.09.28';
+  cs_ZenGL    = 'ZenGL - test 0.3.28';
+  cs_Date     = '16.07.2021';
   cv_major    = 0;
   cv_minor    = 3;
-  cv_revision = 27;
+  cv_revision = 28;
 
   // zgl_Reg
   SYS_APP_INIT           = $000001;
@@ -67,6 +67,9 @@ const
   SYS_UPDATE             = $000005;
   SYS_EXIT               = $000006;
   SYS_ACTIVATE           = $000007;
+
+  SYS_EVENTS             = $000009;
+  SYS_POSTDRAW           = $000012;
   {$IfNDef ANDROID}
   SYS_CLOSE_QUERY        = $000008;
   SYS_APP_LOOP           = $000002;
@@ -76,13 +79,13 @@ const
   SYS_iOS_CHANGE_ORIENTATION = $000011;
   {$ENDIF}
   {$IFDEF ANDROID}
-  SYS_ANDROID_RESTORE = $00000015;
+  SYS_ANDROID_RESTORE = $000015;
   {$ENDIF}
 
-  TEXTURE_FORMAT_EXTENSION   = $000100;
-  TEXTURE_FORMAT_FILE_LOADER = $000101;
-  TEXTURE_FORMAT_MEM_LOADER  = $000102;
-  TEXTURE_CURRENT_EFFECT     = $000103;
+  TEXTURE_FORMAT_EXTENSION   = $000100;                     // расширение файла
+  TEXTURE_FORMAT_FILE_LOADER = $000101;                     // процедура загрузки
+  TEXTURE_FORMAT_MEM_LOADER  = $000102;                     // процедура загрузки из памяти
+  TEXTURE_CURRENT_EFFECT     = $000103;                     // процедура дополнительных эффектов
 
   SND_FORMAT_EXTENSION   = $000110;
   SND_FORMAT_FILE_LOADER = $000111;
@@ -206,13 +209,17 @@ procedure zgl_Reg(What: LongWord; UserData: Pointer);
 function  zgl_Get(What: LongWord): Ptr;
 
 // новое        new
-procedure zgl_SetParam(width, height: Integer; FullScreen, Vsync: Boolean);
+procedure zgl_SetParam(width, height: Integer; FullScreen: Boolean = False; Vsync: Boolean = False);
 
 procedure zgl_GetMem(out Mem: Pointer; Size: LongWord);
 procedure zgl_FreeMem(var Mem: Pointer);
 procedure zgl_FreeStrList(var List: zglTStringList);
 procedure zgl_Enable(What: LongWord);
 procedure zgl_Disable(What: LongWord);
+{$IfNDef USE_INIT_HANDLE}
+// установка интервала обработки клавиатуры, мыши и др. определять до создания окна!!!
+procedure zgl_SetEventsInterval(Interval: Cardinal);
+{$EndIf}
 
 var
   wndX         : Integer;
@@ -234,7 +241,7 @@ var
   wndProtocols  : TAtom;
   {$ENDIF}
   {$IFDEF WINDOWS}
-  wndFirst    : Boolean = TRUE; // Microsoft Sucks! :)
+//  wndFirst    : Boolean = TRUE; // Microsoft Sucks! :)
   wndHandle   : HWND;
   wndDC       : HDC;
   wndINST     : HINST;
@@ -305,6 +312,9 @@ uses
   {$IFDEF USE_VIDEO}
   zgl_video,
   {$IFDEF USE_THEORA}
+  {$IfNDef OLD_METHODS}
+  gegl_VElements,
+  {$EndIf}
   zgl_lib_theora,
   {$ENDIF}
   {$ENDIF}
@@ -320,6 +330,7 @@ function LoadCursorW(hInstance: HINST; lpCursorName: PWideChar): HCURSOR; stdcal
 procedure zglNSWindow.close;
 begin
   winOn := false;
+//  inherited;
 end;
 
 procedure zglNSWindow.resignMainWindow;
@@ -337,6 +348,7 @@ end;
 procedure zglNSView.windowWillClose(note: NSNotification);
 begin
   winOn := False;
+//  NSApp.terminate(nil);
 end;
 
 {$EndIf}
@@ -512,13 +524,14 @@ begin
   else begin
     viewNSRect.origin.x := wndX;
     viewNSRect.origin.y := wndY;
-    viewNSRect.size.width := wndWidth;
-    viewNSRect.size.height := wndHeight + 0;
+    viewNSRect.size.width := { wndx +} wndWidth;
+    viewNSRect.size.height := {wndY +} wndHeight + 0;
     createFlags := NSTitledWindowMask or NSClosableWindowMask;
   end;
   wndHandle := zglNSWindow.alloc;
   wndHandle.initWithContentRect_styleMask_backing_defer(viewNSRect, createFlags, NSBackingStoreBuffered, False).autorelease;
 
+  // ???  zdes ili net
   zglView := zglNSView.alloc;
   zglView.initWithFrame(viewNSRect);
   wndHandle.setContentView(zglView);
@@ -604,7 +617,7 @@ begin
     wndDC := 0;
   end;
 
-  if wndFirst Then
+//  if wndFirst Then
   begin
     if (wndHandle <> 0) and (not DestroyWindow(wndHandle)) Then
     begin
@@ -693,11 +706,8 @@ begin
 {$IFDEF iOS}
   UIApplication.sharedApplication.setStatusBarHidden(wndFullScreen);
 {$ENDIF}
-//  winOn := TRUE;
-
   wnd_UpdateCaption();
   wndUpdateWin := False;
-
 
   if (not wndFullScreen) and (appFlags and WND_USE_AUTOCENTER > 0) Then
     wnd_SetPos((zgl_Get(DESKTOP_WIDTH) - wndWidth) div 2, (zgl_Get(DESKTOP_HEIGHT) - wndHeight) div 2);
@@ -866,6 +876,7 @@ begin
   wndY := 0;
   {$ENDIF}
 {$EndIf}
+  appFlags := appFlags and ($FFFFFFFF - WND_USE_AUTOCENTER);
 end;
 
 {$IfNDef USE_INIT_HANDLE}
@@ -925,7 +936,6 @@ end;
 procedure zgl_Init(FSAA: Byte = 0; StencilBits: Byte = 0);
 begin
   {$IfNDef ANDROID}
-//  scr_GetResList;
   zgl_GetSysDir();
   {$EndIf}
 
@@ -1055,10 +1065,17 @@ begin
     app_PExit();
   res_Free();
 
+  {$IfNDef OLD_METHODS}
+  if managerSetOfTools.count > 0 then
+  begin
+    log_Add('Destroy GE-Elements' + u_IntToStr(managerSetOfTools.count));
+    DestroyManagerSOT();
+  end;
+  {$EndIf}
+
   if managerTimer.Count <> 0 Then
     log_Add('Timers to free: ' + u_IntToStr(managerTimer.Count));
-  while managerTimer.Count > 0 do
-    timers_Destroy;
+  timers_Destroy;
 
   if managerFont.Count <> 0 Then
     log_Add('Fonts to free: ' + u_IntToStr(managerFont.Count));
@@ -1154,13 +1171,15 @@ begin
     SYS_APP_INIT:
       begin
         app_PInit := UserData;
-        if not Assigned(UserData) Then app_PInit := @app_Init;
+        if not Assigned(UserData) Then
+          app_PInit := @app_Init;
       end;
     {$IfNDef ANDROID}
     SYS_APP_LOOP:
       begin
         app_PLoop := UserData;
-        if not Assigned(UserData) Then app_PLoop := @app_MainLoop;
+        if not Assigned(UserData) Then
+          app_PLoop := @app_MainLoop;
       end;
     {$EndIf}
     SYS_LOAD:
@@ -1183,6 +1202,10 @@ begin
       begin
         app_PActivate := UserData;
       end;
+    {$IfNDef USE_INIT_HANDLE}
+    SYS_EVENTS: app_PEvents := UserData;
+    {$EndIf}
+    SYS_POSTDRAW: app_PostPDraw := UserData;
     {$IFDEF iOS}
     SYS_iOS_MEMORY_WARNING:
       begin
@@ -1199,8 +1222,6 @@ begin
         app_PRestore := UserData;
       end;
     {$ENDIF}
-    // Input events          delete
-
     // Textures
     TEXTURE_FORMAT_EXTENSION:
       begin
@@ -1534,6 +1555,13 @@ begin
     end;
 {$ENDIF}
 end;
+
+{$IfNDef USE_INIT_HANDLE}
+procedure zgl_SetEventsInterval(Interval: Cardinal);
+begin
+  appEventsTime := Interval;
+end;
+{$EndIf}
 
 procedure zgl_SetParam(width, height: Integer; FullScreen, Vsync: Boolean);
 begin

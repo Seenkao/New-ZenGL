@@ -168,6 +168,7 @@ begin
   end;
 end;
 
+// эта фигня зачем?
 procedure fx_SetColorMask(R, G, B, Alpha: Boolean);
   var
     mask: LongWord;

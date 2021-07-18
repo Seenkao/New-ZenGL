@@ -47,10 +47,6 @@ begin
   // EN: Render circle in the center of screen with radius 128 pixels.
   pr2d_Circle( 400, 300, 128, $000000, 155, 32, PR2D_FILL );
 
-  INC( calc );
-  if calc > 359 Then calc := 0;
-  points[ calc ].X := 400 + m_Cos( calc ) * ( 96 + random( 32 ) );
-  points[ calc ].Y := 300 + m_Sin( calc ) * ( 96 + random( 32 ) );
   // RU: Рисуем линии внутри круга.
   // EN: Render lines inside the circle.
 
@@ -59,16 +55,20 @@ begin
 
   // RU: Рисуем эллипсы с заливкой и без, со сглаженными контурами(флаг PR2D_SMOOTH).
   // EN: Render filled ellipses with smoothed edges(flag PR2D_SMOOTH).
-  pr2d_Ellipse( 400 + 300, 300, 64, 256, $FFFFFF, 128, 32, PR2D_FILL or PR2D_SMOOTH );
+  pr2d_Ellipse( 400 + 300, 300, 64, 256, $FFFFFF, 75, 32, PR2D_FILL {or PR2D_SMOOTH });
   pr2d_Ellipse( 400 + 300, 300, 64, 256, $000000, 255, 32, PR2D_SMOOTH );
 
-  pr2d_Ellipse( 400 - 300, 300, 64, 256, $FFFFFF, 128, 32, PR2D_FILL or PR2D_SMOOTH );
+  pr2d_Ellipse( 400 - 300, 300, 64, 256, $FFFFFF, 75, 32, PR2D_FILL or PR2D_SMOOTH );
   pr2d_Ellipse( 400 - 300, 300, 64, 256, $000000, 255, 32, PR2D_SMOOTH );
 end;
 
 procedure Timer;
 begin
-  key_ClearState();
+  INC( calc );
+  if calc > 359 Then
+    calc := 0;
+  points[ calc ].X := 400 + m_Cos( calc ) * ( 96 + random( 32 ) );
+  points[ calc ].Y := 300 + m_Sin( calc ) * ( 96 + random( 32 ) );
 end;
 
 Begin

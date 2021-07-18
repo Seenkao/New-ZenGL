@@ -92,6 +92,11 @@ const
   GL_UNSIGNED_SHORT_4_4_4_4         = $8033;
 
   // PixelFormat
+  GL_RED                            = $1903;
+  GL_GREEN                          = $1904;
+  GL_BLUE                           = $1905;
+  GL_ALPHA                          = $1906;
+  GL_RGB                            = $1907;
   GL_RGBA                           = $1908;
 
   // Alpha Function
@@ -350,6 +355,9 @@ type
   // Color
   procedure glColor4ub(red, green, blue, alpha: GLubyte); stdcall; external libGL;
   procedure glColor4ubv(v: PGLubyte); stdcall; external libGL;
+
+  procedure glColor3ub(red, green, blue: GLbyte); stdcall; external libGL;
+  procedure glColor3ubv(v: PGLfloat); stdcall; external libGL;
   procedure glColor4f(red, green, blue, alpha: GLfloat); stdcall; external libGL;
   procedure glColor4fv(v: PGLfloat); stdcall; external libGL;
   procedure glColorMask(red, green, blue, alpha: GLboolean); stdcall; external libGL;
@@ -400,6 +408,9 @@ type
   procedure glColorPointer(size: GLint; atype: GLenum; stride: GLsizei; const pointer: Pointer); stdcall; external libGL;
   procedure glTexCoordPointer(size: GLint; atype: GLenum; stride: GLsizei; const pointer: Pointer); stdcall; external libGL;
   //---------------------------------------------------------------------
+
+  // deprecated
+  procedure glPointSize(size: GLfloat); stdcall; external libGL;
 var
   //
 //  glCompressedTexImage2D: procedure(target: GLenum; level, internalformat: GLint; width, height: GLsizei; border: GLint; imageSize: GLsizei; const pixels: Pointer); stdcall;

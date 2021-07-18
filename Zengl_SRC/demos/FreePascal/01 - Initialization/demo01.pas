@@ -5,17 +5,21 @@ program demo01;
 {$I zglCustomConfig.cfg}
 
 uses
+  {$IFDEF UNIX}
+  cthreads,
+  {$ENDIF}
   {$IFDEF USE_ZENGL_STATIC}
   // RU: При использовании статической компиляции необходимо подключать модули ZenGL содержащие необходимый функционал.
   // EN: Using static compilation needs to use ZenGL units with needed functionality.
-  zgl_screen,
   zgl_window,
+  zgl_screen,
   zgl_timers,
-  zgl_utils
+  zgl_utils,
+  zgl_log
   {$ELSE}
   // RU: Используя ZenGL в качестве библиотеки(so, dll или dylib) нужен всего один заголовочный файл.
   // EN: Using ZenGL as a shared library(so, dll or dylib) needs only one header.
-  zglHeader
+//  zglHeader
   {$ENDIF}
   ;
 
@@ -43,6 +47,8 @@ begin
   // EN: This function is the best way to implement smooth moving of something, because accuracy of timers are restricted by FPS.
 end;
 
+// RU: Пример использования таймера.
+// EN: An example of using a timer.
 procedure Timer;
 begin
   // RU: Будем в заголовке показывать количество кадров в секунду.
@@ -50,15 +56,25 @@ begin
   wnd_SetCaption( '01 - Initialization[ FPS: ' + u_IntToStr( zgl_Get( RENDER_FPS ) ) + ' ]' );
 end;
 
+procedure KeyMouseEvent;
+begin
+  // RU: Функция обработки клавиатуры, мыши, джойстика и тачпада. Все события связанные с ними очищаются после её обработки.
+  //     Все попытки обработать клавиатуру, мышь или тачпад в других функциях могут привести к непредвиденным ситуациям.
+  // EN: Keyboard, mouse, joystick and touchpad handling function. All events associated with them are cleared after processing it.
+  //     Any attempt to handle the keyboard, mouse, or touchpad in other functions may lead to unexpected situations.
+end;
+
 procedure Quit;
 begin
- //
+  // RU: События которые надо произвести по завершению программы.
+  // EN: Events to be performed at the end of the program.
 end;
 
 Begin
+(*
   // RU: Код ниже загружает библиотеку если статическая компиляция не используется.
   // EN: Code below loads a library if static compilation is not used.
-(*  {$IFNDEF USE_ZENGL_STATIC}
+  {$IFNDEF USE_ZENGL_STATIC}
     {$IFDEF LINUX}
     // RU: В GNU/Linux все библиотеки принято хранить в /usr/lib, поэтому libZenGL.so должна быть предварительно установлена.
     // Но zglLoad сначала проверить есть ли libZenGL.so рядом с исполняемым файлом.
@@ -78,16 +94,24 @@ Begin
     // Also you must know, that log-file will be created in root directory, so you must disable a log, or choose your own path and name for it. How to do this you can find in documentation.
     if not zglLoad( libZenGL ) Then exit;
     {$ENDIF}
-  {$ENDIF}   *)
+  {$ENDIF}
+*)
 
   // RU: Для загрузки/создания каких-то своих настроек/профилей/etc. можно получить путь к домашенему каталогу пользователя, или к исполняемому файлу(не работает для GNU/Linux).
   // EN: For loading/creating your own options/profiles/etc. you can get path to user home directory, or to executable file(not works for GNU/Linux).
   DirApp  := utf8_Copy( PAnsiChar( zgl_Get( DIRECTORY_APPLICATION ) ) );
   DirHome := utf8_Copy( PAnsiChar( zgl_Get( DIRECTORY_HOME ) ) );
 
+  // RU: Устанавливаем интервал на обработку событий клавиатуры, мыши, тачпада. И регистрируем процедуру.
+  //     Вызывать zgl_SetEventInterval не обязательно. Значение 16 стоит по умолчанию.
+  // EN: We set the interval for processing keyboard, mouse, touchpad events. And we register the procedure.
+  //     Calling zgl_SetEventInterval is optional. The default is 16.
+  zgl_SetEventsInterval(16);
+  zgl_Reg(SYS_EVENTS, @KeyMouseEvent);
+
   // RU: Создаем таймер с интервалом 1000мс.
   // EN: Create a timer with interval 1000ms.
-  TimeStart := timer_Add( @Timer, 1000, start );
+  TimeStart := timer_Add( @Timer, 1000, Start );
 
   // RU: Регистрируем процедуру, что выполнится сразу после инициализации ZenGL.
   // EN: Register the procedure, that will be executed after ZenGL initialization.
@@ -104,15 +128,16 @@ Begin
 
   // RU: Устанавливаем заголовок окна.
   // EN: Set the caption of the window.
-  wnd_SetCaption( '01 - Initialization' );
-
+  wnd_SetCaption(utf8_Copy('01 - Initialization'));
   // RU: Разрешаем курсор мыши.
   // EN: Allow to show the mouse cursor.
-  wnd_ShowCursor( TRUE );
+  wnd_ShowCursor( TRUE );                        // по умолчанию стоит
 
   // RU: Указываем первоначальные настройки.
   // EN: Set screen options.
   zgl_SetParam(800, 600, false, false);
+
+  scr_SetOptions();                              // это тоже не обязательно вызывать, по умолчанию прописано при инициализации
 
   // RU: Инициализируем ZenGL.
   // EN: Initialize ZenGL.

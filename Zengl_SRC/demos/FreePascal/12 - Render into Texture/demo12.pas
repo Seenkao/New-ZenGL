@@ -2,7 +2,12 @@ program demo12;
 
 {$I zglCustomConfig.cfg}
 
+  // MacOS Cocoa not work. Deprecated.
 uses
+  {$IFDEF UNIX}
+  cthreads,
+  {$ENDIF}
+  {$IFDEF USE_ZENGL_STATIC}
   zgl_screen,
   zgl_window,
   zgl_timers,
@@ -17,72 +22,70 @@ uses
   zgl_text,
   zgl_math_2d,
   zgl_utils
+  {$ELSE}
+  zglHeader
+  {$ENDIF}
   ;
 
 var
-  dirRes   : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
-  fntMain  : Byte;
-  texTux   : zglPTexture;
-  rtFull   : zglPRenderTarget;
-  rtDefault: zglPRenderTarget;
-  TimeStart: Byte;
+  dirRes    : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
+  fntMain   : Byte;
+  texTux    : zglPTexture;
+  rtFull    : zglPRenderTarget;
+  rtDefault : zglPRenderTarget;
 
 procedure Init;
 begin
-  texTux := tex_LoadFromFile(dirRes + 'tux_stand.png');
-  tex_SetFrameSize(texTux, 64, 64);
+  texTux := tex_LoadFromFile( dirRes + 'tux_stand.png' );
+  tex_SetFrameSize( texTux, 64, 64 );
 
-  fntMain := font_LoadFromFile(dirRes + 'font.zfi');
+  fntMain := font_LoadFromFile( dirRes + 'font.zfi' );
+  setFontTextScale(15, fntMain);
 
-  // RU: Создаем RenderTarget и "цепляем" пустую текстуру. В процессе текстуру можно сменить присвоив rtarget.Surface другую zglPTexture, главное что бы совпадали размеры с теми, что указаны в
-  //     tex_CreateZero. Таргету также указан флаг RT_FULL_SCREEN, отвечающий за то, что бы в текстуру помещалось все содержимое экрана а не область 256x256(как с флагом RT_DEFAULT).
+  // RU: РЎРѕР·РґР°РµРј RenderTarget Рё "С†РµРїР»СЏРµРј" РїСѓСЃС‚СѓСЋ С‚РµРєСЃС‚СѓСЂСѓ. Р’ РїСЂРѕС†РµСЃСЃРµ С‚РµРєСЃС‚СѓСЂСѓ РјРѕР¶РЅРѕ СЃРјРµРЅРёС‚СЊ РїСЂРёСЃРІРѕРёРІ rtarget.Surface РґСЂСѓРіСѓСЋ zglPTexture, РіР»Р°РІРЅРѕРµ С‡С‚Рѕ Р±С‹ СЃРѕРІРїР°РґР°Р»Рё СЂР°Р·РјРµСЂС‹ СЃ С‚РµРјРё, С‡С‚Рѕ СѓРєР°Р·Р°РЅС‹ РІ
+  //     tex_CreateZero. РўР°СЂРіРµС‚Сѓ С‚Р°РєР¶Рµ СѓРєР°Р·Р°РЅ С„Р»Р°Рі RT_FULL_SCREEN, РѕС‚РІРµС‡Р°СЋС‰РёР№ Р·Р° С‚Рѕ, С‡С‚Рѕ Р±С‹ РІ С‚РµРєСЃС‚СѓСЂСѓ РїРѕРјРµС‰Р°Р»РѕСЃСЊ РІСЃРµ СЃРѕРґРµСЂР¶РёРјРѕРµ СЌРєСЂР°РЅР° Р° РЅРµ РѕР±Р»Р°СЃС‚СЊ 256x256(РєР°Рє СЃ С„Р»Р°РіРѕРј RT_DEFAULT).
   // EN: Create a RenderTarget and "bind" empty texture to it. Later texture can be changed via changing rtarget.Surface to another zglPTexture, the only requirement - the same size, that was
   //     set in tex_CreateZero. Also target use flag RT_FULL_SCREEN that responsible for rendering whole content of screen into target, not only region 256x256(like with flag RT_DEFAULT).
-  rtFull := rtarget_Add(tex_CreateZero(256, 256), RT_FULL_SCREEN);
+  rtFull := rtarget_Add( tex_CreateZero( 256, 256 ), RT_FULL_SCREEN );
 
-  // RU: Для сравнения создадим ещё один RenderTarget с флагом RT_DEFAULT.
+  // RU: Р”Р»СЏ СЃСЂР°РІРЅРµРЅРёСЏ СЃРѕР·РґР°РґРёРј РµС‰С‘ РѕРґРёРЅ RenderTarget СЃ С„Р»Р°РіРѕРј RT_DEFAULT.
   // EN: Create one more RenderTarget with flag RT_DEFAULT for comparison.
-  rtDefault := rtarget_Add(tex_CreateZero(256, 256), RT_DEFAULT);
-
-  setTextScale(15, fntMain);
+  rtDefault := rtarget_Add( tex_CreateZero( 256, 256 ), RT_DEFAULT );
 end;
 
 procedure Draw;
 begin
-  // RU: Устанавливаем текущий RenderTarget.
+  // RU: РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј С‚РµРєСѓС‰РёР№ RenderTarget.
   // EN: Set current RenderTarget.
-  rtarget_Set(rtFull);
-  // RU: Рисуем в него.
+  rtarget_Set( rtFull );
+  // RU: Р РёСЃСѓРµРј РІ РЅРµРіРѕ.
   // EN: Render to it.
-  asprite2d_Draw(texTux, random(800 - 64), random(600 - 64), 64, 64, 0, random(9) + 1);
-  // RU: Возвращаемся к обычному рендеру.
+  asprite2d_Draw( texTux, random( 800 - 64 ), random( 600 - 64 ), 64, 64, 0, random( 9 ) + 1 );
+  // RU: Р’РѕР·РІСЂР°С‰Р°РµРјСЃСЏ Рє РѕР±С‹С‡РЅРѕРјСѓ СЂРµРЅРґРµСЂСѓ.
   // EN: Return to default rendering.
-  rtarget_Set(nil);
+  rtarget_Set( nil );
 
-  rtarget_Set(rtDefault);
-  asprite2d_Draw(texTux, random(800 - 64), random(600 - 64), 64, 64, 0, random(9) + 1);
-  rtarget_Set(nil);
+  rtarget_Set( rtDefault );
+  asprite2d_Draw( texTux, random( 800 - 64 ), random( 600 - 64 ), 64, 64, 0, random( 9 ) + 1 );
+  rtarget_Set( nil );
 
-  // RU: Теперь рисуем содержимое RenderTarget'ов.
+  // RU: РўРµРїРµСЂСЊ СЂРёСЃСѓРµРј СЃРѕРґРµСЂР¶РёРјРѕРµ RenderTarget'РѕРІ.
   // EN: Render content of RenderTargets.
-  ssprite2d_Draw(rtFull.Surface, (400 - 256) / 2, (600 - 256) / 2, 256, 256, 0);
-  ssprite2d_Draw(rtDefault.Surface, (400 - 256) / 2 + 400, (600 - 256) / 2, 256, 256, 0);
+  ssprite2d_Draw( rtFull.Surface, ( 400 - 256 ) / 2, ( 600 - 256 ) / 2, 256, 256, 0 );
+  ssprite2d_Draw( rtDefault.Surface, ( 400 - 256 ) / 2 + 400, ( 600 - 256 ) / 2, 256, 256, 0 );
 
-  text_Draw(fntMain, 0, 0, 'FPS: ' + u_IntToStr(zgl_Get(RENDER_FPS)));
-end;
-
-procedure Timer;
-begin
-  key_ClearState();
+  text_Draw( fntMain, 0, 0, 'FPS: ' + u_IntToStr( zgl_Get( RENDER_FPS ) ) );
 end;
 
 Begin
+  {$IFnDEF USE_ZENGL_STATIC}
+  if not zglLoad( libZenGL ) Then exit;
+  {$ENDIF}
+
   randomize();
 
-  TimeStart := timer_Add(@Timer, 16, Start);
-
-  zgl_Reg(SYS_LOAD, @Init);
-  zgl_Reg(SYS_DRAW, @Draw);
+  zgl_Reg( SYS_LOAD, @Init );
+  zgl_Reg( SYS_DRAW, @Draw );
 
   wnd_SetCaption(utf8_Copy('12 - Render into Texture'));
 

@@ -5,9 +5,6 @@ program demo02;
 {$R *.res}
 
 uses
-{$IFDEF UNIX}
-  cthreads,
-{$ENDIF}
   Classes,
 
   zgl_types,
@@ -70,9 +67,6 @@ var
   i: Integer;
   memStream: TMemoryStream;
 begin
-  file_SetPath('');           // выставляем дирректорию для работы демо-версий
-  // в вашем рабочем проекте выставлять не надо!!!
-
   // RU: Более детальное рассмотрение параметров функций загрузки ресурсов есть в соответствующих примерах, тут же показана лишь основная суть.
   // EN: Description with more details about parameters of functions can be found in other demos, here is only main idea shown.
   snd_Init();
@@ -106,12 +100,11 @@ begin
   // EN: Loading resources from files in memory need additional set their extension.
   //     As an example TMemoryStream will be used instead of mem_LoadFromFile/mem_Free, just for showing how zglTMemory works.
   memStream := TMemoryStream.Create();
-{$IFNDEF MACOSX}
+  {$IFNDEF MACOSX}
   memStream.LoadFromFile(dirRes + 'back01.jpg');
-{$ELSE}
-  memStream.LoadFromFile(PAnsiChar(zgl_Get(DIRECTORY_APPLICATION)) +
-    'Contents/Resources/back01.jpg');
-{$ENDIF}
+  {$ELSE}
+  memStream.LoadFromFile(PAnsiChar(zgl_Get(DIRECTORY_APPLICATION)) + 'Contents/Resources/back01.jpg');
+  {$ENDIF}
   memory.Position := memStream.Position;
   memory.Memory := memStream.Memory;
   memory.Size := memStream.Size;
@@ -124,7 +117,9 @@ begin
   texLogo := tex_LoadFromFile('zengl.png');
   file_CloseArchive();
 
-  setTextScale(15, fntMain);                                            // выставляем размер шрифта
+  // RU: Устанавливаем размер шрифта fntMain (в пикселях).
+  // EN: Set the fntMain font size (in pixels).
+  setFontTextScale(15, fntMain);
 end;
 
 procedure Draw;
@@ -133,27 +128,21 @@ begin
   // EN: Resources which are loading in multithreaded mode can be used only after finishing the loading process. Code below renders loading screen if resources are not loaded yet.
   if res_GetCompleted() < 100 then
   begin
-    ssprite2d_Draw(texLogo, (800 - texLogo.Width) / 2, (600 - texLogo.Height) /
-      2, texLogo.Width, texLogo.Height, 0);
-    text_Draw(fntMain, 400, 300 + texLogo.Height / 4, 'Loading... ' +
-      u_IntToStr(res_GetCompleted()) + '%', TEXT_HALIGN_CENTER);
+    ssprite2d_Draw(texLogo, (800 - texLogo.Width) / 2, (600 - texLogo.Height) / 2, texLogo.Width, texLogo.Height, 0);
+    text_Draw(fntMain, 400, 300 + texLogo.Height / 4, 'Loading... ' + u_IntToStr(res_GetCompleted()) + '%', TEXT_HALIGN_CENTER);
     exit;
   end;
 
   ssprite2d_Draw(texTest, 0, 0, 800, 600, 0);
   text_Draw(fntMain, 0, 0, 'FPS: ' + u_IntToStr(zgl_Get(RENDER_FPS)));
-  text_Draw(fntMain, 0, 16, 'VRAM Used: ' +
-    u_FloatToStr(zgl_Get(RENDER_VRAM_USED) / 1024 / 1024) + 'Mb');
+  text_Draw(fntMain, 0, 16, 'VRAM Used: ' + u_FloatToStr(zgl_Get(RENDER_VRAM_USED) / 1024 / 1024) + 'Mb');
 end;
 
 begin
-
   zgl_Reg(SYS_LOAD, @Init);
   zgl_Reg(SYS_DRAW, @Draw);
 
   wnd_SetCaption(utf8_Copy('02 - Resources'));
-
-  zgl_SetParam(800, 600, false, false);
 
   zgl_Init();
 end.

@@ -3,13 +3,13 @@
   <ProjectSession>
     <PathDelim Value="\"/>
     <Version Value="11"/>
-    <Units Count="3">
+    <Units Count="2">
       <Unit0>
         <Filename Value="ZenFont.lpr"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="42" Y="16"/>
-        <UsageCount Value="66"/>
+        <UsageCount Value="95"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit0>
       <Unit1>
@@ -18,24 +18,13 @@
         <ComponentName Value="Form1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <TopLine Value="16"/>
-        <CursorPos X="8" Y="25"/>
-        <UsageCount Value="66"/>
+        <TopLine Value="180"/>
+        <CursorPos X="13" Y="189"/>
+        <UsageCount Value="95"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit1>
-      <Unit2>
-        <Filename Value="uProcessing.pas"/>
-        <IsPartOfProject Value="True"/>
-        <ComponentName Value="Form2"/>
-        <HasResources Value="True"/>
-        <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="-1"/>
-        <CursorPos X="38" Y="18"/>
-        <UsageCount Value="66"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit2>
     </Units>
     <RunParams>
       <FormatVersion Value="2"/>

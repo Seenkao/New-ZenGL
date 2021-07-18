@@ -57,63 +57,63 @@ uses
 procedure pr2d_Pixel( X, Y : Single; Color : LongWord; Alpha : Byte = 255 );
 begin
   if ( not b2dStarted ) or batch2d_Check( GL_POINTS, FX_BLEND, nil ) Then
-    begin
-      glEnable( GL_BLEND );
-      glBegin( GL_POINTS );
-    end;
+  begin
+    glEnable( GL_BLEND );
+    glBegin( GL_POINTS );
+  end;
 
   glColor4ub( ( Color and $FF0000 ) shr 16, ( Color and $FF00 ) shr 8, Color and $FF, Alpha );
   glVertex2f( X + 0.5, Y + 0.5 );
 
   if not b2dStarted Then
-    begin
-      glEnd();
-      glDisable( GL_BLEND );
-    end;
+  begin
+    glEnd();
+    glDisable( GL_BLEND );
+  end;
 end;
 
 procedure pr2d_Line( X1, Y1, X2, Y2 : Single; Color : LongWord; Alpha : Byte = 255; FX : LongWord = 0 );
 begin
   if ( not b2dStarted ) or batch2d_Check( GL_LINES, FX_BLEND or FX, nil ) Then
+  begin
+    if FX and PR2D_SMOOTH > 0 Then
     begin
-      if FX and PR2D_SMOOTH > 0 Then
-        begin
-          glEnable( GL_LINE_SMOOTH    );
-          {$IFNDEF USE_GLES}
-          glEnable( GL_POLYGON_SMOOTH );
-          {$ENDIF}
-        end;
-      glEnable( GL_BLEND );
-
-      glBegin( GL_LINES );
+      glEnable( GL_LINE_SMOOTH    );
+      {$IFNDEF USE_GLES}
+      glEnable( GL_POLYGON_SMOOTH );
+      {$ENDIF}
     end;
+    glEnable( GL_BLEND );
+
+    glBegin( GL_LINES );
+  end;
 
   if FX and FX2D_VCA > 0 Then
-    begin
-      glColor4f(fx2dVCA[0, 0], fx2dVCA[0, 1], fx2dVCA[0, 2], fx2dVCA[0, 3]);
-      glVertex2f( X1 + 0.5, Y1 + 0.5 );
-      glColor4f(fx2dVCA[1, 0], fx2dVCA[1, 1], fx2dVCA[1, 2], fx2dVCA[1, 3]);
-      glVertex2f( X2 + 0.5, Y2 + 0.5 );
-    end else
-      begin
-        glColor4f(((Color and $FF0000 ) shr 16) / 255, (( Color and $FF00 ) shr 8) / 255, (Color and $FF) / 255, Alpha / 255);
-        glVertex2f( X1 + 0.5, Y1 + 0.5 );
-        glVertex2f( X2 + 0.5, Y2 + 0.5 );
-      end;
+  begin
+    glColor4f(fx2dVCA[0, 0], fx2dVCA[0, 1], fx2dVCA[0, 2], fx2dVCA[0, 3]);
+    glVertex2f( X1 + 0.5, Y1 + 0.5 );
+    glColor4f(fx2dVCA[1, 0], fx2dVCA[1, 1], fx2dVCA[1, 2], fx2dVCA[1, 3]);
+    glVertex2f( X2 + 0.5, Y2 + 0.5 );
+  end else
+  begin
+    glColor4f(((Color and $FF0000 ) shr 16) / 255, (( Color and $FF00 ) shr 8) / 255, (Color and $FF) / 255, Alpha / 255);
+    glVertex2f( X1 + 0.5, Y1 + 0.5 );
+    glVertex2f( X2 + 0.5, Y2 + 0.5 );
+  end;
 
   if not b2dStarted Then
-    begin
-      glEnd();
+  begin
+    glEnd();
 
-      if FX and PR2D_SMOOTH > 0 Then
-        begin
-          glDisable( GL_LINE_SMOOTH    );
-          {$IFNDEF USE_GLES}
-          glDisable( GL_POLYGON_SMOOTH );
-          {$ENDIF}
-        end;
-      glDisable( GL_BLEND );
+    if FX and PR2D_SMOOTH > 0 Then
+    begin
+      glDisable( GL_LINE_SMOOTH    );
+      {$IFNDEF USE_GLES}
+      glDisable( GL_POLYGON_SMOOTH );
+      {$ENDIF}
     end;
+    glDisable( GL_BLEND );
+  end;
 end;
 
 procedure pr2d_Rect( X, Y, W, H : Single; Color : LongWord; Alpha : Byte = 255; FX : LongWord = 0 );
@@ -304,42 +304,42 @@ begin
   if FX and PR2D_FILL = 0 Then
     begin
       if ( not b2dStarted ) or batch2d_Check( GL_LINES, FX_BLEND or FX, nil ) Then
+      begin
+        if FX and PR2D_SMOOTH > 0 Then
         begin
-          if FX and PR2D_SMOOTH > 0 Then
-            begin
-              glEnable( GL_LINE_SMOOTH    );
-              {$IFNDEF USE_GLES}
-              glEnable( GL_POLYGON_SMOOTH );
-              {$ENDIF}
-            end;
-          glEnable( GL_BLEND );
-
-          glBegin( GL_LINES );
+          glEnable( GL_LINE_SMOOTH    );
+          {$IFNDEF USE_GLES}
+          glEnable( GL_POLYGON_SMOOTH );
+          {$ENDIF}
         end;
+        glEnable( GL_BLEND );
+
+        glBegin( GL_LINES );
+      end;
 
       glColor4f(((Color and $FF0000 ) shr 16) / 255, (( Color and $FF00 ) shr 8) / 255, (Color and $FF) / 255, Alpha / 255);
       for i := 0 to Quality - 1 do
-        begin
-          glVertex2f( X + xRadius * cosTable[ Round( i * k ) ], Y + yRadius * sinTable[ Round( i * k ) ] );
-          glVertex2f( X + xRadius * cosTable[ Round( ( i + 1 ) * k ) ], Y + yRadius * sinTable[ Round( ( i + 1 ) * k ) ] );
-        end;
+      begin
+        glVertex2f( X + xRadius * cosTable[ Round( i * k ) ], Y + yRadius * sinTable[ Round( i * k ) ] );
+        glVertex2f( X + xRadius * cosTable[ Round( ( i + 1 ) * k ) ], Y + yRadius * sinTable[ Round( ( i + 1 ) * k ) ] );
+      end;
 
       if not b2dStarted Then
-        begin
-          glEnd();
+      begin
+        glEnd();
 
-          if FX and PR2D_SMOOTH > 0 Then
-            begin
-              glDisable( GL_LINE_SMOOTH    );
-              {$IFNDEF USE_GLES}
-              glDisable( GL_POLYGON_SMOOTH );
-              {$ENDIF}
-            end;
-          glDisable( GL_BLEND );
+        if FX and PR2D_SMOOTH > 0 Then
+        begin
+          glDisable( GL_LINE_SMOOTH    );
+          {$IFNDEF USE_GLES}
+          glDisable( GL_POLYGON_SMOOTH );
+          {$ENDIF}
         end;
+        glDisable( GL_BLEND );
+      end;
     end else
       begin
-        if ( not b2dStarted ) or batch2d_Check( GL_TRIANGLES, FX_BLEND or FX, nil ) Then
+        if ( not b2dStarted ) or batch2d_Check( GL_TRIANGLE_FAN, FX_BLEND or FX, nil ) Then
           begin
             if FX and PR2D_SMOOTH > 0 Then
               begin
@@ -350,16 +350,16 @@ begin
               end;
             glEnable( GL_BLEND );
 
-            glBegin( GL_TRIANGLES );
+            glBegin( GL_TRIANGLE_FAN );
           end;
 
         glColor4f(((Color and $FF0000 ) shr 16) / 255, (( Color and $FF00 ) shr 8) / 255, (Color and $FF) / 255, Alpha / 255);
+        glVertex2f( X, Y );
         for i := 0 to Quality - 1 do
-          begin
-            glVertex2f( X, Y );
-            glVertex2f( X + xRadius * cosTable[ Round( i * k ) ], Y + yRadius * sinTable[ Round( i * k ) ] );
-            glVertex2f( X + xRadius * cosTable[ Round( ( i + 1 ) * k ) ], Y + yRadius * sinTable[ Round( ( i + 1 ) * k ) ] );
-          end;
+        begin   
+          glVertex2f( X + xRadius * cosTable[ Round( i * k ) ], Y + yRadius * sinTable[ Round( i * k ) ] );
+          glVertex2f( X + xRadius * cosTable[ Round( ( i + 1 ) * k ) ], Y + yRadius * sinTable[ Round( ( i + 1 ) * k ) ] );
+        end;
 
         if not b2dStarted Then
           begin

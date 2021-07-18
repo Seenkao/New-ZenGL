@@ -1,11 +1,37 @@
+{
+ *  Copyright (c) 2021 SSW
+ *
+ *  This software is provided 'as-is', without any express or
+ *  implied warranty. In no event will the authors be held
+ *  liable for any damages arising from the use of this software.
+ *
+ *  Permission is granted to anyone to use this software for any purpose,
+ *  including commercial applications, and to alter it and redistribute
+ *  it freely, subject to the following restrictions:
+ *
+ *  1. The origin of this software must not be misrepresented;
+ *     you must not claim that you wrote the original software.
+ *     If you use this software in a product, an acknowledgment
+ *     in the product documentation would be appreciated but
+ *     is not required.
+ *
+ *  2. Altered source versions must be plainly marked as such,
+ *     and must not be misrepresented as being the original software.
+ *
+ *  3. This notice may not be removed or altered from any
+ *     source distribution.
+}
 unit gegl_draw_gui;
 
-{/$I zgl_config.cfg}
+{$I zgl_config.cfg}
 
 interface
 
 uses
-  zgl_font, zgl_textures_png, zgl_textures;
+  zgl_font,
+  zgl_textures_png,
+  zgl_utils,
+  zgl_textures;
 
 var
   fontUse: Byte;
@@ -32,7 +58,7 @@ procedure DrawTouchSymbol;
 implementation
 
 uses
-  zgl_text, gegl_touch_menu, zgl_types, zgl_sprite_2d, zgl_keyboard, zgl_fx,
+  zgl_text, gegl_menu_gui, zgl_types, zgl_sprite_2d, zgl_keyboard, zgl_fx,
   {$IFNDEF USE_GLES}
   zgl_opengl_all
   {$ELSE}
@@ -113,7 +139,6 @@ var
   r: zglTRect;
   i: Integer;
 begin
-  setTextScale(22, fontUse);
   setTextColor(MenuColorText);
   glColor4f(CircleRed[0], CircleGreen[0], CircleBlue[0], CircleAlpha[0]);
   DrawCircle(TouchJoyRolling.Rolling.X, TouchJoyRolling.Rolling.Y, TouchJoyRolling.Rolling.R);
@@ -136,10 +161,10 @@ begin
 
     if ((TouchJoyRolling.OneButton[i].bPush and 1) > 0) then
     begin
-      setTextScale(21, fontUse);
+      setFontTextScale(21, fontUse);
       DrawButton(TouchJoyRolling.OneButton[i].X + 1, TouchJoyRolling.OneButton[i].Y + 1, TouchJoyRolling.Width - 2, TouchJoyRolling.Height - 2, 2);
       text_DrawInRect(fontUse, r, TouchJoyRolling.OneButton[i].symb, TEXT_HALIGN_CENTER or TEXT_VALIGN_CENTER);
-      setTextScale(22, fontUse);
+      setFontTextScale(22, fontUse);
     end
     else begin
       DrawButton(TouchJoyRolling.OneButton[i].X, TouchJoyRolling.OneButton[i].Y, TouchJoyRolling.Width, TouchJoyRolling.Height, 0);
@@ -153,7 +178,6 @@ var
   i: Integer;
   r: zglTRect;
 begin
-  setTextScale(22, fontUse);
   setTextColor(MenuColorText);
   for i := 1 to 9 do
   begin
@@ -172,10 +196,10 @@ begin
     r.Y := TouchJoy.OneButton[i].Y + 3;
     if (TouchJoy.OneButton[i].bPush and 1) > 0 then
     begin
-      setTextScale(21, fontUse);
+      setFontTextScale(21, fontUse);
       DrawButton(TouchJoy.OneButton[i].X + 1, TouchJoy.OneButton[i].Y + 1, TouchJoy.Width - 2, TouchJoy.Height - 2, 2);
       text_DrawInRect(fontUse, r, TouchJoy.OneButton[i].symb,  TEXT_HALIGN_CENTER or TEXT_VALIGN_CENTER);
-      setTextScale(22, fontUse);
+      setFontTextScale(22, fontUse);
     end
     else begin
       DrawButton(TouchJoy.OneButton[i].X, TouchJoy.OneButton[i].Y, TouchJoy.Width, TouchJoy.Height, 0);
@@ -190,15 +214,14 @@ var
   i: Integer;
   r: zglTRect;
 begin
-  setTextScale(TouchKey.textScale, fontUse);
   setTextColor(MenuColorText);
-  if (TouchKey.Flags and keyboardLatinRus) > 0 then           
-    if ((TouchKey.Flags and keyboardCaps) > 0) or ((TouchKey.Flags and keyboardShift) > 0) then
+  if (keybFlags and keyboardLatinRus) > 0 then
+    if ((keybFlags and keyboardCaps) > 0) or ((keybFlags and keyboardShift) > 0) then
       n := 3
     else
       n := 4
   else
-    if ((TouchKey.Flags and keyboardCaps) > 0) or ((TouchKey.Flags and keyboardShift) > 0) then
+    if ((keybFlags and keyboardCaps) > 0) or ((keybFlags and keyboardShift) > 0) then
       n := 1
     else
       n := 2;
@@ -213,25 +236,25 @@ begin
       r.X := r.X + 1;
       r.Y := r.Y + 1;
       DrawButton(TouchKey.OneButton[i].X + 1, TouchKey.OneButton[i].Y + 1, TouchKey.OWidth, TouchKey.Height, 2);
-      text_DrawInRect(fontUse, r, TouchKey.OneButton[i].symb[n], TEXT_HALIGN_CENTER or TEXT_VALIGN_CENTER);
+      text_DrawInRect(fontUse, r, Unicode_toUTF8( TouchKey.OneButton[i].symb[n]), TEXT_HALIGN_CENTER or TEXT_VALIGN_CENTER);
       Continue;                 
     end;
 
     DrawButton(TouchKey.OneButton[i].X, TouchKey.OneButton[i].Y, TouchKey.OWidth, TouchKey.Height, 0);
-    text_DrawInRect(fontUse, r, TouchKey.OneButton[i].symb[n], TEXT_HALIGN_CENTER or TEXT_VALIGN_CENTER);
+    text_DrawInRect(fontUse, r, Unicode_toUTF8(TouchKey.OneButton[i].symb[n]), TEXT_HALIGN_CENTER or TEXT_VALIGN_CENTER);
   end;
   for i := 35 to 44 do
   Begin
-    if (i = _Rus) and ((TouchKey.Flags and keyboardLatinRus) > 0) then
+    if (i = _Rus) and ((keybFlags and keyboardLatinRus) > 0) then
       Continue;
-    if (i = _Latin) and not((TouchKey.Flags and keyboardLatinRus) > 0) then
+    if (i = _Latin) and ((keybFlags and keyboardLatinRus) = 0) then
       Continue;
     r.X := TouchKey.StringButton[i].X;
     r.Y := TouchKey.StringButton[i].Y + 2;
     r.W := TouchKey.StringButton[i].Width;
-    if (keysDown[TouchKey.StringButton[i]._key]) or (((TouchKey.Flags and keyboardCaps) > 0) and (i = _CapsLock)) or
-          (((TouchKey.Flags and keyboardInsert) > 0) and (i = _Insert)) or ((i = _Shift) and
-          (keysDown[TouchKey.StringButton[i]._key])) then
+    if (keysDown[TouchKey.StringButton[i]._key]) or (((keybFlags and keyboardCaps) > 0) and (i = _CapsLock)) or
+          (((keybFlags and keyboardInsert) > 0) and (i = _Insert)) or ((i = _Shift) and
+          ((keybFlags and keyboardShift) > 0)) then
     begin
       r.X := r.X + 1;
       r.Y := r.Y + 1;
@@ -251,9 +274,8 @@ var
   i: Integer;
   r: zglTRect;
 begin
-  setTextScale(TouchKeySymb.textScale, fontUse);
   setTextColor(MenuColorText);
-  if (TouchKeySymb.Flags and keyboardShift) > 0 then
+  if (keybFlags and keyboardShift) > 0 then
     n := 2
   else
     n := 1;
@@ -282,9 +304,9 @@ begin
     r.Y := TouchKeySymb.StringButton[i].Y + 2;
     r.W := TouchKeySymb.StringButton[i].Width;
     if (i = _home) or (i = _end) then
-      setTextScale(Round(TouchKeySymb.textScale / 2), fontUse);
-    if ((keysDown[TouchKeySymb.StringButton[i]._key]) or (((TouchKeySymb.Flags and keyboardInsert) > 0) and (i = _Insert))) or
-           ((i = _Shift) and (keysDown[TouchKeySymb.StringButton[i]._key])) or
+      setFontTextScale(Round(TouchKeySymb.textScale / 2), fontUse);
+    if ((keysDown[TouchKeySymb.StringButton[i]._key]) or (((keybFlags and keyboardInsert) > 0) and (i = _Insert))) or
+           ((i = _Shift) and (keysDown[TouchKeySymb.StringButton[i]._key])) or (((keybFlags and keyboardCtrl) > 0) and (i = _Ctrl)) or
            (keysDown[TouchKeySymb.StringButton[i]._key]) then
     begin
       r.X := r.X + 1;
@@ -297,7 +319,7 @@ begin
       text_DrawInRect(fontUse, r, TouchKeySymb.StringButton[i].bString, TEXT_HALIGN_CENTER or TEXT_VALIGN_CENTER);
     end;
     if (i = _home) or (i = _end) then
-      setTextScale(TouchKeySymb.textScale, fontUse);
+      setFontTextScale(TouchKeySymb.textScale, fontUse);
   end;
   for i := 24 to 27 do
   begin

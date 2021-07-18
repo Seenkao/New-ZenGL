@@ -70,7 +70,6 @@ uses
   {$IFDEF WINDOWS}
   zgl_lib_msvcrt,
   {$ENDIF}
-  sysutils,
   zgl_memory,
   zgl_utils,
   zgl_types;

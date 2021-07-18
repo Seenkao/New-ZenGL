@@ -21,7 +21,7 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 04.08.2020
+ !!! modification from Serge 16.07.2021
 }
 unit zgl_keyboard;
 
@@ -172,18 +172,77 @@ const
 
   KA_DOWN      = 0;
   KA_UP        = 1;
+  KT_DOWN      = 2;
+  KT_UP        = 3;
 
-function  key_Down(KeyCode: Byte): Boolean;
-function  key_Up(KeyCode: Byte): Boolean;
-function  key_Press(KeyCode: Byte): Boolean;
-function  key_Last(KeyAction: Byte): Byte;
+  keyboardLatinRus       = $00000001;
+  keyboardLatRusDown     = $00000002;
+  keyboardCaps           = $00000004;
+  keyboardCapsDown       = $00000008;
+  keyboardSymbol         = $00000010;
+  keyboardShift          = $00000020;
+  keyboardCtrl           = $00000040;
+  keyboardCommand        = $00000080;
+  keyboardAlt            = $00000100;
+  keyboardInsert         = $00000200;
+  keyboardInsertDown     = $00000400;
+  keyboardNumLock        = $00000800;
+  keyboardNumLockDown    = $00001000;
+  keyboardScrollLock     = $00002000;
+  keyboardScrollLockDown = $00004000;
+
+// внутренняя работа с клавиатурой для всех систем, не надо трогать эти процедуры
+procedure keyboardDown(keyCode: Byte);
+procedure keyboardUp(keyCode: Byte);
+
+// опрос, нажата клавиша или нет, в данный момент времени
+function  key_Down(KeyCode: Byte): Boolean; {$IfDef FPC}inline;{$EndIf}
+// опрос, отжата клавиша или нетб в данный момент времени
+function  key_Up(KeyCode: Byte): Boolean; {$IfDef FPC}inline;{$EndIf}
+
+function  key_Press(KeyCode: Byte): Boolean; {$IfDef FPC}inline;{$EndIf}
+// вернёт код последней нажатой/отжатой (НЕ УПРАВЛЯЮЩЕЙ!) клавиши
+// KeyAction = или KA_DOWN или KA_UP
+function  key_Last(KeyAction: Byte): Byte; {$IfDef FPC}inline;{$EndIf}
+
+{$IfDef OLD_METHODS}
+// старые способы использования поля ввода 3-я демка
 procedure key_BeginReadText(const Text: UTF8String; MaxSymbols: Integer = -1);
 procedure key_UpdateReadText(const Text: UTF8String; MaxSymbols: Integer = -1);
-function  key_GetText: UTF8String;
+function  key_GetText: UTF8String; {$IfDef FPC}inline;{$EndIf}
 procedure key_EndReadText;
-procedure key_ClearState;
 
 procedure key_InputText(const Text: UTF8String);
+function _key_GetText: PAnsiChar;
+{$EndIf}
+
+// очистка состояний клавиатуры. Прописано в рабочем коде. Может быть нужно в крайних случаях.
+procedure key_ClearState;
+// возвращает код символа из кода клавиатуры. Только латиница.
+function scancode_to_utf8(ScanCode: Byte): Byte;
+
+(*  Установка начальной задержки (при начальном нажатии) при зажатии клавиши.
+    Sets the initial delay (when initially pressed) when the key is pressed.               *)
+procedure setKey_BeginRepeat(delay: Double); {$IfDef FPC}inline;{$EndIf}
+
+(*  Установки задержки при зажатии клавиши.
+    эта задержка не может быть больше половины начальной задержки.
+    Setting the delay when pressing a key.
+    This delay cannot be more than half of the initial delay                               *)
+procedure setKey_Repeat(delay: Double);
+
+{$IfDef USE_VKEYBOARD}
+(*  Установка задержки отключения виртуальной клавиатуры
+    (защита от одновременной работы клавиатуры и виртуальной клавиатуры)
+    Работает для не управляющих клавиш.
+    (Ctrl, Shif, Alt, Win/Command, CapsLock, ScrollLock, NumLock)
+    Setting the delay for turning off the virtual keyboard
+    (protection against the simultaneous operation of the keyboard and virtual keyboard)
+    Works for non-control keys.
+    (Ctrl, Shif, Alt, Win/Command, CapsLock, ScrollLock, NumLock)                          *)
+procedure setTimeLockVK(delay: Double); {$IfDef FPC}inline;{$EndIf}
+{$EndIf}
+
 {$IFDEF USE_X11}
 function xkey_to_scancode(XKey, KeyCode: Integer): Byte;
 function Xutf8LookupString(ic: PXIC; event: PXKeyPressedEvent; buffer_return: PAnsiChar; bytes_buffer: Integer; keysym_return: PKeySym; status_return: PStatus): integer; cdecl; external;
@@ -203,22 +262,21 @@ type
   end;
 {$ENDIF}
 function  SCA(KeyCode: LongWord): LongWord;
-procedure doKeyPress(KeyCode: LongWord);
-
-function _key_GetText: PAnsiChar;
-
-procedure key_WorkDown(keyCode: LongWord);
-procedure key_WorkUp(keyCode: LongWord);
 
 var
   keysDown    : array[0..255] of Boolean;
   keysUp      : array[0..255] of Boolean;
   keysPress   : array[0..255] of Boolean;
   keysCanPress: array[0..255] of Boolean;
+  {$IfDef OLD_METHODS}
   keysText    : UTF8String = '';
   keysCanText : Boolean;
   keysMax     : Integer;
-  keysLast    : array[0..1] of Byte;
+  {$EndIf}
+  keysLast    : array[0..3] of Byte;
+
+  keybFlags   : Cardinal;
+
   {$IFDEF USE_X11}
   keysRepeat: Integer; // Workaround, yeah... :)
   {$ENDIF}
@@ -228,12 +286,164 @@ var
   keysTextFrame  : CGRect;
   keysTextChanged: Boolean;
   {$ENDIF}
+  keyDownRepeat: Double;
+  keyBoolRepeat: Boolean;
+  beginKeyDelay: Double = 500;
+  repeatKeyDelay: Double = 60;
+  keyDelayWork: Double = 500;
+  {$IfDef USE_VKEYBOARD}
+  lockVirtualKeyboard: Boolean = False;
+  prevLockVK: Boolean = False;
+  timeLockVK: Double = 400;
+  startTimeLockVK: Double;
+  {$EndIf}
 
 implementation
 uses
   zgl_application,
+  {$IfDef USE_VKEYBOARD}
+  gegl_menu_gui,
+  {$EndIf}
   zgl_window,
+  zgl_timers,
   zgl_utils;
+
+procedure keyboardDown(keyCode: Byte);
+var
+  nCode: Byte;
+label
+  toJmp;
+begin
+  nCode := keyCode;
+  if (keybFlags and keyboardNumLock) > 0 then
+  begin
+    if (nCode >= $47) and (nCode <= $53) then
+    begin
+      case nCode of
+        K_KP_0:       nCode := K_INSERT;
+        K_KP_1:       nCode := K_END;
+        K_KP_2:       nCode := K_DOWN;
+        K_KP_3:       nCode := K_PAGEDOWN;
+        K_KP_4:       nCode := K_LEFT;
+        K_KP_6:       nCode := K_RIGHT;
+        K_KP_7:       nCode := K_HOME;
+        K_KP_8:       nCode := K_UP;
+        K_KP_9:       nCode := K_PAGEUP;
+        K_KP_DECIMAL: nCode := K_DELETE;
+      end;
+    end;
+  end;
+toJmp:
+
+  keysDown[nCode] := TRUE;
+  keysUp[nCode] := FALSE;
+  case nCode of
+    K_PAUSE: ;
+    K_INSERT:   keybFlags := keybFlags or keyboardInsertDown;
+    K_CTRL_L, K_CTRL_R, K_ALT_L, K_ALT_R, K_SHIFT_L, K_SHIFT_R, K_SUPER_L, K_SUPER_R:
+      begin
+        nCode := SCA(nCode);
+        keysDown[nCode] := True;
+        keysUp  [nCode] := False;
+        if nCode = K_SHIFT then keybFlags := keybFlags or keyboardShift;
+        if nCode = K_CTRL  then keybFlags := keybFlags or keyboardCtrl;
+        if nCode = K_ALT   then keybFlags := keybFlags or keyboardAlt;
+        if nCode = K_SUPER then keybFlags := keybFlags or keyboardCommand;
+      end;
+    K_APP_MENU: ;
+    K_CAPSLOCK: keybFlags := keybFlags or keyboardCapsDown;
+    K_NUMLOCK:  keybFlags := keybFlags or keyboardNumLockDown;
+    K_SCROLL:   keybFlags := keybFlags or keyboardScrollLockDown;
+    K_F1, K_F2, K_F3, K_F4, K_F5, K_F6, K_F7, K_F8, K_F9, K_F10, K_F11, K_F12: ;
+    else
+      begin
+        keysLast[KA_DOWN] := nCode;
+        {$IfDef USE_VKEYBOARD}
+        prevLockVK := true;
+        {$EndIf}
+      end;
+  end;
+
+  keysLast[KT_UP] := 0;
+
+  {$IFDEF USE_X11}
+  if keysRepeat < 2 Then
+  {$ENDIF}
+  if keysCanPress[nCode] Then
+  begin
+    keysPress   [nCode] := TRUE;
+    keysCanPress[nCode] := FALSE;
+  end;
+end;
+
+procedure keyboardUp(keyCode: Byte);
+var
+  nCode: Byte;
+begin
+  nCode := keyCode;
+  if (keybFlags and keyboardNumLock) > 0 then
+  begin
+    if (nCode >= $47) and (nCode <= $53) then
+    begin
+      case nCode of
+        K_KP_0:       nCode := K_INSERT;
+        K_KP_1:       nCode := K_END;
+        K_KP_2:       nCode := K_DOWN;
+        K_KP_3:       nCode := K_PAGEDOWN;
+        K_KP_4:       nCode := K_LEFT;
+        K_KP_6:       nCode := K_RIGHT;
+        K_KP_7:       nCode := K_HOME;
+        K_KP_8:       nCode := K_UP;
+        K_KP_9:       nCode := K_PAGEUP;
+        K_KP_DECIMAL: nCode := K_DELETE;
+      end;
+    end;
+  end;
+
+  if keysLast[KT_UP] = nCode then
+    exit;
+  keysDown[nCode] := FALSE;
+  keysUp  [nCode] := TRUE;
+
+  case nCode of
+    K_PAUSE: ;
+    K_INSERT:   if ((keybFlags and keyboardInsertDown) > 0) then
+                  keybFlags := keybFlags xor keyboardInsertDown xor keyboardInsert;
+    K_APP_MENU: ;
+    K_CAPSLOCK: if ((keybFlags and keyboardCapsDown) > 0)  then
+                  keybFlags := keybFlags xor keyboardCapsDown xor keyboardCaps;
+    K_NUMLOCK:  if ((keybFlags and keyboardNumLockDown) > 0) then
+                  keybFlags := keybFlags xor keyboardNumLock xor keyboardNumLockDown;
+    K_SCROLL: if ((keybFlags and keyboardScrollLockDown) > 0) then
+                  keybFlags := keybFlags xor keyboardScrollLock xor keyboardScrollLockDown;
+    K_F1, K_F2, K_F3, K_F4, K_F5, K_F6, K_F7, K_F8, K_F9, K_F10, K_F11, K_F12: ;
+    K_CTRL_R, K_CTRL_L, K_ALT_L, K_ALT_R, K_SHIFT_L, K_SHIFT_R, K_SUPER_R, K_SUPER_L:
+      begin
+        nCode := SCA(nCode);
+        keysDown[nCode] := FALSE;
+        keysUp  [nCode] := TRUE;
+        if nCode = K_SHIFT then keybFlags := keybFlags and ($FFFFFFFF - keyboardShift);
+        if nCode = K_CTRL  then keybFlags := keybFlags and ($FFFFFFFF - keyboardCtrl);
+        if nCode = K_ALT   then keybFlags := keybFlags and ($FFFFFFFF - keyboardAlt);
+        if nCode = K_SUPER then keybFlags := keybFlags and ($FFFFFFFF - keyboardCommand);
+      end;
+  else
+    begin
+      keysLast[KA_UP] := nCode;
+      keysLast[KT_UP] := nCode;
+      {$IfDef USE_VKEYBOARD}
+      prevLockVK := true;
+      {$EndIf}
+    end;
+  end;
+
+  if (keysLast[KT_DOWN] = nCode) or (keysLast[KA_DOWN] = nCode) then
+  begin
+    keysLast[KA_DOWN] := 0;
+    keysLast[KT_DOWN] := 0;
+    keyDelayWork := beginKeyDelay;
+  end;
+end;
 
 function key_Down(KeyCode: Byte): Boolean;
 begin
@@ -255,6 +465,7 @@ begin
   Result := keysLast[KeyAction];
 end;
 
+{$IfDef OLD_METHODS}
 procedure key_BeginReadText(const Text: UTF8String; MaxSymbols: Integer = -1);
   {$IFDEF ANDROID}
   var
@@ -335,6 +546,7 @@ begin
   appEnv^.CallVoidMethod(appEnv, appObject, appHideKeyboard);
   {$ENDIF}
 end;
+{$EndIf}
 
 procedure key_ClearState;
   var
@@ -351,16 +563,19 @@ begin
   end;
   keysLast[KA_DOWN] := 0;
   keysLast[KA_UP  ] := 0;
+  keyBoolRepeat := False;
 end;
 
 function scancode_to_utf8(ScanCode: Byte): Byte;
 begin
   Result := 0;
   case ScanCode of
+    K_TAB: Result := 9;
     K_TILDE:  Result := 96;
     K_MINUS,
     K_KP_SUB: Result := 45;
     K_EQUALS: Result := 61;
+    K_SPACE: Result := 32;
 
     K_0, K_KP_0: Result := 48;
     K_1, K_KP_1: Result := 49;
@@ -415,6 +630,28 @@ begin
     K_APOSTROPHE: Result := 39;
   end;
 
+  if ((keybFlags and keyboardCaps) > 0) then
+  begin
+    if (Result >= 97) and (Result <= 122) then
+      Result := Result - 32;
+    if ((keybFlags and keyboardLatinRus) > 0) then
+    begin
+      if Result = 96 then
+        Result := 126;
+      if Result = 91 then
+        Result := 123;
+      if Result = 93 then
+        Result := 125;
+      if Result = 59 then
+        Result := 58;
+      if Result = 39 then
+        Result := 34;
+      if Result = 44 then
+        Result := 60;
+      if Result = 46 then
+        Result := 62;
+    end;
+  end else
   if keysDown[K_SHIFT] then
     case Result of
       96: Result := 126; // ~
@@ -445,6 +682,28 @@ begin
     end;
 end;
 
+procedure setKey_BeginRepeat(delay: Double);
+begin
+  beginKeyDelay := delay;
+  keyDelayWork := delay;
+end;
+
+procedure setKey_Repeat(delay: Double);
+begin
+  if delay > (beginKeyDelay / 2) then
+    repeatKeyDelay := delay
+  else
+    repeatKeyDelay := beginKeyDelay / 2;
+end;
+
+{$IfDef USE_VKEYBOARD}
+procedure setTimeLockVK(delay: Double);
+begin
+  timeLockVK := delay;
+end;
+{$EndIf}
+
+{$IfDef OLD_METHODS}
 procedure key_InputText(const Text: UTF8String);
   var
     c: AnsiChar;
@@ -468,6 +727,12 @@ begin
       keysText := keysText + Text;
   end;
 end;
+
+function _key_GetText: PAnsiChar;
+begin
+  Result := utf8_GetPAnsiChar(key_GetText());
+end;
+{$EndIf}
 
 {$IFDEF USE_X11}
 // Most of scancodes can be get via simple trick. Commented lines were left just in case.
@@ -495,6 +760,7 @@ begin
     XK_Menu:         Result := K_APP_MENU;
 
     XK_KP_Divide:    Result := K_KP_DIV;
+    XK_KP_Enter:     Result := K_KP_ENTER;
   else
     Result := (KeyCode - 8) and $FF;
   end;
@@ -654,50 +920,13 @@ end;
 
 function SCA(KeyCode: LongWord): LongWord;
 begin
-   Result := KeyCode;
-  if (KeyCode = K_SUPER_L) or (KeyCode = K_SUPER_R) Then Result := K_SUPER;
-  if (KeyCode = K_SHIFT_L) or (KeyCode = K_SHIFT_R) Then Result := K_SHIFT;
-  if (KeyCode = K_CTRL_L) or (KeyCode = K_CTRL_R) Then Result := K_CTRL;
-  if (KeyCode = K_ALT_L) or (KeyCode = K_ALT_R) Then Result := K_ALT;
+  if (KeyCode = K_SHIFT_L) or (KeyCode = K_SHIFT_R) then Result := K_SHIFT;
+  if (KeyCode = K_CTRL_L) or (KeyCode = K_CTRL_R) then Result := K_CTRL;
+  if (KeyCode = K_ALT_L) or (KeyCode = K_ALT_R) then Result := K_ALT;
+  if (KeyCode = K_SUPER_L) or (KeyCode = K_SUPER_R) then Result := K_SUPER;
 end;
 
-procedure doKeyPress(KeyCode: LongWord);
-begin
-  {$IFDEF USE_X11}
-  if keysRepeat < 2 Then            
-  {$ENDIF}
-  if keysCanPress[KeyCode] Then
-  begin
-    keysPress   [KeyCode] := TRUE;
-    keysCanPress[KeyCode] := FALSE;
-  end;
-end;
-
-function _key_GetText: PAnsiChar;
-begin
-  Result := utf8_GetPAnsiChar(key_GetText());
-end;
-
-procedure key_WorkDown(keyCode: LongWord);
-begin
-  keysDown[keyCode]     := TRUE;
-  keysUp  [keyCode]     := FALSE;
-  keysLast[KA_DOWN] := keyCode;
-  {$IFDEF USE_X11}
-  if keysRepeat < 2 Then
-  {$ENDIF}
-  if keysCanPress[KeyCode] Then
-  begin
-    keysPress   [KeyCode] := TRUE;
-    keysCanPress[KeyCode] := FALSE;
-  end;
-end;
-
-procedure key_WorkUp(keyCode: LongWord);
-begin
-  keysDown[keyCode]   := FALSE;
-  keysUp  [keyCode]   := TRUE;
-  keysLast[KA_UP] := keyCode;
-end;
+initialization
+  keybFlags := 0;
 
 end.

@@ -52,7 +52,12 @@ function  m_Sin(Angle: Integer): Single;
 function  m_Distance(x1, y1, x2, y2: Single): Single;
 function  m_FDistance(x1, y1, x2, y2: Single): Single;
 function  m_Angle(x1, y1, x2, y2: Single): Single;
+// ориентация относительно двух точек     вопрос - а вектором не быстрее будет?
 function  m_Orientation(x, y, x1, y1, x2, y2: Single): Integer;
+// ориентация относительно двух точек, используя вектора
+// сразу надо определится будет это зависеть от направления вектора или нет!!!
+function m_VectOrientation(aP: zglTPoint2D; bV: zglTVector2D): Integer;
+//function
 
 {$IFDEF USE_TRIANGULATION}
 procedure tess_Triangulate(Contour: zglPPoints2D; iLo, iHi: Integer; AddHoles: Boolean = FALSE);
@@ -198,12 +203,26 @@ begin
         Result := ArcTan2(dx, dy)
 end;
 
-
 function m_Orientation(x, y, x1, y1, x2, y2: Single): Integer;
 var
   orientation: Single;
 begin
   orientation := (x2 - x1) * (y - y1) - (x - x1) * (y2 - y1);
+
+  if orientation > 0 Then
+    Result := ORIENTATION_RIGHT
+  else
+    if orientation < 0 Then
+      Result := ORIENTATION_LEFT
+    else
+      Result := ORIENTATION_ZERO;
+end;
+
+function m_VectOrientation(aP: zglTPoint2D; bV: zglTVector2D): Integer;
+var
+  orientation: Single;
+begin
+  orientation := (bV.x2 - bv.x1) * (aP.Y - bV.y1) - (aP.X - bV.x1) * (bV.y2 - bV.y1);
 
   if orientation > 0 Then
     Result := ORIENTATION_RIGHT

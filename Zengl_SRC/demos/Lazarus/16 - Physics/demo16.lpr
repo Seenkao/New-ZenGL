@@ -40,7 +40,6 @@ var
   Bodies  : array of PcpBody;
   Shapes  : array of PcpShape;
 
-  TimeStart: Byte;
   TimePhisics: Byte;
 
 // RU: Добавить объект "шар"
@@ -117,7 +116,7 @@ procedure Init;
     e, u       : cpFloat;
 begin
   fntMain := font_LoadFromFile(dirRes + 'font.zfi');
-  setTextScale(15, fntMain);
+  setFontTextScale(15, fntMain);
 
   cpInitChipmunk();
 
@@ -184,20 +183,17 @@ begin
 //  batch2d_End();
 end;
 
-procedure Proc;
+procedure KeyMouseEvent;
 begin
   if mBClickCanClick(M_BLEFT_CLICK) Then
     cpAddBox(mouseX - 10, mouseY - 10, 48, 32, 1, 0.5, 0.5);
   if mBClickCanClick(M_BRIGHT_CLICK) Then
-    cpAddBall(mouseX, mouseY, 16, 1, 0.5, 0.9);
+    cpAddBall(mouseX, mouseY, 16, 2, 0.5, 0.1);
 
   (*           код, который можно использовать, если ZenGL не скомпилированная библиотека.
     if (mouseClickCanClick and M_BLEFT_CLICK) > 0 then
       cpAddBox(mouse_X() - 10, mouse_Y() - 10, 48, 32, 1, 0.5, 0.5);
   *)
-
-  key_ClearState();
-  mouse_ClearState();
 end;
 
 procedure Phisics;
@@ -223,9 +219,9 @@ Begin
   if not cpLoad( libChipmunk ) Then exit;
   {$ENDIF}
 
-  TimeStart := timer_Add(@Proc, 16, Start);
   TimePhisics := timer_Add(@Phisics, 16, Start);
 
+  zgl_Reg(SYS_EVENTS, @KeyMouseEvent);
   zgl_Reg(SYS_LOAD, @Init);
   zgl_Reg(SYS_DRAW, @Draw);
   zgl_Reg(SYS_EXIT, @Quit);
