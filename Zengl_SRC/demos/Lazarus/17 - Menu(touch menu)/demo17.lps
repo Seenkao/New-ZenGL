@@ -8,7 +8,6 @@
         <Filename Value="demo17.lpr"/>
         <IsPartOfProject Value="True"/>
         <IsVisibleTab Value="True"/>
-        <TopLine Value="28"/>
         <CursorPos X="39" Y="29"/>
         <UsageCount Value="212"/>
         <Loaded Value="True"/>
@@ -256,7 +255,7 @@
         <WatchScope Value="wpsLocal"/>
         <WatchKind Value="wpkWrite"/>
         <Source Value="demo17.lpr"/>
-        <Line Value="125"/>
+        <Line Value="127"/>
       </Item>
     </BreakPoints>
   </Debugging>

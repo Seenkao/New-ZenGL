@@ -111,6 +111,8 @@ begin
   text_Draw( fontUse, 800 - text_GetWidth( fontUse, s ), 0, s );
 end;
 
+{$R *.res}
+
 begin
   {$IFNDEF USE_ZENGL_STATIC}
   if not zglLoad( libZenGL ) Then exit;

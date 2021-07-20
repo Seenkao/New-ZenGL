@@ -8,6 +8,7 @@
       <Unit0>
         <Filename Value="demo03.lpr"/>
         <IsPartOfProject Value="True"/>
+        <IsVisibleTab Value="True"/>
         <TopLine Value="5"/>
         <CursorPos X="8" Y="30"/>
         <UsageCount Value="176"/>
