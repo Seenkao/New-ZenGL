@@ -520,7 +520,7 @@ begin
 {$ENDIF}
 {$IFDEF MACOSX}{$IfDef MAC_COCOA}
   mouseX := gMouseX;
-  mouseY := gMouseY;
+  mouseY := wndHeight - gMouseY;
 {$Else}
   GetGlobalMouse(mPos);
   mouseX := mPos.h - wndX;
