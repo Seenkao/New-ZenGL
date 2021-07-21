@@ -6,5 +6,5 @@ cp ../../../bin/data/arrow.png ../../../bin/demo17.app/Contents/Resources/
 rm ../../../bin/demo17.app/Contents/MacOS/demo17
 cp ../../../bin/demo17 ../../../bin/demo17.app/Contents/MacOS/demo17
 # make Info.plist and copy icon
-cp -f demo03_macosx.plist ../../../bin/demo17.app/Contents/Info.plist
+cp -f demo17_macosx.plist ../../../bin/demo17.app/Contents/Info.plist
 cp ../../../bin/data/zengl.icns ../../../bin/demo17.app/Contents/Resources/demo17.icns
