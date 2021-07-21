@@ -2,7 +2,7 @@
 
 {$I zglCustomConfig.cfg}
 
-// включить USE_MENUGUI в zgl_config, чтобы виртуальная клавиатура заработала.
+// включить USE_MENUGUI в gegl_config, чтобы виртуальная клавиатура заработала.
 uses
   {$IFDEF UNIX}
   cthreads,
