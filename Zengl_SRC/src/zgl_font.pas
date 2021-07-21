@@ -40,7 +40,7 @@ const
   MAX_USE_FONT = 5;
   // был загружен шрифт?
   Enable       = 1;
-  // используется ли шрифт (можно условно удалить и вместо него загрузить другой)
+  // используется ли шрифт
   UseFnt       = 2;
 
   PaddingX1    = 0;
@@ -110,6 +110,7 @@ var
 
 implementation
 uses
+  zgl_application,
   zgl_window,
   zgl_resources,
   zgl_text,
@@ -235,6 +236,7 @@ begin
   if not file_Exists(FileName) Then
   begin
     log_Add('Cannot read "' + FileName + '"');
+    winOn := False;
     exit;
   end;
 
@@ -264,7 +266,6 @@ begin
 
   useFont.ScaleNorm := 16 / TextScaleStandart ;
 
-  // для ускорения работы с текстом
   setFontTextScale(15, Result);
   useScaleEx := useFont.Scale;
   useFont := nil;
@@ -292,10 +293,7 @@ begin
   font_Load(Result, fntMem);
 
   if Result = 255 Then
-    log_Add('Unable to load font: From Memory');      // а где здесь прогрузка текстуры????
-
-  // здесь не прописана прогрузка текстуры. И вообще, надо уже решить проблему загрузки из ресурсов.
-  // А возможно и сохранения в ресурсы.
+    log_Add('Unable to load font: From Memory');
 
   managerFont.Font[Result].ScaleNorm := 16 / TextScaleStandart;
 
@@ -344,7 +342,6 @@ begin
 
   useFont.ScaleNorm := 16 / TextScaleStandart ;
 
-  // для ускорения работы с текстом
   setFontTextScale(15, Result);
   useScaleEx := useFont.Scale;
   useFont := nil;
