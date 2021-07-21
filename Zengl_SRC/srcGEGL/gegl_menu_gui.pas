@@ -374,7 +374,7 @@ var
   end;
 
 begin
-  txt_LoadFromFile('Rus.txt', RusSymb);
+  txt_LoadFromFile({$IfNDef MACOSX} '../data/' + {$EndIf} 'Rus.txt', RusSymb);
   log_Add(RusSymb);
   TouchKey.count := 34;                         
   if wndWidth < 1200 then
