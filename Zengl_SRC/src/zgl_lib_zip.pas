@@ -229,6 +229,12 @@ procedure UnloadLibZip;
 
 implementation
 
+{$IfDef MAC_COCOA}
+uses
+  zgl_log,
+  zgl_application;
+{$EndIf}  
+
 var
   zipDLL: Pointer;
 
