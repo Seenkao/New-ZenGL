@@ -20,6 +20,8 @@
  *
  *  3. This notice may not be removed or altered from any
  *     source distribution.
+ 
+ !!! modification from Serge 16.07.2021
 }
 unit zgl_lib_zip;
 
@@ -326,36 +328,46 @@ begin
   UnloadLibZip;
 
   zipDLL := dlopen(PChar(zDLL), 1);
-  if zipDLL = nil then raise Exception.Create('Could not load Zip');
-    @zip_open := dlsym(zipDLL, 'zip_open');
-    if not Assigned(zip_open) then
-      Exception.Create('Could not load zip_open from ' + zDLL);
-    @zip_close := dlsym(zipDLL, 'zip_close');
-    @zip_set_default_password := dlsym(zipDLL, 'zip_set_default_password');
-    @zip_stat := dlsym(zipDLL, 'zip_stat');
+  if zipDLL = nil then
+  begin
+    log_Add('Could not load Zip');
+    winOn := False;
+    exit;
+  end;
+  @zip_open := dlsym(zipDLL, 'zip_open');
+  if not Assigned(zip_open) then
+  begin
+    log_Add('Could not load zip_open from ' + zDLL);
+    winOn := False;
+    Exit;
+  end;
+  @zip_close := dlsym(zipDLL, 'zip_close');
+  @zip_set_default_password := dlsym(zipDLL, 'zip_set_default_password');
+  @zip_stat := dlsym(zipDLL, 'zip_stat');
 
-    @zip_fopen := dlsym(zipDLL, 'zip_fopen');
-    @zip_fread := dlsym(zipDLL, 'zip_fread');
-    @zip_fclose := dlsym(zipDLL, 'zip_fclose');
+  @zip_fopen := dlsym(zipDLL, 'zip_fopen');
+  @zip_fread := dlsym(zipDLL, 'zip_fread');
+  @zip_fclose := dlsym(zipDLL, 'zip_fclose');
 
-    @zip_get_num_entries := dlsym(zipDLL, 'zip_get_num_entries');
-    @zip_get_name := dlsym(zipDLL, 'zip_get_name');
-//    Exception.Create('Could not load ' + MethodName + ' from ' + zDLL);
-
+  @zip_get_num_entries := dlsym(zipDLL, 'zip_get_num_entries');
+  @zip_get_name := dlsym(zipDLL, 'zip_get_name');
 
   zipDLL := dlopen(PChar(zlDLL), 1);
-  if zipDLL = nil then raise Exception.Create('Could not load Zip');
+  if zipDLL = nil then
+  begin
+    log_Add('Could not load Zip');
+    winOn := False;
+    exit;
+  end;     
 
-    // hack for compression functions which will be never used, but which are needed on linking stage
-    @deflate := dlsym(zipDLL, 'deflate');
-    @deflateEnd := dlsym(zipDLL, 'deflateEnd');
-    @deflateInit2_ := dlsym(zipDLL, 'deflateInit2_');
-    @inflateInit_ := dlsym(zipDLL, 'inflateInit_');
-    @inflateEnd := dlsym(zipDLL, 'inflateEnd');
-    @inflate := dlsym(zipDLL, 'inflate');
-    @zlibVersion := dlsym(zipDLL, 'zlibVersion');
-//    Exception.Create('Could not load ' + MethodName + ' from ' + zlDLL);
-
+  // hack for compression functions which will be never used, but which are needed on linking stage
+  @deflate := dlsym(zipDLL, 'deflate');
+  @deflateEnd := dlsym(zipDLL, 'deflateEnd');
+  @deflateInit2_ := dlsym(zipDLL, 'deflateInit2_');
+  @inflateInit_ := dlsym(zipDLL, 'inflateInit_');
+  @inflateEnd := dlsym(zipDLL, 'inflateEnd');
+  @inflate := dlsym(zipDLL, 'inflate');
+  @zlibVersion := dlsym(zipDLL, 'zlibVersion');
 end;
 
 procedure UnloadLibZip;
