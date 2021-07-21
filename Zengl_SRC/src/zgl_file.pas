@@ -190,14 +190,14 @@ begin
     FOM_CREATE: FileHandle := FpOpen(platform_GetRes(s + FileName), O_Creat or O_Trunc or O_RdWr);
     FOM_OPENR:  FileHandle := FpOpen(platform_GetRes(s + FileName), O_RdOnly);
     FOM_OPENRW: FileHandle := FpOpen(platform_GetRes(s + FileName), O_RdWr);
-    FOM_OPENW:  FileHandle := FpOpen(platform_GetRes(s + FileName), O_WRONLY);;
+    FOM_OPENW:  FileHandle := FpOpen(platform_GetRes(s + FileName), O_WRONLY);
   end;
 {$Else}
   case Mode of
     FOM_CREATE: FileHandle := FpOpen(platform_GetRes(filePath + FileName), O_Creat or O_Trunc or O_RdWr);
     FOM_OPENR:  FileHandle := FpOpen(platform_GetRes(filePath + FileName), O_RdOnly);
     FOM_OPENRW: FileHandle := FpOpen(platform_GetRes(filePath + FileName), O_RdWr);
-    FOM_OPENW:  FileHandle := FpOpen(platform_GetRes(filePath + FileName), O_WRONLY);;
+    FOM_OPENW:  FileHandle := FpOpen(platform_GetRes(filePath + FileName), O_WRONLY);
   end;
 {$ENDIF}{$EndIf}
   Result := FileHandle <> FILE_ERROR;
@@ -662,7 +662,7 @@ begin
     Result := copy(Str, lenStr - (lenStr - pos) + 1, (lenStr - pos));
 end;
 
-// θμÿ
+// Γ¨Γ¬ΓΏ
 function file_GetName(const FileName: UTF8String): UTF8String;
   var
     tmp: UTF8String;
