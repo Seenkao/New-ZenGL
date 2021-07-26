@@ -431,7 +431,7 @@ begin
                   keybFlags := keybFlags xor keyboardCapsDown xor keyboardCaps;
     K_CTRL_R, K_CTRL_L:
       begin
-        if (keysUp[K_CTRL_L]) and (keysUp[K_CTRL_R]) then
+        if (keysCanPress[K_CTRL_L]) and (keysCanPress[K_CTRL_R]) then
         begin
           keybFlags := keybFlags and ($FFFFFFFF - keyboardCtrl);
           keysDown[K_CTRL] := FALSE;
@@ -440,7 +440,7 @@ begin
       end;
     K_ALT_L, K_ALT_R:
       begin
-        if (keysUp[K_ALT_L]) and (keysUp[K_ALT_R]) then
+        if (keysCanPress[K_ALT_L]) and (keysCanPress[K_ALT_R]) then
         begin
           keybFlags := keybFlags and ($FFFFFFFF - keyboardAlt);
           keysDown[K_ALT] := FALSE;
@@ -449,7 +449,7 @@ begin
       end;
     K_SHIFT_L, K_SHIFT_R:
       begin
-        if (keysUp[K_SHIFT_L]) and (keysUp[K_SHIFT_R]) then
+        if (keysCanPress[K_SHIFT_L]) and (keysCanPress[K_SHIFT_R]) then
         begin
           keybFlags := keybFlags and ($FFFFFFFF - keyboardShift);
           keysDown[K_SHIFT] := FALSE;
@@ -458,7 +458,7 @@ begin
       end;
     K_SUPER_R, K_SUPER_L:
       begin
-        if (keysUp[K_SUPER_L]) and (keysUp[K_SUPER_R]) then
+        if (keysCanPress[K_SUPER_L]) and (keysCanPress[K_SUPER_R]) then
         begin
           keybFlags := keybFlags and ($FFFFFFFF - keyboardCommand);
           keysDown[K_SUPER] := FALSE;
