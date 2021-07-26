@@ -180,16 +180,17 @@ const
   keyboardCaps           = $00000004;
   keyboardCapsDown       = $00000008;
   keyboardSymbol         = $00000010;
-  keyboardShift          = $00000020;
-  keyboardCtrl           = $00000040;
-  keyboardCommand        = $00000080;
-  keyboardAlt            = $00000100;
-  keyboardInsert         = $00000200;
-  keyboardInsertDown     = $00000400;
-  keyboardNumLock        = $00000800;
-  keyboardNumLockDown    = $00001000;
-  keyboardScrollLock     = $00002000;
-  keyboardScrollLockDown = $00004000;
+  keyboardSymbolDown     = $00000020;
+  keyboardShift          = $00000040;
+  keyboardCtrl           = $00000080;
+  keyboardCommand        = $00000100;
+  keyboardAlt            = $00000200;
+  keyboardInsert         = $00000400;
+  keyboardInsertDown     = $00000800;
+  keyboardNumLock        = $00001000;
+  keyboardNumLockDown    = $00002000;
+  keyboardScrollLock     = $00004000;
+  keyboardScrollLockDown = $00008000;
 
 // внутренняя работа с клавиатурой для всех систем, не надо трогать эти процедуры
 procedure keyboardDown(keyCode: Byte);
