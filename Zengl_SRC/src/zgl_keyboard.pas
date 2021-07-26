@@ -427,6 +427,11 @@ begin
     K_INSERT:   if ((keybFlags and keyboardInsertDown) > 0) then
                   keybFlags := keybFlags xor keyboardInsertDown xor keyboardInsert;
     K_APP_MENU: ;
+    K_NUMLOCK:  if ((keybFlags and keyboardNumLockDown) > 0) then
+                  keybFlags := keybFlags xor keyboardNumLock xor keyboardNumLockDown;
+    K_SCROLL: if ((keybFlags and keyboardScrollLockDown) > 0) then
+                  keybFlags := keybFlags xor keyboardScrollLock xor keyboardScrollLockDown;
+    K_F1, K_F2, K_F3, K_F4, K_F5, K_F6, K_F7, K_F8, K_F9, K_F10, K_F11, K_F12: ; 
     {$IfNDef MAC_COCOA}
     K_CAPSLOCK: if ((keybFlags and keyboardCapsDown) > 0)  then
                   keybFlags := keybFlags xor keyboardCapsDown xor keyboardCaps;
