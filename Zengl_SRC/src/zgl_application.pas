@@ -341,8 +341,11 @@ begin
     keybFlags := keybFlags and ($FFFFFFFF - keyboardLatRusDown) xor keyboardLatinRus;
   end;
   {$IfDef USE_VKEYBOARD}
-  if keysUp[K_F2] then
+  if keysDown[K_F2] then
+    keybFlags := keybFlags or keyboardSymbolDown; 
+  if ((keybFlags and keyboardSymbolDown) > 0) and (keysUp[K_F2]) then
   begin
+    keybFlags := keybFlags xor keyboardSymbolDown;
     if MenuChange = 3 then
     begin
       SetMenuProcess(4);
