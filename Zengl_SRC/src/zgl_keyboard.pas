@@ -596,6 +596,7 @@ begin
   {$ENDIF}
   for i := 0 to 255 do
   begin
+    keysUp      [i] := False;
     keysPress   [i] := FALSE;
     keysCanPress[i] := TRUE;
   end;
