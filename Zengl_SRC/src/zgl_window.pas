@@ -934,6 +934,8 @@ end;
 
 {$IfNDef USE_INIT_HANDLE}
 procedure zgl_Init(FSAA: Byte = 0; StencilBits: Byte = 0);
+var
+  i: word; 
 begin
   {$IfNDef ANDROID}
   zgl_GetSysDir();
@@ -981,6 +983,8 @@ begin
     wndCaption := cs_ZenGL;
   wnd_UpdateCaption();
   {$EndIf}
+  for i := 0 to 255 do
+    keysUp[i] := true; 
   winOn := TRUE;
 
   {$IFDEF iOS}
