@@ -310,35 +310,32 @@ uses
   zgl_utils;
 
 procedure keyboardDown(keyCode: Byte);
-var
-  nCode: Byte;
 label
   toJmp;
 begin
-  nCode := keyCode;
   if (keybFlags and keyboardNumLock) > 0 then
   begin
-    if (nCode >= $47) and (nCode <= $53) then
+    if (keyCode >= $47) and (keyCode <= $53) then
     begin
-      case nCode of
-        K_KP_0:       nCode := K_INSERT;
-        K_KP_1:       nCode := K_END;
-        K_KP_2:       nCode := K_DOWN;
-        K_KP_3:       nCode := K_PAGEDOWN;
-        K_KP_4:       nCode := K_LEFT;
-        K_KP_6:       nCode := K_RIGHT;
-        K_KP_7:       nCode := K_HOME;
-        K_KP_8:       nCode := K_UP;
-        K_KP_9:       nCode := K_PAGEUP;
-        K_KP_DECIMAL: nCode := K_DELETE;
+      case keyCode of
+        K_KP_0:       keyCode := K_INSERT;
+        K_KP_1:       keyCode := K_END;
+        K_KP_2:       keyCode := K_DOWN;
+        K_KP_3:       keyCode := K_PAGEDOWN;
+        K_KP_4:       keyCode := K_LEFT;
+        K_KP_6:       keyCode := K_RIGHT;
+        K_KP_7:       keyCode := K_HOME;
+        K_KP_8:       keyCode := K_UP;
+        K_KP_9:       keyCode := K_PAGEUP;
+        K_KP_DECIMAL: keyCode := K_DELETE;
       end;
     end;
   end;
 toJmp:
 
-  keysDown[nCode] := TRUE;
-  keysUp[nCode] := FALSE;
-  case nCode of
+  keysDown[keyCode] := TRUE;
+  keysUp[keyCode] := FALSE;
+  case keyCode of
     K_PAUSE: ;
     K_INSERT:   keybFlags := keybFlags or keyboardInsertDown;
     {$IfNDef MAC_COCOA}
@@ -374,7 +371,7 @@ toJmp:
     K_F1, K_F2, K_F3, K_F4, K_F5, K_F6, K_F7, K_F8, K_F9, K_F10, K_F11, K_F12: ;
     else
       begin
-        keysLast[KA_DOWN] := nCode;
+        keysLast[KA_DOWN] := keyCode;
         {$IfDef USE_VKEYBOARD}
         prevLockVK := true;
         {$EndIf}
@@ -386,43 +383,40 @@ toJmp:
   {$IFDEF USE_X11}
   if keysRepeat < 2 Then
   {$ENDIF}
-  if keysCanPress[nCode] Then
+  if keysCanPress[keyCode] Then
   begin
-    keysPress   [nCode] := TRUE;
-    keysCanPress[nCode] := FALSE;
+    keysPress   [keyCode] := TRUE;
+    keysCanPress[keyCode] := FALSE;
   end;
 end;
 
 procedure keyboardUp(keyCode: Byte);
-var
-  nCode: Byte;
 begin
-  nCode := keyCode;
   if (keybFlags and keyboardNumLock) > 0 then
   begin
-    if (nCode >= $47) and (nCode <= $53) then
+    if (keyCode >= $47) and (keyCode <= $53) then
     begin
-      case nCode of
-        K_KP_0:       nCode := K_INSERT;
-        K_KP_1:       nCode := K_END;
-        K_KP_2:       nCode := K_DOWN;
-        K_KP_3:       nCode := K_PAGEDOWN;
-        K_KP_4:       nCode := K_LEFT;
-        K_KP_6:       nCode := K_RIGHT;
-        K_KP_7:       nCode := K_HOME;
-        K_KP_8:       nCode := K_UP;
-        K_KP_9:       nCode := K_PAGEUP;
-        K_KP_DECIMAL: nCode := K_DELETE;
+      case keyCode of
+        K_KP_0:       keyCode := K_INSERT;
+        K_KP_1:       keyCode := K_END;
+        K_KP_2:       keyCode := K_DOWN;
+        K_KP_3:       keyCode := K_PAGEDOWN;
+        K_KP_4:       keyCode := K_LEFT;
+        K_KP_6:       keyCode := K_RIGHT;
+        K_KP_7:       keyCode := K_HOME;
+        K_KP_8:       keyCode := K_UP;
+        K_KP_9:       keyCode := K_PAGEUP;
+        K_KP_DECIMAL: keyCode := K_DELETE;
       end;
     end;
   end;
 
-  if keysLast[KT_UP] = nCode then
+  if keysLast[KT_UP] = keyCode then
     exit;
-  keysDown[nCode] := FALSE;
-  keysUp  [nCode] := TRUE;
+  keysDown[keyCode] := FALSE;
+  keysUp  [keyCode] := TRUE;
 
-  case nCode of
+  case keyCode of
     K_PAUSE: ;
     K_INSERT:   if ((keybFlags and keyboardInsertDown) > 0) then
                   keybFlags := keybFlags xor keyboardInsertDown xor keyboardInsert;
@@ -474,15 +468,15 @@ begin
     {$EndIf}     
   else
     begin
-      keysLast[KA_UP] := nCode;
-      keysLast[KT_UP] := nCode;
+      keysLast[KA_UP] := keyCode;
+      keysLast[KT_UP] := keyCode;
       {$IfDef USE_VKEYBOARD}
       prevLockVK := true;
       {$EndIf}
     end;
   end;
 
-  if (keysLast[KT_DOWN] = nCode) or (keysLast[KA_DOWN] = nCode) then
+  if (keysLast[KT_DOWN] = keyCode) or (keysLast[KA_DOWN] = keyCode) then
   begin
     keysLast[KA_DOWN] := 0;
     keysLast[KT_DOWN] := 0;
