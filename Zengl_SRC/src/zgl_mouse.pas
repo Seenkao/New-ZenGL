@@ -93,8 +93,6 @@ var
   mouseY       : Integer;
   mouseDX      : Integer;
   mouseDY      : Integer;
-  mouseLX      : Integer;
-  mouseLY      : Integer;
 
   mouseUpDown, mouseClickCanClick, mouseDblClickWheel: Byte;
 
