@@ -340,22 +340,34 @@ toJmp:
   case nCode of
     K_PAUSE: ;
     K_INSERT:   keybFlags := keybFlags or keyboardInsertDown;
-    K_CTRL_L, K_CTRL_R, K_ALT_L, K_ALT_R, K_SHIFT_L, K_SHIFT_R, K_SUPER_L, K_SUPER_R:
-      begin
-        nCode := SCA(nCode);
-        keysDown[nCode] := True;
-        keysUp  [nCode] := False;
-        if nCode = K_SHIFT then keybFlags := keybFlags or keyboardShift;
-        if nCode = K_CTRL  then keybFlags := keybFlags or keyboardCtrl;
-        if nCode = K_ALT   then keybFlags := keybFlags or keyboardAlt;
-        if nCode = K_SUPER then keybFlags := keybFlags or keyboardCommand;
-      end;
-    K_APP_MENU: ;
     {$IfNDef MAC_COCOA}
+    K_CTRL_L, K_CTRL_R:
+      begin
+        keybFlags := keybFlags or keyboardCtrl;
+        keysDown[K_CTRL] := True;
+        keysUp  [K_CTRL] := False;
+      end;
+    K_ALT_L, K_ALT_R:
+      begin
+        keybFlags := keybFlags or keyboardAlt;
+        keysDown[K_ALT] := True;
+        keysUp  [K_ALT] := False;
+      end;
+    K_SHIFT_L, K_SHIFT_R:
+      begin
+        keybFlags := keybFlags or keyboardShift;
+        keysDown[K_SHIFT] := True;
+        keysUp  [K_SHIFT] := False;
+      end;
+    K_SUPER_L, K_SUPER_R:
+      begin
+        keybFlags := keybFlags or keyboardCommand;
+        keysDown[K_SUPER] := True;
+        keysUp  [K_SUPER] := False;
+      end;
     K_CAPSLOCK: keybFlags := keybFlags or keyboardCapsDown;
-    {$Else}
-    K_CAPSLOCK: keybFlags := keybFlags xor keyboardCaps;
-    {$EndIf}  
+    {$EndIf}      
+    K_APP_MENU: ;
     K_NUMLOCK:  keybFlags := keybFlags or keyboardNumLockDown;
     K_SCROLL:   keybFlags := keybFlags or keyboardScrollLockDown;
     K_F1, K_F2, K_F3, K_F4, K_F5, K_F6, K_F7, K_F8, K_F9, K_F10, K_F11, K_F12: ;
@@ -417,22 +429,43 @@ begin
     {$IfNDef MAC_COCOA}
     K_CAPSLOCK: if ((keybFlags and keyboardCapsDown) > 0)  then
                   keybFlags := keybFlags xor keyboardCapsDown xor keyboardCaps;
-    {$EndIf}
-    K_NUMLOCK:  if ((keybFlags and keyboardNumLockDown) > 0) then
-                  keybFlags := keybFlags xor keyboardNumLock xor keyboardNumLockDown;
-    K_SCROLL: if ((keybFlags and keyboardScrollLockDown) > 0) then
-                  keybFlags := keybFlags xor keyboardScrollLock xor keyboardScrollLockDown;
-    K_F1, K_F2, K_F3, K_F4, K_F5, K_F6, K_F7, K_F8, K_F9, K_F10, K_F11, K_F12: ;
-    K_CTRL_R, K_CTRL_L, K_ALT_L, K_ALT_R, K_SHIFT_L, K_SHIFT_R, K_SUPER_R, K_SUPER_L:
+    K_CTRL_R, K_CTRL_L:
       begin
-        nCode := SCA(nCode);
-        keysDown[nCode] := FALSE;
-        keysUp  [nCode] := TRUE;
-        if nCode = K_SHIFT then keybFlags := keybFlags and ($FFFFFFFF - keyboardShift);
-        if nCode = K_CTRL  then keybFlags := keybFlags and ($FFFFFFFF - keyboardCtrl);
-        if nCode = K_ALT   then keybFlags := keybFlags and ($FFFFFFFF - keyboardAlt);
-        if nCode = K_SUPER then keybFlags := keybFlags and ($FFFFFFFF - keyboardCommand);
+        if (keysUp[K_CTRL_L]) and (keysUp[K_CTRL_R]) then
+        begin
+          keybFlags := keybFlags and ($FFFFFFFF - keyboardCtrl);
+          keysDown[K_CTRL] := FALSE;
+          keysUp  [K_CTRL] := TRUE;
+        end;
       end;
+    K_ALT_L, K_ALT_R:
+      begin
+        if (keysUp[K_ALT_L]) and (keysUp[K_ALT_R]) then
+        begin
+          keybFlags := keybFlags and ($FFFFFFFF - keyboardAlt);
+          keysDown[K_ALT] := FALSE;
+          keysUp  [K_ALT] := TRUE;
+        end;
+      end;
+    K_SHIFT_L, K_SHIFT_R:
+      begin
+        if (keysUp[K_SHIFT_L]) and (keysUp[K_SHIFT_R]) then
+        begin
+          keybFlags := keybFlags and ($FFFFFFFF - keyboardShift);
+          keysDown[K_SHIFT] := FALSE;
+          keysUp  [K_SHIFT] := TRUE;
+        end;
+      end;
+    K_SUPER_R, K_SUPER_L:
+      begin
+        if (keysUp[K_SUPER_L]) and (keysUp[K_SUPER_R]) then
+        begin
+          keybFlags := keybFlags and ($FFFFFFFF - keyboardCommand);
+          keysDown[K_SUPER] := FALSE;
+          keysUp  [K_SUPER] := TRUE;
+        end;
+      end;
+    {$EndIf}     
   else
     begin
       keysLast[KA_UP] := nCode;
@@ -563,7 +596,6 @@ begin
   {$ENDIF}
   for i := 0 to 255 do
   begin
-    keysUp      [i] := FALSE;
     keysPress   [i] := FALSE;
     keysCanPress[i] := TRUE;
   end;
