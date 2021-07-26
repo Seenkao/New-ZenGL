@@ -1118,76 +1118,6 @@ eventLoop:
     NSFlagsChanged:
       begin
         modFlags := ev.modifierFlags;
-        if (modFlags and 256) > 0 then
-        begin
-          if ((modFlags and 2) = 0) then
-          begin
-            keysUp[K_SHIFT_L] := True;
-            keysDown[K_SHIFT_L] := False;
-            if ((modFlags and 4) = 0) then
-            begin
-              keysUp[K_SHIFT] := True;
-              keysDown[K_SHIFT] := False;
-              keybFlags := keybFlags and ($FFFFFFFF - keyboardShift);
-            end;
-          end;
-          if ((modFlags and 4) = 0) then
-          begin
-            keysUp[K_SHIFT_R] := True;
-            keysDown[K_SHIFT_R] := False;
-          end;
-
-          if ((modFlags and 1) = 0) then
-          begin
-            keysUp[K_CTRL_L] := True;
-            keysDown[K_CTRL_L] := False;
-            if ((modFlags and $2000) = 0) then
-            begin
-              keysUp[K_CTRL] := True;
-              keysDown[K_CTRL] := False;
-              keybFlags := keybFlags and ($FFFFFFFF - keyboardCtrl);
-            end;
-          end;
-          if ((modFlags and $2000) = 0) then
-          begin
-            keysUp[K_CTRL_R] := True;
-            keysDown[K_CTRL_R] := False;
-          end;
-
-          if ((modFlags and $20) = 0) then
-          begin
-            keysUp[K_ALT_L] := True;
-            keysDown[K_ALT_L] := False;
-            if ((modFlags and $40) = 0) then
-            begin
-              keysUp[K_ALT] := True;
-              keysDown[K_ALT] := False;
-              keybFlags := keybFlags and ($FFFFFFFF - keyboardAlt);
-            end;
-          end;
-          if ((modFlags and $40) = 0) then
-          begin
-            keysUp[K_ALT_R] := True;
-            keysDown[K_ALT_R] := False;
-          end;
-
-          if ((modFlags and 8) = 0) then
-          begin
-            keysUp[K_SUPER_L] := True;
-            keysDown[K_SUPER_L] := False;
-            if ((modFlags and 16) = 0) then
-            begin
-              keysUp[K_SUPER] := True;
-              keysDown[K_SUPER] := False;
-              keybFlags := keybFlags and ($FFFFFFFF - keyboardCommand);
-            end;
-          end;
-          if ((modFlags and 16) = 0) then
-          begin
-            keysUp[K_SUPER_R] := True;
-            keysDown[K_SUPER_R] := False;
-          end;
-        end;
         if (modFlags and NSAlphaShiftKeyMask) > 0 then
           keybFlags := keybFlags or keyboardCaps
         else
@@ -1207,6 +1137,24 @@ eventLoop:
             keysDown[K_SHIFT_R] := true;
             keysUp[K_SHIFT_R] := False;
           end;
+        end
+        else begin
+          if ((modFlags and 2) = 0) then
+          begin
+            keysUp[K_SHIFT_L] := True;
+            keysDown[K_SHIFT_L] := False;
+            if ((modFlags and 4) = 0) then
+            begin
+              keysUp[K_SHIFT] := True;
+              keysDown[K_SHIFT] := False;
+              keybFlags := keybFlags and ($FFFFFFFF - keyboardShift);
+            end;
+          end;
+          if ((modFlags and 4) = 0) then
+          begin
+            keysUp[K_SHIFT_R] := True;
+            keysDown[K_SHIFT_R] := False;
+          end;
         end;
         if (modFlags and NSControlKeyMask) > 0 then
         begin
@@ -1223,6 +1171,24 @@ eventLoop:
             keysDown[K_CTRL_R] := true;
             keysUp[K_CTRL_R] := False;
           end;
+        end
+        else begin
+          if ((modFlags and 1) = 0) then
+          begin
+            keysUp[K_CTRL_L] := True;
+            keysDown[K_CTRL_L] := False;
+            if ((modFlags and $2000) = 0) then
+            begin
+              keysUp[K_CTRL] := True;
+              keysDown[K_CTRL] := False;
+              keybFlags := keybFlags and ($FFFFFFFF - keyboardCtrl);
+            end;
+          end;
+          if ((modFlags and $2000) = 0) then
+          begin
+            keysUp[K_CTRL_R] := True;
+            keysDown[K_CTRL_R] := False;
+          end;
         end;
         if (modFlags and NSAlternateKeyMask) > 0 then
         begin
@@ -1237,6 +1203,24 @@ eventLoop:
           if (modFlags and $40) > 0 then
           begin
             keysDown[K_ALT_R] := true;
+            keysDown[K_ALT_R] := False;
+          end;
+        end
+        else begin
+          if ((modFlags and $20) = 0) then
+          begin
+            keysUp[K_ALT_L] := True;
+            keysDown[K_ALT_L] := False;
+            if ((modFlags and $40) = 0) then
+            begin
+              keysUp[K_ALT] := True;
+              keysDown[K_ALT] := False;
+              keybFlags := keybFlags and ($FFFFFFFF - keyboardAlt);
+            end;
+          end;
+          if ((modFlags and $40) = 0) then
+          begin
+            keysUp[K_ALT_R] := True;
             keysDown[K_ALT_R] := False;
           end;
         end;
@@ -1255,7 +1239,25 @@ eventLoop:
             keysDown[K_SUPER_R] := true;
             keysUp[K_SUPER_R] := False;
           end;
-        end;                                
+        end
+        else begin
+          if ((modFlags and 8) = 0) then
+          begin
+            keysUp[K_SUPER_L] := True;
+            keysDown[K_SUPER_L] := False;
+            if ((modFlags and 16) = 0) then
+            begin
+              keysUp[K_SUPER] := True;
+              keysDown[K_SUPER] := False;
+              keybFlags := keybFlags and ($FFFFFFFF - keyboardCommand);
+            end;
+          end;
+          if ((modFlags and 16) = 0) then
+          begin
+            keysUp[K_SUPER_R] := True;
+            keysDown[K_SUPER_R] := False;
+          end;
+        end;
       end;
     NSKeyDown, NSKeyDownMask:
       begin
