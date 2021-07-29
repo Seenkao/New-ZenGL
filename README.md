@@ -1,5 +1,36 @@
 # ZenGL version 3.28 + MacOS Cocoa - beta version + Green Engine v1.0
 
+[Eng](#English)  
+[Rus](#Russian)
+
+<a name="English"></a>Eng:
+-------------
+
+[zengl](https://zengl.org) - the original site of the library's creator.
+
+**ZenGL** - it is a library that creates window context for working with OpenGL on different platforms.
+
+**Development environment**
+- Lazarus/FreePascal
+- Delphi
+
+**Supported platforms for Lazarus/FreePascal:**
+- Windows 32/64
+- Linux 32/64
+- Android
+- MacOS Cocoa - beta version
+- *MacOS Carbon (not tested, use version 3.12 if won't work)*
+
+**Supported Platforms for Delphi:**
+- Windows 32 (some demos will probably work with Windows 64 too, but certainly not all)
+
+[zengl for iOS](https://github.com/skalogryz/zengl) - version that supports iOS (I have not verified).
+
+****
+
+<a name="Russian"></a>Rus:
+-------------
+
 [zengl](https://zengl.org) - изначальный сайт создателя библиотеки.
 
 **ZenGL** - это бибилотека создающая контекст окна для работы с OpenGL на разных платформах.
