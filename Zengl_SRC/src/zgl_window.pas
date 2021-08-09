@@ -312,12 +312,12 @@ uses
   {$IFDEF USE_VIDEO}
   zgl_video,
   {$IFDEF USE_THEORA}
-  {$IfNDef OLD_METHODS}
-  gegl_VElements,
-  {$EndIf}
   zgl_lib_theora,
   {$ENDIF}
   {$ENDIF}
+  {$IfNDef OLD_METHODS}
+  gegl_VElements,
+  {$EndIf}
   zgl_utils;
 
 {$IFNDEF FPC}
