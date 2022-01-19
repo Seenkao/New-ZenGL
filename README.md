@@ -26,6 +26,17 @@
 
 [zengl for iOS](https://github.com/skalogryz/zengl) - version that supports iOS (I have not verified).
 
+Clicking on the image will take you to the video. Where I redo the 3rd demo. At the end of the video, it shows that you can make multiple input fields.
+
+[![demo3 remake](https://zengl.org/screens/screen03.jpg)](https://youtu.be/qb8hxilAI_I)
+
+***
+Communication: M12Mirrel@yandex.ru
+You can also contact me on the Lazarus forums or [ZenGL](http://zengl.org/forum/) and express your wishes and shortcomings.
+
+You can support through Sberbank:
+2202200951985520
+
 ****
 
 <a name="Russian"></a>Rus:
