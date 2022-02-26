@@ -90,6 +90,6 @@ Please write about the errors found in the process of working with ZenGL. )))
 Поддержать можно через сбер:
 2202200951985520
 
-Оригинальный исходный код находится по адресу [GutHub](https://github.com/Seenkao/New-ZenGL) на других сайтах может отстающая ветка.
+Оригинальный исходный код находится на [GutHub](https://github.com/Seenkao/New-ZenGL) на других сайтах может отстающая ветка.
 
 Просьба писать об ошибках выявленных в процессе работы с ZenGL. )))
