@@ -877,6 +877,8 @@ var
 {$EndIf}
 begin
   {$IfDef LINUX}
+  glXGetProcAddressARB := gl_GetProc('glXGetProcAddress');
+  
   glXChooseVisual := gl_GetProc('glXChooseVisual');
   glXCreateContext := gl_GetProc('glXCreateContext');
   glXDestroyContext := gl_GetProc('glXDestroyContext');
@@ -904,6 +906,35 @@ begin
     glXGetFBConfigAttrib := gl_GetProc('glXGetFBConfigAttrib');
     glXCreateNewContext := gl_GetProc('glXCreateNewContext');;
   end;
+  
+  // for ZenGL
+  // PBUFFER or OpenGL 3+
+  if GLX_VERSION_1_4 or GLX_VERSION_1_3 then
+    oglPBufferMode := 1
+  else
+    if GLX_SGIX_fbconfig and GLX_SGIX_pbuffer Then
+        oglPBufferMode := 2
+    else
+      oglPBufferMode := 0;
+  oglCanPBuffer := oglPBufferMode <> 0;
+  
+  case oglPBufferMode of
+    1:
+      begin
+        glXGetVisualFromFBConfig := gl_GetProc('glXGetVisualFromFBConfig');
+        glXChooseFBConfig        := gl_GetProc('glXChooseFBConfig');
+        glXCreatePbuffer         := gl_GetProc('glXCreatePbuffer');
+        glXDestroyPbuffer        := gl_GetProc('glXDestroyPbuffer');
+      end;
+    2:
+      begin
+        glXGetVisualFromFBConfig := gl_GetProc('glXGetVisualFromFBConfigSGIX');
+        glXChooseFBConfig        := gl_GetProc('glXChooseFBConfigSGIX');
+        glXCreateGLXPbufferSGIX  := gl_GetProc('glXCreateGLXPbufferSGIX');
+        glXDestroyGLXPbufferSGIX := gl_GetProc('glXDestroyGLXPbufferSGIX');
+      end;
+  end;
+  
   {$IfDef USE_FULL_GLX}
   glXCopyContext := gl_GetProc('glXCopyContext');
   glXCreateGLXPixmap := gl_GetProc('glXCreateGLXPixmap');
