@@ -125,7 +125,7 @@ procedure scr_ReadPixels(var pData: Pointer; X, Y, Width, Height: Word);
 //      что Far не должно быть меньше нуля.
 // Eng: depth setting for 2D mode. Can be used for 3D as well, given that Far
 //      must not be less than zero.
-procedure Set2DNearFar(newNear, newFar: {$IfNDef USE_GLES}Double{$Else}{$IF DEFINED(USE_GLES_ON_DESKTOP) and DEFINED(USE_AMD_DRIVERS)}Double{$Else}Single{$EndIf}{$EndIf});
+procedure Set2DNearFar(newNear, newFar: {$IfNDef USE_GLES}Double{$Else}{$IF DEFINED(USE_GLES_ON_DESKTOP) and DEFINED(USE_AMD_DRIVERS)}Double{$Else}Single{$IfEnd}{$EndIf});
 // Rus: установка версии OpenGL, маски и флагов. Вызывать обязательно до
 //      создания окна (до zgl_Init)!!! Совместимые версии только до OpenGL 3.1,
 //      далее они не совместимы со старым контекстом.
@@ -998,7 +998,7 @@ begin
   glReadPixels(X, oglHeight - Height - Y, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pData);
 end;
 
-procedure Set2DNearFar(newNear, newFar: {$IfNDef USE_GLES}Double{$Else}{$IF DEFINED(USE_GLES_ON_DESKTOP) and DEFINED(USE_AMD_DRIVERS)}Double{$Else}Single{$EndIf}{$EndIf});
+procedure Set2DNearFar(newNear, newFar: {$IfNDef USE_GLES}Double{$Else}{$IF DEFINED(USE_GLES_ON_DESKTOP) and DEFINED(USE_AMD_DRIVERS)}Double{$Else}Single{$IfEnd}{$EndIf});
 begin
   scrFar := newFar;
   scrNear := newNear;
