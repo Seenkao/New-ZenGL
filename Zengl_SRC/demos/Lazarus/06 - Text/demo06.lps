@@ -4,16 +4,14 @@
     <PathDelim Value="\"/>
     <Version Value="12"/>
     <BuildModes Active="Default"/>
-    <Units Count="39">
+    <Units Count="43">
       <Unit0>
         <Filename Value="demo06.lpr"/>
         <IsPartOfProject Value="True"/>
         <IsVisibleTab Value="True"/>
-        <TopLine Value="32"/>
-        <CursorPos X="9" Y="37"/>
-        <UsageCount Value="93"/>
+        <CursorPos X="9" Y="28"/>
+        <UsageCount Value="96"/>
         <Loaded Value="True"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit0>
       <Unit1>
         <Filename Value="..\..\..\headers\zglCustomConfig.cfg"/>
@@ -33,16 +31,15 @@
       <Unit3>
         <Filename Value="..\..\..\src\zgl_primitives_2d.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="292"/>
-        <CursorPos X="29" Y="140"/>
-        <UsageCount Value="7"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
+        <TopLine Value="45"/>
+        <CursorPos X="11" Y="69"/>
+        <UsageCount Value="11"/>
       </Unit3>
       <Unit4>
         <Filename Value="..\..\..\src\zgl_font.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="63"/>
-        <CursorPos X="5" Y="87"/>
+        <TopLine Value="408"/>
+        <CursorPos X="40" Y="348"/>
         <UsageCount Value="12"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit4>
@@ -73,8 +70,8 @@
       <Unit8>
         <Filename Value="..\..\..\src\zgl_textures.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="343"/>
-        <CursorPos X="40" Y="356"/>
+        <TopLine Value="4"/>
+        <CursorPos X="5" Y="29"/>
         <UsageCount Value="12"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit8>
@@ -97,8 +94,8 @@
       <Unit11>
         <Filename Value="..\..\..\src\zgl_window.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="810"/>
-        <CursorPos X="59" Y="821"/>
+        <TopLine Value="1229"/>
+        <CursorPos X="3" Y="1179"/>
         <UsageCount Value="37"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit11>
@@ -113,9 +110,9 @@
       <Unit13>
         <Filename Value="..\..\..\src\zgl_text.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="184"/>
-        <CursorPos X="39" Y="373"/>
-        <UsageCount Value="29"/>
+        <TopLine Value="711"/>
+        <CursorPos X="54" Y="732"/>
+        <UsageCount Value="30"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit13>
       <Unit14>
@@ -128,8 +125,8 @@
       <Unit15>
         <Filename Value="..\..\..\src\zgl_keyboard.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="362"/>
-        <CursorPos X="41" Y="292"/>
+        <TopLine Value="309"/>
+        <CursorPos X="45" Y="325"/>
         <UsageCount Value="20"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit15>
@@ -144,7 +141,8 @@
       <Unit17>
         <Filename Value="..\..\..\src\zgl_config.cfg"/>
         <EditorIndex Value="-1"/>
-        <CursorPos X="4" Y="4"/>
+        <TopLine Value="58"/>
+        <CursorPos X="4" Y="74"/>
         <UsageCount Value="10"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit17>
@@ -287,8 +285,8 @@
       <Unit37>
         <Filename Value="..\..\..\src\zgl_textures_jpg.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="323"/>
-        <CursorPos X="57" Y="331"/>
+        <TopLine Value="371"/>
+        <CursorPos X="7" Y="339"/>
         <UsageCount Value="10"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit37>
@@ -300,36 +298,106 @@
         <UsageCount Value="10"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit38>
+      <Unit39>
+        <Filename Value="..\..\..\srcGEGL\gegl_color.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="201"/>
+        <CursorPos X="21" Y="199"/>
+        <UsageCount Value="11"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit39>
+      <Unit40>
+        <Filename Value="..\..\..\src\zgl_opengl_all.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="609"/>
+        <CursorPos X="20" Y="570"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit40>
+      <Unit41>
+        <Filename Value="..\..\..\src\zgl_opengl.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="320"/>
+        <CursorPos X="10" Y="334"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit41>
+      <Unit42>
+        <Filename Value="..\..\..\srcGEGL\gegl_config.cfg"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit42>
     </Units>
-    <JumpHistory Count="7" HistoryIndex="6">
+    <JumpHistory Count="17" HistoryIndex="16">
       <Position1>
         <Filename Value="demo06.lpr"/>
-        <Caret Line="62" TopLine="45"/>
+        <Caret Line="23" Column="15"/>
       </Position1>
       <Position2>
         <Filename Value="demo06.lpr"/>
-        <Caret Line="115" TopLine="100"/>
+        <Caret Line="63" Column="8" TopLine="52"/>
       </Position2>
       <Position3>
         <Filename Value="demo06.lpr"/>
-        <Caret Line="115" Column="29" TopLine="100"/>
+        <Caret Line="60" Column="9" TopLine="44"/>
       </Position3>
       <Position4>
         <Filename Value="demo06.lpr"/>
-        <Caret Line="27" Column="13"/>
+        <Caret Line="51" Column="8" TopLine="35"/>
       </Position4>
       <Position5>
         <Filename Value="demo06.lpr"/>
-        <Caret Line="23" Column="15"/>
+        <Caret Line="98" Column="8" TopLine="87"/>
       </Position5>
       <Position6>
         <Filename Value="demo06.lpr"/>
-        <Caret Line="63" Column="8" TopLine="52"/>
+        <Caret Line="68" Column="8" TopLine="55"/>
       </Position6>
       <Position7>
         <Filename Value="demo06.lpr"/>
-        <Caret Line="60" Column="9" TopLine="44"/>
+        <Caret Line="68" Column="6" TopLine="62"/>
       </Position7>
+      <Position8>
+        <Filename Value="demo06.lpr"/>
+        <Caret Line="99" Column="10" TopLine="86"/>
+      </Position8>
+      <Position9>
+        <Filename Value="demo06.lpr"/>
+        <Caret Line="4" Column="11"/>
+      </Position9>
+      <Position10>
+        <Filename Value="demo06.lpr"/>
+        <Caret Line="79" Column="7" TopLine="55"/>
+      </Position10>
+      <Position11>
+        <Filename Value="demo06.lpr"/>
+        <Caret Line="61" Column="25" TopLine="50"/>
+      </Position11>
+      <Position12>
+        <Filename Value="demo06.lpr"/>
+        <Caret Line="55" Column="17" TopLine="26"/>
+      </Position12>
+      <Position13>
+        <Filename Value="demo06.lpr"/>
+        <Caret Line="64" Column="92" TopLine="39"/>
+      </Position13>
+      <Position14>
+        <Filename Value="demo06.lpr"/>
+        <Caret Line="98" Column="8" TopLine="64"/>
+      </Position14>
+      <Position15>
+        <Filename Value="demo06.lpr"/>
+        <Caret Line="24" Column="7"/>
+      </Position15>
+      <Position16>
+        <Filename Value="demo06.lpr"/>
+        <Caret Line="25" Column="8"/>
+      </Position16>
+      <Position17>
+        <Filename Value="demo06.lpr"/>
+        <Caret Line="28" Column="9"/>
+      </Position17>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>

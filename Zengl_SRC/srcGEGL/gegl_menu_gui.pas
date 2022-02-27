@@ -21,6 +21,12 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 }
+
+(* Обратить внимание! Если будет использоваться тачскрин, то могут происходить множественные нажатия,
+   а это означает, что по процедурам надо проходиться несколько раз, и это не будет зависеть от
+   возможностей??? Будет ли возможность записать все данные тачскрина, лишь бы не делать 10 проходов для
+   каждого нажатия???
+*)
 unit gegl_menu_gui;
 
 {$I zgl_config.cfg}
@@ -75,34 +81,39 @@ const
   _Right = 27;
 
 type
+  // кнопка от текстуры
   _touchButton = record
     X, Y, Angle: Single;
     bPush: Byte;                          
     _key: Byte;                           
   end;
 
+  // обычная кнопка от символа
   _oneTouchButtonJoy = record   
     X, Y: Single;
     _key: Byte;
-    symb: UTF8String;
-    bPush: Byte;
+    symb: UTF8String;           // использовать юникод везде????
+    bPush: Byte;                // в джойстиках это отвечает за каждую клавишу в отдельности
   end;
 
+  // "ролик" для использования в джойстике
   _touchRolling = record
     X, Y, R, _x, _y: Single;    
     direction: Single;          
     bPush: Byte;                
   end;
 
+  // джойстик с одними кнопками
   _keyTouchJoy = record
     textScale: LongWord;
     count: Byte;
     Width, Height: Single;
     BArrow: array[1..9] of _touchButton;
     OneButton: array[1..8] of _oneTouchButtonJoy;
-    TextureUp, TextureDown: Cardinal;
+    TextureUp, TextureDown: Cardinal;               // текстура используемая для стрелок
   end;
 
+  // джойстик с кнопками и роликом
   _keyTouchJoyRolling = record
     textScale: LongWord;
     count: Byte;
@@ -111,6 +122,7 @@ type
     OneButton: array[1..8] of _oneTouchButtonJoy;
   end;
 
+  // для четырёх разных символов (основное)
   _oneTouchButton = record
     X, Y: Single;
     _key: byte;                 
@@ -118,10 +130,11 @@ type
                                 
   end;
 
+  // для двух разных символов
   _oneDoubleTouchButton = record
     X, Y: Single;
     _key: byte;                 
-    symb: array [1..2] of UTF8String;
+    symb: array [1..2] of UTF8String;             // подменить
   end;
 
   _stringTouchButton = record
@@ -131,6 +144,7 @@ type
     bString: UTF8String;        
   end;
 
+  // для обычной клавиатуры
   _keyTouch = record            
     textScale: LongWord;
     count: Byte;                
@@ -144,26 +158,28 @@ type
     _key: Byte;                           
   end;
 
+  // для символьной клавиатуры
   _keyTouchSymb = record
     textScale: LongWord;
     count: Byte;                
     OWidth, Height: Single;     
-    OneDoubleButton: array[1..23] of _oneDoubleTouchButton;
-    BArrow: array[24..27] of _touchBArrow;
-    StringButton: array[36..44] of _stringTouchButton;
-    TextureUp, TextureDown: Cardinal;
+    OneDoubleButton: array[1..23] of _oneDoubleTouchButton;   // обычные клавиши
+    BArrow: array[24..27] of _touchBArrow;                    // стрелки (управляющие клавиши)
+    StringButton: array[36..44] of _stringTouchButton;        // литеральные клавиши (в основном управляющие)
+    TextureUp, TextureDown: Cardinal;                         // текстура используемая для стрелок
   end;
 
 var
   TouchJoy: _keyTouchJoy;                             
   TouchJoyRolling: _keyTouchJoyRolling;
   TouchKey: _keyTouch;                                
-  TouchKeySymb: _keyTouchSymb;                        
+  TouchKeySymb: _keyTouchSymb;
+  VKey_down: Boolean = false;
 
 procedure SetMenuProcess(NumMenu: Byte);
 
-procedure CreateGameJoy01;
-procedure CreateGameJoy02;
+procedure CreateGameJoy01;                     // джойстик с роликом
+procedure CreateGameJoy02;                     // джойстик только с клавишами
 procedure CreateTouchKeyboard;
 procedure CreateTouchSymbol;
 
@@ -189,6 +205,7 @@ uses
   zgl_text,
   zgl_utils,
   zgl_log,
+  zgl_types,
   zgl_mouse;
 
 procedure SetMenuProcess(NumMenu: Byte);
@@ -365,17 +382,17 @@ var
 
   procedure CreateOneButton(key: Byte);
   begin
-    TouchKey.OneButton[n].symb[1] := utf8_toUnicode(RusSymb, m, @m);
-    TouchKey.OneButton[n].symb[2] := utf8_toUnicode(RusSymb, m, @m);
-    TouchKey.OneButton[n].symb[3] := utf8_toUnicode(RusSymb, m, @m);
-    TouchKey.OneButton[n].symb[4] := utf8_toUnicode(RusSymb, m, @m);
+    TouchKey.OneButton[n].symb[1] := utf8_toUnicode(LoadText, m, @m);
+    TouchKey.OneButton[n].symb[2] := utf8_toUnicode(LoadText, m, @m);
+    TouchKey.OneButton[n].symb[3] := utf8_toUnicode(LoadText, m, @m);
+    TouchKey.OneButton[n].symb[4] := utf8_toUnicode(LoadText, m, @m);
     TouchKey.OneButton[n]._key := key;
     inc(n);
   end;
 
 begin
-  txt_LoadFromFile({$IfNDef MACOSX} '../data/' + {$EndIf} 'Rus.txt', RusSymb);
-  log_Add(RusSymb);
+  txt_LoadFromFile({$IfNDef MACOSX} '../data/' + {$EndIf} 'Rus.txt', LoadText);
+//  log_Add(LoadText);
   TouchKey.count := 34;                         
   if wndWidth < 1200 then
     dw := wndWidth
@@ -667,6 +684,7 @@ begin
     TouchKeySymb.OneDoubleButton[i].X := x0 + TouchKeySymb.StringButton[_Ctrl].Width + 3 + dw * (i - 21);
     TouchKeySymb.OneDoubleButton[i].Y := y0;
   end;
+  // застрелитесь со всеми этими долбанными кодировками!!!               ('№')
   TouchKeySymb.OneDoubleButton[21].symb[1] := Unicode_toUTF8(8470);
   TouchKeySymb.OneDoubleButton[21].symb[2] := TouchKeySymb.OneDoubleButton[21].symb[1];
   TouchKeySymb.OneDoubleButton[21]._key := K_KP_3;
@@ -693,7 +711,7 @@ begin
   TouchKeySymb.StringButton[_Shift].Y := y0;
   TouchKeySymb.StringButton[_Shift].Width := TouchKeySymb.StringButton[_Ctrl].Width;
   TouchKeySymb.StringButton[_Shift].bString := NameShift;
-  TouchKeySymb.StringButton[_Shift]._key := K_SHIFT;
+  TouchKeySymb.StringButton[_Shift]._key := K_SHIFT_L;
 
   TouchKeySymb.StringButton[_Space].X := TouchKeySymb.StringButton[_Shift].X + TouchKeySymb.StringButton[_Shift].Width + 3;
   TouchKeySymb.StringButton[_Space].Y := y0;
@@ -739,6 +757,7 @@ procedure UseGameJoy01Down;
 var
   i: Integer;
 begin
+  VKey_down := true;
   if ((Sqr(mouseX - TouchJoyRolling.Rolling.X) + Sqr(mouseY - TouchJoyRolling.Rolling.Y)) <= Sqr(TouchJoyRolling.Rolling.R)) then
   begin
     TouchJoyRolling.Rolling._x := mouseX;
@@ -755,11 +774,13 @@ begin
     if ((mouseX > TouchJoyRolling.OneButton[i].X) and (mouseX < (TouchJoyRolling.OneButton[i].X + TouchJoyRolling.Width)) and
         (mouseY > TouchJoyRolling.OneButton[i].Y) and (mouseY < (TouchJoyRolling.OneButton[i].Y + TouchJoyRolling.Height))) then
     begin
+      // если было нажатие, то отмечаем.
       TouchJoyRolling.OneButton[i].bPush := 1;
       keysDown[TouchJoyRolling.OneButton[i]._key] := True;
       exit;
     end
     else begin
+      // в противном случае, "обнуляем", но по сути проще обнулить все? Или возможно множественное нажатие?
       keysDown[TouchJoyRolling.OneButton[i]._key] := False;
       TouchJoyRolling.OneButton[i].bPush := 0;
     end;
@@ -814,7 +835,9 @@ begin
       if (i = _Rus) then
         Continue;
       keyboardDown(TouchKey.StringButton[i]._key);
+      // выставляем какой код был на мышке последний. Но с тачпадом надо будет проверять именно номер "клика"
       lastKey := TouchKey.StringButton[i]._key;
+//      if (i = _Shift) then
       goto toCompareKey;
     end;
   end;
@@ -825,6 +848,7 @@ begin
           (mouseY > TouchKey.OneButton[i].Y) and (mouseY < (TouchKey.OneButton[i].Y + TouchKey.Height))) then
     begin
       keyboardDown(TouchKey.OneButton[i]._key);
+      // выставляем какой код был на мышке последний. Но с тачпадом надо будет проверять именно номер "клика"
       lastKey := TouchKey.OneButton[i]._key;
       goto toCompareKey;
     end;
@@ -860,6 +884,7 @@ begin
           (mouseY > TouchKeySymb.OneDoubleButton[i].Y) and (mouseY < (TouchKeySymb.OneDoubleButton[i].Y + TouchKeySymb.Height))) then
     begin
       keyboardDown(TouchKeySymb.OneDoubleButton[i]._key);
+      // выставляем какой код был на мышке последний. Но с тачпадом надо будет проверять именно номер "клика"
       lastKey := TouchKeySymb.OneDoubleButton[i]._key;
       goto toCompareKey;
     end;
@@ -870,6 +895,7 @@ begin
           (mouseY > TouchKeySymb.BArrow[i].Y) and (mouseY < (TouchKeySymb.BArrow[i].Y + TouchKeySymb.Height))) then
     begin
       keyboardDown(TouchKeySymb.BArrow[i]._key);
+      // выставляем какой код был на мышке последний. Но с тачпадом надо будет проверять именно номер "клика"
       lastKey := TouchKeySymb.BArrow[i]._key;
       goto toCompareKey;
     end;
@@ -880,7 +906,9 @@ begin
           (mouseY > TouchKeySymb.StringButton[i].Y) and (mouseY < (TouchKeySymb.StringButton[i].Y + TouchKeySymb.Height))) then
     begin
       keyboardDown(TouchKeySymb.StringButton[i]._key);
+      // выставляем какой код был на мышке последний. Но с тачпадом надо будет проверять именно номер "клика"
       lastKey := TouchKeySymb.StringButton[i]._key;
+//      if (i = _Shift) or (i = _Ctrl) then
       goto toCompareKey;
     end;
   end;
@@ -978,6 +1006,7 @@ begin
           (mouseY > TouchKeySymb.StringButton[i].Y) and (mouseY < (TouchKeySymb.StringButton[i].Y + TouchKeySymb.Height))) then
     begin
       keyboardUp(TouchKeySymb.StringButton[i]._key);
+//      if (i = _Shift) or (i = _Ctrl) then
       exit;
     end;
   end;

@@ -1,4 +1,4 @@
-# ZenGL version 3.28 + MacOS Cocoa - beta version + Green Engine v1.0
+# ZenGL version 3.29 + MacOS Cocoa - beta version + Green Engine v1.0
 
 [Eng](#English)  
 [Rus](#Russian)
@@ -25,6 +25,12 @@
 - Windows 32 (some demos will probably work with Windows 64 too, but certainly not all)
 
 [zengl for iOS](https://github.com/skalogryz/zengl) - version that supports iOS (I have not verified).
+
+See the changes in the __Update_ZenGL.txt__ file.  Sorry, the information is only in Russian. :(
+
+Important update: This version has updated OpeGL to the latest version as per end of 2021. All extensions have also been updated. Files: __zgl_pasOpenGL.pas__, __zgl_GLU.pas__, __zgl_GLX_WGL.pas__, __zgl_gltypeconst.pas__, __GLdefine.cfg__.
+
+Ways to work with 3D were not implemented. You will need to do this manually or set __oglMode__ to 3. I haven't tested it! You can rewrite the procedure __Set3DMode(FOVY: Single = 45);__ and set all the parameters yourself.
 
 Clicking on the image will take you to the video. Where I redo the 3rd demo. At the end of the video, it shows that you can make multiple input fields.
 
@@ -63,32 +69,11 @@ You can support through Sberbank:
 [zengl for iOS](https://github.com/skalogryz/zengl) - версия которая поддерживает iOS (мною не проверено).
 
 ***
-В данной версии:
+Изменения смотрите в файле __Update_ZenGL.txt__.
 
-- Добавлена библиотека Green Engine собственной разработки. Это вроде как дополнительное API для библиотеки ZenGL. Разрабатывалась ранее и клавиатура из Green Engine была добавлена в более ранние версии. __Внимание!!! Работает только с ZenGL!!!__
-    - В данной версии GE создано независимое от платформы поле ввода. Должно работать на всех платформах, но на мобильных платформах и MacOS не проверено. Будет проверено и добавлено в исправления.
+Важное обновление: в данной версии обновлён OpeGL до последней версии согласно конца 2021 года. Так же обновлены все расширения. Файлы: __zgl_pasOpenGL.pas__, __zgl_GLU.pas__, __zgl_GLX_WGL.pas__, __zgl_gltypeconst.pas__, __GLdefine.cfg__.
 
-    - В дальнейшем ожидается доработка библиотеки GE.
-
-- изменены названия малой части процедур/функций, для более визуального восприятия. В частности __utf8_GetID__ заменена на __utf8_toUnicode__ так как она как раз переводит UTF8 в юникод.
-
-- добавлена функция __function Unicode_toUTF8(Symb: LongWord): UTF8String;__ перевода из юникода в UTF8.
-
-- изменена и ускорена работа с текстом.
-    - теперь вы не получите ошибку кода, если символа не существует при загруженном шрифте. Все не существующие символы будут отмечены знаком __"?"__.
-    - вы сможете писать на любом языке, но, если шрифт для этого не предназначен, все "не печатаемые" (не определённые в шрифте) символы будут так же отмечены знаком __"?"__. При сохранинии такого текста в файл, вероятнее всего он будет выведен правильно.
-    - в демонстрационной версии 6, показана работа со шрифтами. Если вам нужен шрифт определённого размера, вы должны с ним работать через __procedure setFontTextScale(Index: LongWord; fnt: Byte);__, она позволит вам более быстро работать с данным шрифтом. Если не постоянно, то смотрите демонстрационную версию.
-    - дополнен ряд функций для работы с текстом-шрифтами. Смотрите в файле zgl_text.pas.
-    - созданы процедуры для загрузки/сохранения текста __procedure txt_LoadFromFile(const FileName: UTF8String; out Buf: UTF8String);, procedure txt_SaveFromFile(const FileName: UTF8String; const Buf: UTF8String);__.
-
-- были исправлены некоторые ошибки в коде и изменены части работы с клавиатурой. __keysLast (bold)__ - сейчас работает только для печатаемых клавиш.
-
-- введена процедура постотрисовки. Регистрируется с помощью __zgl_Reg__ и флагом __SYS_POSTDRAW__. Срабатываете данная функция только после того как выведется всё в окно. Бывает нужно, когда нужно работать с видеокартой, но не нужно ни чего выводить.
-
-- теперь обработка клавиатуры/мыши/тачпада необходимо производить с помощью регистрируемой процедуры и флагом __SYS_EVENTS__. Производить их "очистку" больше  нет необходимости.
-- добавленны комментарии в некоторые модули. Постарался сразу же добавить и на английском языке.
-
-- были исправления в части кода, о которых уже забыл... )))
+Способов работы с 3D не реализовывалось. Вам надо будет делать это вручную или __oglMode__ приравнять 3. Я не проверял работоспособность! Вы можете переписать процедуру __Set3DMode(FOVY: Single = 45);__ и задайть все параметры самим.
 
 при нажатии на картинку перейдёте на видео. Где я переделываю 3-ю демо версию. В конце видео показано, что можно делать несколько полей ввода.
 

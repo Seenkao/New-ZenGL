@@ -21,7 +21,7 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 16.07.2021
+ !!! modification from Serge 25.02.2022
 }
 unit zgl_window;
 
@@ -34,7 +34,6 @@ interface
 
 uses
   {$IFDEF UNIX}
-  BaseUnix,
   sysutils,
   {$ENDIF}
   {$IFDEF USE_X11}
@@ -51,14 +50,15 @@ uses
   {$IFDEF iOS}
   iPhoneAll, CGGeometry,
   {$ENDIF}
+  zgl_gltypeconst,
   zgl_types;
 
 const
-  cs_ZenGL    = 'ZenGL - test 0.3.28';
-  cs_Date     = '16.07.2021';
+  cs_ZenGL    = 'ZenGL - 0.3.29';
+  cs_Date     = '26.02.2022';
   cv_major    = 0;
   cv_minor    = 3;
-  cv_revision = 28;
+  cv_revision = 29;
 
   // zgl_Reg
   SYS_APP_INIT           = $000001;
@@ -68,8 +68,9 @@ const
   SYS_EXIT               = $000006;
   SYS_ACTIVATE           = $000007;
 
-  SYS_EVENTS             = $000009;
-  SYS_POSTDRAW           = $000012;
+  SYS_EVENTS             = $000009;                         // keyboard, mouse, touchpad
+  SYS_POSTDRAW           = $000012;                         // процедура постотрисовки (после того как вывелось всё на экран)
+  SYS_RESET              = $000013;                         // процедура обнуления
   {$IfNDef ANDROID}
   SYS_CLOSE_QUERY        = $000008;
   SYS_APP_LOOP           = $000002;
@@ -156,6 +157,10 @@ const
   SND_CAN_PLAY          = $002000;
   SND_CAN_PLAY_FILE     = $004000;
   CLIP_INVISIBLE        = $008000;
+
+  XY_IN_CENTER_WINDOW   = $020000;               // окно выводится от центра экрана
+                                                 // при этом надо перерабатывать прорисовку примитивов
+                                                 // весь ZenGL сделан от края окна, могут быть не состыковки.
   {$IFDEF iOS}
   SND_ALLOW_BACKGROUND_MUSIC = $100000;
   {$ENDIF}
@@ -164,7 +169,6 @@ const
 type
 
   { zglNSWindow }
-
   zglNSWindow = objcclass(NSWindow)
     private
       procedure close; override;
@@ -174,50 +178,97 @@ type
 
   zglNSView = objcclass(NSView)
     public
+//      procedure drawRect(rect: NSRect); override;
       procedure windowWillClose(note: NSNotification); message 'windowWillClose:';
   end;
 {$EndIf}
 
 {$IfNDef ANDROID}
 {$IFDEF WND_USE}
+// Rus: создание окна.
+// Eng: create window
 function  wnd_Create(): Boolean;
+// Rus: уничтожение окна.
+// Eng: destroy window
 procedure wnd_Destroy;
 {$EndIf}
 {$IfNDef USE_INIT_HANDLE}
+// Rus: обновление окна.
+// Eng: update window
 procedure wnd_Update;
+// Rus: обновление "имени" окна.
+// Eng:
 procedure wnd_UpdateCaption();
 
+// Rus: установка "имени" окна.
+// Eng: setting the "name" of the window.
 procedure wnd_SetCaption(Caption: UTF8String);
+// Rus: установка видимости/не видимости курсора.
+// Eng: setting the visibility/non-visibility of the cursor.
 procedure wnd_ShowCursor(Show : Boolean );
 {$EndIf}
 {$EndIf}
+// Rus: установка размеров окна.
+// Eng: window size setting.
 procedure wnd_SetSize(Width, Height: Integer);
+// Rus: установка позиции окна.
+// Eng: setting the window position.
 procedure wnd_SetPos(X, Y: Integer);
 
 //--------------------------------------------------------------
 {$IfNDef USE_INIT_HANDLE}
+// Rus: инициализация рабочего окна и запуск программы.
+// Eng: initialization of the working window and launching the program.
 procedure zgl_Init(FSAA: Byte = 0; StencilBits: Byte = 0);
 {$Else}
+// Rus: инициализация рабочего LCL-окна и запуск программы.
+// Eng: initialization of the working LCL window and launch of the program.
 procedure zgl_InitToHandle(Handle: Ptr; FSAA: Byte = 0; StencilBits: Byte = 0);
 {$EndIf}
 {$IfNDef ANDROID}
+// Rus: установка основных путей для запущенного приложения.
+// Eng:
 procedure zgl_GetSysDir;
 {$EndIf}
+// Rus: уничтожение ранее созданных ресурсов. Вызывать не надо.
+// Eng:
 procedure zgl_Destroy;
+// Rus: указываем программе на завершение работы.
+// Eng:
 procedure zgl_Exit;
+// Rus: регистрация функций для создания и работы приложения.
+// Eng:
 procedure zgl_Reg(What: LongWord; UserData: Pointer);
+// нужна эта процедура или нет? Можно просто вызвать через zgl_Reg со значением nil.
+//procedure zgl_UnReg(What: LongWord);
+// Rus: возврат определённых значений для рабочего приложения.
+// Eng:
 function  zgl_Get(What: LongWord): Ptr;
 
-// новое        new
+// Rus: установка параметров окна. Ширина, высота, полноэкранное или нет и
+//      вертикальная синхронизация.
+// Eng:
 procedure zgl_SetParam(width, height: Integer; FullScreen: Boolean = False; Vsync: Boolean = False);
 
+// Rus: выделение участка памяти.
+// Eng:
 procedure zgl_GetMem(out Mem: Pointer; Size: LongWord);
+// Rus: очистка участка памяти.
+// Eng:
 procedure zgl_FreeMem(var Mem: Pointer);
+// Rus: очистка списка строк.
+// Eng:
 procedure zgl_FreeStrList(var List: zglTStringList);
+// Rus: включение флагов ZenGL.
+// Eng:
 procedure zgl_Enable(What: LongWord);
+// Rus: выключение флагов ZenGL.
+// Eng:
 procedure zgl_Disable(What: LongWord);
 {$IfNDef USE_INIT_HANDLE}
-// установка интервала обработки клавиатуры, мыши и др. определять до создания окна!!!
+// Rus: установка интервала обработки клавиатуры, мыши и др.
+//      Определять до создания окна!!!
+// Eng:
 procedure zgl_SetEventsInterval(Interval: Cardinal);
 {$EndIf}
 
@@ -277,6 +328,7 @@ uses
   {$IFNDEF USE_GLES}
   zgl_opengl,
   zgl_opengl_all,
+  zgl_pasOpenGL,
   {$ELSE}
   zgl_opengles,
   zgl_opengles_all,
@@ -297,6 +349,7 @@ uses
   zgl_textures,
   zgl_render_target,
   zgl_font,
+  zgl_text,
   {$IFDEF USE_SENGINE}
   zgl_sengine_2d,
   {$ENDIF}
@@ -418,7 +471,7 @@ begin
 {$IFNDEF ANDROID}
   {$IFNDEF IOS}
   if wndFullScreen then
-    if (wndWidth <= 640) and (wndHeight <= 320) then
+    if (wndWidth <= 640) and (wndHeight <= 480) then
     begin
       wndWidth := 800;
       wndHeight := 600;
@@ -524,8 +577,8 @@ begin
   else begin
     viewNSRect.origin.x := wndX;
     viewNSRect.origin.y := wndY;
-    viewNSRect.size.width := { wndx +} wndWidth;
-    viewNSRect.size.height := {wndY +} wndHeight + 0;
+    viewNSRect.size.width := wndWidth;
+    viewNSRect.size.height := wndHeight;
     createFlags := NSTitledWindowMask or NSClosableWindowMask;
   end;
   wndHandle := zglNSWindow.alloc;
@@ -706,8 +759,11 @@ begin
 {$IFDEF iOS}
   UIApplication.sharedApplication.setStatusBarHidden(wndFullScreen);
 {$ENDIF}
+//  winOn := TRUE;
+
   wnd_UpdateCaption();
   wndUpdateWin := False;
+
 
   if (not wndFullScreen) and (appFlags and WND_USE_AUTOCENTER > 0) Then
     wnd_SetPos((zgl_Get(DESKTOP_WIDTH) - wndWidth) div 2, (zgl_Get(DESKTOP_HEIGHT) - wndHeight) div 2);
@@ -936,6 +992,7 @@ end;
 procedure zgl_Init(FSAA: Byte = 0; StencilBits: Byte = 0);
 begin
   {$IfNDef ANDROID}
+//  scr_GetResList;
   zgl_GetSysDir();
   {$EndIf}
 
@@ -958,16 +1015,23 @@ begin
   log_Init();
 
   {$IfNDef ANDROID}
-  if not scr_Create() Then exit;
+  if not scr_Create() Then
+    exit;
   {$EndIf}
-  if not gl_Create() Then exit;
+  if not gl_Create() Then
+    exit;
   {$IfNDef ANDROID}
-  if not wnd_Create() Then exit;
+  if not wnd_Create() Then
+    exit;
   {$Else}
   wndX      := 0;
   wndY      := 0;
   {$EndIf}
-  if not gl_Initialize() Then exit;
+  if not gl_Initialize() Then
+  begin
+    wnd_Destroy;
+    exit;
+  end;
 
   appInitialized := TRUE;
 
@@ -1003,6 +1067,7 @@ begin
   exit;
   {$Else}
 
+  oldTimeDraw := timer_GetTicks;
   app_PLoop();
   zgl_Destroy();
   {$EndIf}
@@ -1035,6 +1100,7 @@ begin
   {$IFDEF MACOSX}
   wndHandle := WindowRef(Handle);
   {$ENDIF}
+
   if not gl_Initialize() Then exit;
 
 
@@ -1068,7 +1134,7 @@ begin
   {$IfNDef OLD_METHODS}
   if managerSetOfTools.count > 0 then
   begin
-    log_Add('Destroy GE-Elements' + u_IntToStr(managerSetOfTools.count));
+    log_Add('Destroy GE-Elements: ' + u_IntToStr(managerSetOfTools.count));
     DestroyManagerSOT();
   end;
   {$EndIf}
@@ -1206,6 +1272,7 @@ begin
     SYS_EVENTS: app_PEvents := UserData;
     {$EndIf}
     SYS_POSTDRAW: app_PostPDraw := UserData;
+    SYS_RESET: app_PReset := UserData;
     {$IFDEF iOS}
     SYS_iOS_MEMORY_WARNING:
       begin
@@ -1222,6 +1289,8 @@ begin
         app_PRestore := UserData;
       end;
     {$ENDIF}
+    // Input events          delete
+
     // Textures
     TEXTURE_FORMAT_EXTENSION:
       begin
@@ -1341,7 +1410,7 @@ begin
     GAPI_MAX_TEXTURE_UNITS: Result := oglMaxTexUnits;
     GAPI_MAX_ANISOTROPY: Result := oglMaxAnisotropy;
     GAPI_CAN_BLEND_SEPARATE: Result := Ptr(oglSeparate);
-    GAPI_CAN_AUTOGEN_MIPMAP: Result := Ptr(oglCanAutoMipMap);
+    GAPI_CAN_AUTOGEN_MIPMAP: Result := Ptr(GL_SGIS_generate_mipmap);
 
     RENDER_FPS: Result := appFPS;
     RENDER_BATCHES_2D: Result := b2dBatches + 1;
@@ -1473,7 +1542,10 @@ begin
   appFlags := appFlags or What;
 
   if What and DEPTH_BUFFER > 0 Then
+  begin
     glEnable(GL_DEPTH_TEST);
+    appFlags := appFlags or DEPTH_BUFFER_CLEAR;
+  end;
 
   if What and DEPTH_MASK > 0 Then
     glDepthMask(GL_TRUE);
@@ -1498,6 +1570,9 @@ begin
   if What and CLIP_INVISIBLE > 0 Then
     render2dClip := TRUE;
 
+
+  if What and XY_IN_CENTER_WINDOW > 0 then
+    appFlags := appFlags or XY_IN_CENTER_WINDOW;
 {$IFDEF iOS}
   if What and SND_ALLOW_BACKGROUND_MUSIC > 0 Then
     begin
@@ -1514,7 +1589,10 @@ begin
     appFlags := appFlags xor What;
 
   if What and DEPTH_BUFFER > 0 Then
+  begin
     glDisable(GL_DEPTH_TEST);
+    appFlags := appFlags and ($FFFFFFFF - DEPTH_BUFFER_CLEAR);
+  end;
 
   if What and DEPTH_MASK > 0 Then
     glDepthMask(GL_FALSE);
@@ -1545,6 +1623,9 @@ begin
 
   if What and CLIP_INVISIBLE > 0 Then
     render2dClip := FALSE;
+
+  if What and XY_IN_CENTER_WINDOW > 0 then
+    appFlags := appFlags and ($FFFFFFFF - XY_IN_CENTER_WINDOW);
 
 {$IFDEF iOS}
   if What and SND_ALLOW_BACKGROUND_MUSIC > 0 Then

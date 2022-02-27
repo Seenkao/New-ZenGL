@@ -40,9 +40,9 @@
       <Filename Value="..\..\..\bin\$(TargetCPU)-$(TargetOS)\demo06"/>
     </Target>
     <SearchPaths>
-      <IncludeFiles Value="..\..\..\headers;$(ProjOutDir);..\..\..\srcGEGL;..\..\..\src"/>
-      <OtherUnitFiles Value="..\..\..\src;..\..\..\srcGEGL;..\..\..\extra;..\..\..\lib\zlib\$(TargetCPU)-$(TargetOS);..\..\..\lib\zip\$(TargetCPU)-$(TargetOS);..\..\..\lib\theora\$(TargetCPU)-$(TargetOS);..\..\..\lib\ogg\$(TargetCPU)-$(TargetOS);..\..\..\lib\msvcrt\$(TargetCPU);..\..\..\lib\jpeg\$(TargetCPU)-$(TargetOS)"/>
-      <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+      <IncludeFiles Value="..\..\..\headers;$(ProjOutDir);..\..\..\srcGEGL;..\..\..\src;..\..\..\srcGL"/>
+      <OtherUnitFiles Value="..\..\..\src;..\..\..\srcGL;..\..\..\srcGEGL;..\..\..\extra;..\..\..\lib\zlib\$(TargetCPU)-$(TargetOS);..\..\..\lib\zip\$(TargetCPU)-$(TargetOS);..\..\..\lib\theora\$(TargetCPU)-$(TargetOS);..\..\..\lib\ogg\$(TargetCPU)-$(TargetOS);..\..\..\lib\msvcrt\$(TargetCPU);..\..\..\lib\jpeg\$(TargetCPU)-$(TargetOS)"/>
+      <UnitOutputDirectory Value="..\tmp\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>
       <SyntaxOptions>
@@ -58,6 +58,7 @@
     <Linking>
       <Debugging>
         <GenerateDebugInfo Value="False"/>
+        <DebugInfoType Value="dsDwarf2"/>
       </Debugging>
       <LinkSmart Value="True"/>
       <Options>

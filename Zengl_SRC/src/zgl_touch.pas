@@ -29,72 +29,205 @@ unit zgl_touch;
 
 interface
 
-const
-  MAX_TOUCH = 16;
+uses
+  zgl_types;
 
-function touch_X(Finger: Byte): Integer;
-function touch_Y(Finger: Byte): Integer;
-function touch_Down(Finger: Byte): Boolean;
-function touch_Up(Finger: Byte): Boolean;
-function touch_Tap(Finger: Byte): Boolean;
-procedure touch_ClearState;
+// Ru: возвращаем координату "X" для данного касания!!!
+// En: return coordinates "X" for this touch !!!
+function touch_X(ID: Byte): Integer;
+// Ru: возвращаем координату "Y" для данного касания!!!
+// En: return coordinates "Y" for this touch !!!
+function touch_Y(ID: Byte): Integer;
+// Ru: возвращаем координаты "X", "Y" для данного касания!!!
+// En: return coordinates "X", "Y" for this touch !!!
+function touch_XY(ID: Byte): zglTPoint2D;
+{$IfDef LIBRARY_COMPILE}
+// Ru: возвращаем состояние нажатия в данный момент. Для эмуляции мыши можно
+//     использовать константы M_BLEFT и M_BRIGHT.
+// En: we return the state of pressing at the moment. To emulate a mouse, you
+//     can use the constants M_BLEFT and M_BRIGHT.
+function touch_Down(ID: Byte): Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
+// Ru: возвращаем состояние отжатия в данный момент. Для эмуляции мыши можно
+//     использовать константы M_BLEFT и M_BRIGHT.
+// En: we return the state of the release at the moment. To emulate a mouse, you
+//     can use the constants M_BLEFT and M_BRIGHT.
+function touch_Up(ID: Byte): Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
+// Ru: возвращаем состояние удержания (постоянное удержание). Для эмуляции мыши
+//     можно использовать константы M_BLEFT и M_BRIGHT.
+// En: we return the hold state (constant hold). To emulate a mouse, you
+//     can use the constants M_BLEFT and M_BRIGHT.
+function touch_Tap(ID: Byte): Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
+// Ru: возвращаем состояние двойного клика. Для эмуляции мыши можно
+//     использовать константы M_BLEFT и M_BRIGHT.
+// En: return the double-click state. To emulate a mouse, you
+//     can use the constants M_BLEFT and M_BRIGHT.
+function touch_DoubleTap(ID: Byte): Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
+// Ru: возвращаем состояние тройного клика.
+// En: we return the state of the triple click.
+function touch_TripleTap(ID: Byte): Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
+{$EndIf}
+// Ru: очистка всех нажатий.
+// En: clearing all clicks.
+procedure touch_ClearState; {$IfDef USE_INLINE}inline;{$EndIf}
 
 var
-  touchX     : array[0..MAX_TOUCH - 1] of Integer;
-  touchY     : array[0..MAX_TOUCH - 1] of Integer;
-  touchDown  : array[0..MAX_TOUCH - 1] of Boolean;
-  touchUp    : array[0..MAX_TOUCH - 1] of Boolean;
-  touchTap   : array[0..MAX_TOUCH - 1] of Boolean;
-  touchCanTap: array[0..MAX_TOUCH - 1] of Boolean;
-  touchActive: array[0..MAX_TOUCH - 1] of Boolean;
+  // Ru: состояния всех клавиш.
+  // En: the states of all keys.
+  Andr_Touch: array[0..MAX_TOUCH - 1] of m_touch;
 
 implementation
 
-function touch_X(Finger: Byte): Integer;
+{$IfDef FULL_LOGGING}
+uses
+  zgl_log;
+{$EndIf}
+
+function touch_X(ID: Byte): Integer;
 begin
-  if Finger > MAX_TOUCH - 1 Then
-    Result := -1
+  {$IfDef FULL_LOGGING}
+  if ID > 9 then
+  begin
+    log_Add('Error! ID out of range in touch_X!');
+    Result := - 1;
+    Exit;
+  end;
+  {$EndIf}
+  // если запредельное значение или статус не нажат (не происходило события), то указываем на это
+  if (ID > MAX_TOUCH - 1) or ((Andr_Touch[ID].state and is_canPress) = 0) then
+    Result := - 1
   else
-    Result := touchX[Finger];
+    Result := Andr_Touch[ID].x;
 end;
 
-function touch_Y(Finger: Byte): Integer;
+function touch_Y(ID: Byte): Integer;
 begin
-  if Finger > MAX_TOUCH - 1 Then
-    Result := -1
+  {$IfDef FULL_LOGGING}
+  if ID > 9 then
+  begin
+    log_Add('Error! ID out of range in touch_Y!');
+    Result := - 1;
+    Exit;
+  end;
+  {$EndIf}
+  // если запредельное значение или статус не нажат (не происходило события), то указываем на это
+  if (ID > MAX_TOUCH - 1) or ((Andr_Touch[ID].state and is_canPress) = 0) then
+    Result := - 1
   else
-    Result := touchY[Finger];
+    Result := Andr_Touch[ID].y;
 end;
 
-function touch_Down(Finger: Byte): Boolean;
+function touch_XY(ID: Byte): zglTPoint2D;
 begin
-  if Finger > MAX_TOUCH - 1 Then
-    Result := FALSE
-  else
-    Result := touchDown[Finger];
+  {$IfDef FULL_LOGGING}
+  if ID > 9 then
+  begin
+    log_Add('Error! ID out of range in touch_XY!');
+    Result.X := - 1;
+    Result.Y := - 1;
+    Exit;
+  end;
+  {$EndIf}
+  // если запредельное значение или статус не нажат (не происходило события), то указываем на это
+  if (ID > MAX_TOUCH - 1) or ((Andr_Touch[ID].state and is_canPress) = 0) then
+  begin
+    Result.X := - 1;
+    Result.Y := - 1;
+  end
+  else begin
+    Result.Y := Andr_Touch[ID].y;
+    Result.X := Andr_Touch[ID].x;
+  end;
 end;
 
-function touch_Up(Finger: Byte): Boolean;
+{$IfDef LIBRARY_COMPILE}
+function touch_Down(ID: Byte): Boolean;
 begin
-  if Finger > MAX_TOUCH - 1 Then
-    Result := FALSE
+  {$IfDef FULL_LOGGING}
+  if ID > 9 then
+  begin
+    log_Add('Error! ID out of range in touch_Down!');
+    Result := False;
+    Exit;
+  end;
+  {$EndIf}
+  if ((Andr_Touch[ID].state and is_down) > 0) then
+    Result := True
   else
-    Result := touchUp[Finger];
+    Result := False;
+end;
+
+function touch_Up(ID: Byte): Boolean;
+begin
+  {$IfDef FULL_LOGGING}
+  if ID > 9 then
+  begin
+    log_Add('Error! ID out of range in touch_Up!');
+    Result := False;
+    Exit;
+  end;
+  {$EndIf}
+  if ((Andr_Touch[ID].state and is_up) > 0) then
+    Result := True
+  else
+    Result := False;
 end;
 
 function touch_Tap(Finger: Byte): Boolean;
 begin
-  if Finger > MAX_TOUCH - 1 Then
-    Result := FALSE
+  {$IfDef FULL_LOGGING}
+  if ID > 9 then
+  begin
+    log_Add('Error! ID out of range in touch_Tap!');
+    Result := False;
+    Exit;
+  end;
+  {$EndIf}
+  if ((Andr_Touch[ID].state and is_Press) > 0) then
+    Result := True
   else
-    Result := touchTap[Finger];
+    Result := False;
+end;
+
+function touch_DoubleTap(ID: Byte): Boolean;
+begin
+  {$IfDef FULL_LOGGING}
+  if ID > 9 then
+  begin
+    log_Add('Error! ID out of range in touch_DoubleTap!');
+    Result := False;
+    Exit;
+  end;
+  {$EndIf}
+  if ((Andr_Touch[ID].state and is_DoubleTap) > 0) then
+    Result := True
+  else
+    Result := False;
+end;
+{$EndIf}
+
+function touch_TripleTap(ID: Byte): Boolean;
+begin
+  {$IfDef FULL_LOGGING}
+  if ID > 9 then
+  begin
+    log_Add('Error! ID out of range in touch_DoubleTap!');
+    Result := False;
+    Exit;
+  end;
+  {$EndIf}
+  if ((Andr_Touch[ID].state and is_TripleDown) > 0) then
+    Result := True
+  else
+    Result := False;
 end;
 
 procedure touch_ClearState;
+var
+  i: Byte;
 begin
-  FillChar(touchUp[0], MAX_TOUCH, 0);
-  FillChar(touchTap[0], MAX_TOUCH, 0);
-  FillChar(touchCanTap[0], MAX_TOUCH, 1);
+  for i := 0 to MAX_TOUCH - 1 do
+    // очистка всех данных, кроме удержания в данный момент времени
+    Andr_Touch[i].state := Andr_Touch[i].state and (is_Press or is_canPress);
 end;
 
 end.

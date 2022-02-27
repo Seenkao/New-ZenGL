@@ -29,14 +29,15 @@ interface
 uses
   {$IFDEF USE_X11}
   X, XLib, XUtil,
+  zgl_glx_wgl,
   {$ENDIF}
   {$IFDEF WINDOWS}
   Windows,
+  zgl_glx_wgl,
   {$ENDIF}
   {$IFDEF MACOSX}
   MacOSAll,
   {$ENDIF}
-  zgl_types,
   {$IFNDEF USE_GLES}
   zgl_opengl,
   zgl_opengl_all,
@@ -44,6 +45,7 @@ uses
   zgl_opengles,
   zgl_opengles_all,
   {$ENDIF}
+  zgl_gltypeconst,
   zgl_textures;
 
 const
@@ -269,7 +271,7 @@ begin
             fbconfigAttr[i + 1] := oglFSAA;
           end;
 
-        fbconfig := glXChooseFBConfig(scrDisplay, scrDefault, @fbconfigAttr[0], @n);
+        fbconfig := glXChooseFBConfig(scrDisplay, scrDefault, @fbconfigAttr[0], n);
         if not Assigned(fbconfig) Then
           begin
             log_Add('PBuffer: failed to choose GLXFBConfig');
@@ -311,7 +313,7 @@ begin
             exit;
           end;
 
-        visualinfo := glXGetVisualFromFBConfig(scrDisplay, pPBuffer.Handle);
+        visualinfo := glXGetVisualFromFBConfig(scrDisplay, @pPBuffer.Handle);
         if not Assigned(visualinfo) Then
           begin
             log_Add('PBuffer: failed to choose Visual');
@@ -320,7 +322,7 @@ begin
             exit;
           end;
 
-        pPBuffer.Context := glXCreateContext(scrDisplay, visualinfo, oglContext, TRUE);
+        pPBuffer.Context := glXCreateContext(scrDisplay, visualinfo, oglContext, GL_TRUE);
         XFree(fbconfig);
         XFree(visualinfo);
         if pPBuffer.Context = nil Then

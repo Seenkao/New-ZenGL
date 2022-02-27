@@ -1,13 +1,14 @@
 ﻿program demo17;
 
 {$I zglCustomConfig.cfg}
+{$I zgl_config.cfg}
 
-// включить USE_MENUGUI в gegl_config, чтобы виртуальная клавиатура заработала.
+// включить USE_VKEYBOARD в gegl_config
 uses
   {$IFDEF UNIX}
   cthreads,
   {$ENDIF}
-  {$IFDEF USE_ZENGL_STATIC}  
+  {$IFDEF USE_ZENGL_STATIC}
   zgl_screen,
   zgl_window,
   zgl_timers,
@@ -22,11 +23,13 @@ uses
   zgl_file,
   zgl_types,
   zgl_mouse,
-  {$IfDef USE_VKEYBOARD} 
-  gegl_menu_gui,
+  {$IfDef USE_VKEYBOARD}
   gegl_draw_gui,
-  {$Endif}
-
+  gegl_menu_gui,
+  {$EndIf}
+  {$IfNDef OLD_METHODS}
+  gegl_color,
+  {$EndIf}
   zgl_utils
   {$ELSE}
   zglHeader
@@ -40,6 +43,7 @@ var
 
 procedure Init;
 begin
+  // file_SetPath('');                       // если dirRes = '../data/'   !!!!!     в демо-версиях!!!
   // RU: Загружаем данные о шрифте.
   // EN: Load the font.
 
@@ -50,24 +54,24 @@ begin
   //  fntMain.Pages[ i ] := tex_LoadFromFile( dirRes + 'font-page' + u_IntToStr( i ) + '.png' );
 
   // обязательный код! Данные для отображения клавиатуры.
-  fontUse := font_LoadFromFile(dirRes + 'CalibriBold50pt.zfi');
+(*  fontUse := font_LoadFromFile(dirRes + 'CalibriBold50pt.zfi');
   JoyArrow := tex_LoadFromFile(dirRes + 'arrow.png');     // загрузили текстуру
   tex_SetFrameSize(JoyArrow, 64, 64);                     // и разбили её на части, но в записях не будет указано количество полученных текстур
-  CreateTouchKeyboard;
-  setFontTextScale(15, fontUse);
+  CreateTouchKeyboard; *)
+
+  setFontTextScale(15, fntMain);
 end;
 
 procedure Draw;
   var
-    r : zglTRect;
+    r : zglTRect2D;
     s : UTF8String;
 begin
   // RU: ZenGL работает исключительно с кодировкой UTF-8, поэтому весь текст должен быть в UTF-8.
   // EN: ZenGL works only with UTF-8 encoding, so all text should be encoded with UTF-8.
-
   text_Draw( fntMain, 400, 25, 'String with center alignment', TEXT_HALIGN_CENTER );
 
-  text_DrawEx( fntMain, 400, 65, 3, 0, 'Scaling', 255, $FFFFFF, TEXT_HALIGN_CENTER );
+  text_DrawEx( fntMain, 400, 65, 3, 0, 'Scaling',{$IfDef OLD_METHODS} 255, $FFFFFF,{$Else} cl_White,{$EndIf} TEXT_HALIGN_CENTER );
 
   fx2d_SetVCA( $FF0000, $00FF00, $0000FF, $FFFFFF, 255, 255, 255, 255 );
   text_Draw( fntMain, 400, 125, 'Gradient color for every symbol', TEXT_FX_VCA or TEXT_HALIGN_CENTER );
@@ -110,8 +114,6 @@ begin
   s := 'FPS: ' + u_IntToStr( zgl_Get( RENDER_FPS ) );
   text_Draw( fntMain, 800 - text_GetWidth( fntMain, s ), 0, s );
 end;
-
-{$R *.res}
 
 begin
   {$IFNDEF USE_ZENGL_STATIC}

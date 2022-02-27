@@ -21,7 +21,7 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 16.07.2021
+ !!! modification from Serge 28.10.2021
 }
 unit zgl_font;
 
@@ -38,9 +38,7 @@ uses
 const
   ZGL_FONT_INFO: array[0..13] of AnsiChar = ('Z', 'G', 'L', '_', 'F', 'O', 'N', 'T', '_', 'I', 'N', 'F', 'O', #0);
   MAX_USE_FONT = 5;
-  // был загружен шрифт?
   Enable       = 1;
-  // используется ли шрифт
   UseFnt       = 2;
 
   PaddingX1    = 0;
@@ -56,10 +54,10 @@ type
     Height   : Byte;
     ShiftX   : Integer;
     ShiftY   : Integer;
-    ShiftP   : Integer;                   // ширина символа в пикселях
+    ShiftP   : Integer;
     TexCoords: array[0..3] of zglTPoint2D;
-    xx1, xx2, yy1, yy2: Single;           // координатные данные, для более быстрого пересчёта координат
-    _x1, _x2, _y1, _y2: Single;           // для ещё более быстрого пересчёта... твою дивизию опять размер увеличиваем..
+    xx1, xx2, yy1, yy2: Single;
+    _x1, _x2, _y1, _y2: Single;
 end;
 
 type
@@ -70,15 +68,15 @@ type
       Chars: Word;
                  end;
 
-    Flags     : Byte;
+    Flags     : LongWord;
     Scale     : Single;
     ScaleNorm : Single;
-    Pages     : array of zglPTexture;     // содержит свой ID
+    Pages     : array of zglPTexture;
     CharDesc  : array[0..65535] of zglPCharDesc;
-    MaxHeight : Integer;                  // максисальная высота символа
-    MaxShiftY : Integer;                  // максимальное значение по Y
+    MaxHeight : Integer;
+    MaxShiftY : Integer;
     Padding   : array[0..3] of Byte;
-    _ShiftP63: Single;                    // для символа "?", когда символ не определён
+    _ShiftP63 : Single;
 end;
 
 type
@@ -88,22 +86,28 @@ type
     Font: array[1..MAX_USE_FONT] of zglPFont;
 end;
 
-// добавить шрифт
-function  font_Add: Byte;
-// удалить шрифт под данным номером
-procedure font_Del(var Font: Byte);
-// уничтожить все шрифты. Вызывать не надо, происходит по закрытию программы
+// Rus: добавить шрифт.
+// Eng: add a font.
+function  font_Add: LongWord;
+// Rus: удалить шрифт под данным номером.
+// Eng: delete the font under this number.
+procedure font_Del(var Font: LongWord);
+// Rus: уничтожить все шрифты. Вызывать не надо, происходит автоматически.
+// Eng: destroy all fonts. There is no need to call, it happens automatically.
 procedure allFont_Destroy;
 
-// загрузка шрифта из файла
-function font_LoadFromFile(const FileName: UTF8String): Byte;
-// загрузка шрифта из памяти
-function font_LoadFromMemory(const Memory: zglTMemory): Byte;
+// Rus: загрузка шрифта из файла.
+// Eng: loading a font from a file.
+function font_LoadFromFile(const FileName: UTF8String): LongWord;
+// Rus: загрузка шрифта из памяти.
+// Eng: loading a font from memory.
+function font_LoadFromMemory(const Memory: zglTMemory): LongWord;
 {$IFDEF ANDROID}
-procedure font_RestoreFromFile(var Font: Byte; const FileName: UTF8String);
+procedure font_RestoreFromFile(var Font: LongWord; const FileName: UTF8String);
 {$ENDIF}
-// непосредственно загрузка шрифта из памяти, куда он был загружен
-procedure font_Load(var fnt: Byte; var fntMem: zglTMemory);
+// Rus: непосредственно загрузка шрифта из памяти, куда он был загружен.
+// Eng: directly loading the font from the memory where it was loaded.
+procedure font_Load(var fnt: LongWord; var fntMem: zglTMemory);
 
 var
   managerFont: zglTFontManager;
@@ -116,9 +120,9 @@ uses
   zgl_text,
   zgl_utils;
 
-function font_Add: Byte;
+function font_Add: LongWord;
 var
-  i: Byte;
+  i: LongWord;
   newFont: zglPFont;
   {$IFDEF DELPHI7_AND_DOWN}
   z: Pointer;
@@ -158,7 +162,7 @@ begin
   newFont := nil;
 end;
 
-procedure font_Del(var Font: Byte);
+procedure font_Del(var Font: LongWord);
 var
   useFont: zglPFont;
 label
@@ -210,7 +214,7 @@ begin
   destroyFont := nil;
 end;
 
-function font_LoadFromFile(const FileName: UTF8String): Byte;
+function font_LoadFromFile(const FileName: UTF8String): LongWord;
 var
   fntMem  : zglTMemory;
   i, j    : Integer;
@@ -235,7 +239,7 @@ begin
 
   if not file_Exists(FileName) Then
   begin
-    log_Add('Cannot read "' + FileName + '"');
+    log_Add('Cannot read "' + FileName + '" - program terminate');
     winOn := False;
     exit;
   end;
@@ -246,7 +250,8 @@ begin
 
   if Result = 255 Then
   begin
-    log_Add('Unable to load font: "' + FileName + '"');
+    log_Add('Unable to load font: "' + FileName + '" - program terminate');
+    winOn := False;
     exit;
   end;
 
@@ -271,7 +276,7 @@ begin
   useFont := nil;
 end;
 
-function font_LoadFromMemory(const Memory: zglTMemory): Byte;
+function font_LoadFromMemory(const Memory: zglTMemory): LongWord;
   var
     fntMem: zglTMemory;
     res   : zglTFontResource;
@@ -297,12 +302,11 @@ begin
 
   managerFont.Font[Result].ScaleNorm := 16 / TextScaleStandart;
 
-  // для ускорения работы с текстом
   setFontTextScale(15, Result);
 end;
 
 {$IFDEF ANDROID}
-procedure font_RestoreFromFile(var Font: Byte; const FileName: UTF8String);
+procedure font_RestoreFromFile(var Font: LongWord; const FileName: UTF8String);
 var
   fntMem: zglTMemory;
   i, j  : Integer;
@@ -349,7 +353,7 @@ end;
 {$ENDIF}
 
 // (fnt <> 255) - Error
-procedure font_Load(var fnt: Byte; var fntMem: zglTMemory);
+procedure font_Load(var fnt: LongWord; var fntMem: zglTMemory);
 var
   i    : Integer;
   c    : LongWord;

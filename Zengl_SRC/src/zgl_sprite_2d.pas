@@ -33,19 +33,20 @@ uses
   zgl_types,
   zgl_fx,
   zgl_textures,
+  zgl_gltypeconst,
   zgl_math_2d;
 
 procedure texture2d_Draw(Texture: zglPTexture; const TexCoord: array of zglTPoint2D; X, Y, W, H, Angle: Single; Alpha: Byte = 255; FX: LongWord = FX_BLEND);
 procedure ssprite2d_Draw(Texture: zglPTexture; X, Y, W, H, Angle: Single; Alpha: Byte = 255; FX: LongWord = FX_BLEND);
 procedure asprite2d_Draw(Texture: zglPTexture; X, Y, W, H, Angle: Single; Frame: Word; Alpha: Byte = 255; FX: LongWord = FX_BLEND);
-procedure csprite2d_Draw(Texture: zglPTexture; X, Y, W, H, Angle: Single; const CutRect: zglTRect; Alpha: Byte = 255; FX: LongWord = FX_BLEND);
+procedure csprite2d_Draw(Texture: zglPTexture; X, Y, W, H, Angle: Single; const CutRect: zglTRect2D; Alpha: Byte = 255; FX: LongWord = FX_BLEND);
 
 implementation
 uses
   zgl_application,
   zgl_screen,
   {$IFNDEF USE_GLES}
-  zgl_opengl,
+  //zgl_opengl,
   zgl_opengl_all,
   {$ELSE}
   zgl_opengles,
@@ -609,7 +610,7 @@ begin
   end;
 end;
 
-procedure csprite2d_Draw(Texture: zglPTexture; X, Y, W, H, Angle: Single; const CutRect: zglTRect; Alpha: Byte = 255; FX: LongWord = FX_BLEND);
+procedure csprite2d_Draw(Texture: zglPTexture; X, Y, W, H, Angle: Single; const CutRect: zglTRect2D; Alpha: Byte = 255; FX: LongWord = FX_BLEND);
   var
     quad: array[0..3] of zglTPoint2D;
     mode: Integer;

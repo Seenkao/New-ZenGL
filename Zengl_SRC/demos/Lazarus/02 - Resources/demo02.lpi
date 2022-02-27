@@ -89,8 +89,8 @@
       <Filename Value="../../../bin/$(TargetCPU)-$(TargetOS)/demo02"/>
     </Target>
     <SearchPaths>
-      <IncludeFiles Value="$(ProjOutDir);../../../headers;../../../srcGEGL"/>
-      <OtherUnitFiles Value="../../../headers;../../../extra;../../../src;../../../lib/jpeg/$(TargetCPU)-$(TargetOS);../../../lib/msvcrt/$(TargetCPU);../../../lib/ogg/$(TargetCPU)-$(TargetOS);../../../lib/theora/$(TargetCPU)-$(TargetOS);../../../lib/zlib/$(TargetCPU)-$(TargetOS);../../../lib/zip/$(TargetCPU)-$(TargetOS)"/>
+      <IncludeFiles Value="$(ProjOutDir);../../../headers;../../../srcGEGL;../../../srcGL;../../../src"/>
+      <OtherUnitFiles Value="../../../headers;../../../extra;../../../src;../../../lib/jpeg/$(TargetCPU)-$(TargetOS);../../../lib/msvcrt/$(TargetCPU);../../../lib/ogg/$(TargetCPU)-$(TargetOS);../../../lib/theora/$(TargetCPU)-$(TargetOS);../../../lib/zlib/$(TargetCPU)-$(TargetOS);../../../lib/zip/$(TargetCPU)-$(TargetOS);../../../srcGEGL;../../../srcGL"/>
       <UnitOutputDirectory Value="../tmp/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>
@@ -107,6 +107,7 @@
     <Linking>
       <Debugging>
         <GenerateDebugInfo Value="False"/>
+        <DebugInfoType Value="dsDwarf2"/>
         <StripSymbols Value="True"/>
       </Debugging>
       <LinkSmart Value="True"/>

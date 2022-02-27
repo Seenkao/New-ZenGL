@@ -20,6 +20,8 @@
  *
  *  3. This notice may not be removed or altered from any
  *     source distribution.
+
+ !!! modification from Serge 22.11.2021
 }
 unit zgl_collision_2d;
 
@@ -32,43 +34,68 @@ uses
   zgl_math_2d;
 
 // point 2d
-(* пересечение очки с квадратом *)
-function col2d_PointInRect(X, Y: Single; const Rect: zglTRect): Boolean;
-(* пересечение точки с треугольником *)
+// Rus: точка в квадрате?
+// Eng:
+function col2d_PointInRect(X, Y: Single; const Rect: zglTRect2D): Boolean;
+// Rus: точка в треугольнике?
+// Eng:
 function col2d_PointInTriangle(X, Y: Single; const P1, P2, P3: zglTPoint2D): Boolean;
-(* пересечение точки с кругом *)
-function col2d_PointInCircle(X, Y: Single; const Circle: zglTCircle): Boolean;
-(* пересечение точки с произвольным четырёхугольником *)
-function col2d_PointInQuad(X, Y: Single; Quad: zglTRectPoints): Boolean;
+// Rus: точка в круге?
+// Eng:
+function col2d_PointInCircle(X, Y: Single; const Circle: zglTCircle2D): Boolean;
+// Rus: точка в произвольном четырёхугольнике? Проверить работу!!!
+// Eng:
+function col2d_PointInQuad(X, Y: Single; Quad: zglTRectPoints2D): Boolean;
 
 // line 2d
-(* пересечение линий *)
+// Rus: пересечение линий
+// Eng:
 function col2d_Line(const A, B: zglTLine2D; ColPoint: zglPPoint2D): Boolean;
-(* пересечение линии с  квадратом *)
-function col2d_LineVsRect(const Line: zglTLine2D; const Rect: zglTRect): Boolean;
-(* пересечение линии с кругом *)
-function col2d_LineVsCircle(const Line: zglTLine2D; const Circle: zglTCircle): Boolean;
+// Rus: пересечение линий, без вычисления точки пересечения
+// Eng:
+function col2d_Lines(const A, B: zglTLine2D): Boolean;
+// Rus: пересечение линии с  квадратом
+// Eng:
+function col2d_LineVsRect(const Line: zglTLine2D; const Rect: zglTRect2D): Boolean;
+// Rus: пересечение линии с кругом
+// Eng:
+function col2d_LineVsCircle(const Line: zglTLine2D; const Circle: zglTCircle2D): Boolean;
 
 // rect
-(* пересечение квадратов *)
-function col2d_Rect(const Rect1, Rect2: zglTRect): Boolean;
-(* обрезание первого квадрата по второму *)
-function col2d_ClipRect(const Rect1, Rect2: zglTRect): zglTRect;
-(* пересечение квадратов (квадрат внутри квадрата) *)
-function col2d_RectInRect(const Rect1, Rect2: zglTRect): Boolean;
-(* квадрат в круге *)
-function col2d_RectInCircle(const Rect: zglTRect; const Circle: zglTCircle): Boolean;
-(* пересечение квадрата с кругом *)
-function col2d_RectVsCircle(const Rect: zglTRect; const Circle: zglTCircle): Boolean;
+// Rus: пересечение квадратов
+// Eng:
+function col2d_Rect(const Rect1, Rect2: zglTRect2D): Boolean;
+// Begin point - End point
+// Rus:
+// Eng:
+function col2d_RectBPEP(const Rect1, Rect2: zglTRectBPEP2D): Boolean;
+// Rus: обрезание первого квадрата по второму
+// Eng:
+function col2d_ClipRect(const Rect1, Rect2: zglTRect2D): zglTRect2D;
+// Rus: пересечение квадратов (квадрат внутри квадрата)
+// Eng:
+function col2d_RectInRect(const Rect1, Rect2: zglTRect2D): Boolean;
+// Rus: квадрат в круге
+// Eng:
+function col2d_RectInCircle(const Rect: zglTRect2D; const Circle: zglTCircle2D): Boolean;
+// Rus: пересечение квадрата с кругом
+// Eng:
+function col2d_RectVsCircle(const Rect: zglTRect2D; const Circle: zglTCircle2D): Boolean;
 
 // circle
-function col2d_Circle(const Circle1, Circle2: zglTCircle): Boolean;
-function col2d_CircleInCircle(const Circle1, Circle2: zglTCircle): Boolean;
-function col2d_CircleInRect(const Circle: zglTCircle; const Rect: zglTRect): Boolean;
+// Rus:
+// Eng:
+function col2d_Circle(const Circle1, Circle2: zglTCircle2D): Boolean;
+// Rus:
+// Eng:
+function col2d_CircleInCircle(const Circle1, Circle2: zglTCircle2D): Boolean;
+// Rus:
+// Eng:
+function col2d_CircleInRect(const Circle: zglTCircle2D; const Rect: zglTRect2D): Boolean;
 
 implementation
 
-function col2d_PointInRect(X, Y: Single; const Rect: zglTRect): Boolean;
+function col2d_PointInRect(X, Y: Single; const Rect: zglTRect2D): Boolean;
 begin
   Result := (X >= Rect.X) and (X <= Rect.X + Rect.W) and (Y >= Rect.Y) and (Y <= Rect.Y + Rect.H);
 end;
@@ -99,12 +126,12 @@ begin
       Result := FALSE;
 end;
 
-function col2d_PointInCircle(X, Y: Single; const Circle: zglTCircle): Boolean;
+function col2d_PointInCircle(X, Y: Single; const Circle: zglTCircle2D): Boolean;
 begin
   Result := sqr(Circle.cX - X) + sqr(Circle.cY - Y) <= sqr(Circle.Radius);
 end;
 
-function col2d_PointInQuad(X, Y: Single; Quad: zglTRectPoints): Boolean;
+function col2d_PointInQuad(X, Y: Single; Quad: zglTRectPoints2D): Boolean;
 var
   oAll: array[0..3] of Integer;
 begin
@@ -134,10 +161,10 @@ var
 begin
   Result := FALSE;
 
-  s1[0] := A.x1 - A.x1;
-  s1[1] := A.y1 - A.y1;
-  s2[0] := B.x1 - B.x1;
-  s2[1] := B.y1 - B.y1;
+  s1[0] := A.x2 - A.x1;
+  s1[1] := A.y2 - A.y1;
+  s2[0] := B.x2 - B.x1;
+  s2[1] := B.y2 - B.y1;
 
   tmp := -s2[0] * s1[1] + s1[0] * s2[1];
   if tmp <> 0 Then
@@ -160,7 +187,34 @@ begin
   end;
 end;
 
-function col2d_LineVsRect(const Line: zglTLine2D; const Rect: zglTRect): Boolean;
+function col2d_Lines(const A, B: zglTLine2D): Boolean;
+var
+  s, t, tmp: Single;
+  s1, s2   : array[0..1] of Single;
+begin
+  Result := FALSE;
+
+  s1[0] := A.x2 - A.x1;
+  s1[1] := A.y2 - A.y1;
+  s2[0] := B.x2 - B.x1;
+  s2[1] := B.y2 - B.y1;
+
+  tmp := -s2[0] * s1[1] + s1[0] * s2[1];
+  if tmp <> 0 Then
+    tmp := 1 / tmp
+  else
+    exit;
+
+  s := (-s1[1] * (A.x1 - B.x1) + s1[0] * (A.y1 - B.y1)) * tmp;
+  t := (s2[0] * (A.y1 - B.y1) - s2[1] * (A.x1 - B.x1)) * tmp;
+
+  if (s >= 0) and (s <= 1) and (t >= 0) and (t <= 1) Then
+  begin
+    Result := TRUE;
+  end;
+end;
+
+function col2d_LineVsRect(const Line: zglTLine2D; const Rect: zglTRect2D): Boolean;
 var
   minX, maxX, minY, maxY, dx, a, b, tmp: Single;
 begin
@@ -220,7 +274,7 @@ begin
   Result := TRUE;
 end;
 
-function col2d_LineVsCircle(const Line: zglTLine2D; const Circle: zglTCircle): Boolean;
+function col2d_LineVsCircle(const Line: zglTLine2D; const Circle: zglTCircle2D): Boolean;
 var
   p1, p2 : array[0..1] of Single;
   dx, dy : Single;
@@ -247,12 +301,17 @@ begin
       Result := a + b + c < 0;
 end;
 
-function col2d_Rect(const Rect1, Rect2: zglTRect): Boolean;
+function col2d_Rect(const Rect1, Rect2: zglTRect2D): Boolean;
 begin
   Result := (Rect1.X + Rect1.W >= Rect2.X) and (Rect1.X <= Rect2.X + Rect2.W) and (Rect1.Y + Rect1.H >= Rect2.Y) and (Rect1.Y <= Rect2.Y + Rect2.H);
 end;
 
-function col2d_ClipRect(const Rect1, Rect2: zglTRect): zglTRect;
+function col2d_RectBPEP(const Rect1, Rect2: zglTRectBPEP2D): Boolean;
+begin
+  Result := (Rect1.X2 >= Rect2.X1) and (Rect1.X1 <= Rect2.X2) and (rect1.Y2 >= Rect2.Y1) and (Rect1.Y1 <= Rect2.Y2);
+end;
+
+function col2d_ClipRect(const Rect1, Rect2: zglTRect2D): zglTRect2D;
 begin
   if (Rect1.X < Rect2.X) or (Rect1.X > Rect2.X + Rect2.W) Then
     Result.X := Rect2.X
@@ -272,12 +331,12 @@ begin
     Result.H := (Rect2.Y + Rect2.H) - Result.Y - 1;
 end;
 
-function col2d_RectInRect(const Rect1, Rect2: zglTRect): Boolean;
+function col2d_RectInRect(const Rect1, Rect2: zglTRect2D): Boolean;
 begin
   Result := (Rect1.X >= Rect2.X) and (Rect1.X + Rect1.W <= Rect2.X + Rect2.W) and (Rect1.Y >= Rect2.Y) and (Rect1.Y + Rect1.H <= Rect2.Y + Rect2.H);
 end;
 
-function col2d_RectInCircle(const Rect: zglTRect; const Circle: zglTCircle): Boolean;
+function col2d_RectInCircle(const Rect: zglTRect2D; const Circle: zglTCircle2D): Boolean;
 var
   sqrRadius, dX, dY: Single;
   sqrDX, sqrDY, sqrDXsubDW, sqrDYsubDH: Single;
@@ -294,7 +353,7 @@ begin
             ((sqrDXsubDW + sqrDYsubDH) <= sqrRadius) and ((sqrDX + sqrDYsubDH) <= sqrRadius);
 end;
 
-function col2d_RectVsCircle(const Rect: zglTRect; const Circle: zglTCircle): Boolean;
+function col2d_RectVsCircle(const Rect: zglTRect2D; const Circle: zglTCircle2D): Boolean;
 var
   closestX, closestY, distanceX, distanceY: Single;
 begin
@@ -318,18 +377,18 @@ begin
   Result := sqr(distanceX) + sqr(distanceY) < sqr(circle.Radius);
 end;
 
-function col2d_Circle(const Circle1, Circle2: zglTCircle): Boolean;
+function col2d_Circle(const Circle1, Circle2: zglTCircle2D): Boolean;
 begin
   // не правильный подсчёт. Надо учитывать пересечения кругов
   Result := sqr(Circle1.cX - Circle2.cX) + sqr(Circle1.cY - Circle2.cY) <= sqr(Circle1.Radius + Circle2.Radius);
 end;
 
-function col2d_CircleInCircle(const Circle1, Circle2: zglTCircle): Boolean;
+function col2d_CircleInCircle(const Circle1, Circle2: zglTCircle2D): Boolean;
 begin
   Result := sqr(Circle1.cX - Circle2.cX) + sqr(Circle1.cY - Circle2.cY) <= sqr(Circle1.Radius - Circle2.Radius);
 end;
 
-function col2d_CircleInRect(const Circle: zglTCircle; const Rect: zglTRect): Boolean;
+function col2d_CircleInRect(const Circle: zglTCircle2D; const Rect: zglTRect2D): Boolean;
 begin
   Result := (Circle.cX - Circle.Radius >= Rect.X) and (Circle.cX + Circle.Radius <= Rect.X + Rect.W) and
             (Circle.cY - Circle.Radius >= Rect.Y) and (Circle.cY + Circle.Radius <= Rect.Y + Rect.H);

@@ -114,23 +114,25 @@ public class ZenGL extends GLSurfaceView
 		{
 			case MotionEvent.ACTION_DOWN:
 			{
-				int count = event.getPointerCount();
+/*				int count = event.getPointerCount();
 				for ( int i = 0; i < count; i++ )
 				{
 					int pointerID = event.getPointerId( i );
 					zglNativeTouch( pointerID, event.getX( i ), event.getY( i ), event.getPressure( i ) );
-				}
+				}  */
+				zglNativeTouch(0, event.getX(0), event.getY(0), event.getPressure(0));
 				break;
 			}
 
 			case MotionEvent.ACTION_UP:
 			{
-				int count = event.getPointerCount();
+/*				int count = event.getPointerCount();
 				for ( int i = 0; i < count; i++ )
 				{
 					int pointerID = event.getPointerId( i );
 					zglNativeTouch( pointerID, event.getX( i ), event.getY( i ), 0 );
-				}
+				}  */
+				zglNativeTouch(0, event.getX(0), event.getY(0), 0);
 				break;
 			}
 

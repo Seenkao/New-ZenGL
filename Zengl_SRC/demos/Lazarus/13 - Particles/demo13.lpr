@@ -26,7 +26,8 @@ uses
   zgl_font,
   zgl_text,
   zgl_math_2d,
-  zgl_utils
+  zgl_utils,
+  gegl_color
   {$ELSE}
   zglHeader
   {$ENDIF}
@@ -50,7 +51,7 @@ begin
 
   fntMain := font_LoadFromFile( dirRes + 'font.zfi' );
   setFontTextScale(15, fntMain);
-
+  setTextColor(Get_Color(cl_White));
   // EN: Load three types of fire emitters.
   // RU: Загрузка трёх разных видов эмиттеров огня.
   emitterFire[ 0 ] := emitter2d_LoadFromFile( dirRes + 'emitter_fire00.zei' );

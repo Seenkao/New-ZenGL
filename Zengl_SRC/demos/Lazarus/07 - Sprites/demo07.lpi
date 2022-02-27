@@ -89,8 +89,8 @@
       <Filename Value="../../../bin/$(TargetCPU)-$(TargetOS)/demo07"/>
     </Target>
     <SearchPaths>
-      <IncludeFiles Value="$(ProjOutDir);../../../headers;../../../srcGEGL"/>
-      <OtherUnitFiles Value="../../../headers;../../../extra;../../../lib/jpeg/$(TargetCPU)-$(TargetOS);../../../lib/msvcrt/$(TargetCPU);../../../lib/ogg/$(TargetCPU)-$(TargetOS);../../../lib/theora/$(TargetCPU)-$(TargetOS);../../../lib/zlib/$(TargetCPU)-$(TargetOS);../../../lib/zip/$(TargetCPU)-$(TargetOS);../../../src"/>
+      <IncludeFiles Value="$(ProjOutDir);../../../headers;../../../src;../../../srcGL;../../../srcGEGL"/>
+      <OtherUnitFiles Value="../../../headers;../../../extra;../../../lib/jpeg/$(TargetCPU)-$(TargetOS);../../../lib/msvcrt/$(TargetCPU);../../../lib/ogg/$(TargetCPU)-$(TargetOS);../../../lib/theora/$(TargetCPU)-$(TargetOS);../../../lib/zlib/$(TargetCPU)-$(TargetOS);../../../lib/zip/$(TargetCPU)-$(TargetOS);../../../src;../../../srcGL;../../../srcGEGL"/>
       <UnitOutputDirectory Value="../tmp/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>

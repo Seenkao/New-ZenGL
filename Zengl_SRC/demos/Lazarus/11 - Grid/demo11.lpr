@@ -39,8 +39,8 @@ var
   TimeStart  : Byte = 0;
 
 procedure Init;
-  var
-    i, j : Integer;
+var
+  i, j : Integer;
 begin
   texBack := tex_LoadFromFile( dirRes + 'back04.jpg' );
 
@@ -53,10 +53,10 @@ begin
   SetLength( grid.Grid, grid.Cols, grid.Rows );
   for i := 0 to grid.Cols - 1 do
     for j := 0 to grid.Rows - 1 do
-      begin
-        grid.Grid[ i, j ].X := i * 40;
-        grid.Grid[ i, j ].Y := j * 40;
-      end;
+    begin
+      grid.Grid[ i, j ].X := i * 40;
+      grid.Grid[ i, j ].Y := j * 40;
+    end;
   setFontTextScale(15, fntMain);
 end;
 
@@ -70,9 +70,9 @@ begin
 end;
 
 procedure Timer;
-  var
-    i, j : Integer;
-    cwave, swave : Single;
+var
+  i, j : Integer;
+  cwave, swave : Single;
 begin
   wave  := wave + random( 1000 ) / 10000;
   cwave := cos( wave );
@@ -82,17 +82,17 @@ begin
   // EN: Simulation of simple underwater effect.
   for i := 1 to grid.Cols - 2 do
     for j := 1 to grid.Rows - 2 do
+    begin
+      if ( i mod 2 = 0 ) and ( j mod 2 = 0 ) Then
       begin
-        if ( i mod 2 = 0 ) and ( j mod 2 = 0 ) Then
-          begin
-            grid.Grid[ i, j ].X := i * 40 + cwave;
-            grid.Grid[ i, j ].Y := j * 40 + swave;
-          end else
-            begin
-              grid.Grid[ i, j ].X := i * 40 - cwave;
-              grid.Grid[ i, j ].Y := j * 40 - swave;
-            end;
+        grid.Grid[ i, j ].X := i * 40 + cwave;
+        grid.Grid[ i, j ].Y := j * 40 + swave;
+      end else
+      begin
+        grid.Grid[ i, j ].X := i * 40 - cwave;
+        grid.Grid[ i, j ].Y := j * 40 - swave;
       end;
+    end;
 end;
 
 Begin
@@ -102,7 +102,7 @@ Begin
 
   randomize();
 
-  TimeStart := timer_Add( @Timer, 16, Start );
+  TimeStart := timer_Add( @Timer, 16, t_Start );
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );

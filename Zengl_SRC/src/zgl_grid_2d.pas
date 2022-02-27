@@ -42,7 +42,7 @@ type
 
 procedure sgrid2d_Draw(Texture: zglPTexture; X, Y: Single; Grid: zglPGrid2D; Alpha: Byte = 255; FX: LongWord = FX_BLEND);
 procedure agrid2d_Draw(Texture: zglPTexture; X, Y: Single; Grid: zglPGrid2D; Frame: Integer; Alpha: Byte = 255; FX: LongWord = FX_BLEND);
-procedure cgrid2d_Draw(Texture: zglPTexture; X, Y: Single; Grid: zglPGrid2D; const CutRect: zglTRect; Alpha: Byte = 255; FX: LongWord = FX_BLEND);
+procedure cgrid2d_Draw(Texture: zglPTexture; X, Y: Single; Grid: zglPGrid2D; const CutRect: zglTRect2D; Alpha: Byte = 255; FX: LongWord = FX_BLEND);
 
 implementation
 uses
@@ -51,6 +51,7 @@ uses
   {$IFNDEF USE_GLES}
   zgl_opengl,
   zgl_opengl_all,
+  zgl_gltypeconst,
   {$ELSE}
   zgl_opengles,
   zgl_opengles_all,
@@ -256,7 +257,7 @@ begin
     end;
 end;
 
-procedure cgrid2d_Draw(Texture: zglPTexture; X, Y: Single; Grid: zglPGrid2D; const CutRect: zglTRect; Alpha: Byte = 255; FX: LongWord = FX_BLEND);
+procedure cgrid2d_Draw(Texture: zglPTexture; X, Y: Single; Grid: zglPGrid2D; const CutRect: zglTRect2D; Alpha: Byte = 255; FX: LongWord = FX_BLEND);
   var
     quad: array[0..3] of zglTPoint2D;
     i, j: Integer;

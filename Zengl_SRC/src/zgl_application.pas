@@ -21,7 +21,7 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 16.07.2021
+ !!! modification from Serge 26.02.2022
 }
 unit zgl_application;
 
@@ -169,7 +169,9 @@ var
   app_PUpdate    : procedure(dt: Double);
   app_PActivate  : procedure(activate: Boolean);
   app_PEvents    : procedure;
+  app_PReset     : procedure;
 
+  // процедура после прорисовки экрана. Для использования буфферов OpenGL
   app_PostPDraw  : procedure;
 
   {$IFDEF iOS}
@@ -188,14 +190,16 @@ var
 
   MenuChange: Byte = 0;
   VisibleMenuChange: Boolean = true;
+//  MenuTimerSleep: Byte;
   MaxNumMenu: Byte = 4;
   {$EndIf}
 
   {$IFDEF USE_X11}
   appCursor: TCursor = None;
+  {$IfDef OLD_METHODS}
   appXIM   : PXIM;
   appXIC   : PXIC;
-  {$ENDIF}
+  {$ENDIF}{$EndIf}
   {$IFDEF WINDOWS}
   appTimer    : LongWord;
   appMinimized: Boolean;
@@ -236,15 +240,17 @@ var
   appFPS     : LongWord;
   appFPSCount: LongWord;
   appFPSAll  : LongWord;
-  timeCalcFPS: Byte;
+  timeCalcFPS: LongWord;
 
   appFlags   : LongWord;
 
   {$IfNDef USE_INIT_HANDLE}
-  newTimeDraw, oldTimeDraw: Double;
-  useFPS: Byte = 30;
+  oldTimeDraw: Double;
+  useFPS: LongWord = 30;
   maxFPS: Single = 1000 / 30;
-  timeAppEvents: Byte;
+  // номер таймера опроса событий
+  timeAppEvents: LongWord;
+  // интервал опроса событий
   appEventsTime: Cardinal = 8;
   {$EndIf}
 
@@ -271,6 +277,7 @@ uses
   zgl_resources,
   zgl_textures,
   zgl_log,
+  zgl_types,
   {$IFDEF USE_SOUND}
   zgl_sound,
   {$ENDIF}
@@ -298,8 +305,14 @@ begin
     if managerSetOfTools.count > 0 then
       for i := 0 to managerSetOfTools.count - 1 do
       begin
-        if managerSetOfTools.propElement[i].Element = _Edit then
+        if managerSetOfTools.propElement[i].Element = is_Edit then
           EditDraw(i);
+(*        if managerSetOfTools.propElement[i].Element = is_Label then   пока не созданы
+          ;
+        if managerSetOfTools.propElement[i].Element = is_Memo then
+          ;
+        if managerSetOfTools.propElement[i].Element = is_Button then
+          ;  *)
       end;
     {$EndIf}
     {$IfDef USE_VKEYBOARD}
@@ -315,6 +328,7 @@ begin
   if not appPause Then
     INC(appFPSCount);
 
+  // это для работы с буферами после отрисовки
   if Assigned(app_PostPDraw) then
     app_PostPDraw;
 end;
@@ -332,30 +346,34 @@ procedure app_Events;
 var
   i: Word;
 begin
-  if keysDown[K_F12] then
+  // переключение языка, переработать
+  if (appFlags and APP_USE_ENGLISH_INPUT) = 0 then
   begin
-    keybFlags := keybFlags or keyboardLatRusDown;
-  end;
-  if ((keybFlags and keyboardLatRusDown) > 0) and keysUp[K_F12] then
-  begin
-    keybFlags := keybFlags and ($FFFFFFFF - keyboardLatRusDown) xor keyboardLatinRus;
+    if keysDown[K_F12] then
+    begin
+      PkeybFlags^ := PkeybFlags^ or keyboardLatRusDown;
+    end;
+    if ((PkeybFlags^ and keyboardLatRusDown) > 0) and (keysUp[K_F12]) then
+    begin
+      PkeybFlags^ := PkeybFlags^ and ($FFFFFFFF - keyboardLatRusDown) xor keyboardLatinRus;
+    end;
   end;
   {$IfDef USE_VKEYBOARD}
   if keysDown[K_F2] then
-    keybFlags := keybFlags or keyboardSymbolDown; 
-  if ((keybFlags and keyboardSymbolDown) > 0) and (keysUp[K_F2]) then
+    PkeybFlags^ := PkeybFlags^ or keyboardSymbolDown;
+  if ((PkeybFlags^ and keyboardSymbolDown) > 0) and (keysUp[K_F2]) then
   begin
-    keybFlags := keybFlags xor keyboardSymbolDown;
+    PkeybFlags^ := PkeybFlags^ xor keyboardSymbolDown;
     if MenuChange = 3 then
     begin
       SetMenuProcess(4);
       MenuChange := 4;
-      keybFlags := keybFlags or keyboardSymbol;
+      PkeybFlags^ := PkeybFlags^ or keyboardSymbol;
     end
     else begin
       SetMenuProcess(3);
       MenuChange := 3;
-      keybFlags := keybFlags xor keyboardSymbol;
+      PkeybFlags^ := PkeybFlags^ xor keyboardSymbol;
     end;
   end;
   {$EndIf}
@@ -375,9 +393,9 @@ begin
   if managerSetOfTools.count > 0 then
     for i := 0 to managerSetOfTools.count - 1 do
     begin
-      if managerSetOfTools.propElement[i].Element = _Edit then
+      if managerSetOfTools.propElement[i].Element = is_Edit then
         EventsEdit(i);
-      if managerSetOfTools.propElement[i].Element = _Memo then
+      if managerSetOfTools.propElement[i].Element = is_Memo then
         ;
     end;
   {$EndIf}
@@ -396,9 +414,11 @@ end;
 procedure app_Init;
 begin
   managerZeroTexture := tex_CreateZero(4, 4, $FFFFFFFF, TEX_DEFAULT_2D);
+  {$IfNDef OLD_METHODS}
   managerSetOfTools.count := 0;
   managerSetOfTools.maxPossibleEl := 0;
   managerSetOfTools.ActiveElement := 65535;
+  {$EndIf}
   if scrViewPort then
     SetCurrentMode();
   scr_Clear();
@@ -406,11 +426,10 @@ begin
     app_PLoad();
   scr_Flush();
 
-
   timer_Reset();
-  timeCalcFPS := timer_Add(@app_CalcFPS, 1000, Start);
+  timeCalcFPS := timer_Add(@app_CalcFPS, 1000, t_Start);
   {$IfNDef USE_INIT_HANDLE}
-  timeAppEvents := timer_Add(@app_Events, appEventsTime, Start);
+  timeAppEvents := timer_Add(@app_Events, appEventsTime, t_Start);
   {$EndIf}
 end;
 
@@ -444,7 +463,6 @@ begin
       u_Sleep(15);
 
       continue;
-
     end else
     begin
       timer_MainLoop();
@@ -463,10 +481,7 @@ begin
     appdt := timeLoop;
 
     {$IfNDef USE_INIT_HANDLE}
-    timeLoop := newTimeDraw;
-    newTimeDraw := timer_GetTicks;
-
-    if newTimeDraw >= (oldTimeDraw + maxFPS) then
+    if timer_GetTicks >= (oldTimeDraw + maxFPS) then
     begin
       app_Draw();
       oldTimeDraw := oldTimeDraw + maxFPS;
@@ -577,7 +592,7 @@ begin
   else begin
     if timer_GetTicks - startTimeLockVK > timeLockVK then
     begin
-      prevLockVK := False;
+    //  prevLockVK := False;
       lockVirtualKeyboard := false;
     end;
   end;
@@ -597,10 +612,12 @@ begin
     end;
     if VisibleMenuChange then
     begin
-      if (mouseUpDown and M_BLEFT_DOWN) > 0 then
+      mouseToKey := True;
+      if (mouseAction[M_BLEFT].state and is_down) > 0 then
         app_UseMenuDown;
-      if (mouseUpDown and M_BLEFT_UP) > 0 then
+      if (mouseAction[M_BLEFT].state and is_up) > 0 then
         app_UseMenuUp;
+      mouseToKey := False;
     end;
   end;
 end;
@@ -655,9 +672,11 @@ function app_ProcessMessages;
     i      : Integer;
     wndMouseIn: Boolean;
   {$ENDIF}
+  {$IfDef OLD_METHODS}
     len: Integer;
     c  : array[0..5] of AnsiChar;
     str: UTF8String;
+  {$EndIf}
     key: LongWord;
   {$IfDef MAC_COCOA}
     ev: NSEvent;
@@ -695,7 +714,7 @@ begin
               if winOn and Assigned(app_PActivate) Then
                 app_PActivate(TRUE);
               FillChar(keysDown[0], 256, 0);
-              mouseUpDown := 0;
+              mouse_ClearState;
             end;
         FocusOut:
             begin
@@ -718,27 +737,24 @@ begin
               case event.xbutton.button of
                 1: // Left
                   begin
-                    mouseUpDown := (mouseUpDown and (255 - M_BLEFT_UP)) or M_BLEFT_DOWN;
-                    mouseClickCanClick := mouseClickCanClick or M_BLEFT_CLICK;
-                    if timer_GetTicks - mouseDblCTime[M_BLEFT] < mouseDblCInt Then
-                      mouseDblClickWheel := mouseDblClickWheel or M_BLEFT_DBLCLICK;
-                    mouseDblCTime[M_BLEFT] := timer_GetTicks();
+                    mouseAction[M_BLEFT].state := is_Press or is_down;
+                    if timer_GetTicks - mouseAction[M_BLEFT].DBLClickTime < mouseDblCInt Then
+                      mouseAction[M_BLEFT].state := is_Press or is_down or is_DoubleDown;
+                    mouseAction[M_BLEFT].DBLClickTime := timer_GetTicks();
                   end;
                 2: // Middle
                   begin
-                    mouseUpDown := (mouseUpDown and (255 - M_BMIDDLE_UP)) or M_BMIDDLE_DOWN;
-                    mouseClickCanClick := mouseClickCanClick or M_BMIDDLE_CLICK;
-                    if timer_GetTicks - mouseDblCTime[M_BMIDDLE] < mouseDblCInt Then
-                      mouseDblClickWheel := mouseDblClickWheel or M_BMIDDLE_DBLCLICK;
-                    mouseDblCTime[M_BMIDDLE] := timer_GetTicks();
+                    mouseAction[M_BMIDDLE].state := is_Press or is_down;
+                    if timer_GetTicks - mouseAction[M_BMIDDLE].DBLClickTime < mouseDblCInt Then
+                      mouseAction[M_BMIDDLE].state := is_Press or is_down or is_DoubleDown;
+                    mouseAction[M_BMIDDLE].DBLClickTime := timer_GetTicks();
                   end;
                 3: // Right
                   begin
-                    mouseUpDown := (mouseUpDown and (255 - M_BRIGHT_UP)) or M_BRIGHT_DOWN;
-                    mouseClickCanClick := mouseClickCanClick or M_BRIGHT_CLICK;
-                    if timer_GetTicks - mouseDblCTime[M_BRIGHT] < mouseDblCInt Then
-                      mouseDblClickWheel := mouseDblClickWheel or M_BRIGHT_DBLCLICK;
-                    mouseDblCTime[M_BRIGHT] := timer_GetTicks();
+                    mouseAction[M_BRIGHT].state := is_Press or is_down;
+                    if timer_GetTicks - mouseAction[M_BRIGHT].DBLClickTime < mouseDblCInt Then
+                      mouseAction[M_BRIGHT].state := is_Press or is_down or is_DoubleDown;
+                    mouseAction[M_BRIGHT].DBLClickTime := timer_GetTicks();
                   end;
               end;
             end;
@@ -747,26 +763,23 @@ begin
               case event.xbutton.button of
                 1: // Left
                   begin
-                    mouseUpDown := (mouseUpDown and (255 - M_BLEFT_DOWN)) or M_BLEFT_UP;
-                    mouseClickCanClick := mouseClickCanClick  or M_BLEFT_CANCLICK;
+                    mouseAction[M_BLEFT].state := is_canPress or is_up;
                   end;
                 2: // Middle
                   begin
-                    mouseUpDown := (mouseUpDown and (255 - M_BMIDDLE_DOWN)) or M_BMIDDLE_UP;
-                    mouseClickCanClick := mouseClickCanClick  or M_BMIDDLE_CANCLICK;
+                    mouseAction[M_BMIDDLE].state := is_canPress or is_up;
                   end;
                 3: // Right
                   begin
-                    mouseUpDown := (mouseUpDown and (255 - M_BRIGHT_DOWN)) or M_BRIGHT_UP;
-                    mouseClickCanClick := mouseClickCanClick  or M_BRIGHT_CANCLICK;
+                    mouseAction[M_BRIGHT].state := is_canPress or is_up;
                   end;
                 4: // Up Wheel
                   begin
-                    mouseDblClickWheel := mouseDblClickWheel or M_WHEEL_UP;
+                    mouseAction[M_BMIDDLE].state := mouseAction[M_BMIDDLE].state or is_mWheelUp;
                   end;
                 5: // Down Wheel
                   begin
-                    mouseDblClickWheel := mouseDblClickWheel or M_WHEEL_DOWN;
+                    mouseAction[M_BMIDDLE].state := mouseAction[M_BMIDDLE].state or is_mWheelDown;
                   end;
               end;
             end;
@@ -777,13 +790,6 @@ begin
               key := xkey_to_scancode(XLookupKeysym(@event.xkey, 0), event.xkey.keycode);
 
               keyboardDown(key);
-              {$IfDef USE_VKEYBOARD}
-              if prevLockVK then
-              begin
-                lockVirtualKeyboard := True;
-                startTimeLockVK := timer_GetTicks;
-              end;
-              {$EndIf}
 
               {$IfDef OLD_METHODS}
               if keysCanText Then
@@ -818,13 +824,6 @@ begin
               key := xkey_to_scancode(XLookupKeysym(@event.xkey, 0), event.xkey.keycode);
 
               keyboardUp(key);
-              {$IfDef USE_VKEYBOARD}
-              if prevLockVK then
-              begin
-                lockVirtualKeyboard := True;
-                startTimeLockVK := timer_GetTicks;
-              end;
-              {$EndIf}
             end;
     end
   end;
@@ -869,7 +868,7 @@ begin
           if winOn and Assigned(app_PActivate) Then
             app_PActivate(TRUE);
           FillChar(keysDown[0], 256, 0);
-          mouseUpDown := 0;
+          mouse_ClearState;
         end else
           if (wParam = 0) and (appFocus) Then
           begin
@@ -943,54 +942,48 @@ begin
 
     WM_LBUTTONDOWN, WM_LBUTTONDBLCLK:
       begin
-        mouseUpDown := (mouseUpDown and (255 - M_BLEFT_UP)) or M_BLEFT_DOWN;
-        mouseClickCanClick := mouseClickCanClick or M_BLEFT_CLICK;
+        mouseAction[M_BLEFT].state := is_Press or is_down;
         if Msg = WM_LBUTTONDBLCLK then
         begin
-          mouseDblClickWheel := mouseDblClickWheel or M_BLEFT_DBLCLICK;
+          mouseAction[M_BLEFT].state := is_Press or is_down or is_DoubleDown;
         end;
       end;
     WM_MBUTTONDOWN, WM_MBUTTONDBLCLK:
       begin
-        mouseUpDown := (mouseUpDown and (255 - M_BMIDDLE_UP)) or M_BMIDDLE_DOWN;
-        mouseClickCanClick := mouseClickCanClick or M_BMIDDLE_CLICK;
+        mouseAction[M_BMIDDLE].state := is_Press or is_down;
         if Msg = WM_MBUTTONDBLCLK then
         begin
-          mouseDblClickWheel := mouseDblClickWheel or M_BMIDDLE_DBLCLICK;
+          mouseAction[M_BMIDDLE].state := is_Press or is_down or is_DoubleDown;
         end;
       end;
     WM_RBUTTONDOWN, WM_RBUTTONDBLCLK:
       begin
-        mouseUpDown := (mouseUpDown and (255 - M_BRIGHT_UP)) or M_BRIGHT_DOWN;
-        mouseClickCanClick := mouseClickCanClick or M_BRIGHT_CLICK;
+        mouseAction[M_BRIGHT].state := is_Press or is_down;
         if Msg = WM_RBUTTONDBLCLK then
         begin
-          mouseDblClickWheel := mouseDblClickWheel or M_BRIGHT_DBLCLICK;
+          mouseAction[M_BRIGHT].state := is_Press or is_down or is_DoubleDown;
         end;
       end;
     WM_LBUTTONUP:
       begin
-        mouseUpDown := (mouseUpDown and (255 - M_BLEFT_DOWN)) or M_BLEFT_UP;
-        mouseClickCanClick := mouseClickCanClick or M_BLEFT_CANCLICK;
+        mouseAction[M_BLEFT].state := is_canPress or is_up;
       end;
     WM_MBUTTONUP:
       begin
-        mouseUpDown := (mouseUpDown and (255 - M_BMIDDLE_DOWN)) or M_BMIDDLE_UP;
-        mouseClickCanClick := mouseClickCanClick or M_BMIDDLE_CANCLICK;
+        mouseAction[M_BMIDDLE].state := is_canPress or is_up;
       end;
     WM_RBUTTONUP:
       begin
-        mouseUpDown := (mouseUpDown and (255 - M_BRIGHT_DOWN)) or M_BRIGHT_UP;
-        mouseClickCanClick := mouseClickCanClick or M_BRIGHT_CANCLICK;
+        mouseAction[M_BRIGHT].state := is_canPress or is_up;
       end;
     WM_MOUSEWHEEL:
       begin
         if SmallInt(wParam shr 16) > 0 Then
         begin
-          mouseDblClickWheel := mouseDblClickWheel or M_WHEEL_UP;
+          mouseAction[M_BMIDDLE].state := mouseAction[M_BMIDDLE].state or is_mWheelUp;
         end else
         begin
-          mouseDblClickWheel := mouseDblClickWheel or M_WHEEL_DOWN;
+          mouseAction[M_BMIDDLE].state := mouseAction[M_BMIDDLE].state or is_mWheelDown;
         end;
       end;
 
@@ -998,13 +991,6 @@ begin
       begin
         key := winkey_to_scancode(wParam);
         keyboardDown(key);
-        {$IfDef USE_VKEYBOARD}
-        if prevLockVK then
-        begin
-          lockVirtualKeyboard := True;
-          startTimeLockVK := timer_GetTicks;
-        end;
-        {$EndIf}
 
         if (Msg = WM_SYSKEYDOWN) and (key = K_F4) Then
           winOn := false;
@@ -1014,13 +1000,6 @@ begin
       begin
         key := winkey_to_scancode(wParam);
         keyboardUp(key);
-        {$IfDef USE_VKEYBOARD}
-        if prevLockVK then
-        begin
-          lockVirtualKeyboard := True;
-          startTimeLockVK := timer_GetTicks;
-        end;
-        {$EndIf}
       end;
     {$IfDef OLD_METHODS}
     WM_CHAR:
@@ -1053,12 +1032,17 @@ begin
 {$ENDIF}
 {$IFDEF MACOSX}{$IfDef MAC_COCOA}
   flagTrue := 0;
+//  pool := NSAutoreleasePool.alloc.init;
 eventLoop:
   ev := wndHandle.nextEventMatchingMask_untilDate_inMode_dequeue(NSAnyEventMask, nil, NSDefaultRunLoopMode, true);
   if ev = nil then
   begin
+//    NSApp.updateWindows;
+//    pool.release;
     exit;
   end;
+//  if ev.type_ <> 33 then
+//    flagTrue := flagTrue or KEYUPDOWN; ;
   case ev.type_ of
     NSMouseMoved, NSLeftMouseDragged, NSRightMouseDragged, NSOtherMouseDragged:
       begin
@@ -1068,56 +1052,130 @@ eventLoop:
           gMouseY := Trunc(ev.locationInWindow.y);
           flagTrue := flagTrue or MOUSEMOVE;
         end;
+ {       wndMouseIn := (mouseX >= 0) and (mouseX <= wndWidth) and (mouseY >= 0) and (mouseY <= wndHeight);
+        if wndMouseIn Then
+        begin
+          if (not appShowCursor) and (CGCursorIsVisible = 1) Then
+            CGDisplayHideCursor(scrDisplay);
+          if (appShowCursor) and (CGCursorIsVisible = 0) Then
+            CGDisplayShowCursor(scrDisplay);
+          end else
+            if CGCursorIsVisible = 0 Then
+              CGDisplayShowCursor(scrDisplay);      }
       end;
     NSLeftMouseDown:
       begin
-        mouseUpDown := (mouseUpDown and (255 - M_BLEFT_UP)) or M_BLEFT_DOWN;
-        mouseClickCanClick := mouseClickCanClick or M_BLEFT_CLICK;
-        if timer_GetTicks() - mouseDblCTime[M_BLEFT] < mouseDblCInt Then
-          mouseDblClickWheel := mouseDblClickWheel or M_BLEFT_DBLCLICK;
-        mouseDblCTime[M_BLEFT] := timer_GetTicks();
+        mouseAction[M_BLEFT].state := is_Press or is_down;
+        if timer_GetTicks - mouseAction[M_BLEFT].DBLClickTime < mouseDblCInt Then
+          mouseAction[M_BLEFT].state := is_Press or is_down or is_DoubleDown;
+        mouseAction[M_BLEFT].DBLClickTime := timer_GetTicks();
       end;
     NSLeftMouseUp:
       begin
-        mouseUpDown := (mouseUpDown and (255 - M_BLEFT_DOWN)) or M_BLEFT_UP;
-        mouseClickCanClick := mouseClickCanClick or M_BLEFT_CANCLICK;
+        mouseAction[M_BLEFT].state := is_canPress or is_up;
       end;
     NSRightMouseDown:
       begin
-        mouseUpDown := (mouseUpDown and (255 - M_BRIGHT_UP)) or M_BRIGHT_DOWN;
-        mouseClickCanClick := mouseClickCanClick or M_BRIGHT_CLICK;
-        if timer_GetTicks() - mouseDblCTime[M_BRIGHT] < mouseDblCInt Then
-          mouseDblClickWheel := mouseDblClickWheel or M_BRIGHT_DBLCLICK;
-        mouseDblCTime[M_BRIGHT] := timer_GetTicks();
+        mouseAction[M_BRIGHT].state := is_Press or is_down;
+        if timer_GetTicks - mouseAction[M_BRIGHT].DBLClickTime < mouseDblCInt Then
+          mouseAction[M_BRIGHT].state := is_Press or is_down or is_DoubleDown;
+        mouseAction[M_BRIGHT].DBLClickTime := timer_GetTicks();
       end;
     NSRightMouseUp:
       begin
-        mouseUpDown := (mouseUpDown and (255 - M_BRIGHT_DOWN)) or M_BRIGHT_UP;
-        mouseClickCanClick := mouseClickCanClick or M_BRIGHT_CANCLICK;
+        mouseAction[M_BRIGHT].state := is_canPress or is_up;
       end;
     NSOtherMouseDown:
       begin
-        mouseUpDown := (mouseUpDown and (255 - M_BMIDDLE_UP)) or M_BMIDDLE_DOWN;
-        mouseClickCanClick := mouseClickCanClick or M_BMIDDLE_CLICK;
-        if timer_GetTicks() - mouseDblCTime[M_BMIDDLE] < mouseDblCInt Then
-          mouseDblClickWheel := mouseDblClickWheel or M_BMIDDLE_DBLCLICK;
-        mouseDblCTime[M_BMIDDLE] := timer_GetTicks();
+        mouseAction[M_BMIDDLE].state := is_Press or is_down;
+        if timer_GetTicks - mouseAction[M_BMIDDLE].DBLClickTime < mouseDblCInt Then
+          mouseAction[M_BMIDDLE].state := is_Press or is_down or is_DoubleDown;
+        mouseAction[M_BMIDDLE].DBLClickTime := timer_GetTicks();
       end;
     NSOtherMouseUp:
       begin
-        mouseUpDown := (mouseUpDown and (255 - M_BMIDDLE_DOWN)) or M_BMIDDLE_UP;
-        mouseClickCanClick := mouseClickCanClick or M_BMIDDLE_CANCLICK;
+        mouseAction[M_BMIDDLE].state := is_canPress or is_up;
       end;
     NSScrollWheel:
       begin
         if ev.scrollingDeltaY > 0 then
-          mouseDblClickWheel := mouseDblClickWheel or M_WHEEL_UP
+          mouseAction[M_BMIDDLE].state := mouseAction[M_BMIDDLE].state or is_mWheelUp;
         else
-          mouseDblClickWheel := mouseDblClickWheel or M_WHEEL_DOWN;
+          mouseAction[M_BMIDDLE].state := mouseAction[M_BMIDDLE].state or is_mWheelDown;
       end;
     NSFlagsChanged:
       begin
         modFlags := ev.modifierFlags;
+        if (modFlags and 256) > 0 then
+        begin
+          if ((modFlags and 2) = 0) then
+          begin
+            keysUp[K_SHIFT_L] := True;
+            keysDown[K_SHIFT_L] := False;
+            if ((modFlags and 4) = 0) then
+            begin
+              keysUp[K_SHIFT] := True;
+              keysDown[K_SHIFT] := False;
+              keybFlags := keybFlags and ($FFFFFFFF - keyboardShift);
+            end;
+          end;
+          if ((modFlags and 4) = 0) then
+          begin
+            keysUp[K_SHIFT_R] := True;
+            keysDown[K_SHIFT_R] := False;
+          end;
+
+          if ((modFlags and 1) = 0) then
+          begin
+            keysUp[K_CTRL_L] := True;
+            keysDown[K_CTRL_L] := False;
+            if ((modFlags and $2000) = 0) then
+            begin
+              keysUp[K_CTRL] := True;
+              keysDown[K_CTRL] := False;
+              keybFlags := keybFlags and ($FFFFFFFF - keyboardCtrl);
+            end;
+          end;
+          if ((modFlags and $2000) = 0) then
+          begin
+            keysUp[K_CTRL_R] := True;
+            keysDown[K_CTRL_R] := False;
+          end;
+
+          if ((modFlags and $20) = 0) then
+          begin
+            keysUp[K_ALT_L] := True;
+            keysDown[K_ALT_L] := False;
+            if ((modFlags and $40) = 0) then
+            begin
+              keysUp[K_ALT] := True;
+              keysDown[K_ALT] := False;
+              keybFlags := keybFlags and ($FFFFFFFF - keyboardAlt);
+            end;
+          end;
+          if ((modFlags and $40) = 0) then
+          begin
+            keysUp[K_ALT_R] := True;
+            keysDown[K_ALT_R] := False;
+          end;
+
+          if ((modFlags and 8) = 0) then
+          begin
+            keysUp[K_SUPER_L] := True;
+            keysDown[K_SUPER_L] := False;
+            if ((modFlags and 16) = 0) then
+            begin
+              keysUp[K_SUPER] := True;
+              keysDown[K_SUPER] := False;
+              keybFlags := keybFlags and ($FFFFFFFF - keyboardCommand);
+            end;
+          end;
+          if ((modFlags and 16) = 0) then
+          begin
+            keysUp[K_SUPER_R] := True;
+            keysDown[K_SUPER_R] := False;
+          end;
+        end;
         if (modFlags and NSAlphaShiftKeyMask) > 0 then
           keybFlags := keybFlags or keyboardCaps
         else
@@ -1137,24 +1195,6 @@ eventLoop:
             keysDown[K_SHIFT_R] := true;
             keysUp[K_SHIFT_R] := False;
           end;
-        end
-        else begin
-          if ((modFlags and 2) = 0) then
-          begin
-            keysUp[K_SHIFT_L] := True;
-            keysDown[K_SHIFT_L] := False;
-            if ((modFlags and 4) = 0) then
-            begin
-              keysUp[K_SHIFT] := True;
-              keysDown[K_SHIFT] := False;
-              keybFlags := keybFlags and ($FFFFFFFF - keyboardShift);
-            end;
-          end;
-          if ((modFlags and 4) = 0) then
-          begin
-            keysUp[K_SHIFT_R] := True;
-            keysDown[K_SHIFT_R] := False;
-          end;
         end;
         if (modFlags and NSControlKeyMask) > 0 then
         begin
@@ -1171,24 +1211,6 @@ eventLoop:
             keysDown[K_CTRL_R] := true;
             keysUp[K_CTRL_R] := False;
           end;
-        end
-        else begin
-          if ((modFlags and 1) = 0) then
-          begin
-            keysUp[K_CTRL_L] := True;
-            keysDown[K_CTRL_L] := False;
-            if ((modFlags and $2000) = 0) then
-            begin
-              keysUp[K_CTRL] := True;
-              keysDown[K_CTRL] := False;
-              keybFlags := keybFlags and ($FFFFFFFF - keyboardCtrl);
-            end;
-          end;
-          if ((modFlags and $2000) = 0) then
-          begin
-            keysUp[K_CTRL_R] := True;
-            keysDown[K_CTRL_R] := False;
-          end;
         end;
         if (modFlags and NSAlternateKeyMask) > 0 then
         begin
@@ -1203,24 +1225,6 @@ eventLoop:
           if (modFlags and $40) > 0 then
           begin
             keysDown[K_ALT_R] := true;
-            keysDown[K_ALT_R] := False;
-          end;
-        end
-        else begin
-          if ((modFlags and $20) = 0) then
-          begin
-            keysUp[K_ALT_L] := True;
-            keysDown[K_ALT_L] := False;
-            if ((modFlags and $40) = 0) then
-            begin
-              keysUp[K_ALT] := True;
-              keysDown[K_ALT] := False;
-              keybFlags := keybFlags and ($FFFFFFFF - keyboardAlt);
-            end;
-          end;
-          if ((modFlags and $40) = 0) then
-          begin
-            keysUp[K_ALT_R] := True;
             keysDown[K_ALT_R] := False;
           end;
         end;
@@ -1239,24 +1243,6 @@ eventLoop:
             keysDown[K_SUPER_R] := true;
             keysUp[K_SUPER_R] := False;
           end;
-        end
-        else begin
-          if ((modFlags and 8) = 0) then
-          begin
-            keysUp[K_SUPER_L] := True;
-            keysDown[K_SUPER_L] := False;
-            if ((modFlags and 16) = 0) then
-            begin
-              keysUp[K_SUPER] := True;
-              keysDown[K_SUPER] := False;
-              keybFlags := keybFlags and ($FFFFFFFF - keyboardCommand);
-            end;
-          end;
-          if ((modFlags and 16) = 0) then
-          begin
-            keysUp[K_SUPER_R] := True;
-            keysDown[K_SUPER_R] := False;
-          end;
         end;
       end;
     NSKeyDown, NSKeyDownMask:
@@ -1264,31 +1250,18 @@ eventLoop:
         flagTrue := flagTrue or KEYUPDOWN;
         key := mackey_to_scancode(ev.keyCode);
         keyboardDown(key);
-        {$IfDef USE_VKEYBOARD}
-        if prevLockVK then
-        begin
-          lockVirtualKeyboard := True;
-          startTimeLockVK := timer_GetTicks;
-        end;
-        {$EndIf}
       end;
     NSKeyUp, NSKeyUpMask:
       begin
         flagTrue := flagTrue or KEYUPDOWN;
         key := mackey_to_scancode(ev.keyCode);
         keyboardUp(key);
-        {$IfDef USE_VKEYBOARD}
-        if prevLockVK then
-        begin
-          lockVirtualKeyboard := True;
-          startTimeLockVK := timer_GetTicks;
-        end;
-        {$EndIf}
       end;
   end;
   if (flagTrue and KEYUPDOWN) = 0 then
   begin
     NSApp.sendEvent(ev);
+//    NSApp.updateWindows;
   end;
   goto eventLoop;
 {$Else}
@@ -1477,27 +1450,24 @@ eventLoop:
             case mButton of
               kEventMouseButtonPrimary: // Left
                 begin
-                  mouseUpDown := (mouseUpDown and (255 - M_BLEFT_UP)) or M_BLEFT_DOWN;
-                  mouseClickCanClick := mouseClickCanClick or M_BLEFT_CLICK;
-                  if timer_GetTicks() - mouseDblCTime[M_BLEFT] < mouseDblCInt Then
-                    mouseDblClickWheel := mouseDblClickWheel or M_BLEFT_DBLCLICK;
-                  mouseDblCTime[M_BLEFT] := timer_GetTicks();
+                  mouseAction[M_BLEFT].state := is_Press or is_down;
+                  if timer_GetTicks - mouseAction[M_BLEFT].DBLClickTime < mouseDblCInt Then
+                    mouseAction[M_BLEFT].state := is_Press or is_down or is_DoubleDown;
+                  mouseAction[M_BLEFT].DBLClickTime := timer_GetTicks();
                 end;
               kEventMouseButtonTertiary: // Middle
                 begin
-                  mouseUpDown := (mouseUpDown and (255 - M_BMIDDLE_UP)) or M_BMIDDLE_DOWN;
-                  mouseClickCanClick := mouseClickCanClick or M_BMIDDLE_CLICK;
-                  if timer_GetTicks() - mouseDblCTime[M_BMIDDLE] < mouseDblCInt Then
-                    mouseDblClickWheel := mouseDblClickWheel or M_BMIDDLE_DBLCLICK;
-                  mouseDblCTime[M_BMIDDLE] := timer_GetTicks();
+                  mouseAction[M_BMIDDLE].state := is_Press or is_down;
+                  if timer_GetTicks - mouseAction[M_BMIDDLE].DBLClickTime < mouseDblCInt Then
+                    mouseAction[M_BMIDDLE].state := is_Press or is_down or is_DoubleDown;
+                  mouseAction[M_BMIDDLE].DBLClickTime := timer_GetTicks();
                 end;
               kEventMouseButtonSecondary: // Right
                 begin
-                  mouseUpDown := (mouseUpDown and (255 - M_BRIGHT_UP)) or M_BRIGHT_DOWN;
-                  mouseClickCanClick := mouseClickCanClick or M_BRIGHT_CLICK;
-                  if timer_GetTicks() - mouseDblCTime[M_BRIGHT] < mouseDblCInt Then
-                    mouseDblClickWheel := mouseDblClickWheel or M_BRIGHT_DBLCLICK;
-                  mouseDblCTime[M_BRIGHT] := timer_GetTicks();
+                  mouseAction[M_BRIGHT].state := is_Press or is_down;
+                  if timer_GetTicks - mouseAction[M_BRIGHT].DBLClickTime < mouseDblCInt Then
+                    mouseAction[M_BRIGHT].state := is_Press or is_down or is_DoubleDown;
+                  mouseAction[M_BRIGHT].DBLClickTime := timer_GetTicks();
                 end;
             end;
           end;
@@ -1512,18 +1482,15 @@ eventLoop:
             case mButton of
               kEventMouseButtonPrimary: // Left
                 begin
-                  mouseUpDown := (mouseUpDown and (255 - M_BLEFT_DOWN)) or M_BLEFT_UP;
-                  mouseClickCanClick := mouseClickCanClick or M_BLEFT_CANCLICK;
+                  mouseAction[M_BLEFT].state := is_canPress or is_up;
                 end;
               kEventMouseButtonTertiary: // Middle
                 begin
-                  mouseUpDown := (mouseUpDown and (255 - M_BMIDDLE_DOWN)) or M_BMIDDLE_UP;
-                  mouseClickCanClick := mouseClickCanClick or M_BMIDDLE_CANCLICK;
+                  mouseAction[M_BMIDDLE].state := is_canPress or is_up;
                 end;
               kEventMouseButtonSecondary: // Right
                 begin
-                  mouseUpDown := (mouseUpDown and (255 - M_BRIGHT_DOWN)) or M_BRIGHT_UP;
-                  mouseClickCanClick := mouseClickCanClick or M_BRIGHT_CANCLICK;
+                  mouseAction[M_BRIGHT].state := is_canPress or is_up;
                 end;
             end;
           end;
@@ -1533,10 +1500,10 @@ eventLoop:
 
             if mWheel > 0 then
             begin
-              mouseDblClickWheel := mouseDblClickWheel or M_WHEEL_UP;
+              mouseAction[M_BMIDDLE].state := mouseAction[M_BMIDDLE].state or is_mWheelUp;
             end else
             begin
-              mouseDblClickWheel := mouseDblClickWheel or M_WHEEL_DOWN;
+              mouseAction[M_BMIDDLE].state := mouseAction[M_BMIDDLE].state or is_mWheelDown;
             end;
           end;
       end;
@@ -2123,7 +2090,42 @@ var
 begin
   thread_CSEnter(appLock);
 
-  dX := Abs(round((X - scrAddCX) / scrResCX) - touchX[ID]);
+  dX := Abs(round((X - scrAddCX) / scrResCX) - Andr_Touch[ID].oldX);
+  dY := Abs(round((Y - scrAddCY) / scrResCY) - Andr_Touch[ID].oldY);
+
+  if appFlags and CORRECT_RESOLUTION > 0 Then
+  begin
+    Andr_Touch[ID].newX := Round((X - scrAddCX) / scrResCX);
+    Andr_Touch[ID].newY := Round((Y - scrAddCY) / scrResCY);
+  end else
+  begin
+    Andr_Touch[ID].newX := Round(X);
+    Andr_Touch[ID].newY := Round(Y);
+  end;
+
+  if Pressure > 0 then
+  begin
+    Andr_Touch[ID].state := Andr_Touch[ID].state or is_Press;
+    if (Andr_Touch[ID].state and is_down) = 0 then
+    begin
+      Andr_Touch[ID].state := is_down;
+      if (dX <= 10) and (dy <= 10) then
+        if timer_GetTicks - Andr_Touch[ID].DBLClickTime < mouseDblCInt then
+          if ((Andr_Touch[ID].state and t_DoubleTap) = 0) then
+            Andr_Touch[ID].state := Andr_Touch[ID].state or t_DoubleTap
+          else
+            Andr_Touch[ID].state := Andr_Touch[ID].state or t_TripleTap;
+      Andr_Touch[ID].DBLClickTime := timer_GetTicks;
+    end;
+  end
+  else begin
+    Andr_Touch[ID].state := t_canPress;
+    Andr_Touch[ID].oldX := - 1;
+    Andr_Touch[ID].oldY := - 1;
+    Andr_Touch[ID].newX := - 1;
+    Andr_Touch[ID].newY := - 1;
+  end;
+(*  dX := Abs(round((X - scrAddCX) / scrResCX) - touchX[ID]);  // смещение относительно последнего нажатия
   dY := Abs(round((Y - scrAddCY) / scrResCY) - touchY[ID]);
 
   if appFlags and CORRECT_RESOLUTION > 0 Then
@@ -2196,7 +2198,7 @@ begin
         {$EndIf}
         mouseClickCanClick := (mouseClickCanClick and (255 - M_BLEFT_CLICK)) or M_BLEFT_CANCLICK;
       end;
-  end;
+  end;     *)
 
   thread_CSLeave(appLock);
 end;

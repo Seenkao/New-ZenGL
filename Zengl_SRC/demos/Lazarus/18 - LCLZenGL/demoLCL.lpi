@@ -51,15 +51,19 @@
       <Filename Value="../../../bin/$(TargetCPU)-$(TargetOS)/demoLCL"/>
     </Target>
     <SearchPaths>
-      <IncludeFiles Value="$(ProjOutDir);../../../srcGEGL;../../../src"/>
-      <OtherUnitFiles Value="../../../src;../../../lib/zlib/$(TargetCPU)-$(TargetOS);../../../lib/zip/$(TargetCPU)-$(TargetOS);../../../lib/theora/$(TargetCPU)-$(TargetOS);../../../lib/ogg/$(TargetCPU)-$(TargetOS);../../../lib/msvcrt/$(TargetCPU);../../../lib/jpeg/$(TargetCPU)-$(TargetOS);../../../lib/chipmunk/$(TargetCPU)-$(TargetOS);../../../srcGEGL"/>
-      <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
+      <IncludeFiles Value="$(ProjOutDir);../../../srcGEGL;../../../src;../../../srcGL"/>
+      <OtherUnitFiles Value="../../../src;../../../srcGL;../../../lib/zlib/$(TargetCPU)-$(TargetOS);../../../lib/zip/$(TargetCPU)-$(TargetOS);../../../lib/theora/$(TargetCPU)-$(TargetOS);../../../lib/ogg/$(TargetCPU)-$(TargetOS);../../../lib/msvcrt/$(TargetCPU);../../../lib/jpeg/$(TargetCPU)-$(TargetOS);../../../lib/chipmunk/$(TargetCPU)-$(TargetOS);../../../srcGEGL"/>
+      <UnitOutputDirectory Value="../tmp/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
+    <CodeGeneration>
+      <SmartLinkUnit Value="True"/>
+    </CodeGeneration>
     <Linking>
       <Debugging>
         <GenerateDebugInfo Value="False"/>
         <StripSymbols Value="True"/>
       </Debugging>
+      <LinkSmart Value="True"/>
       <Options>
         <Win32>
           <GraphicApplication Value="True"/>

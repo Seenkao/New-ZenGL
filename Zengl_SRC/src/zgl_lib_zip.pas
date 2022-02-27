@@ -20,8 +20,6 @@
  *
  *  3. This notice may not be removed or altered from any
  *     source distribution.
- 
- !!! modification from Serge 16.07.2021
 }
 unit zgl_lib_zip;
 
@@ -137,6 +135,7 @@ type
     file_ : Pzip_file;
     name  : PAnsiChar;
   end;
+{$EndIf}
 
 type
   TAlloc = function( AppData : Pointer; Items, Size : cuint ): Pointer; cdecl;
@@ -163,6 +162,7 @@ type
     reserved  : culong;    // reserved for future use
   end;
 
+{$IFDEF USE_ZIP}
 {$IfDef MAC_COCOA}
 var
   zip_open: function(path: PAnsiChar; flags: Integer; out error: cint): Pzip; cdecl;
@@ -233,7 +233,7 @@ implementation
 uses
   zgl_log,
   zgl_application;
-{$EndIf}  
+{$EndIf}
 
 var
   zipDLL: Pointer;
@@ -333,7 +333,6 @@ procedure LoadLibZip(const zDLL, zlDLL: String);
 begin
   UnloadLibZip;
 
-  zipDLL := dlopen(PChar(zDLL), 1);
   if zipDLL = nil then
   begin
     log_Add('Could not load Zip');
@@ -364,7 +363,7 @@ begin
     log_Add('Could not load Zip');
     winOn := False;
     exit;
-  end;     
+  end;
 
   // hack for compression functions which will be never used, but which are needed on linking stage
   @deflate := dlsym(zipDLL, 'deflate');

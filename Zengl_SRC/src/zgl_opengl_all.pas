@@ -21,7 +21,7 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 04.08.2020
+ !!! modification from Serge - SSW 26.02.2022
 }
 unit zgl_opengl_all;
 
@@ -35,19 +35,15 @@ unit zgl_opengl_all;
 
 interface
 
-  {$IFDEF LINUX}
 uses
-  X, XLib, XUtil;
-  {$ENDIF}
   {$IFDEF WINDOWS}
-uses
-  Windows;
+  Windows,
   {$ENDIF}
   {$IFDEF MACOSX}
-uses
-  MacOSAll;
+  MacOSAll,
   {$ENDIF}
-
+  zgl_gltypeconst,
+  zgl_pasOpenGL;
 
 function InitGL: Boolean;
 procedure FreeGL;
@@ -70,351 +66,171 @@ const
   {$IFDEF MACOSX}
   libGL  = '/System/Library/Frameworks/OpenGL.framework/Libraries/libGL.dylib';
   libGLU = '/System/Library/Frameworks/OpenGL.framework/Libraries/libGLU.dylib';
+  {$IfNDef MAC_COCOA}
   libAGL = '/System/Library/Frameworks/AGL.framework/AGL';
-  {$ENDIF}
-
-  GL_FALSE                          = 0;
-  GL_TRUE                           = 1;
-  GL_ZERO                           = 0;
-  GL_ONE                            = 1;
-
-  // String Name
-  GL_VENDOR                         = $1F00;
-  GL_RENDERER                       = $1F01;
-  GL_VERSION                        = $1F02;
-  GL_EXTENSIONS                     = $1F03;
-
-  // DataType
-  GL_UNSIGNED_BYTE                  = $1401;
-  GL_UNSIGNED_SHORT                 = $1403;
-  GL_UNSIGNED_INT                   = $1405;
-  GL_FLOAT                          = $1406;
-  GL_UNSIGNED_SHORT_4_4_4_4         = $8033;
-
-  // PixelFormat
-  GL_RED                            = $1903;
-  GL_GREEN                          = $1904;
-  GL_BLUE                           = $1905;
-  GL_ALPHA                          = $1906;
-  GL_RGB                            = $1907;
-  GL_RGBA                           = $1908;
-
-  // Alpha Function
-  GL_NEVER                          = $0200;
-  GL_LESS                           = $0201;
-  GL_EQUAL                          = $0202;
-  GL_LEQUAL                         = $0203;
-  GL_GREATER                        = $0204;
-  GL_NOTEQUAL                       = $0205;
-  GL_GEQUAL                         = $0206;
-  GL_ALWAYS                         = $0207;
-
-  // Blend
-  GL_BLEND                          = $0BE2;
-  // Blending Factor Dest
-  GL_SRC_COLOR                      = $0300;
-  GL_ONE_MINUS_SRC_COLOR            = $0301;
-  GL_SRC_ALPHA                      = $0302;
-  GL_ONE_MINUS_SRC_ALPHA            = $0303;
-  GL_DST_ALPHA                      = $0304;
-  GL_ONE_MINUS_DST_ALPHA            = $0305;
-  // Blending Factor Src
-  GL_DST_COLOR                      = $0306;
-  GL_ONE_MINUS_DST_COLOR            = $0307;
-  GL_SRC_ALPHA_SATURATE             = $0308;
-
-  // blendOP
-  GL_FUNC_ADD_EXT                   = $8006;
-  GL_MIN_EXT                        = $8007;
-  GL_MAX_EXT                        = $8008;
-  GL_FUNC_SUBTRACT_EXT              = $800A;
-  GL_FUNC_REVERSE_SUBTRACT_EXT      = $800B;
-  GL_BLEND_EQUATION_EXT             = $8009;
-
-  GL_BLEND_DST_RGB_EXT              = $80C8;
-  GL_BLEND_SRC_RGB_EXT              = $80C9;
-  GL_BLEND_DST_ALPHA_EXT            = $80CA;
-  GL_BLEND_SRC_ALPHA_EXT            = $80CB;
-  GL_BLEND_EQUATION_RGB_EXT         = $8009;
-  GL_BLEND_EQUATION_ALPHA_EXT       = $883D;
-
-  // Hint Mode
-  GL_DONT_CARE                      = $1100;
-  GL_FASTEST                        = $1101;
-  GL_NICEST                         = $1102;
-
-  // Hints
-  GL_PERSPECTIVE_CORRECTION_HINT    = $0C50;
-  GL_LINE_SMOOTH_HINT               = $0C52;
-  GL_POLYGON_SMOOTH_HINT            = $0C53;
-  GL_FOG_HINT                       = $0C54;
-
-  // Shading Model
-  GL_SHADE_MODEL                    = $0B54;
-  GL_FLAT                           = $1D00;
-  GL_SMOOTH                         = $1D01;
-
-  // Buffer Bit
-  GL_DEPTH_BUFFER_BIT               = $00000100;
-  GL_STENCIL_BUFFER_BIT             = $00000400;
-  GL_COLOR_BUFFER_BIT               = $00004000;
-
-  // Enable
-  GL_LINE_SMOOTH                    = $0B20;
-  GL_POLYGON_SMOOTH                 = $0B41;
-  GL_NORMALIZE                      = $0BA1;
-
-  // glBegin/glEnd
-  GL_POINTS                         = $0000;
-  GL_LINES                          = $0001;
-  GL_LINE_LOOP                      = $0002;
-  GL_LINE_STRIP                     = $0003;
-  GL_TRIANGLES                      = $0004;
-  GL_TRIANGLE_STRIP                 = $0005;
-  GL_TRIANGLE_FAN                   = $0006;
-  GL_QUADS                          = $0007;
-  GL_QUAD_STRIP                     = $0008;
-  GL_POLYGON                        = $0009;
-
-  // Texture
-  GL_UNPACK_ROW_LENGTH              = $0CF2;
-  GL_TEXTURE_2D                     = $0DE1;
-  GL_TEXTURE0_ARB                   = $84C0;
-  GL_MAX_TEXTURE_SIZE               = $0D33;
-  GL_MAX_TEXTURE_UNITS_ARB          = $84E2;
-  GL_TEXTURE_MAX_ANISOTROPY_EXT     = $84FE;
-  GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT = $84FF;
-  // Texture Wrap Mode
-  GL_CLAMP_TO_EDGE                  = $812F;
-  GL_REPEAT                         = $2901;
-  // Texture Format
-  GL_RGB16                          = $8054;
-  GL_RGBA16                         = $805B;
-  GL_COMPRESSED_RGB_ARB             = $84ED;
-  GL_COMPRESSED_RGBA_ARB            = $84EE;
-  GL_COMPRESSED_RGB_S3TC_DXT1_EXT   = $83F0;
-  GL_COMPRESSED_RGBA_S3TC_DXT1_EXT  = $83F1;
-  GL_COMPRESSED_RGBA_S3TC_DXT3_EXT  = $83F2;
-  GL_COMPRESSED_RGBA_S3TC_DXT5_EXT  = $83F3;
-  // Texture Env Mode
-  GL_MODULATE                       = $2100;
-  GL_DECAL                          = $2101;
-  // Texture Env Parameter
-  GL_TEXTURE_ENV_MODE               = $2200;
-  GL_TEXTURE_ENV_COLOR              = $2201;
-  // Texture Env Target
-  GL_TEXTURE_ENV                    = $2300;
-  // Texture Mag Filter
-  GL_NEAREST                        = $2600;
-  GL_LINEAR                         = $2601;
-  // Mipmaps
-  GL_GENERATE_MIPMAP                = $8191;
-  GL_GENERATE_MIPMAP_HINT           = $8192;
-  // Texture Min Filter
-  GL_NEAREST_MIPMAP_NEAREST         = $2700;
-  GL_LINEAR_MIPMAP_NEAREST          = $2701;
-  GL_NEAREST_MIPMAP_LINEAR          = $2702;
-  GL_LINEAR_MIPMAP_LINEAR           = $2703;
-  // Texture Parameter Name
-  GL_TEXTURE_MAG_FILTER             = $2800;
-  GL_TEXTURE_MIN_FILTER             = $2801;
-  GL_TEXTURE_WRAP_S                 = $2802;
-  GL_TEXTURE_WRAP_T                 = $2803;
-
-  GL_COMBINE_ARB                    = $8570;
-  GL_COMBINE_RGB_ARB                = $8571;
-  GL_COMBINE_ALPHA_ARB              = $8572;
-  GL_SOURCE0_RGB_ARB                = $8580;
-  GL_SOURCE1_RGB_ARB                = $8581;
-  GL_SOURCE2_RGB_ARB                = $8582;
-  GL_SOURCE0_ALPHA_ARB              = $8588;
-  GL_SOURCE1_ALPHA_ARB              = $8589;
-  GL_SOURCE2_ALPHA_ARB              = $858A;
-  GL_OPERAND0_RGB_ARB               = $8590;
-  GL_OPERAND1_RGB_ARB               = $8591;
-  GL_OPERAND2_RGB_ARB               = $8592;
-  GL_OPERAND0_ALPHA_ARB             = $8598;
-  GL_OPERAND1_ALPHA_ARB             = $8599;
-  GL_OPERAND2_ALPHA_ARB             = $859A;
-  GL_RGB_SCALE_ARB                  = $8573;
-  GL_ADD_SIGNED_ARB                 = $8574;
-  GL_INTERPOLATE_ARB                = $8575;
-  GL_SUBTRACT_ARB                   = $84E7;
-  GL_CONSTANT_ARB                   = $8576;
-  GL_PRIMARY_COLOR_ARB              = $8577;
-  GL_PREVIOUS_ARB                   = $8578;
-  GL_DOT3_RGB                       = $86AE;
-  GL_DOT3_RGBA                      = $86AF;
-
-  // Vertex Array
-  GL_VERTEX_ARRAY                   = $8074;
-  GL_NORMAL_ARRAY                   = $8075;
-  GL_COLOR_ARRAY                    = $8076;
-  GL_INDEX_ARRAY                    = $8077;
-  GL_TEXTURE_COORD_ARRAY            = $8078;
-
-  // FBO
-  GL_FRAMEBUFFER                    = $8D40;
-  GL_RENDERBUFFER                   = $8D41;
-  GL_DEPTH_COMPONENT16              = $81A5;
-  GL_DEPTH_COMPONENT24              = $81A6;
-  GL_DEPTH_COMPONENT32              = $81A7;
-  GL_COLOR_ATTACHMENT0              = $8CE0;
-  GL_DEPTH_ATTACHMENT               = $8D00;
-  GL_MAX_RENDERBUFFER_SIZE          = $84E8;
-
-  // Matrices
-  GL_MODELVIEW_MATRIX               = $0BA6;
-  GL_PROJECTION_MATRIX              = $0BA7;
-
-  // Matrix Mode
-  GL_MODELVIEW                      = $1700;
-  GL_PROJECTION                     = $1701;
-  GL_TEXTURE                        = $1702;
-
-  // Test
-  GL_DEPTH_TEST                     = $0B71;
-  GL_STENCIL_TEST                   = $0B90;
-  GL_ALPHA_TEST                     = $0BC0;
-  GL_SCISSOR_TEST                   = $0C11;
-
-  // StencilOp
-  GL_KEEP                           = $1E00;
-  GL_REPLACE                        = $1E01;
-  GL_INCR                           = $1E02;
-  GL_DECR                           = $1E03;
-
-  // VBO
-  GL_BUFFER_SIZE_ARB                = $8764;
-  GL_ARRAY_BUFFER_ARB               = $8892;
-  GL_ELEMENT_ARRAY_BUFFER_ARB       = $8893;
-  GL_WRITE_ONLY_ARB                 = $88B9;
-  GL_STREAM_DRAW_ARB                = $88E0;
-  GL_STATIC_DRAW_ARB                = $88E4;
-
-  // Triangulation
-  GLU_TESS_BEGIN                    = $18704;
-  GLU_TESS_VERTEX                   = $18705;
-  GLU_TESS_END                      = $18706;
-  GLU_TESS_ERROR                    = $18707;
-  GLU_TESS_EDGE_FLAG                = $18708;
-  GLU_TESS_COMBINE                  = $18709;
-  GLU_TESS_BEGIN_DATA               = $1870A;
-  GLU_TESS_VERTEX_DATA              = $1870B;
-  GLU_TESS_END_DATA                 = $1870C;
-  GLU_TESS_ERROR_DATA               = $1870D;
-  GLU_TESS_EDGE_FLAG_DATA           = $1870E;
-  GLU_TESS_COMBINE_DATA             = $1870F;
+  {$ENDIF}{$EndIf}
 
 type
-  GLenum     = Cardinal;      PGLenum     = ^GLenum;
-  GLboolean  = Byte;          PGLboolean  = ^GLboolean;
-  GLbitfield = Cardinal;      PGLbitfield = ^GLbitfield;
-  GLbyte     = ShortInt;      PGLbyte     = ^GLbyte;
-  GLshort    = SmallInt;      PGLshort    = ^GLshort;
-  GLint      = Integer;       PGLint      = ^GLint;
-  GLsizei    = Integer;       PGLsizei    = ^GLsizei;
-  GLubyte    = Byte;          PGLubyte    = ^GLubyte;
-  GLushort   = Word;          PGLushort   = ^GLushort;
-  GLuint     = Cardinal;      PGLuint     = ^GLuint;
-  GLfloat    = Single;        PGLfloat    = ^GLfloat;
-  GLclampf   = Single;        PGLclampf   = ^GLclampf;
-  GLdouble   = Double;        PGLdouble   = ^GLdouble;
-  GLclampd   = Double;        PGLclampd   = ^GLclampd;
-{ GLvoid     = void; }        PGLvoid     = Pointer;
-                              PPGLvoid    = ^PGLvoid;
+  TVector2d = array[0..1] of double;
+  TVector2f = array[0..1] of single;
+  TVector2i = array[0..1] of longint;
+  TVector2s = array[0..1] of smallint;
+  TVector2b = array[0..1] of byte;
 
-  function  glGetString(name: GLenum): PAnsiChar; stdcall; external libGL;
-  procedure glHint(target, mode: GLenum); stdcall; external libGL;
+  TVector3d = array[0..2] of double;
+  TVector3f = array[0..2] of single;
+  TVector3i = array[0..2] of longint;
+  TVector3s = array[0..2] of smallint;
+  TVector3b = array[0..2] of byte;
 
-  procedure glShadeModel(mode: GLenum); stdcall; external libGL;
+  TVector4d = array[0..3] of double;
+  TVector4f = array[0..3] of single;
+  TVector4i = array[0..3] of longint;
+  TVector4s = array[0..3] of smallint;
+  TVector4b = array[0..3] of byte;
 
-  procedure glReadPixels(x, y: GLint; width, height: GLsizei; format, atype: GLenum; pixels: Pointer); stdcall; external libGL;
+  TMatrix3d = array[0..2] of TVector3d;
+  TMatrix3f = array[0..2] of TVector3f;
+  TMatrix3i = array[0..2] of TVector3i;
+  TMatrix3s = array[0..2] of TVector3s;
+  TMatrix3b = array[0..2] of TVector3b;
+
+  TMatrix4d = array[0..3] of TVector4d;
+  TMatrix4f = array[0..3] of TVector4f;
+  TMatrix4i = array[0..3] of TVector4i;
+  TMatrix4s = array[0..3] of TVector4s;
+  TMatrix4b = array[0..3] of TVector4b;
+
+                              PGLvoid     = Pointer;
+  GLvoid     = Pointer;       PPGLvoid    = ^PGLvoid;
+  GLint64    = Int64;         PGLint64    = ^GLint64;
+  GLuint64   = UInt64;        PGLuint64   = ^GLuint64;
+
+  function  glGetString(name: GLenum): PAnsiChar; stdcall; external libGL;            // GL_VERSION_1_0
+  procedure glHint(target, mode: GLenum); stdcall; external libGL;                    // GL_VERSION_1_0
+
+  procedure glShadeModel(mode: GLenum); stdcall; external libGL;                      // USE_DEPRECATED
+
+  procedure glReadPixels(x, y: GLint; width, height: GLsizei; format, atype: GLenum; pixels: Pointer); stdcall; external libGL; // GL_VERSION_1_0
 
   // Clear
-  procedure glClear(mask: GLbitfield); stdcall; external libGL;
-  procedure glClearColor(red, green, blue, alpha: GLclampf); stdcall; external libGL;
-  procedure glClearDepth(depth: GLclampd); stdcall; external libGL;
+  procedure glClear(mask: GLbitfield); stdcall; external libGL;                       // USE_DEPRECATED
+  procedure glClearColor(red, green, blue, alpha: GLclampf); stdcall; external libGL; // USE_DEPRECATED
+  procedure glClearDepth(depth: GLclampd); stdcall; external libGL;                   // USE_DEPRECATED
   // Get
-  procedure glGetFloatv(pname: GLenum; params: PGLfloat); stdcall; external libGL;
-  procedure glGetIntegerv(pname: GLenum; params: PGLint); stdcall; external libGL;
+  procedure glGetFloatv(pname: GLenum; params: PGLfloat); stdcall; external libGL;    // GL_VERSION_1_0
+  procedure glGetIntegerv(pname: GLenum; params: PGLint); stdcall; external libGL;    // GL_VERSION_1_0
   // State
-  procedure glBegin(mode: GLenum); stdcall; external libGL;
-  procedure glEnd; stdcall; external libGL;
-  procedure glEnable(cap: GLenum); stdcall; external libGL;
-  procedure glEnableClientState(aarray: GLenum); stdcall; external libGL;
-  procedure glDisable(cap: GLenum); stdcall; external libGL;
-  procedure glDisableClientState(aarray: GLenum); stdcall; external libGL;
+  procedure glBegin(mode: GLenum); stdcall; external libGL;                           // USE_DEPRECATED
+  procedure glEnd; stdcall; external libGL;                                           // USE_DEPRECATED
+  procedure glEnable(cap: GLenum); stdcall; external libGL;                           // GL_VERSION_1_0
+  procedure glEnableClientState(aarray: GLenum); stdcall; external libGL;             // USE_DEPRECATED
+  procedure glDisable(cap: GLenum); stdcall; external libGL;                          // GL_VERSION_1_0
+  procedure glDisableClientState(aarray: GLenum); stdcall; external libGL;            // USE_DEPRECATED
   // Viewport
-  procedure glViewport(x, y: GLint; width, height: GLsizei); stdcall; external libGL;
-  procedure glOrtho(left, right, bottom, top, zNear, zFar: GLdouble); stdcall; external libGL;
-  procedure glScissor(x, y: GLint; width, height: GLsizei); stdcall; external libGL;
+  procedure glViewport(x, y: GLint; width, height: GLsizei); stdcall; external libGL; // GL_VERSION_1_0
+  procedure glOrtho(left, right, bottom, top, zNear, zFar: GLdouble); stdcall; external libGL;      // USE_DEPRECATED
+  procedure glScissor(x, y: GLint; width, height: GLsizei); stdcall; external libGL;  // GL_VERSION_1_0
   // Depth
-  procedure glDepthFunc(func: GLenum); stdcall; external libGL;
-  procedure glDepthMask(flag: GLboolean); stdcall; external libGL;
+  procedure glDepthFunc(func: GLenum); stdcall; external libGL;                       // GL_VERSION_1_0
+  procedure glDepthMask(flag: GLboolean); stdcall; external libGL;                    // GL_VERSION_1_0
+  procedure glDepthRange(zNear, zFar: GLclampd); stdcall; external libGL;             // GL_VERSION_1_0
   // Color
-  procedure glColor4ub(red, green, blue, alpha: GLubyte); stdcall; external libGL;
-  procedure glColor4ubv(v: PGLubyte); stdcall; external libGL;
+  procedure glColor4ub(red, green, blue, alpha: GLubyte); stdcall; external libGL;    // USE_DEPRECATED
+  procedure glColor4ubv(v: PGLubyte); stdcall; external libGL;                        // USE_DEPRECATED
 
-  procedure glColor3ub(red, green, blue: GLbyte); stdcall; external libGL;
-  procedure glColor3ubv(v: PGLfloat); stdcall; external libGL;
-  procedure glColor4f(red, green, blue, alpha: GLfloat); stdcall; external libGL;
-  procedure glColor4fv(v: PGLfloat); stdcall; external libGL;
-  procedure glColorMask(red, green, blue, alpha: GLboolean); stdcall; external libGL;
+  procedure glColor3ub(red, green, blue: GLbyte); stdcall; external libGL;            // USE_DEPRECATED
+  procedure glColor3ubv(v: PGLfloat); stdcall; external libGL;                        // USE_DEPRECATED
+  procedure glColor4f(red, green, blue, alpha: GLfloat); stdcall; external libGL;     // USE_DEPRECATED
+  procedure glColor4fv(v: PGLfloat); stdcall; external libGL;                         // USE_DEPRECATED
+  procedure glColorMask(red, green, blue, alpha: GLboolean); stdcall; external libGL; // GL_VERSION_1_0
+  procedure glColorMaterial(face, mode: GLenum); stdcall; external libGL;             // USE_DEPRECATED
   // Alpha
-  procedure glAlphaFunc(func: GLenum; ref: GLclampf); stdcall; external libGL;
-  procedure glBlendFunc(sfactor, dfactor: GLenum); stdcall; external libGL;
-//var
-//  glBlendEquation: procedure(mode: GLenum); stdcall;
-//  glBlendFuncSeparate: procedure(sfactorRGB: GLenum; dfactorRGB: GLenum; sfactorAlpha: GLenum; dfactorAlpha: GLenum); stdcall;
+  procedure glAlphaFunc(func: GLenum; ref: GLclampf); stdcall; external libGL;        // USE_DEPRECATED
+  procedure glBlendFunc(sfactor, dfactor: GLenum); stdcall; external libGL;           // GL_VERSION_1_0
+
   // Matrix
-  procedure glPushMatrix; stdcall; external libGL;
-  procedure glPopMatrix; stdcall; external libGL;
-  procedure glMatrixMode(mode: GLenum); stdcall; external libGL;
-  procedure glLoadIdentity; stdcall; external libGL;
+  procedure glPushMatrix; stdcall; external libGL;                                    // USE_DEPRECATED
+  procedure glPopMatrix; stdcall; external libGL;                                     // USE_DEPRECATED
+  procedure glMatrixMode(mode: GLenum); stdcall; external libGL;                      // USE_DEPRECATED
+  procedure glLoadIdentity; stdcall; external libGL;                                  // USE_DEPRECATED
+  procedure glFrustum(left, right, bottom, top, zNear, zFar: GLdouble); stdcall; external libGL;    // USE_DEPRECATED
 
-  procedure gluPerspective(fovy, aspect, zNear, zFar: GLdouble); stdcall; external libGLU;
-
-  procedure glLoadMatrixf(const m: PGLfloat); stdcall; external libGL;
-  procedure glRotatef(angle, x, y, z: GLfloat); stdcall; external libGL;
-  procedure glScalef(x, y, z: GLfloat); stdcall; external libGL;
-  procedure glTranslatef(x, y, z: GLfloat); stdcall; external libGL;
+  procedure glLoadMatrixf(const m: PGLfloat); stdcall; external libGL;                // USE_DEPRECATED
+  procedure glRotatef(angle, x, y, z: GLfloat); stdcall; external libGL;              // USE_DEPRECATED
+  procedure glScalef(x, y, z: GLfloat); stdcall; external libGL;                      // USE_DEPRECATED
+  procedure glTranslatef(x, y, z: GLfloat); stdcall; external libGL;                  // USE_DEPRECATED
   // Vertex
-  procedure glVertex2f(x, y: GLfloat); stdcall; external libGL;
-  procedure glVertex2fv(v: PGLfloat); stdcall; external libGL;
-  procedure glVertex3f(x, y, z: GLfloat); stdcall; external libGL;
-  procedure glVertexPointer(size: GLint; atype: GLenum; stride: GLsizei; const pointer: Pointer); stdcall; external libGL;
+  procedure glVertex2f(x, y: GLfloat); stdcall; external libGL;                       // USE_DEPRECATED
+  procedure glVertex2fv(v: PGLfloat); stdcall; external libGL;                        // USE_DEPRECATED
+  procedure glVertex3f(x, y, z: GLfloat); stdcall; external libGL;                    // USE_DEPRECATED
+  procedure glVertex3dv(v: PGLdouble); stdcall; external libGL;                       // USE_DEPRECATED
+  procedure glVertexPointer(size: GLint; atype: GLenum; stride: GLsizei; const pointer: Pointer); stdcall; external libGL;    // USE_DEPRECATED
   // Texture
-  procedure glBindTexture(target: GLenum; texture: GLuint); stdcall; external libGL;
-  procedure glGenTextures(n: GLsizei; textures: PGLuint); stdcall; external libGL;
-  procedure glDeleteTextures(n: GLsizei; const textures: PGLuint); stdcall; external libGL;
-  procedure glTexParameterf(target: GLenum; pname: GLenum; param: GLfloat); stdcall; external libGL;
-  procedure glTexParameteri(target: GLenum; pname: GLenum; param: GLint); stdcall; external libGL;
-  procedure glPixelStorei(pname: GLenum; param: GLint); stdcall; external libGL;
-  procedure glTexImage2D(target: GLenum; level, internalformat: GLint; width, height: GLsizei; border: GLint; format, atype: GLenum; const pixels: Pointer); stdcall; external libGL;
-  procedure glTexSubImage2D(target: GLenum; level, xoffset, yoffset: GLint; width, height: GLsizei; format, atype: GLenum; const pixels: Pointer); stdcall; external libGL;
-  procedure glGetTexImage(target: GLenum; level: GLint; format: GLenum; atype: GLenum; pixels: Pointer); stdcall; external libGL;
-  procedure glCopyTexSubImage2D(target: GLenum; level, xoffset, yoffset, x, y: GLint; width, height: GLsizei); stdcall; external libGL;
-  procedure glTexEnvi(target: GLenum; pname: GLenum; param: GLint); stdcall; external libGL;
-  
-  function  gluBuild2DMipmaps(target: GLenum; components, width, height: GLint; format, atype: GLenum; const data: Pointer): Integer; stdcall; external libGLU;
+  procedure glBindTexture(target: GLenum; texture: GLuint); stdcall; external libGL;                  // GL_VERSION_1_1
+  procedure glGenTextures(n: GLsizei; textures: PGLuint); stdcall; external libGL;                    // GL_VERSION_1_1
+  procedure glDeleteTextures(n: GLsizei; const textures: PGLuint); stdcall; external libGL;           // GL_VERSION_1_1
+  procedure glTexParameterf(target: GLenum; pname: GLenum; param: GLfloat); stdcall; external libGL;  // GL_VERSION_1_0
+  procedure glTexParameterfv(target: GLenum; pname: GLenum; const params: PGLfloat); stdcall; external libGL; // GL_VERSION_1_0
+  procedure glTexParameteri(target: GLenum; pname: GLenum; param: GLint); stdcall; external libGL;    // GL_VERSION_1_0
+  procedure glTexParameteriv(target: GLenum; pname: GLenum; const params: PGLint); stdcall; external libGL;   // GL_VERSION_1_0
+  procedure glPixelStoref(pname: GLenum; param: GLfloat); stdcall; external libGL;                    // GL_VERSION_1_0
+  procedure glPixelStorei(pname: GLenum; param: GLint); stdcall; external libGL;                      // GL_VERSION_1_0
+  procedure glTexImage2D(target: GLenum; level, internalformat: GLint; width, height: GLsizei; border: GLint; format, atype: GLenum; const pixels: Pointer); stdcall; external libGL; // GL_VERSION_1_0
+  procedure glTexSubImage2D(target: GLenum; level, xoffset, yoffset: GLint; width, height: GLsizei; format, atype: GLenum; const pixels: Pointer); stdcall; external libGL; // GL_VERSION_1_1
+  procedure glGetTexImage(target: GLenum; level: GLint; format: GLenum; atype: GLenum; pixels: Pointer); stdcall; external libGL;       // GL_VERSION_1_0
+  procedure glCopyTexSubImage2D(target: GLenum; level, xoffset, yoffset, x, y: GLint; width, height: GLsizei); stdcall; external libGL; // GL_VERSION_1_1
+  procedure glTexEnvi(target: GLenum; pname: GLenum; param: GLint); stdcall; external libGL;          // USE_DEPRECATED
+  procedure glTexEnviv(target: GLenum; pname: GLenum; const params: PGLint); stdcall; external libGL; // USE_DEPRECATED
+
   // TexCoords
-  procedure glTexCoord2f(s, t: GLfloat); stdcall; external libGL;
-  procedure glTexCoord2fv(v: PGLfloat); stdcall; external libGL;
+  procedure glTexCoord2f(s, t: GLfloat); stdcall; external libGL;                                     // USE_DEPRECATED
+  procedure glTexCoord2fv(v: PGLfloat); stdcall; external libGL;                                      // USE_DEPRECATED
 
   //---------------------------------------------------------------------
-  procedure glDrawArrays(mode: GLenum; first: GLint; count: GLsizei); stdcall; external libGL;
-  procedure glDrawElements(mode: GLenum; count: GLsizei; _type: GLenum; const indices: PGLvoid); stdcall; external libGL;
-  procedure glColorPointer(size: GLint; atype: GLenum; stride: GLsizei; const pointer: Pointer); stdcall; external libGL;
-  procedure glTexCoordPointer(size: GLint; atype: GLenum; stride: GLsizei; const pointer: Pointer); stdcall; external libGL;
+  procedure glDrawArrays(mode: GLenum; first: GLint; count: GLsizei); stdcall; external libGL;                                // GL_VERSION_1_1
+  procedure glDrawElements(mode: GLenum; count: GLsizei; _type: GLenum; const indices: PGLvoid); stdcall; external libGL;     // GL_VERSION_1_1
+  procedure glColorPointer(size: GLint; atype: GLenum; stride: GLsizei; const pointer: Pointer); stdcall; external libGL;     // USE_DEPRECATED
+  procedure glTexCoordPointer(size: GLint; atype: GLenum; stride: GLsizei; const pointer: Pointer); stdcall; external libGL;  // USE_DEPRECATED
   //---------------------------------------------------------------------
 
-  // deprecated
-  procedure glPointSize(size: GLfloat); stdcall; external libGL;
+  procedure glPointSize(size: GLfloat); stdcall; external libGL;                                      // GL_VERSION_1_0
+  // дисплейные списки
+  procedure glNewList(list: GLuint; mode: GLenum); stdcall; external libGL;                           // USE_DEPRECATED
+  procedure glEndList; stdcall; external libGL;                                                       // USE_DEPRECATED
+  procedure glCallList(list: GLuint); stdcall; external libGL;                                        // USE_DEPRECATED
+  procedure glCallLists(n: GLsizei; atype: GLenum; const lists: Pointer); stdcall; external libGL;    // USE_DEPRECATED
+  procedure glDeleteLists(list: GLuint; range: GLsizei); stdcall; external libGL;                     // USE_DEPRECATED
+  function glGenLists(range: GLsizei): GLuint; stdcall; external libGL;                               // USE_DEPRECATED
+  function glIsList(list: GLuint): GLboolean; stdcall; external libGL;                                // USE_DEPRECATED
+  procedure glListBase(base: GLuint); stdcall; external libGL;                                        // USE_DEPRECATED
+
+  procedure glArrayElement(i: GLint); stdcall; external libGL;                                        // USE_DEPRECATED
+  procedure glDrawRangeElements(mode: GLenum; start: GLuint; _end: GLuint; count: GLsizei; _type: GLenum; const indices: PGLvoid); stdcall; external libGL; // GL_VERSION_1_2
+  procedure glEdgeFlagPointer(stride: GLsizei; const _pointer: PGLvoid); stdcall; external libGL;
+  procedure glFogCoordPointer(_type: GLenum; stride: GLsizei; const _pointer: PGLvoid); stdcall; external libGL;   // GL_VERSION_1_4
+  procedure glInterleavedArrays(format: GLenum; stride: GLsizei; const pointer: Pointer); stdcall; external libGL; // USE_DEPRECATED
+  procedure glMultiDrawElements(mode: GLenum; const count: PGLsizei; _type: GLenum; const indices: PGLvoid; primcount: GLsizei); stdcall; external libGL;   // GL_VERSION_1_4
+  procedure glNormalPointer(atype: GLenum; stride: GLsizei; const pointer: Pointer); stdcall; external libGL;      // USE_DEPRECATED
+  procedure glSecondaryColorPointer(size: GLint; _type: GLenum; stride: GLsizei; const _pointer: PGLvoid); stdcall; external libGL; // GL_VERSION_1_4
+  // освещение, материал
+  procedure glLightModelf(pname: GLenum; param: GLfloat); stdcall; external libGL;                    // USE_DEPRECATED
+  procedure glLightModelfv(pname: GLenum; const params: PGLfloat); stdcall; external libGL;           // USE_DEPRECATED
+  procedure glLightf(light, pname: GLenum; param: GLfloat); stdcall; external libGL;                  // USE_DEPRECATED
+  procedure glLightfv(light, pname: GLenum; const params: PGLfloat); stdcall; external libGL;         // USE_DEPRECATED
+  procedure glGetLightfv(light, pname: GLenum; params: PGLfloat); stdcall; external libGL;         // Gles 1.1   // USE_DEPRECATED
+  procedure glGetLightiv(light, pname: GLenum; params: PGLint); stdcall; external libGL;           // Gles 1.1   // USE_DEPRECATED
+  procedure glGetMaterialfv(face, pname: GLenum; params: PGLfloat); stdcall; external libGL;       // Gles 1.1   // USE_DEPRECATED
+  procedure glGetMaterialiv(face, pname: GLenum; params: PGLint); stdcall; external libGL;         // Gles 1.1   // USE_DEPRECATED
+  procedure glMaterialf(face, pname: GLenum; param: GLfloat); stdcall; external libGL;                // USE_DEPRECATED
+  procedure glMaterialfv(face, pname: GLenum; const params: PGLfloat); stdcall; external libGL;       // USE_DEPRECATED
+  procedure glNormal3f(nx, ny, nz: GLfloat); stdcall; external libGL;                                 // USE_DEPRECATED
+  procedure glNormal3fv(const v: PGLfloat); stdcall; external libGL;                                  // USE_DEPRECATED
+
 var
   //
-//  glCompressedTexImage2D: procedure(target: GLenum; level, internalformat: GLint; width, height: GLsizei; border: GLint; imageSize: GLsizei; const pixels: Pointer); stdcall;
-  // FBO
+  glCompressedTexImage2D: procedure(target: GLenum; level, internalformat: GLint; width, height: GLsizei; border: GLint; imageSize: GLsizei; const pixels: Pointer); stdcall; // GL_VERSION_1_3
+  // FBO             GL_VERSION_3_0 or GL_EXT_framebuffer_object
   glIsRenderbuffer: function(renderbuffer: GLuint): GLboolean; stdcall;
   glBindRenderbuffer: procedure(target: GLenum; renderbuffer: GLuint); stdcall;
   glDeleteRenderbuffers: procedure(n: GLsizei; const renderbuffers: PGLuint); stdcall;
@@ -428,106 +244,10 @@ var
   glFramebufferTexture2D: procedure(target: GLenum; attachment: GLenum; textarget: GLenum; texture: GLuint; level: GLint); stdcall;
   glFramebufferRenderbuffer: procedure(target: GLenum; attachment: GLenum; renderbuffertarget: GLenum; renderbuffer: GLuint); stdcall;
 
-  // Triangulation
-  {$IFDEF USE_TRIANGULATION}
-  procedure gluDeleteTess(tess: Integer); stdcall external libGLU;
-  function  gluErrorString(error: Integer): PAnsiChar; stdcall external libGLU;
-  function  gluNewTess: Integer; stdcall external libGLU;
-  procedure gluTessBeginContour(tess: Integer); stdcall external libGLU;
-  procedure gluTessBeginPolygon(tess: Integer; data: Pointer); stdcall external libGLU;
-  procedure gluTessCallback(tess: Integer; which: Integer; fn: Pointer); stdcall external libGLU;
-  procedure gluTessEndContour(tess: Integer); stdcall external libGLU;
-  procedure gluTessEndPolygon(tess: Integer); stdcall external libGLU;
-  procedure gluTessVertex(tess: Integer; vertex: PDouble; data: Pointer); stdcall external libGLU;
-  {$ENDIF}
+  glBlendEquation: procedure(mode: GLenum); stdcall;                                                  // GL_VERSION_1_4
+  glBlendFuncSeparate: procedure(sfactorRGB: GLenum; dfactorRGB: GLenum; sfactorAlpha: GLenum; dfactorAlpha: GLenum); stdcall; // GL_VERSION_1_4
 
-{$IFDEF LINUX}
-type
-  GLXFBConfig = Pointer;
-  GLXContext  = Pointer;
-  GLXPBuffer  = TXID;
-  GLXDrawable = TXID;
 
-const
-  GLX_EXTENSIONS   = 3;
-  GLX_BUFFER_SIZE  = 2;
-  GLX_RGBA         = 4;
-  GLX_DOUBLEBUFFER = 5;
-  GLX_RED_SIZE     = 8;
-  GLX_GREEN_SIZE   = 9;
-  GLX_BLUE_SIZE    = 10;
-  GLX_ALPHA_SIZE   = 11;
-  GLX_DEPTH_SIZE   = 12;
-  GLX_STENCIL_SIZE = 13;
-
-  GLX_SAMPLES_SGIS = $186A1;
-
-  // PBuffer
-  GLX_PBUFFER_HEIGHT     = $8040;
-  GLX_PBUFFER_WIDTH      = $8041;
-  GLX_PRESERVED_CONTENTS = $801B;
-  GLX_LARGEST_PBUFFER    = $801C;
-  GLX_DRAWABLE_TYPE      = $8010;
-  GLX_RENDER_TYPE        = $8011;
-  GLX_RGBA_BIT           = $0001;
-  GLX_PBUFFER_BIT        = $0004;
-
-  function  glXChooseVisual(dpy: PDisplay; screen: Integer; attribList: PInteger): PXVisualInfo; cdecl; external libGL;
-  function  glXCreateContext(dpy: PDisplay; vis: PXVisualInfo; shareList: GLXContext; direct: Boolean): GLXContext; cdecl; external libGL;
-  procedure glXDestroyContext(dpy: PDisplay; ctx: GLXContext); cdecl; external libGL;
-  function  glXMakeCurrent(dpy: PDisplay; drawable: GLXDrawable; ctx: GLXContext): Boolean; cdecl; external libGL;
-  procedure glXSwapBuffers(dpy: PDisplay; drawable: GLXDrawable); cdecl; external libGL;
-  function  glXQueryExtension(dpy: PDisplay; out errorb, event: Integer): Boolean; cdecl; external libGL;
-  function  glXQueryVersion(dpy: PDisplay; out major, minor: Integer): Boolean; cdecl; external libGL;
-  function  glXIsDirect(dpy: PDisplay; ctx: GLXContext): Boolean; cdecl; external libGL;
-  function  glXQueryServerString(dpy: PDisplay; screen: Integer; name: Integer): PAnsiChar; cdecl; external libGL;
-
-var
-  glXGetProcAddressARB: function(name: PAnsiChar): Pointer; cdecl;
-  glXSwapIntervalSGI: function(interval: Integer): Integer; cdecl;
-  // PBuffer
-  glXGetVisualFromFBConfig: function(dpy: PDisplay; config: Integer): PXVisualInfo; cdecl;
-  glXChooseFBConfig: function(dpy: PDisplay; screen: Integer; attribList: PInteger; nitems: PInteger): GLXFBConfig; cdecl;
-  glXCreatePbuffer: function(dpy: PDisplay; config: Integer; attribList: PInteger): GLXPBuffer; cdecl;
-  glXDestroyPbuffer: procedure(dpy: PDisplay; pbuf: GLXPBuffer); cdecl;
-  glXCreateGLXPbufferSGIX: function(dpy: PDisplay; config: Integer; width, height: LongWord; attribList: PInteger): GLXPBuffer; cdecl;
-  glXDestroyGLXPbufferSGIX: procedure(dpy: PDisplay; pbuf: GLXPBuffer); cdecl;
-{$ENDIF}
-{$IFDEF WINDOWS}
-const
-  // Pixel Format
-  WGL_DRAW_TO_WINDOW_ARB    = $2001;
-  WGL_ACCELERATION_ARB      = $2003;
-  WGL_FULL_ACCELERATION_ARB = $2027;
-  WGL_SUPPORT_OPENGL_ARB    = $2010;
-  WGL_DOUBLE_BUFFER_ARB     = $2011;
-  WGL_PIXEL_TYPE_ARB        = $2013;
-  WGL_COLOR_BITS_ARB        = $2014;
-  WGL_RED_BITS_ARB          = $2015;
-  WGL_GREEN_BITS_ARB        = $2017;
-  WGL_BLUE_BITS_ARB         = $2019;
-  WGL_ALPHA_BITS_ARB        = $201B;
-  WGL_DEPTH_BITS_ARB        = $2022;
-  WGL_STENCIL_BITS_ARB      = $2023;
-  WGL_TYPE_RGBA_ARB         = $202B;
-
-  // AA
-  WGL_SAMPLE_BUFFERS_ARB    = $2041;
-  WGL_SAMPLES_ARB           = $2042;
-
-  // PBuffer
-  WGL_DRAW_TO_PBUFFER_ARB   = $202D;
-
-  function wglGetProcAddress(proc: PAnsiChar): Pointer; stdcall; external libGL;
-var
-  wglChoosePixelFormatARB: function(hdc: HDC; const piAttribIList: PGLint; const pfAttribFList: PGLfloat; nMaxFormats: GLuint; piFormats: PGLint; nNumFormats: PGLuint): BOOL; stdcall;
-  wglSwapInterval: function(interval: GLint): BOOL; stdcall;
-  // PBuffer
-  wglCreatePbufferARB: function(hDC: HDC; iPixelFormat: GLint; iWidth: GLint; iHeight: GLint; const piAttribList: PGLint): THandle; stdcall;
-  wglGetPbufferDCARB: function(hPbuffer: THandle): HDC; stdcall;
-  wglReleasePbufferDCARB: function(hPbuffer: THandle; hDC: HDC): GLint; stdcall;
-  wglDestroyPbufferARB: function(hPbuffer: THandle): BOOL; stdcall;
-{$ENDIF}
 {$IFDEF MACOSX}{$IfNDef MAC_COCOA}
 const
   AGL_NONE         = 0;
@@ -600,6 +320,15 @@ uses
   {$IFDEF FPC}
   math,
   {$ENDIF}
+  {$IfDef USE_X11}
+  zgl_glx_wgl,
+  {$EndIf}
+  {$IfDef WINDOWS}
+  zgl_glx_wgl,
+  {$EndIf}
+  zgl_window,
+  zgl_opengl,
+  zgl_log,
   zgl_utils;
 
 function InitGL: Boolean;
@@ -617,9 +346,6 @@ begin
   {$ENDIF}
 
   oglLibrary := dlopen(libGL {$IFDEF UNIX}, $001 {$ENDIF});
-  {$IFDEF LINUX}
-  glXGetProcAddressARB := gl_GetProc('glXGetProcAddress');
-  {$ENDIF}
 
   Result := oglLibrary <> LIB_ERROR;
 end;
@@ -671,20 +397,37 @@ end;
 {$ENDIF}{$EndIf}
 
 function gl_GetProc(const Proc: UTF8String): Pointer;
+var
+  s: String = '';
 begin
   {$IFDEF WINDOWS}
   Result := wglGetProcAddress(PAnsiChar(Proc));                
   if Result = nil Then
-    Result := wglGetProcAddress(PAnsiChar(Proc + 'ARB'));
-  if Result = nil Then
-    Result := wglGetProcAddress(PAnsiChar(Proc + 'EXT'));
+  begin
+    s := 'ARB';
+    Result := wglGetProcAddress(PAnsiChar(Proc + s));
+    if Result = nil Then
+    begin
+      s := 'EXT';
+      Result := wglGetProcAddress(PAnsiChar(Proc + s));
+      if Result = nil then
+        s := '';
+    end;
+  end;
   {$ELSE}
   Result := dlsym(oglLibrary, PAnsiChar(Proc));
   if Result = nil Then
-    Result := dlsym(oglLibrary, PAnsiChar(Proc + 'ARB'));
-  if Result = nil Then
-    Result := dlsym(oglLibrary, PAnsiChar(Proc + 'EXT'));
-
+  begin
+    s := 'ARB';
+    Result := dlsym(oglLibrary, PAnsiChar(Proc + s));
+    if Result = nil Then
+    begin
+      s := 'EXT';
+      Result := dlsym(oglLibrary, PAnsiChar(Proc + s));
+      if Result = nil then
+        s := '';
+    end;
+  end;
   {$IFDEF LINUX}
   if (Result = nil) and Assigned(glXGetProcAddressARB) Then
     Result := glXGetProcAddressARB(PAnsiChar(Proc));
@@ -692,7 +435,7 @@ begin
   {$ENDIF}
 end;
 
-
+// получение значения заголовка
 function gl_IsSupported(const Extension, SearchIn: UTF8String): Boolean;
   var
     extPos: Integer;

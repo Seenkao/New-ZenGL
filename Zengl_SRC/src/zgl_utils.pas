@@ -47,7 +47,7 @@ uses
   zgl_types;
 
 const
-  LIB_ERROR  = {$IFDEF UNIX} nil {$ELSE} 0 {$ENDIF};
+  LIB_ERROR  = {$IFDEF UNIX}nil{$ELSE}0{$ENDIF};
 
 function u_IntToStr(Value: Integer): UTF8String;
 function u_StrToInt(const Value: UTF8String): Integer;
@@ -579,8 +579,19 @@ end;
 
 // пауза
 procedure u_Sleep(Milliseconds: LongWord);
+(*  {$IFDEF UNIX}
+  var
+    tv: TimeVal;
+  {$ENDIF}       *)
 begin
+(*{$IFDEF UNIX}
+  tv.tv_sec  := Milliseconds div 1000;
+  tv.tv_usec := (Milliseconds mod 1000) * 1000;
+  select(0, nil, nil, nil, tv);
+{$ENDIF}
+{$IFDEF WINDOWS}      *)
   Sleep(Milliseconds);
+//{$ENDIF}
 end;
 
 {$IF DEFINED(LINUX) and DEFINED(CPUx86_64)}

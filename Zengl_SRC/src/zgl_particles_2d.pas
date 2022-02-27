@@ -33,6 +33,7 @@ uses
   zgl_types,
   zgl_math_2d,
   zgl_file,
+  zgl_gltypeconst,
   zgl_memory;
 
 const
@@ -141,7 +142,7 @@ type
   zglTEmitterRect = record
     Direction : Single;
     Spread    : Single;
-    Rect      : zglTRect;
+    Rect      : zglTRect2D;
   end;
 
   zglTEmitterCircle = record
@@ -271,7 +272,7 @@ uses
   zgl_window,
   zgl_log,
   {$IFNDEF USE_GLES}
-  zgl_opengl,
+  //zgl_opengl,
   zgl_opengl_all,
   {$ELSE}
   zgl_opengles,

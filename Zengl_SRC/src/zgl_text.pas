@@ -21,7 +21,7 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 16.07.2021
+ !!! modification from Serge 24.02.2022
 }
 
 unit zgl_text;
@@ -31,7 +31,12 @@ unit zgl_text;
 interface
 uses
   zgl_font,
-  zgl_types;
+  zgl_gltypeconst,
+  zgl_types
+  {$IfNDef OLD_METHODS}
+  , gegl_color
+  {$EndIf}
+  ;
 
 const
   TEXT_HALIGN_LEFT    = $000001;
@@ -45,64 +50,66 @@ const
   TEXT_FX_VCA         = $000100;
   TEXT_FX_LENGTH      = $000200;
 
-// RU: процедуры вывода текста
-// EN: text output procedures
-procedure text_Draw(fnt: Byte; X, Y: Single; const Text: UTF8String; Flags: LongWord = 0);
-procedure text_DrawEx(fnt: Byte; X, Y, Scale, Step: Single; const Text: UTF8String; Alpha: Byte = 255; Color: LongWord = $FFFFFF; Flags: LongWord = 0);
-// RU: процедуры вывода текста в определённую область (прямоугольник)
-// EN: procedures for displaying text in a specific area (rectangle)
-procedure text_DrawInRect(fnt: Byte; const Rect: zglTRect; const Text: UTF8String; Flags: LongWord = 0);
-procedure text_DrawInRectEx(fnt: Byte; const Rect: zglTRect; Scale, Step: Single; const Text: UTF8String; Alpha: Byte = 0; Color: LongWord = $FFFFFF; Flags: LongWord = 0);
-// RU: возвращаем ширину текста
-// EN: return the width of the text
-function  text_GetWidth(fnt: Byte; const Text: UTF8String; Step: Single = 0.0): Single;
-// RU: возвращаем высоту текста
-// EN: return the height of the text
-function  text_GetHeight(fnt: Byte; Width: Single; const Text: UTF8String; Step: Single = 0.0): Single;
+// Rus: процедура вывода текста.
+// Eng:
+procedure text_Draw(fnt: LongWord; X, Y: Single; const Text: UTF8String; Flags: LongWord = 0);
+// Rus: расширенная процедура вывода текста.
+// Eng:
+procedure text_DrawEx(fnt: LongWord; X, Y, Scale, Step: Single; const Text: UTF8String; {$IfDef OLD_METHODS} Alpha: Byte = 255; Color: LongWord = $FFFFFFFF;{$Else} Color: LongWord = cl_White;{$EndIf} Flags: LongWord = 0);
+// Rus: процедура вывода текста в определённую область (прямоугольник).
+// Eng:
+procedure text_DrawInRect(fnt: LongWord; const Rect: zglTRect2D; const Text: UTF8String; Flags: LongWord = 0);
+// Rus: расширенная процедура вывода текста в определённую область (прямоугольник).
+// Eng:
+procedure text_DrawInRectEx(fnt: LongWord; const Rect: zglTRect2D; Scale, Step: Single; const Text: UTF8String; {$IfDef OLD_METHODS} Alpha: Byte = 0; Color: LongWord = $FFFFFF;{$Else} Color: LongWord = cl_White;{$EndIf} Flags: LongWord = 0);
+// Rus: возвращаем ширину текста.
+// Eng:
+function  text_GetWidth(fnt: LongWord; const Text: UTF8String; Step: Single = 0.0): Single;
+// Rus: возвращаем высоту текста.
+// Eng:
+function  text_GetHeight(fnt: LongWord; Width: Single; const Text: UTF8String; Step: Single = 0.0): Single;
 procedure textFx_SetLength(Length: Integer; LastCoord: zglPPoint2D = nil; LastCharDesc: zglPCharDesc = nil);
-// RU: установка размера шрифта (в пикселях, может быть не совсем точно, зависит от созданного шрифта). Index - size, fnt - num font.
-// EN: setting the font size (in pixels, it may not be entirely accurate, it depends on the created font). Index - size, fnt - num font
-procedure setFontTextScale(Index: LongWord; fnt: Byte);
-// RU: установка флага отключения шкалы размерности. Только для функций, которые используют свою собственную шкалу.
-// EN: setting the flag for disabling the dimension scale. Only for functions that use their own scale.
+// Index - size, fnt - num font
+procedure setFontTextScale(Index: LongWord; fnt: LongWord);
+// Rus: установка флага отключения шкалы размерности. Только для функций,
+//      которые используют свою собственную шкалу.
+// Eng:
 procedure setScallingOnOff(flag: Boolean); {$IfDef FPC}inline;{$EndIf}
-(* RU: устанавливаем размер шкалы, для отключенного флага
-       !!!Внимательние!!! Процедура меняет временную переменную - она будет действовать
-       для любого шрифта, даже если вы выбирали для какого-то определённого, потому
-       устанавливать размер шрифта, нужно именно перед моментом вывода шрифта.
-       Значение переменной, может меняться, если вы использовали procedure text_DrawEx
-       или procedure text_DrawInRectEx - это правильное поведение данной переменной.
-   EN: set the scale size for the disabled flag
-       !!!Attention!!! The procedure changes the temporary variable - it will work for
-       any font. Even if you opted for a particular font. Therefore, you need to set the
-       font size just before the moment the font is displayed. The value of the variable
-       may change if you used procedure text_DrawEx or procedure text_DrawInRectEx - this
-       is the correct behavior of this variable.
-*)
-procedure setTextScaleEx(Scale: Single; fnt:Byte); {$IfDef FPC}inline;{$EndIf}
-// RU: возвращаем размер шкалы данного шрифта
-// EN: return the scale size of the given font
-function getTextScale(fnt: Byte): LongWord;
-
+// Rus: устанавливаем размер шкалы, для отключенного флага.
+//      !!!Внимательние!!! Процедура меняет временную переменную - она будет
+//      действовать для любого шрифта, даже если вы выбирали для какого-то
+//      определённого, потому устанавливать размер шрифта, именно перед моментом
+//      вывода шрифта значение переменной, может меняться, если вы использовали
+//      procedure text_DrawEx или procedure text_DrawInRectEx - это правильное
+//      поведение данной переменной.
+// Eng:
+procedure setTextScaleEx(Scale: Single; fnt:LongWord); {$IfDef FPC}inline;{$EndIf}
+// Rus: возвращаем размер шкалы данного шрифта.
+// Eng:
+function getTextScale(fnt: LongWord): LongWord;
+// Rus: возвращаем размерность шкалы, которая используется вне шрифтов.
+// Eng:
 function getTextScaleEx(): Single;
-// RU: устанавливаем стандартные значения цвета для любого текста.
-// EN: set default color values for any text.
+// Rus: устанавливаем стандартные значения цвета для любого текста.
+//      Color - значение цвета.
+// Eng:
 procedure setTextColor(Color: Cardinal);
 
-// RU: загрузка текстового файла в формате UTF-8 (хотя не обязательно UTF-8)
-// EN: loading a text file in UTF-8 format (although not necessarily UTF-8)
+// Rus: загрузка текстового файла в формате UTF-8.
+// Eng:
 procedure txt_LoadFromFile(const FileName: UTF8String; out Buf: UTF8String);
-// RU: сохранение текстового UTF-8 файла (хотя не обязательно UTF-8)
-// EN: saving a text UTF-8 file (although not necessarily UTF-8)
+// Rus: сохранение текстового UTF-8 файла.
+// Eng:
 procedure txt_SaveFromFile(const FileName: UTF8String; const Buf: UTF8String);
 
 var
   TextScaleStandart : Single;
-  // RU: флаг, отвечающий за выключение шкалы размерности.
-  // EN: flag responsible for turning off the dimension scale.
+  // Rus: флаг, отвечающий за выключение шкалы размерности.
+  // Eng:
   Off_TextScale: Boolean = false;
-  // RU: шкала для отключённых флагов. Будет использоваться данная шкала, а не шкала заданная в шрифте.
-  // EN: scale for disabled flags. This scale will be used, not the scale specified in the font.
+  // Rus: шкала для отключённых флагов, будет использоваться данная шкала, а не
+  //      шкала заданная в шрифте.
+  // Eng:
   useScaleEx: Single;
 
 implementation
@@ -128,7 +135,7 @@ type
 end;
 
 var
-  textRGBA      : array[0..3] of Byte = (255, 255, 255, 255);
+  textRGBA      : {$IfDef OLD_METHODS} array[0..3] of Byte = (255, 255, 255, 255){$Else}LongWord = $FFFFFFFF{$EndIf};
   textStep      : Single = 0.0;
   textLength    : Integer;
   textLCoord    : zglPPoint2D;
@@ -137,7 +144,7 @@ var
   textWordsCount: Integer;
   textLinesCount: Integer;
 
-procedure setFontTextScale(Index: LongWord; fnt: Byte);
+procedure setFontTextScale(Index: LongWord; fnt: LongWord);
 var
   i: Integer;
   charDesc: zglPCharDesc;
@@ -154,6 +161,7 @@ begin
       charDesc := useFont.CharDesc[i]
     else
       Continue;
+
     charDesc.xx1 := charDesc._x1 * useFont.Scale;
     charDesc.yy1 := charDesc._y1 * useFont.Scale;
     charDesc.xx2 := charDesc._x2 * useFont.Scale;
@@ -168,12 +176,12 @@ begin
   Off_TextScale := flag;
 end;
 
-procedure setTextScaleEx(Scale: Single; fnt:Byte);
+procedure setTextScaleEx(Scale: Single; fnt:LongWord);
 begin
   useScaleEx := Scale * managerFont.Font[fnt].ScaleNorm;
 end;
 
-function getTextScale(fnt: Byte): LongWord;
+function getTextScale(fnt: LongWord): LongWord;
 begin
   Result := Round((managerFont.Font[fnt].Scale * 10) / managerFont.Font[fnt].ScaleNorm);
 end;
@@ -185,13 +193,17 @@ end;
 
 procedure setTextColor(Color: Cardinal);
 begin
+  {$IfDef OLD_METHODS}
   textRGBA[0] := Color shr 24;
   textRGBA[1] := (Color and $FF0000) shr 16;
   textRGBA[2] := (Color and $FF00) shr 8;
   textRGBA[3] := Color and $FF;
+  {$else}
+  textRGBA := Color;
+  {$EndIf}
 end;
 
-procedure text_CalcRect(fnt: Byte; const Rect: zglTRect; const Text: UTF8String; Flags: LongWord = 0);
+procedure text_CalcRect(fnt: LongWord; const Rect: zglTRect2D; const Text: UTF8String; Flags: LongWord = 0);
 var
   x, y, sX  : Integer;
   b, i, imax: Integer;
@@ -240,7 +252,6 @@ begin
         continue;
     end;
 
-    
     if (c = 32) and (startWord) and (lc <> 10) and (lc <> 32) Then
     begin
       newWord   := TRUE;
@@ -339,7 +350,7 @@ begin
   useFont := nil;
 end;
 
-procedure text_Draw(fnt: Byte; X, Y: Single; const Text: UTF8String; Flags: LongWord = 0);
+procedure text_Draw(fnt: LongWord; X, Y: Single; const Text: UTF8String; Flags: LongWord = 0);
   var
     i, c, s : LongWord;
     charDesc: zglPCharDesc;
@@ -351,12 +362,13 @@ procedure text_Draw(fnt: Byte; X, Y: Single; const Text: UTF8String; Flags: Long
 begin
   if fnt > MAX_USE_FONT then
     exit;
-  if (Text = '') or ((managerFont.Font[fnt].Flags and UseFnt) = 0) Then exit;
+  if (Text = '') or ((managerFont.Font[fnt].Flags and UseFnt) = 0) Then
+    exit;
   useFont := managerFont.Font[fnt];
   for i := 0 to useFont.Count.Pages - 1 do
     if not Assigned(useFont.Pages[i]) Then exit;
 
-  glColor4ubv(@textRGBA[0]);
+  glColor4ubv(@textRGBA{$IfDef OLD_METHODS}[0]{$EndIf});
 
   if Off_TextScale then
     Y := Y - useFont.MaxShiftY * useScaleEx
@@ -551,12 +563,13 @@ begin
   useFont := nil;
 end;
 
-procedure text_DrawEx(fnt: Byte; X, Y, Scale, Step: Single; const Text: UTF8String; Alpha: Byte = 255; Color: LongWord = $FFFFFF; Flags: LongWord = 0);
+procedure text_DrawEx(fnt: LongWord; X, Y, Scale, Step: Single; const Text: UTF8String; {$IfDef OLD_METHODS} Alpha: Byte = 255; Color: LongWord = $FFFFFFFF;{$Else} Color: LongWord = cl_White;{$EndIf} Flags: LongWord = 0);
 var
-  oldTextRGBA: array[0..3] of Cardinal;
+  oldTextRGBA: {$IfDef OLD_METHODS} array[0..3] of Byte = (255, 255, 255, 255){$Else}LongWord{$EndIf};
   oldTextStep: Single;
 begin
   oldTextStep := textStep;
+  {$IfDef OLD_METHODS}
   oldTextRGBA[0] := textRGBA[0];
   oldTextRGBA[1] := textRGBA[1];
   oldTextRGBA[2] := textRGBA[2];
@@ -565,19 +578,27 @@ begin
   textRGBA[1] := (Color and $FF00) shr 8;
   textRGBA[2] := Color and $FF;
   textRGBA[3] := Alpha;
+  {$Else}
+  oldTextRGBA := textRGBA;
+  textRGBA := Get_Color(Color);
+  {$EndIf}
   Off_TextScale := True;
   useScaleEx := Scale * managerFont.Font[fnt].ScaleNorm;
   textStep    := Step;
   text_Draw(fnt, X, Y, Text, Flags);
+  {$IfDef OLD_METHODS}
   textRGBA[0] := oldTextRGBA[0];
   textRGBA[1] := oldTextRGBA[1];
   textRGBA[2] := oldTextRGBA[2];
   textRGBA[3] := oldTextRGBA[3];
+  {$Else}
+  textRGBA := oldTextRGBA;
+  {$EndIf}
   Off_TextScale := False;
   textStep    := oldTextStep;
 end;
 
-procedure text_DrawInRect(fnt: Byte; const Rect: zglTRect; const Text: UTF8String; Flags: LongWord = 0);
+procedure text_DrawInRect(fnt: LongWord; const Rect: zglTRect2D; const Text: UTF8String; Flags: LongWord = 0);
   var
     i, j, b : Integer;
     NewFlags: Integer;
@@ -606,33 +627,42 @@ begin
   end;
 end;
 
-procedure text_DrawInRectEx(fnt: Byte; const Rect: zglTRect; Scale, Step: Single; const Text: UTF8String; Alpha: Byte = 0; Color: LongWord = $FFFFFF; Flags: LongWord = 0);
+procedure text_DrawInRectEx(fnt: LongWord; const Rect: zglTRect2D; Scale, Step: Single; const Text: UTF8String; {$IfDef OLD_METHODS} Alpha: Byte = 0; Color: LongWord = $FFFFFF;{$Else} Color: LongWord = cl_White;{$EndIf} Flags: LongWord = 0);
 var
-  oldTextRGBA: array[0..3] of Cardinal;
+  oldTextRGBA: {$IfDef OLD_METHODS} array[0..3] of Byte = (255, 255, 255, 255){$Else}LongWord{$EndIf};
   oldTextStep: Single;
 begin
   oldTextStep := textStep;
+  {$IfDef OLD_METHODS}
   oldTextRGBA[0] := textRGBA[0];
   oldTextRGBA[1] := textRGBA[1];
   oldTextRGBA[2] := textRGBA[2];
   oldTextRGBA[3] := textRGBA[3];
-  textRGBA[0] :=   Color             shr 16;
+  textRGBA[0] := Color shr 16;
   textRGBA[1] := (Color and $FF00) shr 8;
-  textRGBA[2] :=   Color and $FF;
+  textRGBA[2] := Color and $FF;
   textRGBA[3] := Alpha;
+  {$Else}
+  oldTextRGBA := textRGBA;
+  textRGBA := Get_Color(Color);
+  {$EndIf}
   Off_TextScale := True;
   useScaleEx := Scale * managerFont.Font[fnt].ScaleNorm;
   textStep      := Step;
   text_DrawInRect(fnt, Rect, Text, Flags);
+  {$IfDef OLD_METHODS}
   textRGBA[0] := oldTextRGBA[0];
   textRGBA[1] := oldTextRGBA[1];
   textRGBA[2] := oldTextRGBA[2];
   textRGBA[3] := oldTextRGBA[3];
+  {$Else}
+  textRGBA := oldTextRGBA;
+  {$EndIf}
   Off_TextScale := False;
   textStep      := oldTextStep;
 end;
 
-function text_GetWidth(fnt: Byte; const Text: UTF8String; Step: Single = 0.0): Single;
+function text_GetWidth(fnt: LongWord; const Text: UTF8String; Step: Single = 0.0): Single;
 var
   i: Integer;
   c: LongWord;
@@ -662,9 +692,9 @@ begin
     Result := lResult;
 end;
 
-function text_GetHeight(fnt: Byte; Width: Single; const Text: UTF8String; Step: Single = 0.0): Single;
+function text_GetHeight(fnt: LongWord; Width: Single; const Text: UTF8String; Step: Single = 0.0): Single;
   var
-    Rect: zglTRect;
+    Rect: zglTRect2D;
 begin
   if (Text = '') or ((managerFont.Font[fnt].Flags and UseFnt) = 0) Then
   begin
@@ -723,8 +753,6 @@ begin
     end else
       log_Add('File ' + FileName + ' not create!');
 end;
-
-
 
 initialization
   SetLength(textWords, 1024);

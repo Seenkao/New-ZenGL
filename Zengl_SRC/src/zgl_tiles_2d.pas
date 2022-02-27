@@ -52,6 +52,7 @@ uses
   {$IFNDEF USE_GLES}
   zgl_opengl,
   zgl_opengl_all,
+  zgl_gltypeconst,
   {$ELSE}
   zgl_opengles,
   zgl_opengles_all,

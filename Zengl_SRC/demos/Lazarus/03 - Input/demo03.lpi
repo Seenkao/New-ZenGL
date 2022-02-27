@@ -28,7 +28,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);../../../headers"/>
-            <OtherUnitFiles Value="../../../headers;../../../extra;../../../src;../../../lib/jpeg/$(TargetCPU)-$(TargetOS);../../../lib/msvcrt/$(TargetCPU);../../../lib/ogg/$(TargetCPU)-$(TargetOS);../../../lib/theora/$(TargetCPU)-$(TargetOS);../../../lib/zlib/$(TargetCPU)-$(TargetOS);../../../lib/zip/$(TargetCPU)-$(TargetOS)"/>
+            <OtherUnitFiles Value="../../../headers;../../../src;../../../lib/jpeg/$(TargetCPU)-$(TargetOS);../../../lib/msvcrt/$(TargetCPU);../../../lib/ogg/$(TargetCPU)-$(TargetOS);../../../lib/theora/$(TargetCPU)-$(TargetOS);../../../lib/zlib/$(TargetCPU)-$(TargetOS);../../../lib/zip/$(TargetCPU)-$(TargetOS)"/>
             <UnitOutputDirectory Value="../tmp/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -76,16 +76,11 @@
         <Mode0 Name="default"/>
       </Modes>
     </RunParams>
-    <Units Count="2">
+    <Units Count="1">
       <Unit0>
         <Filename Value="demo03.lpr"/>
         <IsPartOfProject Value="True"/>
       </Unit0>
-      <Unit1>
-        <Filename Value="../../../extra/zglglutm.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="zglGLUTM"/>
-      </Unit1>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -94,8 +89,8 @@
       <Filename Value="../../../bin/$(TargetCPU)-$(TargetOS)/demo03"/>
     </Target>
     <SearchPaths>
-      <IncludeFiles Value="$(ProjOutDir);../../../headers;../../../srcGEGL;../../../src"/>
-      <OtherUnitFiles Value="../../../headers;../../../extra;../../../src;../../../lib/jpeg/$(TargetCPU)-$(TargetOS);../../../lib/msvcrt/$(TargetCPU);../../../lib/ogg/$(TargetCPU)-$(TargetOS);../../../lib/theora/$(TargetCPU)-$(TargetOS);../../../lib/zlib/$(TargetCPU)-$(TargetOS);../../../lib/zip/$(TargetCPU)-$(TargetOS);../../../srcGEGL"/>
+      <IncludeFiles Value="$(ProjOutDir);../../../headers;../../../srcGEGL;../../../src;../../../srcGL"/>
+      <OtherUnitFiles Value="../../../headers;../../../src;../../../srcGEGL;../../../lib/jpeg/$(TargetCPU)-$(TargetOS);../../../lib/msvcrt/$(TargetCPU);../../../lib/ogg/$(TargetCPU)-$(TargetOS);../../../lib/theora/$(TargetCPU)-$(TargetOS);../../../lib/zlib/$(TargetCPU)-$(TargetOS);../../../lib/zip/$(TargetCPU)-$(TargetOS);../../../srcGL"/>
       <UnitOutputDirectory Value="../tmp/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>
@@ -112,6 +107,7 @@
     <Linking>
       <Debugging>
         <GenerateDebugInfo Value="False"/>
+        <DebugInfoType Value="dsDwarf2"/>
         <StripSymbols Value="True"/>
       </Debugging>
       <LinkSmart Value="True"/>

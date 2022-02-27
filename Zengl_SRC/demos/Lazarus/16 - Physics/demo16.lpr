@@ -26,6 +26,7 @@ uses
   zgl_text,
   zgl_primitives_2d,
   zgl_math_2d,
+  zgl_types,
   zgl_utils
   {$ELSE}
   zglHeader
@@ -172,7 +173,7 @@ end;
 
 procedure Draw;
 begin
-//  batch2d_Begin();
+  batch2d_Begin();
 
   // RU: Рендерим объекты указанного "мира". Второй аргумент функции отвечает за показ точек соприкосновения.
   // EN: Render objects for specified "world". Second argument responsible for rendering of collision points.
@@ -180,20 +181,18 @@ begin
 
   text_Draw(fntMain, 10, 5,  'FPS: ' + u_IntToStr(zgl_Get(RENDER_FPS)));
   text_Draw(fntMain, 10, 25, 'Use your mouse: Left Click - box, Right Click - ball');
-//  batch2d_End();
+  batch2d_End();
 end;
 
 procedure KeyMouseEvent;
 begin
-  if mBClickCanClick(M_BLEFT_CLICK) Then
+  // два варианта работы с мышью, статический и динамический
+  if (mouseAction[M_BLEFT].state and is_down) > 0 Then
     cpAddBox(mouseX - 10, mouseY - 10, 48, 32, 1, 0.5, 0.5);
-  if mBClickCanClick(M_BRIGHT_CLICK) Then
-    cpAddBall(mouseX, mouseY, 16, 2, 0.5, 0.1);
 
-  (*           код, который можно использовать, если ZenGL не скомпилированная библиотека.
-    if (mouseClickCanClick and M_BLEFT_CLICK) > 0 then
-      cpAddBox(mouse_X() - 10, mouse_Y() - 10, 48, 32, 1, 0.5, 0.5);
-  *)
+  if mouseBClick(M_BMIDDLE) Then
+    cpAddBall(mouseX, mouseY, 16, 2, 0.5, 0.1);
+ // if mouseBDown(4) then ;
 end;
 
 procedure Phisics;
@@ -219,7 +218,7 @@ Begin
   if not cpLoad( libChipmunk ) Then exit;
   {$ENDIF}
 
-  TimePhisics := timer_Add(@Phisics, 16, Start);
+  TimePhisics := timer_Add(@Phisics, 16, t_Start);
 
   zgl_Reg(SYS_EVENTS, @KeyMouseEvent);
   zgl_Reg(SYS_LOAD, @Init);

@@ -81,7 +81,7 @@ var
   sound, audio   : zglPSound;
   audioPlay : Boolean = false;
   state   : Integer;
-  r : zglTRect;
+  r : zglTRect2D;
   p : Integer;
 
   // добавляем номер звука, пока для одного звука
@@ -217,6 +217,8 @@ begin
     // EN: For MacOS X initialization should be done into form, even if rendering will be into another control.
     zgl_InitToHandle( LongWord( TCarbonWindow( Form1.Handle ).Window ) );
   {$ENDIF}
+  // таймер должен быть изначально выключен. Включаем таймер только когда окно инициализировано.
+  Timer1.Enabled := True;
 end;
 
 // проверка нажатия клавиши

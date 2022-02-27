@@ -21,13 +21,16 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 04.08.2020
+ !!! modification from Serge 08.02.2022
 }
 unit zgl_fx;
 
 {$I zgl_config.cfg}
 
 interface
+
+uses
+  zgl_gltypeconst;
 
 const
   FX_BLEND_NORMAL = $00;
@@ -90,6 +93,7 @@ uses
   {$IFNDEF USE_GLES}
   zgl_opengl,
   zgl_opengl_all,
+  zgl_pasOpenGL,
   {$ELSE}
   zgl_opengles,
   zgl_opengles_all,
@@ -161,9 +165,9 @@ begin
       end;
     FX_COLOR_SET:
       begin
-        glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB);
-        glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB,  GL_REPLACE);
-        glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB,  GL_PRIMARY_COLOR_ARB);
+        glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
+        glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB,  GL_REPLACE);
+        glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB,  GL_PRIMARY_COLOR);
       end;
   end;
 end;

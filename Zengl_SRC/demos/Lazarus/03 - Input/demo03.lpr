@@ -22,6 +22,7 @@ uses
   zgl_text,
   zgl_textures_png,
   zgl_types,
+  gegl_color,
   {$IfDef OLD_METHODS}
   zgl_collision_2d,
   {$Else}
@@ -33,7 +34,11 @@ uses
 var
   dirRes  : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
 
-  fntMain, fntEdit: Byte;
+  // Ru: номера шрифтов. Вся работа со шрифтами происходит именно от этих номеров.
+  fntMain, fntEdit: LongWord;
+
+  // Ru: номер цвета. Работа с цветом происходит именно от этого номера.
+  EditColor: LongWord;
 
   joyCount   : Integer;
   // RU: строка для получения значения из поля ввода
@@ -48,7 +53,7 @@ var
   {$Else}
   // RU: прямоугольник описывающий поле ввода
   // EN: rectangle describing the input field
-  myRect: zglTRect;
+  myRect: zglTRect2D;
 
   // "перепись" полей ввода для того, чтоб знать с каким полем работаем.
   // RU: объявляем переменную для работы с полем ввода
@@ -59,18 +64,17 @@ var
 // EN: draw the base of the input field. Everything is limited only by your imagination. )))
 procedure EditCont;
 begin
-  // RU: при прорисовке поля ввода, смешениt и поворот уже будут сделаны. Я показываю как нарисовать рамку.
-  // Текст будет выведен поверх того, что вы здесь нарисуете.
+  // RU: при прорисовке поля ввода, смешение и поворот уже будут сделаны. Я показываю как нарисовать рамку.
+  //     Текст будет выведен поверх того, что вы здесь нарисуете.
   // EN: displacement and rotation will be done prior to performing the procedure. I am showing you how to draw a frame.
-  // The text will be drawn on top of what you draw here.
-  pr2d_Rect(- 2, - 1, myRect.W + 5, myRect.H, $FFFFFF, 128, PR2D_FILL);
+  //     The text will be drawn on top of what you draw here.
+  pr2d_Rect(- 2, - 1, myRect.W + 5, myRect.H, cl_White {$IfDef OLD_METHODS}, 128{$EndIf}, PR2D_FILL);
 end;
   {$EndIf}
 
 procedure Init;
 {$IfNDef OLD_METHODS}
 var
-  TextColor: zglTColor;
   EScale: Word;
 {$EndIf}
 begin
@@ -97,15 +101,19 @@ begin
   // RU: указываем точку вращения, в данном случае центр поля ввода (по необходимости) и угол поворота (например 45)
   // EN: specify the point of rotation, in this case the center of the input field (if necessary) and the angle of rotation (for example 45)
   SetOfRotateAngleAndPoint(myRect.x + myRect.W / 2, myRect.y + myRect.H / 2, 30);
-  // RU: указываем цвет текста
-  // EN: specify the color of the text
-  TextColor.R := 0.1;
-  TextColor.G := 0.5;
-  TextColor.B := 0.3;
-  TextColor.A := 1;            // max = 1, min = 0
-  // RU: передаём цвет в данные менеджера
-  // EN: transfer the color to the manager data
-  SetColorElementText(@TextColor);
+
+  // RU: указываем цвет текста (добавляем новый номер цвета, хотя данная функция вам возвратит цвет, если он уже был прописан).
+  // EN: specify the color of the text (we add a new color number, although this function will return the color to you if it
+  //     has already been assigned).
+  EditColor := Color_FindOrAdd($208055FF);
+  // Ru: устанавливаем цвета по умолчанию для всех  элементов API. Эти цвета будут задействованы только при создании
+  //     определённого элемента. Для изменения цвета в самом (уже созданном) элементе, ни чего не прилагается.
+  //     Дальнейшие измениня этих значений цвета, ни как не скажется на уже созданных элементах.
+  // En: set default colors for all API elements. These colors will only be used when creating a specific element.
+  //     To change the color in the (already created) element itself, nothing is attached. Further changes to these
+  //     color values will not affect the already created elements in any way.
+  SetEditColor(fntEdit, EditColor, 1);
+
   // RU: создаём само поле ввода с данными указанными выше и передаваемыми данными
   // EN: create the input field itself with the data specified above and the data that needs to be transferred
   myEdit := CreateEdit(myRect, fntEdit, EScale, @EditCont);
@@ -136,8 +144,12 @@ var
   w : Single;
 {$EndIf}
 begin
+  // Ru: балуемся цветом шрифта.
+  // En: indulge in the color of the font.
+  setTextColor(Get_Color(cl_Blue));
   text_Draw( fntMain, 0, 0, 'Escape - Exit' );
 
+  setTextColor(Get_Color(cl_White));
   // RU: Координаты мыши можно получить при помощи функций mouse_X и mouse_Y.
   // EN: Mouse coordinates can be got using functions mouse_X and mouse_Y.
   text_Draw( fntMain, 0, 18, 'Mouse X, Y: ' + u_IntToStr( mouseX ) + '; ' + u_IntToStr( mouseY ) );
@@ -165,15 +177,20 @@ begin
   // EN: Show the state of axes and buttons of first joystick in the system.
   text_Draw( fntMain, 400, 360, 'JOYSTICK ( Found: ' + u_IntToStr( joyCount ) + ' )', TEXT_HALIGN_CENTER );
 
+  setTextColor(Get_Color(cl_Black));
   text_Draw( fntMain, 100, 400, 'Axis X: ' + u_FloatToStr( joy_AxisPos( 0, JOY_AXIS_X ) ) );
   text_Draw( fntMain, 100, 420, 'Axis Y: ' + u_FloatToStr( joy_AxisPos( 0, JOY_AXIS_Y ) ) );
+  setTextColor(Get_Color(cl_Black05));
   text_Draw( fntMain, 100, 440, 'Axis Z: ' + u_FloatToStr( joy_AxisPos( 0, JOY_AXIS_Z ) ) );
+  setTextColor(Get_Color(cl_Green));
   text_Draw( fntMain, 100, 460, 'Axis R: ' + u_FloatToStr( joy_AxisPos( 0, JOY_AXIS_R ) ) );
   text_Draw( fntMain, 100, 480, 'Axis U: ' + u_FloatToStr( joy_AxisPos( 0, JOY_AXIS_U ) ) );
+  setTextColor(Get_Color(cl_Green05));
   text_Draw( fntMain, 100, 500, 'Axis V: ' + u_FloatToStr( joy_AxisPos( 0, JOY_AXIS_V ) ) );
   text_Draw( fntMain, 100, 520, 'POVX: ' + u_FloatToStr( joy_AxisPos( 0, JOY_POVX ) ) );
   text_Draw( fntMain, 100, 540, 'POVY: ' + u_FloatToStr( joy_AxisPos( 0, JOY_POVY ) ) );
 
+  setTextColor(Get_Color(cl_Red05));
   text_Draw( fntMain, 400, 400, 'Button1: ' + u_BoolToStr( joy_Down( 0, 0 ) ) );
   text_Draw( fntMain, 400, 420, 'Button2: ' + u_BoolToStr( joy_Down( 0, 1 ) ) );
   text_Draw( fntMain, 400, 440, 'Button3: ' + u_BoolToStr( joy_Down( 0, 2 ) ) );

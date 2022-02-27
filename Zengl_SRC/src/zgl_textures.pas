@@ -26,12 +26,14 @@
 unit zgl_textures;
 
 {$I zgl_config.cfg}
+{$I GLdefine.cfg}
 
 interface
 
 uses
   zgl_types,
   zgl_math_2d,
+  zgl_gltypeconst,
   zgl_memory;
 
 const
@@ -159,9 +161,13 @@ var
 implementation
 uses
   zgl_window,
+  {$IfDef USE_GLU}
+  zgl_glu,
+  {$EndIf}
   {$IFNDEF USE_GLES}
   zgl_opengl,
   zgl_opengl_all,
+  zgl_pasOpenGL,
   {$ELSE}
   zgl_opengles,
   zgl_opengles_all,
@@ -247,7 +253,7 @@ function tex_CreateGL(var Texture: zglTTexture; pData: PByteArray): Boolean;
 begin
   if Texture.Flags and TEX_COMPRESS >= 1 Then
   {$IFNDEF USE_GLES}
-    if not oglCanS3TC Then
+    if not GL_EXT_texture_compression_s3tc Then
   {$ENDIF}
       Texture.Flags := Texture.Flags xor TEX_COMPRESS;
 
@@ -265,7 +271,7 @@ begin
   {$IFDEF USE_GLES}
   if ((not oglCanPVRTC) and ((Texture.Format = TEX_FORMAT_RGBA_DXT1) or (Texture.Format = TEX_FORMAT_RGBA_DXT3) or (Texture.Format = TEX_FORMAT_RGBA_DXT5))) or
   {$ELSE}
-  if ((not oglCanS3TC) and ((Texture.Format = TEX_FORMAT_RGBA_PVR2) or (Texture.Format = TEX_FORMAT_RGBA_PVR4))) or
+  if ((not GL_EXT_texture_compression_s3tc) and ((Texture.Format = TEX_FORMAT_RGBA_PVR2) or (Texture.Format = TEX_FORMAT_RGBA_PVR4))) or
   {$ENDIF}
     ((width > oglMaxTexSize) or (height > oglMaxTexSize)) Then
     begin
@@ -276,9 +282,10 @@ begin
   glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
   {$IFNDEF USE_GLES}
-  if (not oglCanAutoMipMap) and (Texture.Flags and TEX_MIPMAP > 0) Then
+  if (not GL_SGIS_generate_mipmap) and (Texture.Flags and TEX_MIPMAP > 0) Then
     begin
       if Texture.Flags and TEX_COMPRESS = 0 Then
+// izmenit i ubrat zavisimost ot GLU
         gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pData)
       else
         gluBuild2DMipmaps(GL_TEXTURE_2D, GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pData);
@@ -688,7 +695,7 @@ begin
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   end;
 
-  if oglCanAutoMipMap Then
+  if GL_SGIS_generate_mipmap Then
     glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, Byte(Flags and TEX_MIPMAP > 0));
 
   if Flags and TEX_MIPMAP > 0 Then
@@ -711,7 +718,7 @@ begin
           glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
           glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         end else
-          if (Flags and TEX_FILTER_TRILINEAR > 0) or ((not oglCanAnisotropy) and (Flags and TEX_FILTER_ANISOTROPY > 0)) Then
+          if (Flags and TEX_FILTER_TRILINEAR > 0) or ((not GL_EXT_texture_filter_anisotropic) and (Flags and TEX_FILTER_ANISOTROPY > 0)) Then
           begin
             Texture.Flags := Texture.Flags or TEX_FILTER_TRILINEAR;
             glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);

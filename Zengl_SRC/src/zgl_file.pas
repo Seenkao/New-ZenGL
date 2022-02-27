@@ -65,25 +65,61 @@ const
   FSM_CUR    = $02;
   FSM_END    = $03;
 
+// Rus: открыть файл.
+// Eng:
 function  file_Open(out FileHandle: zglTFile; const FileName: UTF8String; Mode: Byte{$IfDef MAC_COCOA}; log: Boolean = false{$EndIf}): Boolean;
+// Rus: создать дирректорию.
+// Eng:
 function  file_MakeDir(const Directory: UTF8String): Boolean;
+// Rus: переименование файла/дирректории.
+// Eng:
 function  file_Remove(const Name: UTF8String): Boolean;
+// Rus: существует файл или нет?
+// Eng:
 function  file_Exists(const Name: UTF8String): Boolean;
+// Rus: установка позиции чтения/записи.
+// Eng:
 function  file_Seek(FileHandle: zglTFile; Offset, Mode: Integer): LongWord;
+// Rus: возвращение позиции чтения/записи.
+// Eng:
 function  file_GetPos(FileHandle: zglTFile): LongWord;
+// Rus: чтение файла.
+// Eng:
 function  file_Read(FileHandle: zglTFile; var Buffer; Bytes: LongWord): LongWord;
+// Rus: сохранение файла.
+// Eng:
 function  file_Write(FileHandle: zglTFile; const Buffer; Bytes: LongWord): LongWord;
+// Rus: возвращаем размер файла.
+// Eng:
 function  file_GetSize(FileHandle: zglTFile): LongWord;
+// Rus:
+// Eng:
 procedure file_Flush(FileHandle: zglTFile);
+// Rus: закрытие файла.
+// Eng:
 procedure file_Close(var FileHandle: zglTFile);
+// Rus: поиск файла.
+// Eng:
 procedure file_Find(const Directory: UTF8String; out List: zglTFileList; FindDir: Boolean);
+// Rus: возвращаем имя файла.
+// Eng:
 function  file_GetName(const FileName: UTF8String): UTF8String;
+// Rus: возвращаем расширение файла.
+// Eng:
 function  file_GetExtension(const FileName: UTF8String): UTF8String;
+// Rus: возвращаем имя дирректории
+// Eng:
 function  file_GetDirectory(const FileName: UTF8String): UTF8String;
+// Rus: устанавливаем путь (глобально)
+// Eng:
 procedure file_SetPath(const Path: UTF8String);
 
 {$IFDEF USE_ZIP}
+// Rus: открыть архив.
+// Eng:
 function  file_OpenArchive(const FileName: UTF8String; const Password: UTF8String = ''): Boolean;
+// Rus: закрыть архив.
+// Eng:
 procedure file_CloseArchive;
 {$ENDIF}
 
@@ -662,7 +698,7 @@ begin
     Result := copy(Str, lenStr - (lenStr - pos) + 1, (lenStr - pos));
 end;
 
-// èìÿ
+// ���
 function file_GetName(const FileName: UTF8String): UTF8String;
   var
     tmp: UTF8String;
@@ -693,7 +729,6 @@ end;
 
 function file_GetDirectory(const FileName: UTF8String): UTF8String;
 begin
-
   {$IfNDef USE_INIT_HANDLE}
   Result := GetStr(FileName, '/', TRUE);
   {$IFDEF WINDOWS}

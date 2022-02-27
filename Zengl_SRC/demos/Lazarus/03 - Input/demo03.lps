@@ -4,26 +4,16 @@
     <PathDelim Value="\"/>
     <Version Value="12"/>
     <BuildModes Active="Release"/>
-    <Units Count="2">
+    <Units Count="1">
       <Unit0>
         <Filename Value="demo03.lpr"/>
         <IsPartOfProject Value="True"/>
         <IsVisibleTab Value="True"/>
-        <TopLine Value="5"/>
-        <CursorPos X="8" Y="30"/>
-        <UsageCount Value="176"/>
+        <TopLine Value="9"/>
+        <CursorPos X="31" Y="15"/>
+        <UsageCount Value="210"/>
         <Loaded Value="True"/>
       </Unit0>
-      <Unit1>
-        <Filename Value="..\..\..\extra\zglglutm.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="zglGLUTM"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="745"/>
-        <CursorPos X="19" Y="739"/>
-        <UsageCount Value="42"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit1>
     </Units>
     <RunParams>
       <FormatVersion Value="2"/>

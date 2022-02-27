@@ -21,71 +21,72 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 16.07.2021
+ !!! modification from Serge 21.09.2021
 }
 unit zgl_mouse;
 
 {$I zgl_config.cfg}
 
 interface
+
+uses
 {$IFDEF USE_X11}
-  uses X, XLib;
+  X, XLib,
 {$ENDIF}
 {$IFDEF WINDOWS}
-  uses Windows;
+  Windows,
 {$ENDIF}
 {$IFDEF MACOSX}
-  uses MacOSAll;
+  MacOSAll,
 {$ENDIF}
-
-const
-  M_BLEFT_DOWN        =  1;
-  M_BMIDDLE_DOWN      =  2;
-  M_BRIGHT_DOWN       =  4;
-  M_BLEFT_UP          =  8;
-  M_BMIDDLE_UP        = 16;
-  M_BRIGHT_UP         = 32;
-
-  M_BLEFT_CLICK       =  1;
-  M_BMIDDLE_CLICK     =  2;
-  M_BRIGHT_CLICK      =  4;
-  M_BLEFT_CANCLICK    =  8;
-  M_BMIDDLE_CANCLICK  = 16;
-  M_BRIGHT_CANCLICK   = 32;
-
-  M_BLEFT_DBLCLICK    =  1;
-  M_BMIDDLE_DBLCLICK  =  2;
-  M_BRIGHT_DBLCLICK   =  4;
-  M_WHEEL_UP          =  8;
-  M_WHEEL_DOWN        = 16;
-
-  M_BLEFT   = 0;
-  M_BMIDDLE = 1;
-  M_BRIGHT  = 2;
+  sysutils,
+  zgl_types;
 
 {$IfDef LIBRARY_COMPILE}
-// возвращаем координату "X"
-function mouse_X : Integer; {$IfDef FPC}inline;{$EndIf}
-// возвращаем координату "Y"
-function mouse_Y : Integer; {$IfDef FPC}inline;{$EndIf}
-// возвращаем "DX"
-function mouse_DX : Integer; {$IfDef FPC}inline;{$EndIf}
-// возвращаем "DY"
-function mouse_DY : Integer; {$IfDef FPC}inline;{$EndIf}
-{$EndIf}
+// Ru: возвращаем координату "X".
+// En: return the "X" coordinate.
+function mouse_X : Integer; {$IfDef USE_INLINE}inline;{$EndIf}
+// Ru: возвращаем координату "Y".
+// En: return the "Y" coordinate.
+function mouse_Y : Integer; {$IfDef USE_INLINE}inline;{$EndIf}
+// Ru: возвращаем координаты "X", "Y".
+// En: return coordinates "X", "Y".
+function mouse_XY : zglTPoint2D; {$IfDef USE_INLINE}inline;{$EndIf}
+// Ru: возвращаем "DX" (дельта X).
+// En: return "DX" (delta X).
+function mouse_DX : Integer; {$IfDef USE_INLINE}inline;{$EndIf}
+// Ru: возвращаем "DY" (дельта Y).
+// En: return "DY" (delta Y).
+function mouse_DY : Integer; {$IfDef USE_INLINE}inline;{$EndIf}
 
-// обработка клавишь мыши на нажатие/отжатие.
-// состояния: action = M_BLEFT_DOWN или M_BMIDDLE_DOWN или M_BRIGHT_DOWN или M_BLEFT_UP или M_BMIDDLE_UP или M_BRIGHT_UP
-function mBUpDown(action: Byte): Boolean; {$IfDef FPC}inline;{$EndIf}
-// обработка клавишь мыши на клик/отклик.
-// состояния: action = M_BLEFT_CLICK или M_BMIDDLE_CLICK или M_BRIGHT_CLICK или M_BLEFT_CANCLICK или M_BMIDDLE_CANCLICK или M_BRIGHT_CANCLICK
-function mBClickCanClick(action: Byte): Boolean; {$IfDef FPC}inline;{$EndIf}
-// обработка двойного нажатия клавишь мыши и работа ролика.
-// состояния: action = M_BLEFT_DBLCLICK или M_BMIDDLE_DBLCLICK или M_BRIGHT_DBLCLICK или M_WHEEL_UP или M_WHEEL_DOWN
-function mBDblClickWheel(action: Byte): Boolean; {$IfDef FPC}inline;{$EndIf}
-// очистка состояний мыши
-procedure mouse_ClearState; {$IfDef FPC}inline;{$EndIf}
-// блокирование координат мыши
+//    Ru: состояния: Button = M_BLEFT или M_BMIDDLE или M_BRIGHT.
+//    En: states: Button = M_BLEFT or M_BMIDDLE or M_BRIGHT.
+
+// Ru: обработка клавиш мыши на нажатие.
+// En: processing of mouse keys on pressing.
+function mouseBDown(Button: Byte): Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
+// Ru: обработка клавиш мыши на отжатие. (по сути бесполезная функция, если не нажата клавиша, то по умолчанию отпущена).
+// En: processing of mouse keys for releasing.
+function mouseBUp(Button: Byte): Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
+// Ru: обработка клавиш мыши на клик.
+// En: handling mouse keys per click.
+function mouseBClick(Button: Byte): Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
+// Ru: обработка клавиш мыши на двойной клик.
+// En: processing of mouse keys on a double click.
+function mouseBDblClick(Button: Byte): Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
+// Ru: обработка клавишь мыши на отклик.
+// En: processing of mouse keys on the response.
+function mouseBCanClick(Button: Byte): Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
+// Ru: обработка работы ролика мыши.
+// En: processing of the operation of the mouse roller.
+function mouseWheelUp: Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
+function mouseWheelDown: Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
+{$EndIf}
+// Ru: очистка состояний мыши. Вызывать не нужно, производится автоматически.
+// En: clearing mouse states. You do not need to call, it is done automatically.
+procedure mouse_ClearState; {$IfDef USE_INLINE}inline;{$EndIf}
+// Ru: блокирование координат мыши.
+// En: locking mouse coordinates.
 procedure mouse_Lock(X: Integer = -1; Y: Integer = -1);
 
 var
@@ -94,20 +95,27 @@ var
   mouseDX      : Integer;
   mouseDY      : Integer;
 
-  mouseUpDown, mouseClickCanClick, mouseDblClickWheel: Byte;
+//  mouseUpDown, mouseClickCanClick, mouseDblClickWheel: Byte;
+  // три кнопки, с событиями, и у каждой кнопки споя задержка времени
+  mouseAction: array[0..2] of km_Button;
 
-  mouseDblCTime: array[0..2] of Double;
+//  mouseDblCTime: array[0..2] of Double;
   mouseDblCInt : Integer = 250;
   mouseLock    : Boolean;
   {$IfDef MAC_COCOA}
   gMouseX, gMouseY: Integer;
   {$EndIf}
   {$IfDef USE_VKEYBOARD}
+  // события отвечающее за клавиатуру, если их нет, то виртуальная клавиатура будет "залипать"
+  // это же нужно и для тачпада
   mouseLastVKey: array[0..3] of Byte;
   {$EndIf}
 
 implementation
 uses
+  {$IfDef FULL_LOGGING}
+  zgl_log,
+  {$EndIf}
   zgl_window,
   zgl_screen;
 
@@ -122,6 +130,12 @@ begin
   Result := mouseY;
 end;
 
+function mouse_XY: zglTPoint2D;
+begin
+  Result.X := mouseX;
+  Result.Y := mouseY;
+end;
+
 function mouse_DX : Integer;
 begin
   Result := mouseDX;
@@ -131,28 +145,109 @@ function mouse_DY : Integer;
 begin
   Result := mouseDY;
 end;
+
+function mouseBDown(Button: Byte): Boolean;
+begin
+  {$IfDef FULL_LOGGING}
+  if Button > 2 then
+  begin
+    log_Add('Error! Out of range in mouseBDown!');
+    Result := False;
+    Exit;
+  end;
+  {$EndIf}
+  if (mouseAction[Button].state and is_Press) > 0 then
+    Result := true
+  else
+    Result := False;
+end;
+
+function mouseBUp(Button: Byte): Boolean;
+begin
+  {$IfDef FULL_LOGGING}
+  if Button > 2 then
+  begin
+    log_Add('Error! Out of range in mouseBUp!');
+    Result := False;
+    Exit;
+  end;
+  {$EndIf}
+  if (mouseAction[Button].state and is_canPress) > 0 then
+    Result := true
+  else
+    Result := False;
+end;
+
+function mouseBClick(Button: Byte): Boolean;
+begin
+  {$IfDef FULL_LOGGING}
+  if Button > 2 then
+  begin
+    log_Add('Error! Out of range in mouseBClick!');
+    Result := False;
+    Exit;
+  end;
+  {$EndIf}
+  if (mouseAction[Button].state and is_down) > 0 then
+    Result := true
+  else
+    Result := False;
+end;
+
+function mouseBDblClick(Button: Byte): Boolean;
+begin
+  {$IfDef FULL_LOGGING}
+  if Button > 2 then
+  begin
+    log_Add('Error! Out of range in mouseBClick!');
+    Result := False;
+    Exit;
+  end;
+  {$EndIf}
+  if (mouseAction[Button].state and is_DoubleDown) > 0 then
+    Result := true
+  else
+    Result := False;
+end;
+
+function mouseBCanClick(Button: Byte): Boolean;
+begin
+  {$IfDef FULL_LOGGING}
+  if Button > 2 then
+  begin
+    log_Add('Error! Out of range in mouseBCanClick!');
+    Result := False;
+    Exit;
+  end;
+  {$EndIf}
+  if (mouseAction[Button].state and is_up) > 0 then
+    Result := true
+  else
+    Result := False;
+end;
+
+function mouseWheelUp: Boolean;
+begin
+  if (mouseAction[M_BMIDDLE].state and is_mWheelUp) > 0 then
+    Result := true
+  else
+    Result := False;
+end;
+
+function mouseWheelDown: Boolean;
+begin
+  if (mouseAction[M_BMIDDLE].state and is_mWheelDown) > 0 then
+    Result := true
+  else
+    Result := False;
+end;
 {$EndIf}
-
-function mBUpDown(action: Byte): Boolean;
-begin
-    Result := (action and mouseUpDown) > 0;
-end;
-
-function mBClickCanClick(action: Byte): Boolean;
-begin
-    Result := (action and mouseClickCanClick) > 0;
-end;
-
-function mBDblClickWheel(action: Byte): Boolean;
-begin
-    Result := (action and mouseDblClickWheel) > 0;
-end;
 
 procedure mouse_ClearState;
 begin
-  mouseClickCanClick := 0;
-  mouseDblClickWheel := 0;
-  mouseUpDown := mouseUpDown and (255 - M_BLEFT_UP - M_BRIGHT_UP - M_BMIDDLE_UP);
+  mouseAction[M_BLEFT].state := mouseAction[M_BLEFT].state and (is_canPress or is_Press);
+  mouseAction[M_BMIDDLE].state := mouseAction[M_BMIDDLE].state and (is_canPress or is_Press);
+  mouseAction[M_BRIGHT].state := mouseAction[M_BRIGHT].state and (is_canPress or is_Press);
 end;
 
 procedure mouse_Lock(X: Integer = -1; Y: Integer = -1);

@@ -28,7 +28,6 @@ unit gegl_draw_gui;
 interface
 
 uses
-  zgl_font,
   zgl_textures_png,
   zgl_utils,
   zgl_textures;
@@ -58,9 +57,16 @@ procedure DrawTouchSymbol;
 implementation
 
 uses
-  zgl_text, gegl_menu_gui, zgl_types, zgl_sprite_2d, zgl_keyboard, zgl_fx,
+  zgl_text,
+  zgl_font,
+  gegl_menu_gui,
+  zgl_types,
+  zgl_sprite_2d,
+  zgl_keyboard,
+  zgl_fx,
   {$IFNDEF USE_GLES}
-  zgl_opengl_all
+  zgl_opengl_all,
+  zgl_gltypeconst
   {$ELSE}
   zgl_opengles_all
   {$ENDIF}
@@ -136,9 +142,10 @@ end;
 
 procedure DrawGameJoy01;
 var
-  r: zglTRect;
+  r: zglTRect2D;
   i: Integer;
 begin
+//  setTextScale(22, fontUse);
   setTextColor(MenuColorText);
   glColor4f(CircleRed[0], CircleGreen[0], CircleBlue[0], CircleAlpha[0]);
   DrawCircle(TouchJoyRolling.Rolling.X, TouchJoyRolling.Rolling.Y, TouchJoyRolling.Rolling.R);
@@ -176,8 +183,9 @@ end;
 procedure DrawGameJoy02;
 var
   i: Integer;
-  r: zglTRect;
+  r: zglTRect2D;
 begin
+//  setTextScale(22, fontUse);
   setTextColor(MenuColorText);
   for i := 1 to 9 do
   begin
@@ -212,8 +220,11 @@ procedure DrawTouchKeyboard;
 var
   n: Byte;
   i: Integer;
-  r: zglTRect;
+  r: zglTRect2D;
 begin
+//  setTextScale(TouchKey.textScale, fontUse);
+//  Off_TextScale := True;
+//  useScaleEx := TouchKey.textScale * managerFont.Font[fontUse].ScaleNorm;
   setTextColor(MenuColorText);
   if (keybFlags and keyboardLatinRus) > 0 then
     if ((keybFlags and keyboardCaps) > 0) or ((keybFlags and keyboardShift) > 0) then
@@ -266,14 +277,18 @@ begin
     DrawButton(TouchKey.StringButton[i].X, TouchKey.StringButton[i].Y, TouchKey.StringButton[i].Width, TouchKey.Height, 0);
     text_DrawInRect(fontUse, r, TouchKey.StringButton[i].bString, TEXT_HALIGN_CENTER or TEXT_VALIGN_CENTER);
   end;
+//  Off_TextScale := False;
 end;
 
 procedure DrawTouchSymbol;
 var
   n: Byte;
   i: Integer;
-  r: zglTRect;
+  r: zglTRect2D;
 begin
+//  setTextScale(TouchKeySymb.textScale, fontUse);
+//  Off_TextScale := True;
+//  useScaleEx := TouchKey.textScale * managerFont.Font[fontUse].ScaleNorm;
   setTextColor(MenuColorText);
   if (keybFlags and keyboardShift) > 0 then
     n := 2
@@ -345,6 +360,7 @@ begin
             TouchKeySymb.BArrow[i].Angle, TouchKeySymb.TextureUp, 192, FX_COLOR or FX_BLEND);
     end;
   end;
+//  Off_TextScale := False;
 end;
 
 end.

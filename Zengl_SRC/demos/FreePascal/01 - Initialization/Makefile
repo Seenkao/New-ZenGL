@@ -14,8 +14,8 @@ else ifeq ($(shell uname), Darwin)
 endif
 
 # Variables
-FPC     = fpc
-FLAGS   = -O3 -XsX -CX -Sd
+FPC     = /home/seenkao/FreePas/fpc/bin/x86_64-linux/fpc.sh
+FLAGS   = -O3 -XsX -CX -Sd -al
 INCLUDE = -Fu../../../headers -Fi../../../headers -Fi../../../srcGEGL -Fi../../../src  -Fu../../../srcGEGL -Fu../../../extra -Fu../../../src
 LIBS    = -Fu../../../lib/jpeg/$(ARCH)-$(OS) -Fu../../../lib/ogg/$(ARCH)-$(OS) -Fu../../../lib/theora/$(ARCH)-$(OS) -Fu../../../lib/zlib/$(ARCH)-$(OS) -Fu../../../lib/zip/$(ARCH)-$(OS)
 LIBSPPC = -Fu../../../lib/jpeg/powerpc-$(OS) -Fu../../../lib/ogg/powerpc-$(OS) -Fu../../../lib/theora/powerpc-$(OS) -Fu../../../lib/zlib/powerpc-$(OS) -Fu../../../lib/zip/powerpc-$(OS)

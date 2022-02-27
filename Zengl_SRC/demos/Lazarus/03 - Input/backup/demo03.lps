@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectSession>
+    <PathDelim Value="\"/>
+    <Version Value="12"/>
+    <BuildModes Active="Release"/>
+    <Units Count="1">
+      <Unit0>
+        <Filename Value="demo03.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <TopLine Value="7"/>
+        <CursorPos X="16" Y="14"/>
+        <UsageCount Value="210"/>
+        <Loaded Value="True"/>
+      </Unit0>
+    </Units>
+    <RunParams>
+      <FormatVersion Value="2"/>
+      <Modes ActiveMode="default"/>
+    </RunParams>
+  </ProjectSession>
+</CONFIG>

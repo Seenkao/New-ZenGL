@@ -23,15 +23,22 @@
 }
 unit gegl_drawElement;
 
+{$I zgl_config.cfg}
 interface
 
 uses
   zgl_font,
   zgl_types,
+  {$IfDef USE_GLES}
+  zgl_opengles_all,
+  {$Else}
   zgl_opengl_all,
+  {$EndIf}
+  zgl_gltypeconst,
   zgl_window,
   gegl_Types,
   gegl_VElements,
+  gegl_color,
   zgl_fx,
   zgl_primitives_2d,
   zgl_render_2d;
@@ -49,25 +56,43 @@ var
 begin
   UseText := managerSetOfTools.SetOfTools[num];
 
+(* В данном случае надо обратить внимание, что все трансформации должны быть произведены "по умолчанию" -
+   ротация, шкала, трансляция.
+   Получается, для поля ввода, должнен быть определён фонт, который не должен меняться, но пользователь
+   может сам выбирать этот фонт, либо просто переименовывать свой фонт, в нужное название.
+
+   На данное время, работа с разными фонтами, даже менеджера не будет реализовано. Возможно в дальнейшем
+   будет реализовано.  *)
+
   glPushMatrix;
-  glTranslatef(UseText^.mainRPoint.X, UseText^.mainRPoint.Y, 0);
+  // устанавливаем центр вращения
+  glTranslatef(UseText^.RotatePoint.X, UseText^.RotatePoint.Y, 0);
+  // поворачиваем
   glRotatef(UseText^.Rotate, 0, 0, 1);
-  glTranslatef(UseText^.Rect.X - UseText^.mainRPoint.x, UseText^.Rect.Y - UseText^.mainRPoint.Y, 0);
+  // и возвращаем на начальное значение рисования, только уже повернули
+  glTranslatef(UseText^.Rect.X - UseText^.RotatePoint.x, UseText^.Rect.Y - UseText^.RotatePoint.Y, 0);
 
-  if Assigned(UseText^.procEdit) then
-    UseText^.procEdit;
+  // функция вывода окантовки, если её задали
+  if Assigned(UseText^.procDraw) then
+    UseText^.procDraw;
 
+  // трансляция для вывода текста
   glTranslatef(- UseText^.translateX, 0, 0);
+  //--------------------------------------------------------------
   if UseText^.EditString.UseLen > 0 then
+  begin
+    Set_numColor(UseText^.ColorText);
     DrawTextEdit(UseText);
+  end;
 
+  // рисуем курсор, только если этот элемент активирован
   if managerSetOfTools.ActiveElement = num then
     if UseText^.Cursor.NSleep > 0 then
     begin
-      if UseText^.Cursor.Flags then                 
-      begin                                        
+      if UseText^.Cursor.Flags then                  // проверяем что прорисовывать (флаг мигания)
+      begin                                         // и для знака подчёркивания
         pr2d_Rect(UseText^.Cursor.curRect.X, UseText^.Cursor.curRect.Y, UseText^.Cursor.curRect.W,
-                                             UseText^.Cursor.curRect.H, $FFFFFF, 160, PR2D_FILL);
+                                             UseText^.Cursor.curRect.H, {$IfDef OLD_METHODS}$FFFFFF, 160{$Else}UseText^.ColorCursor{$EndIf}, PR2D_FILL);
       end;
       dec(UseText^.Cursor.NSleep);
     end
@@ -75,11 +100,16 @@ begin
       UseText^.Cursor.NSleep := 15;
       UseText^.Cursor.Flags := not (UseText^.Cursor.Flags);
     end;
+  //--------------------------------------------------------------
   glPopMatrix;
 
   UseText := nil;
 end;
 
+// в данном варианте так, но надо всё будет переделать  - размер шрифта идёт по умолчанию
+
+// задача: производить вывод только тех символов, которые попадают в поле ввода
+//  подзадача: произвести текстурную выборку для символов, которые должны "резаться" - которые попадают на стык поля ввода
 procedure DrawTextEdit(Edit: geglPEdit);
 var
   i: LongWord;
@@ -87,19 +117,44 @@ var
   lastPage: Integer;
   XLoop, YLoop: Single;
 
-  xx1, xx2, yy1, yy2: Single;
+  xx1, xx2, yy1, yy2{, mode}: Single;
   xTex1, yTex1, xTex2, yTex2: Single;
   useFont: zglPFont;
 label
   StartLoop, EndLoop, NextLoop;
 begin
-  glColor4fv(@Edit^.ColorText);
+  // color???         // это должно происходить от менеджера!!! Но пока это только поле ввода, оставлю
+//  glColor4fv(@Edit^.ColorText);
+  if managerSetOfTools.count = 0 then
+    exit;
 
   useFont := managerFont.Font[Edit^.font];
   i := 0;
   lastPage := -1;
   XLoop := 0;
   YLoop :=  - useFont^.MaxShiftY * useFont^.Scale;
+
+{  mode := GL_QUADS;              // надо определиться, нужен этот код или нет
+
+  charDesc := managerFont.Font[fnt].CharDesc[Edit^.EditString.LineString[i]^.CharSymb];
+  if not b2dStarted Then
+  begin
+    if Assigned(charDesc) Then
+    begin
+      lastPage := charDesc^.Page;
+      batch2d_Check(mode, FX_BLEND, managerFont.Font[fnt].Pages[lastPage]);
+
+      glEnable(GL_BLEND);
+      glEnable(GL_TEXTURE_2D);
+      glBindTexture(GL_TEXTURE_2D, managerFont.Font[fnt].Pages[lastPage]^.ID);
+      glBegin(mode);
+    end else
+    begin
+      glEnable(GL_BLEND);
+      glEnable(GL_TEXTURE_2D);
+      glBegin(mode);
+    end;
+  end;                 }
 
 StartLoop:
   if Edit^.EditString.CharSymb[i] = 0 then
@@ -118,22 +173,25 @@ StartLoop:
   xTex2 := charDesc^.TexCoords[1].X;
 
   if xx1 > Edit^.translateX + Edit^.Rect.W then
-    goto EndLoop;
+    goto EndLoop;                    // выходим, если координата за пределами
   if xx2 < Edit^.translateX then
-    goto NextLoop;
+    goto NextLoop;                   // переходим на следующий символ, если ещё не в пределах поля ввода
 
+  // вариант когда начали писать, но текст ещё пока находится
   if xx1 < Edit^.translateX then
-  begin
-    xTex1 := xTex2 - (xx2 - Edit^.translateX) * (xTex2 - xTex1) / (xx2 - xx1);
+  begin                            // за пределами поля ввода
+    xTex1 := xTex2 - (xx2 - Edit^.translateX) * (xTex2 - xTex1) / (xx2 - xx1);                 // или делать пересчёт координат текстуры...
     xx1 := Edit^.translateX;
   end;
 
+  // и вариант, когда уже за пределами поля ввода
   if xx2 > Edit^.translateX + Edit^.Rect.W then
   begin
-    xTex2 := xTex2 - (xx2 - Edit^.translateX - Edit^.Rect.W) * (xTex2 - xTex1) / (xx2 - xx1);
+    xTex2 := xTex2 - (xx2 - Edit^.translateX - Edit^.Rect.W) * (xTex2 - xTex1) / (xx2 - xx1);   // формула не меняется, меняется текстурная координата
     xx2 := Edit^.translateX + Edit^.Rect.W;
   end;
 
+  // ниже код, для смены текстуры, если она разбита на части (смена страницы текстуры)
   if lastPage <> charDesc^.Page Then
   begin
     lastPage := charDesc^.Page;

@@ -20,6 +20,8 @@
  *
  *  3. This notice may not be removed or altered from any
  *     source distribution.
+
+ !!! modification from Serge - SSW 24.01.2022
 }
 unit zgl_opengles;
 
@@ -120,6 +122,7 @@ uses
   zgl_application,
   zgl_screen,
   zgl_window,
+  zgl_gl_const_all,
   zgl_log,
   zgl_utils;
 
@@ -290,7 +293,7 @@ function gl_Initialize: Boolean;
     err: LongWord;
 begin
 {$IFNDEF NO_EGL}
-  oglSurface := eglCreateWindowSurface(oglDisplay, oglConfig, @wndHandle, nil);
+  oglSurface := eglCreateWindowSurface(oglDisplay, oglConfig, {@}wndHandle, nil);
   err := eglGetError();
   if err <> EGL_SUCCESS Then
     begin

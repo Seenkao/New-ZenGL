@@ -112,7 +112,7 @@ type
   zglTFontResource = record
     FileName: UTF8String;
     Memory  : zglTMemory;
-    Font    : Byte;
+    Font    : LongWord;
     pData   : array of PByteArray;
     Format  : array of Word;
     Width   : array of Word;

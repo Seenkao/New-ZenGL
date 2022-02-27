@@ -27,14 +27,32 @@ unit zgl_render;
 
 interface
 
+uses
+  zgl_gltypeconst;
+
+// Rus: установки 2D режима.
+// Eng:
 procedure Set2DMode;
+// Rus: установки 3D режима.
+// Eng:
 procedure Set3DMode(FOVY: Single = 45);
+// Rus: выбор режима 2D или 3D. Не предоставлено, только 2D.
+// Eng:
 procedure SetCurrentMode;
 
+// Rus: установка глубины для 3D. то что будет за нулевой точкой (в минусе)
+//      видно не будет. Читаем документацию OpenGL.
+// Eng:
 procedure zbuffer_SetDepth(zNear, zFar: Single);
+// Rus: очистка буфера глубины, но его можно очистить и при обычной очистке.
+// Eng:
 procedure zbuffer_Clear;
 
+// Rus: начало вырезки. Вставить в том месте, где хотим вырезать.
+// Eng:
 procedure scissor_Begin(X, Y, Width, Height: Integer; ConsiderCamera: Boolean = TRUE);
+// Rus: конец вырезки.
+// Eng:
 procedure scissor_End;
 
 implementation
@@ -55,30 +73,103 @@ uses
 var
   tSCount : Integer;
   tScissor: array of array[0..3] of Integer;
+  rs1: Single = 1;
+  {$IfNDef USE_GLES}
+  rsd0: Double = 0;
+  rsd2: Double = 2;
+  {$Else}
+  rsd0: Single = 0;
+  rsd2: Single = 2;
+  {$IF DEFINED(USE_GLES_ON_DESKTOP) and DEFINED(USE_AMD_DRIVERS)}
+  rs0: Double = 0;
+  rs2: Double = 2;
+  {$Else}
+  rs0: Single = 0;
+  rs2: Single = 2;
+  {$EndIf}
+  {$EndIf}
 
 procedure Set2DMode;
+var
+{$IfNDef USE_GLES}
+  scrLeft, scrRight, scrTop, scrBottom: Double;
+{$Else}
+{$IF DEFINED(USE_GLES_ON_DESKTOP) and DEFINED(USE_AMD_DRIVERS)}
+  scrLeft, scrRight, scrTop, scrBottom: Double;
+{$Else}
+  scrLeft, scrRight, scrTop, scrBottom: Single;
+{$EndIf}
+{$EndIf}
 begin
   oglMode := 2;
   batch2d_Flush();
-  if cam2d.Apply Then glPopMatrix();
+  if cam2d.Apply Then
+    glPopMatrix();
   cam2d := @cam2dTarget[oglTarget];
 
   glDisable(GL_DEPTH_TEST);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  if oglTarget = TARGET_SCREEN Then
+
+  // нулевые координаты в центре окна
+  if appFlags and XY_IN_CENTER_WINDOW > 0 then
   begin
-    if appFlags and CORRECT_RESOLUTION > 0 Then
-      {$IfDef USE_GLES} glOrthof{$Else}glOrtho{$EndIf}(0, Round(oglWidth - scrAddCX * 2 / scrResCX), Round(oglHeight - scrAddCY * 2 / scrResCY), 0, -1, 1)
-    else
-      {$IfDef USE_GLES} glOrthof{$Else}glOrtho{$EndIf}(0, wndWidth, wndHeight, 0, -1, 1);
+    if oglTarget = TARGET_SCREEN Then
+    begin
+      if appFlags and CORRECT_RESOLUTION > 0 Then
+      begin
+        scrRight := (oglWidth - scrAddCX * rsd2 / scrResCX) / rsd2;
+        scrLeft := - scrRight;
+        scrBottom := (oglHeight - scrAddCY * rsd2 / scrResCY) / rsd2;
+        scrTop := - scrBottom;
+      end
+      else begin
+        scrRight := wndWidth / rsd2;
+        scrLeft := - scrRight;
+        scrBottom := wndHeight / rsd2;
+        scrTop := - scrBottom;
+      end;
+    end
+    else begin
+      // вывод в текстуру (в часть окна)
+      scrRight := oglWidth / rsd2;
+      scrLeft := - scrRight;
+      scrBottom := oglHeight / rsd2;
+      scrTop := - scrBottom;
+    end;
+  // нулевые координаты от левого верхнего угла
   end else
-    {$IfDef USE_GLES} glOrthof{$Else}glOrtho{$EndIf}(0, oglWidth, oglHeight, 0, -1, 1);
+    if oglTarget = TARGET_SCREEN Then
+    begin
+      if appFlags and CORRECT_RESOLUTION > 0 Then
+      begin
+        scrLeft := rsd0;
+        scrRight := (oglWidth - scrAddCX * rsd2 / scrResCX);
+        scrTop := rsd0;
+        scrBottom := (oglHeight - scrAddCY * rsd2 / scrResCY);
+      end
+      else begin
+        scrLeft := rsd0;
+        scrRight := wndWidth;
+        scrTop := rsd0;
+        scrBottom := wndHeight;
+      end;
+    end
+    else begin
+   //    вывод в текстуру (в часть окна)
+      scrLeft := rsd0;
+      scrRight := oglWidth;
+      scrTop := rsd0;
+      scrBottom := oglHeight;
+    end;
+  {$IfDef USE_GLES} glOrthof{$Else}glOrtho{$EndIf}(scrLeft, scrRight, scrBottom, scrTop, scrNear, scrFar);
+
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   scr_SetViewPort();
 
-  if cam2d.Apply Then cam2d_Set(cam2d.Global);
+  if cam2d.Apply Then
+    cam2d_Set(cam2d.Global);
 end;
 
 procedure Set3DMode(FOVY: Single = 45);
@@ -86,18 +177,23 @@ begin
   oglMode := 3;
   oglFOVY := FOVY;
   batch2d_Flush();
-  if cam2d.Apply Then glPopMatrix();
+  if cam2d.Apply Then
+    glPopMatrix();
   cam2d := @cam2dTarget[oglTarget];
 
-  glColor4f(1, 1, 1, 1);
+  glColor4f(rs1, rs1, rs1, rs1);
 
   glEnable(GL_DEPTH_TEST);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  gluPerspective(oglFOVY, oglWidth / oglHeight, oglzNear, oglzFar);
+//  gluPerspective(oglFOVY, oglWidth / oglHeight, oglzNear, oglzFar);
+  {$IfDef USE_GLES}glFrustumf{$Else}glFrustum{$EndIf}(- oglWidth / 2, oglWidth / 2, oglHeight / 2, - oglHeight / 2, oglzFar, oglzNear);
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   scr_SetViewPort();
+
+  if cam2d.Apply Then
+    cam2d_Set(cam2d.Global);
 end;
 
 procedure SetCurrentMode;

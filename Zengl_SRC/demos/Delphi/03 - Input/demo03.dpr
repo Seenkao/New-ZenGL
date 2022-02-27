@@ -22,6 +22,7 @@ uses
   {$Else}
   gegl_VElements,
   {$EndIf}
+  gegl_color,
   zgl_utils
   ;
 
@@ -62,7 +63,7 @@ begin
   // Текст будет выведен поверх того, что вы тут нарисуете.
   // EN: displacement and rotation will be done prior to performing the procedure. I am showing you how to draw a frame.
   // The text will be drawn on top of what you draw here.
-  pr2d_Rect(- 2, - 1, myRect.W + 5, myRect.H, $FFFFFF, 128, PR2D_FILL);
+  pr2d_Rect(- 2, - 1, myRect.W + 5, myRect.H, cl_white, PR2D_FILL);
 end;
 {$EndIf}
 
@@ -72,6 +73,7 @@ var
   TextColor: zglTColor;
 {$EndIf}
 begin
+  SetAndAddDefaultColor;
   fntMain := font_LoadFromFile(dirRes + 'font.zfi');
   {$IfNDef OLD_METHODS}
   // RU: Загружаем данные о шрифте.

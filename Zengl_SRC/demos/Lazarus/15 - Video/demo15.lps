@@ -9,8 +9,8 @@
         <Filename Value="demo15.lpr"/>
         <IsPartOfProject Value="True"/>
         <IsVisibleTab Value="True"/>
-        <TopLine Value="25"/>
-        <CursorPos X="40" Y="36"/>
+        <TopLine Value="45"/>
+        <CursorPos X="129" Y="70"/>
         <UsageCount Value="29"/>
         <Loaded Value="True"/>
       </Unit0>
@@ -20,15 +20,4 @@
       <Modes ActiveMode="default"/>
     </RunParams>
   </ProjectSession>
-  <Debugging>
-    <BreakPoints>
-      <Item>
-        <Kind Value="bpkSource"/>
-        <WatchScope Value="wpsLocal"/>
-        <WatchKind Value="wpkWrite"/>
-        <Source Value="demo15.lpr"/>
-        <Line Value="63"/>
-      </Item>
-    </BreakPoints>
-  </Debugging>
 </CONFIG>

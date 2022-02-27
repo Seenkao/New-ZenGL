@@ -2,22 +2,23 @@
 <CONFIG>
   <ProjectSession>
     <PathDelim Value="\"/>
-    <Version Value="12"/>
+    <Version Value="11"/>
     <BuildModes Active="Release"/>
     <Units Count="1">
       <Unit0>
         <Filename Value="demo07.lpr"/>
         <IsPartOfProject Value="True"/>
         <IsVisibleTab Value="True"/>
-        <TopLine Value="44"/>
+        <TopLine Value="185"/>
         <CursorPos X="23" Y="44"/>
         <UsageCount Value="20"/>
         <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit0>
     </Units>
     <RunParams>
       <FormatVersion Value="2"/>
-      <Modes ActiveMode="default"/>
+      <Modes Count="0" ActiveMode="default"/>
     </RunParams>
   </ProjectSession>
 </CONFIG>

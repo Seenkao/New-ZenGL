@@ -21,7 +21,7 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 16.07.2021
+ !!! modification from Serge 26.02.2022
 }
 unit zgl_screen;
 
@@ -31,14 +31,15 @@ unit zgl_screen;
 {$IfEnd}
 
 interface
-{$IfNDef ANDROID}
+
 uses
-{$EndIf}
 {$IFDEF USE_X11}
   X, XLib, XRandr, UnixType,
+  zgl_glx_wgl,
 {$ENDIF}
 {$IFDEF WINDOWS}
   Windows,
+  zgl_glx_wgl,
 {$ENDIF}
 {$IFDEF MACOSX}{$IfDef MAC_COCOA}
   CocoaAll,
@@ -48,6 +49,7 @@ uses
 {$IFDEF iOS}
   iPhoneAll, CFBase, CFString,
 {$ENDIF}
+  zgl_gltypeconst,
   zgl_types;
 
 const
@@ -55,35 +57,80 @@ const
   REFRESH_DEFAULT = 1;
 
 {$IfNDef ANDROID}
+// Rus: инициализация окна.
+// Eng: window initialization.
 procedure scr_Init;
 {$IfNDef MAC_COCOA}
+// Rus: сбросить настройки окна в исходное состояние.
+// Eng: reset the window settings to their original state.
 procedure scr_Reset;
 {$EndIf}
+// Rus: создание окна.
+// Eng: window creation.
 function  scr_Create: Boolean;
+// Rus: уничтожение окна.
+// Eng: window destruction.
 procedure scr_Destroy;
 {$EndIf}
 
+// Rus: очистка окна.
+// Eng: window cleaning.
 procedure scr_Clear;
+// Rus:
+// Eng:
 procedure scr_Flush;
 
 {$IfNDef USE_INIT_HANDLE}
+// Rus: установка заданных значений окна. Значения заданы посредством
+//      zgl_SetParam или по умолчанию.
+// Eng: setting window preset values. Values are set via zgl_SetParam or by default.
 function  scr_SetOptions(): Boolean;
 {$EndIf}
+// Rus: корректировка окна вывода заданным значениям.
+// Eng: adjustment of the output window to the given values.
 procedure scr_CorrectResolution(Width, Height: Word);
+// Rus: установка порта вывода. На данное время только 2D.
+// Eng: setting the output port. Currently only 2D.
 procedure scr_SetViewPort;
+// Rus: включение/выключение вертикальной синхронизации.
+// Eng: enable/disable vertical sync.
 procedure scr_SetVSync(WSync: Boolean);
-procedure scr_SetClearColor(flag: Boolean; Color: Cardinal = 0);
+// Rus: включение/выключение очистки окна заданным цветом и установка цвета
+//      очистки. RGB, A = 255;
+// Eng: enable/disable window cleaning with a specified color and set the
+//      cleaning color. RGB, A=255;
+procedure scr_SetClearColor(flag: Boolean = true; Color: Cardinal = 0);
+// Rus: процедура вертикальной синхронизации. Вызывать не надо, происходит по
+//      умолчанию, если включена вертикальная синхронизация.
+// Eng: vertical synchronization procedure. Don't call, happens by default if
+//      vertical sync is enabled.
 procedure scr_VSync;
 {$IfNDef USE_INIT_HANDLE}
-procedure scr_SetFPS(FPS: Byte);
+// Rus: установка FPS. Требуется доработка на проверку частот монитора.
+// Eng: FPS setting. Improvement is required to check the frequencies of the monitor.
+procedure scr_SetFPS(FPS: LongWord);
 {$EndIf}
 
 //procedure scr_SetFSAA(FSAA: Byte);
 
+// Rus: Чтение определённой области окна в память.
+// Eng: Reading a specific region of a window into memory.
 procedure scr_ReadPixels(var pData: Pointer; X, Y, Width, Height: Word);
 {$IfNDef ANDROID}
+// на данное время ни где не используется, кроме инициализации. Нужен будет
+// выводимый список всех возможных разрешений экрана?
 //procedure scr_GetResList;
 {$EndIf}
+// Rus: установка глубины для 2D режима. Можно использовать и для 3D, учитывая,
+//      что Far не должно быть меньше нуля.
+// Eng: depth setting for 2D mode. Can be used for 3D as well, given that Far
+//      must not be less than zero.
+procedure Set2DNearFar(newNear, newFar: {$IfNDef USE_GLES}Double{$Else}{$IF DEFINED(USE_GLES_ON_DESKTOP) and DEFINED(USE_AMD_DRIVERS)}Double{$Else}Single{$EndIf}{$EndIf});
+// Rus: установка версии OpenGL, маски и флагов. Вызывать обязательно до
+//      создания окна (до zgl_Init)!!! Совместимые версии только до OpenGL 3.1,
+//      далее они не совместимы со старым контекстом.
+// Eng:
+procedure SetGLVersionAndFlags({$IfNDef MAC_COCOA}major, minor: Integer; flag: LongWord = COMPATIBILITY_VERSION{$Else}mode: LongWord{$EndIf});
 
 type
   zglPResolutionList = ^zglTResolutionList;
@@ -132,7 +179,8 @@ var
   scrSubCX: Integer = 0;
   scrSubCY: Integer = 0;
 
-  scrViewPort       : Boolean = True;
+
+  scrViewPort       : Boolean = True;  // этот флаг можно отключать, если мы не меняем поле прорисовки.
   scrClearColor     : Boolean = True;
   scr_UseClearColor : zglTColor;
 
@@ -176,6 +224,19 @@ var
   scrDesktopW: Integer;
   scrDesktopH: Integer;
   {$ENDIF}
+  {$IfNDef USE_GLES}
+  scrFar: Double = 1;
+  scrNear: Double = - 1;
+  {$Else}
+  {$IF DEFINED(USE_GLES_ON_DESKTOP) and DEFINED(USE_AMD_DRIVERS)}
+  scrFar: Double = 1;
+  scrNear: Double = - 1;
+  {$Else}
+  scrFar: Single = 1;
+  scrNear: Single = - 1;
+  {$EndIf}
+  {$EndIf}
+
 
 implementation
 uses
@@ -493,17 +554,19 @@ begin
       exit;
     end;
 
+  {$IfDef OLD_METHODS}
   appXIM := XOpenIM(scrDisplay, nil, nil, nil);
   if not Assigned(appXIM) Then
     log_Add('XOpenIM - Fail')
   else
-    log_Add('XOpenIM - ok');
+    log_Add('XOpenIM - ok'); }
 
   appXIC := XCreateIC(appXIM, [XNInputStyle, XIMPreeditNothing or XIMStatusNothing, 0]);
   if not Assigned(appXIC) Then
     log_Add('XCreateIC - Fail')
   else
     log_Add('XCreateIC - ok');
+  {$EndIf}
   {$ENDIF}
   {$IFDEF WINDOWS}
   if (not wndFullScreen) and (scrDesktop.dmBitsPerPel <> 32) Then
@@ -517,7 +580,7 @@ begin
 
   mainMenu := NSMenu.alloc.init.autorelease;
   NSApp.setMainMenu(mainMenu);
-  mainMenu.setMenuBarVisible(false);
+  mainMenu.setMenuBarVisible(false);        // menu not visible
 
   pool.dealloc;
 
@@ -542,9 +605,10 @@ begin
   {$EndIf}
   {$IFDEF USE_X11}
   XRRFreeScreenConfigInfo(scrSettings);
-
+  {$IfDef OLD_METHODS}
   XDestroyIC(appXIC);
   XCloseIM(appXIM);
+  {$EndIf}
   {$ENDIF}
 
   scrResList.Count := 0;
@@ -565,7 +629,6 @@ begin
     glClearColor(scr_UseClearColor.R, scr_UseClearColor.G, scr_UseClearColor.b, scr_UseClearColor.A);
   glClear(GL_COLOR_BUFFER_BIT * Byte(appFlags and COLOR_BUFFER_CLEAR > 0) or GL_DEPTH_BUFFER_BIT * Byte(appFlags and DEPTH_BUFFER_CLEAR > 0) or
            GL_STENCIL_BUFFER_BIT * Byte(appFlags and STENCIL_BUFFER_CLEAR > 0));
-
 end;
 
 procedure scr_Flush;
@@ -816,13 +879,13 @@ begin
       scrViewportX := scrAddCX;
       scrViewportY := scrAddCY;
       scrViewportW := wndWidth - scrAddCX * 2;
-      scrViewportH := wndHeight{$IfDef MAC_COCOA} + 0{$EndIf} - scrAddCY * 2;
+      scrViewportH := wndHeight - scrAddCY * 2;
     end else
     begin
       scrViewportX := 0;
       scrViewportY := 0;
       scrViewportW := wndWidth;
-      scrViewportH := wndHeight{$IfDef MAC_COCOA} + 0{$EndIf};
+      scrViewportH := wndHeight;
     end;
   end else
   begin
@@ -858,7 +921,7 @@ begin
   scrVSync := WSync;
 end;
 
-procedure scr_SetClearColor(flag: Boolean; Color: Cardinal = 0);
+procedure scr_SetClearColor(flag: Boolean = true; Color: Cardinal = 0);
 begin
   scrClearColor := flag;
   scr_UseClearColor.R := (Color shr 16) / 255;
@@ -876,9 +939,10 @@ begin
   {$ENDIF}
   {$IFDEF WINDOWS}
   if oglCanVSync Then
-    wglSwapInterval(Integer(scrVSync));
+    wglSwapIntervalEXT(Integer(scrVSync));
   {$ENDIF}
   {$IFDEF MACOSX}{$IfDef MAC_COCOA}
+//  oglContext.setValues_forParameter(30, NSOpenGLCPSwapInterval);
   {$Else}
   if Assigned(oglContext) Then
     aglSetInt(oglContext, AGL_SWAP_INTERVAL, Byte(scrVSync));
@@ -892,7 +956,7 @@ begin
 end;
 
 {$IfNDef USE_INIT_HANDLE}
-procedure scr_SetFPS(FPS: Byte);
+procedure scr_SetFPS(FPS: LongWord);
 begin
   if FPS < 30 then
     FPS := 30;
@@ -932,6 +996,82 @@ begin
   batch2d_Flush();
   GetMem(pData, Width * Height * 4);
   glReadPixels(X, oglHeight - Height - Y, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pData);
+end;
+
+procedure Set2DNearFar(newNear, newFar: {$IfNDef USE_GLES}Double{$Else}{$IF DEFINED(USE_GLES_ON_DESKTOP) and DEFINED(USE_AMD_DRIVERS)}Double{$Else}Single{$EndIf}{$EndIf});
+begin
+  scrFar := newFar;
+  scrNear := newNear;
+end;
+
+procedure SetGLVersionAndFlags({$IfNDef MAC_COCOA}major, minor: Integer; flag: LongWord = COMPATIBILITY_VERSION{$Else}mode: LongWord{$EndIf});
+  {$IfNDef MAC_COCOA}
+  procedure MajorMinor;
+  begin
+    if major > 4 then
+      major := 4;
+    maxGLVerMajor := major;
+    if major = 4 then
+    begin
+      if minor > 6 then
+        minor := 6;
+      maxGLVerMinor := minor;
+      exit;
+    end;
+    if major = 3 then
+    begin
+      if minor > 3 then
+        minor := 3;
+      maxGLVerMinor := minor;
+      exit;
+    end;
+    if major = 2 then
+    begin
+      if minor > 1 then
+        minor := 1;
+      maxGLVerMinor := minor;
+      exit;
+    end;
+    if major = 1 then
+    begin
+      if minor > 5 then
+        minor := 5;
+      maxGLVerMinor := minor;
+    end;
+  end;
+  {$EndIf}
+
+begin
+  {$IfDef MACOSX}
+  if (mode > CORE_4_1) or (mode = 0) then
+    mode := CORE_2_1;
+  if mode = CORE_3_2 then
+  begin
+    oglAttr[8] := $3200;
+    exit;
+  end;
+  if mode = CORE_4_1 then
+  begin
+    oglAttr[8] := $4100;
+    exit;
+  end;
+  oglAttr[8] := $1000;
+  {$Else}
+
+  if (flag and 3) = 3 then
+    flag := flag and 13;
+  contextMask := flag and 3;
+  contextFlags := (flag and 12) shr 2;
+
+  MajorMinor;
+  {$IfDef LINUX}
+  if (major > 3) or ((major = 3) and (minor >= 2)) then
+  begin
+    if contextMask = 2 then
+      contextMask := 1;
+  end;
+  {$EndIf}
+  {$EndIf}
 end;
 
 end.

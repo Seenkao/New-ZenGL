@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectSession>
-    <Version Value="12"/>
+    <Version Value="11"/>
     <BuildModes Active="Release"/>
     <Units Count="1">
       <Unit0>
@@ -9,14 +9,15 @@
         <IsPartOfProject Value="True"/>
         <IsVisibleTab Value="True"/>
         <TopLine Value="129"/>
-        <CursorPos X="40" Y="133"/>
+        <CursorPos X="83" Y="152"/>
         <UsageCount Value="20"/>
         <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit0>
     </Units>
     <RunParams>
       <FormatVersion Value="2"/>
-      <Modes ActiveMode="default"/>
+      <Modes Count="0" ActiveMode="default"/>
     </RunParams>
   </ProjectSession>
 </CONFIG>

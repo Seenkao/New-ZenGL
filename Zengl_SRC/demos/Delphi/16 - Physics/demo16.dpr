@@ -20,6 +20,7 @@ uses
   zgl_text,
   zgl_primitives_2d,
   zgl_math_2d,
+  zgl_types,
   zgl_utils;
 
 var
@@ -176,16 +177,11 @@ end;
 
 procedure KeyMouseEvent;
 begin
-  // проверяем одиночное касание левой или правой клавиши мыши
-  if mBClickCanClick(M_BLEFT_CLICK) Then
+  // два варианта работы с мышью, статический и динамический
+  if (mouseAction[M_BLEFT].state and is_down) > 0 Then
     cpAddBox(mouseX - 10, mouseY - 10, 48, 32, 1, 0.5, 0.5);
-  if mBClickCanClick(M_BRIGHT_CLICK) Then
-    cpAddBall(mouseX, mouseY, 16, 1, 0.5, 0.9);
-
-  (*           предлагаемый код, без вызова функции, для малого ускорения кода. )))
-    if (mouseClickCanClick and M_BLEFT_CLICK) > 0 then
-      cpAddBox(mouse_X() - 10, mouse_Y() - 10, 48, 32, 1, 0.5, 0.5);
-  *)
+  if mouseBClick(M_BRIGHT) Then
+    cpAddBall(mouseX, mouseY, 16, 2, 0.5, 0.1);
 end;
 
 procedure Phisics;

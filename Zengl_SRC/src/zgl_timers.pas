@@ -39,18 +39,21 @@ const
   MAX_TIMERS   =  50;        // максимальное количество таймеров.
 
   // биты работы с таймером
-  Stop         =   1;        // таймер создаётся и стартует незамедлительно
-  Start        =   2;        // таймер останавливается незамедлительно
-  Tiks         =   4;        // используется только внутри таймеров!
-  SleepToStart =   8;        // таймер создаётся и запускается с установленной задержкой
-  SleepToStop  =  16;        // таймер останавливается через определённое время
-  Enable       = 128;        // используется или нет данный таймер (существует или нет?)
+  t_Stop         =   1;        // таймер останавливается незамедлительно
+  t_Start        =   2;        // таймер создаётся и стартует незамедлительно
+  t_Tiks         =   4;        // используется только внутри таймеров!
+  t_SleepToStart =   8;        // таймер создаётся и запускается с установленной задержкой
+  t_SleepToStop  =  16;        // таймер останавливается через определённое время
+  t_Enable       = 128;        // используется или нет данный таймер (существует или нет?)
+
+  t_Stop_or_SleepToStart = t_Stop or t_SleepToStart;
+  t_Start_or_SleepToStop = t_Start or t_SleepToStop;
 
 type
   zglPTimer = ^zglTTimer;
   zglTTimer = record
     Interval, SInterval: Cardinal;
-    Flags: Byte;
+    Flags: LongWord;
     LastTick, LastTickForSleep: Double;
     OnTimer: procedure;
   end;
@@ -69,7 +72,7 @@ function  timer_GetTicks: Double;
 
 (*  добавить процедуру-таймер (если не добавить обрабатываемую процедуру таймер "как бы" будет работать)
   *)
-function timer_Add(OnTimer: Pointer; Interval: Cardinal; Flags: Byte = 2; SleepInterval: Cardinal = 5): Byte;
+function timer_Add(OnTimer: Pointer; Interval: Cardinal; Flags: LongWord = t_Start; SleepInterval: Cardinal = 5): Byte;
 
 (*  Удаляется таймер, но не уничтожается
     Если во время удаления таймера создаётся новый таймер, то большая вероятность, что удалённый таймер уничтожится.
@@ -128,9 +131,9 @@ var
   {$ENDIF}
   timerStart: Double;
 
-function timer_Add(OnTimer: Pointer; Interval: Cardinal; Flags: Byte = 2; SleepInterval: Cardinal = 5): Byte;
+function timer_Add(OnTimer: Pointer; Interval: Cardinal; Flags: LongWord = t_Start; SleepInterval: Cardinal = 5): Byte;
 var
-  i: Byte;
+  i: LongWord;
   t: Double;
   newTimer: zglPTimer;
   {$IFDEF DELPHI7_AND_DOWN}
@@ -140,7 +143,7 @@ begin
   Result := 255;
   if managerTimer.Count >= managerTimer.maxTimers then
   begin
-    inc(managerTimer.maxTimers, 1);
+    inc(managerTimer.maxTimers, 5);
     if managerTimer.maxTimers > MAX_TIMERS then
     begin
       managerTimer.maxTimers := MAX_TIMERS;
@@ -150,15 +153,15 @@ begin
     SetLength(managerTimer.Timers, managerTimer.maxTimers);
   end;
 
-  if (Flags and (Start or Stop or SleepToStart or SleepToStop) = 0) then
-    Flags := Start;
+  if (Flags and (t_Start or t_Stop or t_SleepToStart or t_SleepToStop) = 0) then
+    Flags := t_Start;
   i := 0;
   while i < managerTimer.maxTimers do
   begin
     newTimer := managerTimer.Timers[i];
     if (not Assigned(newTimer)) then
       Break;
-    if ((newTimer.Flags and Enable) = 0) then
+    if ((newTimer.Flags and t_Enable) = 0) then
       break;
     inc(i);
   end;
@@ -176,16 +179,16 @@ begin
 
   newTimer.OnTimer := OnTimer;
   t := timer_GetTicks;
-  if (Flags and SleepToStart) > 0 then
+  if (Flags and t_SleepToStart) > 0 then
   begin
-    Flags := Flags and (255 - Start);
+    Flags := Flags and (255 - t_Start);
     newTimer.LastTickForSleep := t;
   end;
   newTimer.LastTick := t;
-  if (Flags and Start) > 0 then
-    newTimer.Flags := (newTimer.Flags and (255 - Stop)) or Enable or Flags
+  if (Flags and t_Start) > 0 then
+    newTimer.Flags := newTimer.Flags and (255 - t_Stop) or t_Enable or Flags
   else
-    newTimer.Flags := (newTimer.Flags and (255 - Start)) or Enable or Flags;
+    newTimer.Flags := (newTimer.Flags and (255 - t_Start)) or t_Enable or Flags;
   newTimer.Interval := Interval;
   newTimer.SInterval := SleepInterval;
   inc(managerTimer.Count);
@@ -201,20 +204,20 @@ begin
   if (num >= managerTimer.maxTimers) or (num = timeCalcFPS) {$IfNDef USE_INIT_HANDLE}or (num = timeAppEvents){$EndIf} then
     exit;
 
-  if (managerTimer.Timers[num].Flags and Enable) = 0 then
+  if (managerTimer.Timers[num].Flags and t_Enable) = 0 then
     Exit;
 
-  if (Flags and (Start or Stop or SleepToStop or SleepToStart) = 0) then
-    Flags := Start;
+  if (Flags and (t_Start or t_Stop or t_SleepToStop or t_SleepToStart) = 0) then
+    Flags := t_Start;
 
   useTimer := managerTimer.Timers[num];
-  if (Flags = Start) or (Flags = SleepToStart) then
+  if (Flags = t_Start) or (Flags = t_SleepToStart) then
   begin
-    useTimer.Flags := (useTimer.Flags and (255 - Stop)) or Start;
+    useTimer.Flags := (useTimer.Flags and (255 - t_Stop)) or t_Start;
     useTimer.LastTick := timer_GetTicks;
   end
   else
-    useTimer.Flags := (useTimer.Flags and (255 - Start)) or Stop;
+    useTimer.Flags := (useTimer.Flags and (255 - t_Start)) or t_Stop;
   Result := True;
   useTimer := nil;
 end;
@@ -228,18 +231,18 @@ begin
   if (num >= managerTimer.maxTimers) or (num = timeCalcFPS) {$IfNDef USE_INIT_HANDLE}or (num = timeAppEvents){$EndIf} then
     exit;
 
-  if (managerTimer.Timers[num].Flags and Enable) = 0 then
+  if (managerTimer.Timers[num].Flags and t_Enable) = 0 then
     Exit;
 
-  if (Flags and (Start or Stop or SleepToStop or SleepToStart) = 0) then
-    Flags := Start;
+  if (Flags and (t_Start or t_Stop or t_SleepToStop or t_SleepToStart) = 0) then
+    Flags := t_Start;
 
   useTimer := managerTimer.Timers[num];
   useTimer.SInterval := IntervalSleep;
-  if (Flags = Start) or (Flags = SleepToStart) then
-    useTimer.Flags := (useTimer.Flags or SleepToStart or Stop) and (255 - Start)
+  if (Flags = t_Start) or (Flags = t_SleepToStart) then
+    useTimer.Flags := (useTimer.Flags or t_Stop_or_SleepToStart) and (255 - t_Start)
   else
-    useTimer.Flags := (useTimer.Flags or SleepToStop or Start) and (255 - Stop);
+    useTimer.Flags := (useTimer.Flags or t_Start_or_SleepToStop) and (255 - t_Stop);
   t := timer_GetTicks;
   useTimer.LastTick := t;
   useTimer.LastTickForSleep := t;
@@ -253,7 +256,7 @@ begin
   if managerTimer.Count = 0 then Exit;
   if (num > managerTimer.maxTimers) or (num = timeCalcFPS) {$IfNDef USE_INIT_HANDLE}or (num = timeAppEvents){$EndIf} then
     exit;
-  if (managerTimer.Timers[num].Flags and Enable) > 0 then
+  if (managerTimer.Timers[num].Flags and t_Enable) > 0 then
   begin
     inc(timersToKill);
     aTimersToKill[timersToKill] := num;
@@ -263,7 +266,7 @@ end;
 
 procedure timers_Destroy;
 var
-  i: Byte;
+  i: LongWord;
   delTimer: zglPTimer;
 begin
   if managerTimer.Count = 0 then Exit;
@@ -283,7 +286,7 @@ end;
 
 procedure timer_MainLoop;
 var
-  i, j, Flag: Byte;
+  i, j, Flag: LongWord;
   t : Double;
   useTimer: zglPTimer;
 begin
@@ -296,12 +299,12 @@ begin
     if Assigned(managerTimer.Timers[i]) then
     begin
 
-      if ((managerTimer.Timers[i].Flags and Enable) > 0) then
+      if ((managerTimer.Timers[i].Flags and t_Enable) > 0) then
       begin
         t := timer_GetTicks;
         useTimer := managerTimer.Timers[i];
         Flag := useTimer.Flags;
-        if ((Flag and SleepToStart) > 0) then
+        if ((Flag and t_SleepToStart) > 0) then
         begin
           if (t - useTimer.LastTickForSleep) > 1000 then
           begin
@@ -310,7 +313,7 @@ begin
           end;
           if useTimer.SInterval = 0 then
           begin
-            useTimer.Flags := (Flag or Start) and (255 - SleepToStart - Stop);
+            useTimer.Flags := (Flag or t_Start) and (255 - t_SleepToStart - t_Stop);
             useTimer.LastTick := t;
           end
           else begin
@@ -318,18 +321,18 @@ begin
             Continue;
           end;
         end;
-        if ((Flag and Start ) > 0) then
+        if ((Flag and t_Start ) > 0) then
         begin
           while ((t - useTimer.LastTick) > useTimer.Interval) do
           begin
-            if (Flag and Tiks) = 0 then
+            if (Flag and t_Tiks) = 0 then
             begin
               useTimer.OnTimer;
-              Flag := Flag or Tiks;
+              Flag := Flag or t_Tiks;
             end;
             useTimer.LastTick :=  useTimer.LastTick + useTimer.Interval;
           end;
-          if (Flag and SleepToStop) > 0 then
+          if (Flag and t_SleepToStop) > 0 then
           begin
             if (t - useTimer.LastTickForSleep) > 1000 then
             begin
@@ -338,7 +341,7 @@ begin
             end;
             if useTimer.SInterval = 0 then
             begin
-              useTimer.Flags := (useTimer.Flags or Stop) and (255 - SleepToStop - Start);
+              useTimer.Flags := (useTimer.Flags or t_Stop) and (255 - t_SleepToStop - t_Start);
             end;
           end;
           dec(j);
@@ -350,7 +353,7 @@ begin
 
   for i := 1 to timersToKill do
   begin
-    managerTimer.Timers[aTimersToKill[i]].Flags := managerTimer.Timers[aTimersToKill[i]].Flags and (255 - Enable);
+    managerTimer.Timers[aTimersToKill[i]].Flags := managerTimer.Timers[aTimersToKill[i]].Flags and (255 - t_Enable);
     dec(managerTimer.Count);
   end;
   timersToKill := 0;
@@ -383,10 +386,14 @@ end;
 
 procedure timer_Reset;
 var
-  i: Byte;
+  i: LongWord;
   useTimer: zglPTimer;
+  t: Double;
 begin
   appdt := timer_GetTicks();
+  {$IfNDef USE_INIT_HANDLE}
+  oldTimeDraw := appdt;
+  {$EndIf}
   if managerTimer.Count = 0 then Exit;
   i := 0;
   while i < managerTimer.maxTimers do
@@ -394,12 +401,15 @@ begin
     useTimer := managerTimer.Timers[i];
     if (Assigned(useTimer)) and (Assigned(useTimer.OnTimer)) then
     begin
-      useTimer.LastTick := timer_GetTicks ;
-      useTimer.LastTickForSleep := timer_GetTicks;
+      t := timer_GetTicks;
+      useTimer.LastTick := t;
+      useTimer.LastTickForSleep := t;
     end;
     inc(i);
   end;
   useTimer := nil;
+  if Assigned(app_PReset) then
+    app_PReset;
 end;
 
 initialization

@@ -28,6 +28,7 @@ unit zgl_math_2d;
 interface
 
 uses
+  zgl_gltypeconst,
   zgl_types;
 
 const
@@ -44,13 +45,21 @@ const
 function min(a, b: Single): Single; {$IFDEF USE_INLINE} inline; {$ENDIF}
 function max(a, b: Single): Single; {$IFDEF USE_INLINE} inline; {$ENDIF}
 
+// Rus: Вычисление синуса и косинуса по данному углу (в градусах)
+// Eng:
 procedure m_SinCos(Angle: Single; out s, c: Single); {$IFDEF USE_ASM} assembler; {$ELSE} {$IFDEF USE_INLINE} inline; {$ENDIF} {$ENDIF}
 
+// Rus: Заполнение табличных данных, вызывать не надо.
+// Eng:
 procedure InitCosSinTables;
 function  m_Cos(Angle: Integer): Single;
 function  m_Sin(Angle: Integer): Single;
+// Rus: дистанция между точками
+// Eng:
 function  m_Distance(x1, y1, x2, y2: Single): Single;
 function  m_FDistance(x1, y1, x2, y2: Single): Single;
+// Rus: Направление ветора (угол по дву точкам), результат в градусах
+// Eng:
 function  m_Angle(x1, y1, x2, y2: Single): Single;
 // ориентация относительно двух точек     вопрос - а вектором не быстрее будет?
 function  m_Orientation(x, y, x1, y1, x2, y2: Single): Integer;
@@ -72,6 +81,9 @@ var
 implementation
 uses
   zgl_window,
+  {$IfDef USE_GLU}
+  zgl_glu,
+  {$EndIf}
   {$IFNDEF USE_GLES}
   zgl_opengl_all
   {$ELSE}
@@ -81,7 +93,7 @@ uses
 
 {$IFDEF USE_TRIANGULATION}
 var
-  tess       : Integer;
+  tess       : {$IfNDef USE_GLES} PGLUtesselator{$Else}Integer{$EndIf};
   tessMode   : Integer;
   tessHoles  : Boolean;
   tessFinish : Boolean;
@@ -290,7 +302,7 @@ end;
 procedure tess_Triangulate(Contour: zglPPoints2D; iLo, iHi: Integer; AddHoles: Boolean = FALSE);
   var
     i: Integer;
-    v: array[0..2] of Double;
+    v: TVector3d;
 begin
   tessFinish  := FALSE;
   tessHoles   := AddHoles;
@@ -304,7 +316,7 @@ begin
   begin
     v[0] := Contour[i].X;
     v[1] := Contour[i].Y;
-    gluTessVertex(tess, @v[0], @Contour[i]);
+    gluTessVertex(tess, v, @Contour[i]);
   end;
   gluTessEndContour(tess);
   if not AddHoles Then
@@ -314,7 +326,7 @@ end;
 procedure tess_AddHole(Contour: zglPPoints2D; iLo, iHi: Integer; LastHole: Boolean = TRUE);
   var
     i: Integer;
-    v: array[0..2] of Double;
+    v: TVector3d;
 begin
   if not tessHoles Then exit;
   v[2] := 0;
@@ -324,7 +336,7 @@ begin
   begin
     v[0] := Contour[i].X;
     v[1] := Contour[i].Y;
-    gluTessVertex(tess, @v[0], @Contour[i]);
+    gluTessVertex(tess, v, @Contour[i]);
   end;
   gluTessEndContour(tess);
   if LastHole Then
@@ -355,7 +367,7 @@ end;
 initialization
   InitCosSinTables();
   {$IFDEF USE_TRIANGULATION}
-  tess := gluNewTess();                                      
+  tess := gluNewTess();
   gluTessCallBack(tess, GLU_TESS_BEGIN,  @tessBegin   );
   gluTessCallBack(tess, GLU_TESS_VERTEX, @tessVertex2f);
   {$ENDIF}

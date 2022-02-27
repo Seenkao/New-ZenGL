@@ -29,6 +29,7 @@ unit zgl_render_2d;
 
 interface
 uses
+  zgl_gltypeconst,
   zgl_textures;
 
 procedure batch2d_Begin;
@@ -64,7 +65,7 @@ var
 implementation
 uses
   {$IFNDEF USE_GLES}
-  zgl_opengl,
+  //zgl_opengl,
   zgl_opengl_all,
   {$ELSE}
   zgl_opengles,

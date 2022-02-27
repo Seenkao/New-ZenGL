@@ -1,6 +1,5 @@
 # copy resources
 cp ../../../bin/data/font* ../../../bin/demo03.app/Contents/Resources/
-cp ../../../bin/data/CalibriBold50pt* ../../../bin/demo03.app/Contents/Resources/
 # copy binary into bundle
 rm ../../../bin/demo03.app/Contents/MacOS/demo03
 cp ../../../bin/demo03 ../../../bin/demo03.app/Contents/MacOS/demo03

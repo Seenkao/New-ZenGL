@@ -9,11 +9,10 @@
         <Filename Value="demo11.lpr"/>
         <IsPartOfProject Value="True"/>
         <IsVisibleTab Value="True"/>
-        <TopLine Value="45"/>
-        <CursorPos X="19" Y="60"/>
+        <TopLine Value="67"/>
+        <CursorPos X="54" Y="84"/>
         <UsageCount Value="20"/>
         <Loaded Value="True"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit0>
     </Units>
     <RunParams>

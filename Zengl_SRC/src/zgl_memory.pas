@@ -37,13 +37,32 @@ type
     Position: LongWord;
 end;
 
+// Rus: Загружаем файл FileName в память Memory.
+// Eng:
 function  mem_LoadFromFile(out Memory: zglTMemory; const FileName: UTF8String): Boolean;
+// Rus: Сохраняем в файл FileName данные взятые из памяти Memory.
+// Eng:
 function  mem_SaveToFile(var Memory: zglTMemory; const FileName: UTF8String): Boolean;
+// Rus: Установка позиции курсора. Mode указание положения "курсора"
+//     FSM_SET - точное
+//     FSM_CUR - смещение от текущего курсора
+//     FSM_END - от конца
+// Eng:
 function  mem_Seek(var Memory: zglTMemory; Offset, Mode: Integer): LongWord;
+// Rus: Чтение файла из памяти в указанный буфер, указанного размера Bytes.
+// Eng:
 function  mem_Read(var Memory: zglTMemory; var Buffer; Bytes: LongWord): LongWord;
+// Rus: Чтение остатка файла (при чём тут Swap?)
+// Eng:
 function  mem_ReadSwap(var Memory: zglTMemory; var Buffer; Bytes: LongWord): LongWord;
+// Rus: Записываем в память данные из буфера.
+// Eng:
 function  mem_Write(var Memory: zglTMemory; const Buffer; Bytes: LongWord): LongWord;
+// Rus: Изменение/установка размеров памяти.
+// Eng:
 procedure mem_SetSize(var Memory: zglTMemory; Size: LongWord);
+// Rus: Очистка памяти.
+// Eng:
 procedure mem_Free(var Memory: zglTMemory);
 
 {$IFDEF ENDIAN_BIG}
