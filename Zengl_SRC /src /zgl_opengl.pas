@@ -578,7 +578,7 @@ begin
         exit;
       end;
     end;
-  end
+  end {$IfDef GL_VERSION_3_0}
   else begin
     contextAttr[0] := GLX_CONTEXT_MAJOR_VERSION_ARB;
     contextAttr[1] := maxGLVerMajor;
@@ -610,7 +610,7 @@ begin
         exit;
       end;
     end;
-  end;
+  end{$EndIf};
   if not glXMakeCurrent(scrDisplay, wndHandle, oglContext) Then
   begin
     u_Error('Cannot set current OpenGL context');
