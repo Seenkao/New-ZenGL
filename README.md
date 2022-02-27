@@ -43,6 +43,10 @@ You can also contact me on the Lazarus forums or [ZenGL](http://zengl.org/forum/
 You can support through Sberbank:
 2202200951985520
 
+The original source code is at [GutHub](https://github.com/Seenkao/New-ZenGL) other sites may have a back branch.
+
+Please write about the errors found in the process of working with ZenGL. )))
+
 ****
 
 <a name="Russian"></a>Rus:
@@ -85,3 +89,7 @@ You can support through Sberbank:
 
 Поддержать можно через сбер:
 2202200951985520
+
+Оригинальный исходный код находится по адресу [GutHub](https://github.com/Seenkao/New-ZenGL) на других сайтах может отстающая ветка.
+
+Просьба писать об ошибках выявленных в процессе работы с ZenGL. )))
