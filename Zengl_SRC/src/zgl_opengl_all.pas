@@ -330,6 +330,7 @@ uses
   zgl_glx_wgl,
   {$EndIf}
   zgl_window,
+  zgl_screen,
   zgl_opengl,
   zgl_log,
   zgl_utils;
