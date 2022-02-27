@@ -53,6 +53,9 @@ procedure FreeAGL;
 {$ENDIF}{$EndIf}
 function gl_GetProc(const Proc: UTF8String): Pointer;
 function gl_IsSupported(const Extension, SearchIn: UTF8String): Boolean;
+// Rus: проверка и загрузка расширений.
+// Eng:
+procedure gl_LoadEx;
 
 const
   {$IFDEF LINUX}
@@ -444,6 +447,98 @@ begin
   Result := extPos > 0;
   if Result Then
     Result := ((extPos + Length(Extension) - 1) = Length(SearchIn)) or (SearchIn[extPos + Length(Extension)] = ' ');
+end;
+
+procedure gl_LoadEx;
+begin
+  // Texture size
+  glGetIntegerv(GL_MAX_TEXTURE_SIZE, @oglMaxTexSize);
+  log_Add('GL_MAX_TEXTURE_SIZE: ' + u_IntToStr(oglMaxTexSize));
+
+  glCompressedTexImage2D := gl_GetProc('glCompressedTexImage2D');
+  log_Add('GL_EXT_TEXTURE_COMPRESSION_S3TC: ' + u_BoolToStr(GL_EXT_texture_compression_s3tc));
+
+  log_Add('GL_SGIS_GENERATE_MIPMAP: ' + u_BoolToStr(GL_SGIS_generate_mipmap));
+
+  // Multitexturing
+  glGetIntegerv(GL_MAX_TEXTURE_UNITS_ARB, @oglMaxTexUnits);
+  log_Add('GL_MAX_TEXTURE_UNITS_ARB: ' + u_IntToStr(oglMaxTexUnits));
+
+  // Anisotropy
+  if GL_EXT_texture_filter_anisotropic Then
+  begin
+    glGetIntegerv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, @oglMaxAnisotropy);
+    oglAnisotropy := oglMaxAnisotropy;
+  end else
+    oglAnisotropy := 0;
+  log_Add('GL_EXT_TEXTURE_FILTER_ANISOTROPIC: ' + u_BoolToStr(GL_EXT_texture_filter_anisotropic));
+  log_Add('GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT: ' + u_IntToStr(oglMaxAnisotropy));
+
+  glBlendEquation     := gl_GetProc('glBlendEquation');
+  glBlendFuncSeparate := gl_GetProc('glBlendFuncSeparate');
+  // separator
+  oglSeparate := Assigned(glBlendEquation) and Assigned(glBlendFuncSeparate) and GL_EXT_blend_func_separate;
+  log_Add('GL_EXT_BLEND_FUNC_SEPARATE: ' + u_BoolToStr(oglSeparate));
+
+  // FBO
+  glBindRenderbuffer := gl_GetProc('glBindRenderbuffer');
+  if Assigned(glBindRenderbuffer) Then
+  begin
+    oglCanFBO                 := TRUE;
+    glIsRenderbuffer          := gl_GetProc('glIsRenderbuffer'         );
+    glDeleteRenderbuffers     := gl_GetProc('glDeleteRenderbuffers'    );
+    glGenRenderbuffers        := gl_GetProc('glGenRenderbuffers'       );
+    glRenderbufferStorage     := gl_GetProc('glRenderbufferStorage'    );
+    glIsFramebuffer           := gl_GetProc('glIsFramebuffer'          );
+    glBindFramebuffer         := gl_GetProc('glBindFramebuffer'        );
+    glDeleteFramebuffers      := gl_GetProc('glDeleteFramebuffers'     );
+    glGenFramebuffers         := gl_GetProc('glGenFramebuffers'        );
+    glCheckFramebufferStatus  := gl_GetProc('glCheckFramebufferStatus' );
+    glFramebufferTexture2D    := gl_GetProc('glFramebufferTexture2D'   );
+    glFramebufferRenderbuffer := gl_GetProc('glFramebufferRenderbuffer');
+
+    glGetIntegerv(GL_MAX_RENDERBUFFER_SIZE, @oglMaxFBOSize);
+    log_Add('GL_MAX_RENDERBUFFER_SIZE: ' + u_IntToStr(oglMaxFBOSize));
+  end else
+    oglCanFBO := FALSE;
+   log_Add('GL_EXT_FRAMEBUFFER_OBJECT: ' + u_BoolToStr(oglCanFBO));
+
+{$IFDEF WINDOWS}
+  if Assigned(wglCreatePbufferARB) and Assigned(wglChoosePixelFormatARB) Then
+  begin
+    oglCanPBuffer          := TRUE;
+    wglGetPbufferDCARB     := gl_GetProc('wglGetPbufferDC'    );
+    wglReleasePbufferDCARB := gl_GetProc('wglReleasePbufferDC');
+    wglDestroyPbufferARB   := gl_GetProc('wglDestroyPbuffer'  );
+    wglQueryPbufferARB     := gl_GetProc('wglQueryPbuffer');
+  end else
+    oglCanPBuffer := FALSE;
+  log_Add('WGL_PBUFFER: ' + u_BoolToStr(oglCanPBuffer));
+{$ENDIF}
+{$IFDEF MACOSX}{$IfNDef MAC_COCOA}
+  oglCanPBuffer := Assigned(aglCreatePBuffer);
+  log_Add('AGL_PBUFFER: ' + u_BoolToStr(oglCanPBuffer));
+{$ENDIF}{$EndIf}
+
+  // WaitVSync
+{$IFDEF LINUX}
+  glXSwapIntervalSGI := gl_GetProc('glXSwapIntervalSGI');
+  oglCanVSync        := Assigned(glXSwapIntervalSGI);
+{$ENDIF}
+{$IFDEF WINDOWS}
+  wglSwapIntervalEXT := gl_GetProc('wglSwapInterval');
+  oglCanVSync     := Assigned(wglSwapIntervalEXT);
+{$ENDIF}
+{$IFDEF MACOSX}{$IfNDef MAC_COCOA}
+  if aglSetInt(oglContext, AGL_SWAP_INTERVAL, 1) = GL_TRUE Then
+    oglCanVSync := TRUE
+  else
+    oglCanVSync := FALSE;
+  aglSetInt(oglContext, AGL_SWAP_INTERVAL, Byte(scrVSync));
+{$ENDIF}{$EndIf}
+  if oglCanVSync Then
+    scr_VSync;
+  log_Add('Support WaitVSync: ' + u_BoolToStr(oglCanVSync));
 end;
 
 end.
