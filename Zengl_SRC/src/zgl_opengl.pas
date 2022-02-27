@@ -23,15 +23,12 @@
  !!! modification from Serge 26.02.2022
 }
 unit zgl_opengl;
-
+{$mode objfpc}  // delphi???
 {$I zgl_config.cfg}
 {$I GLdefine.cfg}
 {$IfDef MAC_COCOA}
   {$modeswitch objectivec1}
 {$EndIf}
-{$IFDEF UNIX}
-  {$DEFINE stdcall := cdecl}
-{$ENDIF}
 
 interface
 uses
@@ -71,9 +68,6 @@ function  gl_Initialize: Boolean;
 // Rus: возвращение к первоначальным заданным данным.
 // Eng:
 procedure gl_ResetState;
-// Rus: проверка и загрузка расширений.
-// Eng:
-procedure gl_LoadEx;
 
 var
   oglzDepth    : LongWord;
@@ -195,7 +189,6 @@ begin
   end;
 
 {$IFDEF LINUX}
-  glXGetProcAddressARB := gl_GetProc('glXGetProcAddress');
   Init_GLX_WGL;
 
   if not glXQueryExtension(scrDisplay, i, j) Then
@@ -206,36 +199,10 @@ begin
   else
     log_Add('GLX Extension - ok');
 
-  // PBUFFER or OpenGL 3+
-  if GLX_VERSION_1_4 or GLX_VERSION_1_3 then
-    oglPBufferMode := 1
-  else
-    if GLX_SGIX_fbconfig and GLX_SGIX_pbuffer Then
-        oglPBufferMode := 2
-    else
-      oglPBufferMode := 0;
-  oglCanPBuffer := oglPBufferMode <> 0;
   if oglPBufferMode = 2 Then
     log_Add('GLX_SGIX_PBUFFER: TRUE')
   else
     log_Add('GLX_PBUFFER: ' + u_BoolToStr(oglCanPBuffer));
-
-  case oglPBufferMode of
-    1:
-      begin
-        glXGetVisualFromFBConfig := gl_GetProc('glXGetVisualFromFBConfig');
-        glXChooseFBConfig        := gl_GetProc('glXChooseFBConfig');
-        glXCreatePbuffer         := gl_GetProc('glXCreatePbuffer');
-        glXDestroyPbuffer        := gl_GetProc('glXDestroyPbuffer');
-      end;
-    2:
-      begin
-        glXGetVisualFromFBConfig := gl_GetProc('glXGetVisualFromFBConfigSGIX');
-        glXChooseFBConfig        := gl_GetProc('glXChooseFBConfigSGIX');
-        glXCreateGLXPbufferSGIX  := gl_GetProc('glXCreateGLXPbufferSGIX');
-        glXDestroyGLXPbufferSGIX := gl_GetProc('glXDestroyGLXPbufferSGIX');
-      end;
-  end;
 
   {$IfDef GL_VERSION_3_0}
   if maxGLVerMajor >= 3 then
@@ -737,98 +704,6 @@ begin
   glDisable(GL_DEPTH_TEST);
   glDisable(GL_TEXTURE_2D);
   glEnable (GL_NORMALIZE);
-end;
-
-procedure gl_LoadEx;
-begin
-  // Texture size
-  glGetIntegerv(GL_MAX_TEXTURE_SIZE, @oglMaxTexSize);
-  log_Add('GL_MAX_TEXTURE_SIZE: ' + u_IntToStr(oglMaxTexSize));
-
-  glCompressedTexImage2D := gl_GetProc('glCompressedTexImage2D');
-  log_Add('GL_EXT_TEXTURE_COMPRESSION_S3TC: ' + u_BoolToStr(GL_EXT_texture_compression_s3tc));
-
-  log_Add('GL_SGIS_GENERATE_MIPMAP: ' + u_BoolToStr(GL_SGIS_generate_mipmap));
-
-  // Multitexturing
-  glGetIntegerv(GL_MAX_TEXTURE_UNITS_ARB, @oglMaxTexUnits);
-  log_Add('GL_MAX_TEXTURE_UNITS_ARB: ' + u_IntToStr(oglMaxTexUnits));
-
-  // Anisotropy
-  if GL_EXT_texture_filter_anisotropic Then
-  begin
-    glGetIntegerv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, @oglMaxAnisotropy);
-    oglAnisotropy := oglMaxAnisotropy;
-  end else
-    oglAnisotropy := 0;
-  log_Add('GL_EXT_TEXTURE_FILTER_ANISOTROPIC: ' + u_BoolToStr(GL_EXT_texture_filter_anisotropic));
-  log_Add('GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT: ' + u_IntToStr(oglMaxAnisotropy));
-
-  glBlendEquation     := gl_GetProc('glBlendEquation');
-  glBlendFuncSeparate := gl_GetProc('glBlendFuncSeparate');
-  // separator
-  oglSeparate := Assigned(glBlendEquation) and Assigned(glBlendFuncSeparate) and GL_EXT_blend_func_separate;
-  log_Add('GL_EXT_BLEND_FUNC_SEPARATE: ' + u_BoolToStr(oglSeparate));
-
-  // FBO
-  glBindRenderbuffer := gl_GetProc('glBindRenderbuffer');
-  if Assigned(glBindRenderbuffer) Then
-  begin
-    oglCanFBO                 := TRUE;
-    glIsRenderbuffer          := gl_GetProc('glIsRenderbuffer'         );
-    glDeleteRenderbuffers     := gl_GetProc('glDeleteRenderbuffers'    );
-    glGenRenderbuffers        := gl_GetProc('glGenRenderbuffers'       );
-    glRenderbufferStorage     := gl_GetProc('glRenderbufferStorage'    );
-    glIsFramebuffer           := gl_GetProc('glIsFramebuffer'          );
-    glBindFramebuffer         := gl_GetProc('glBindFramebuffer'        );
-    glDeleteFramebuffers      := gl_GetProc('glDeleteFramebuffers'     );
-    glGenFramebuffers         := gl_GetProc('glGenFramebuffers'        );
-    glCheckFramebufferStatus  := gl_GetProc('glCheckFramebufferStatus' );
-    glFramebufferTexture2D    := gl_GetProc('glFramebufferTexture2D'   );
-    glFramebufferRenderbuffer := gl_GetProc('glFramebufferRenderbuffer');
-
-    glGetIntegerv(GL_MAX_RENDERBUFFER_SIZE, @oglMaxFBOSize);
-    log_Add('GL_MAX_RENDERBUFFER_SIZE: ' + u_IntToStr(oglMaxFBOSize));
-  end else
-    oglCanFBO := FALSE;
-   log_Add('GL_EXT_FRAMEBUFFER_OBJECT: ' + u_BoolToStr(oglCanFBO));
-
-{$IFDEF WINDOWS}
-  if Assigned(wglCreatePbufferARB) and Assigned(wglChoosePixelFormatARB) Then
-  begin
-    oglCanPBuffer          := TRUE;
-    wglGetPbufferDCARB     := gl_GetProc('wglGetPbufferDC'    );
-    wglReleasePbufferDCARB := gl_GetProc('wglReleasePbufferDC');
-    wglDestroyPbufferARB   := gl_GetProc('wglDestroyPbuffer'  );
-    wglQueryPbufferARB     := gl_GetProc('wglQueryPbuffer');
-  end else
-    oglCanPBuffer := FALSE;
-  log_Add('WGL_PBUFFER: ' + u_BoolToStr(oglCanPBuffer));
-{$ENDIF}
-{$IFDEF MACOSX}{$IfNDef MAC_COCOA}
-  oglCanPBuffer := Assigned(aglCreatePBuffer);
-  log_Add('AGL_PBUFFER: ' + u_BoolToStr(oglCanPBuffer));
-{$ENDIF}{$EndIf}
-
-  // WaitVSync
-{$IFDEF LINUX}
-  glXSwapIntervalSGI := gl_GetProc('glXSwapIntervalSGI');
-  oglCanVSync        := Assigned(glXSwapIntervalSGI);
-{$ENDIF}
-{$IFDEF WINDOWS}
-  wglSwapIntervalEXT := gl_GetProc('wglSwapInterval');
-  oglCanVSync     := Assigned(wglSwapIntervalEXT);
-{$ENDIF}
-{$IFDEF MACOSX}{$IfNDef MAC_COCOA}
-  if aglSetInt(oglContext, AGL_SWAP_INTERVAL, 1) = GL_TRUE Then
-    oglCanVSync := TRUE
-  else
-    oglCanVSync := FALSE;
-  aglSetInt(oglContext, AGL_SWAP_INTERVAL, Byte(scrVSync));
-{$ENDIF}{$EndIf}
-  if oglCanVSync Then
-    scr_VSync;
-  log_Add('Support WaitVSync: ' + u_BoolToStr(oglCanVSync));
 end;
 
 end.
