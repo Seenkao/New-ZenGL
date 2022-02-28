@@ -24,6 +24,9 @@ uses
   zgl_text,
   zgl_math_2d,
   zgl_utils
+  {$IfNDef OLD_METHODS}
+  , gegl_color
+  {$EndIf}
   {$ELSE}
   zglHeader
   {$ENDIF}
@@ -45,6 +48,7 @@ begin
 
   fntMain := font_LoadFromFile( dirRes + 'font.zfi' );
   setFontTextScale(15, fntMain);
+  setTextColor(Get_Color(cl_White));
 
   // EN: Load three types of fire emitters.
   // RU: Загрузка трёх разных видов эмиттеров огня.
@@ -90,7 +94,7 @@ begin
   if debug Then
     for i := 0 to particles.Count.Emitters - 1 do
       with particles.List[ i ].BBox do
-        pr2d_Rect( MinX, MinY, MaxX - MinX, MaxY - MinY, $FF0000, 255 );
+        pr2d_Rect( MinX, MinY, MaxX - MinX, MaxY - MinY, {$IfNDef OLD_METHODS}cl_Red{$Else} $FF0000, 255{$EndIf} );
 
   text_Draw( fntMain, 0, 0, 'FPS: ' + u_IntToStr( zgl_Get( RENDER_FPS ) ) );
   text_Draw( fntMain, 0, 20, 'Particles: ' + u_IntToStr( particles.Count.Particles ) );
