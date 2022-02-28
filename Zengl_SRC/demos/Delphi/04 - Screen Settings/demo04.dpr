@@ -1,6 +1,7 @@
 program demo04;
 
 {$I zglCustomConfig.cfg}
+{$I zgl_config.cfg}
 
 {$R *.res}
 
@@ -16,6 +17,9 @@ uses
   zgl_textures_png,
   zgl_textures_jpg,
   zgl_utils
+  {$IfNDef OLD_METHODS}
+  , gegl_color
+  {$EndIf}
   ;
 
 var
@@ -28,6 +32,8 @@ procedure Init;
 begin
   fntMain := font_LoadFromFile(dirRes + 'font.zfi');
   texBack := tex_LoadFromFile(dirRes + 'back03.jpg');
+
+  setTextColor(Get_Color(cl_White));
   setFontTextScale(15, fntMain);
 end;
 
@@ -58,9 +64,12 @@ begin
       // EN: Set resolution for what application was wrote.
     scr_CorrectResolution(800, 600);
     zgl_SetParam(zgl_Get(DESKTOP_WIDTH), zgl_Get(DESKTOP_HEIGHT), True, false);
-{    wndWidth := zgl_Get(DESKTOP_WIDTH);
-    wndHeight := zgl_Get(DESKTOP_HEIGHT);
-    wndFullScreen := true;  }
+(*  --------------------- OR!!! ----------------------------------------
+      wndWidth := zgl_Get( DESKTOP_WIDTH );
+      wndHeight := zgl_Get( DESKTOP_HEIGHT );
+      wndFullScreen := True;
+      scrVSync := False;
+    -------------------------------------------------------------------- *)
     scr_SetOptions();
   end;
 
@@ -78,6 +87,12 @@ begin
     wndHeight := zgl_Get(DESKTOP_HEIGHT);
     wndFullScreen := true; }
     zgl_SetParam(zgl_Get(DESKTOP_WIDTH), zgl_Get(DESKTOP_HEIGHT), True, false);
+    (*  --------------------- OR!!! ----------------------------------------
+      wndWidth := zgl_Get( DESKTOP_WIDTH );
+      wndHeight := zgl_Get( DESKTOP_HEIGHT );
+      wndFullScreen := True;
+      scrVSync := False;
+    -------------------------------------------------------------------- *)
     scr_SetOptions();
   end;
 
@@ -91,6 +106,13 @@ begin
   begin
     zgl_Disable(CORRECT_RESOLUTION);
     zgl_SetParam(800, 600, true, false);
+    (* ---------------------- OR!!! ----------------------------------------
+      wndWidth := 800;
+      wndHeight := 600;
+      wndFullScreen := True;
+      scrVSync := False;
+      scr_SetOptions();
+    -------------------------------------------------------------------- *)
     scr_SetOptions();
   end;
 
@@ -103,9 +125,12 @@ begin
   if key_Press(K_F4) Then
   begin
     zgl_Disable(CORRECT_RESOLUTION);
-{    wndWidth := 800;
-    wndHeight := 600;
-    wndFullScreen := false;  }
+(* ---------------------- OR!!! ----------------------------------------
+      wndWidth := 800;
+      wndHeight := 600;
+      wndFullScreen := False;
+      scrVSync := False;
+   -------------------------------------------------------------------- *) 
     zgl_SetParam(800, 600, False, false);
     scr_SetOptions();
   end;

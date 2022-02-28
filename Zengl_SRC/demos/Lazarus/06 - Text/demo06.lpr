@@ -36,7 +36,7 @@ uses
 var
 //  dirRes  : UTF8String {$IFNDEF MACOSX} = 'data/' {$ENDIF};             // вне демо-версий
   dirRes  : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};            // в демо-версиях!!!
-  fntMain : Byte;
+  fntMain : LongWord;
 
 procedure Init;
 begin
@@ -61,7 +61,7 @@ begin
   // EN: ZenGL works only with UTF-8 encoding, so all text should be encoded with UTF-8.
   text_Draw( fntMain, 400, 25, 'String with center alignment', TEXT_HALIGN_CENTER );
 
-  text_DrawEx( fntMain, 400, 65, 3, 0, 'Scaling'{$IfDef OLD_METHODS}, 255{$EndIf}, cl_White, TEXT_HALIGN_CENTER );
+  text_DrawEx( fntMain, 400, 65, 3, 0, 'Scaling'{$IfDef OLD_METHODS}, 255, $FFFFFF{$EndIf}, cl_White, TEXT_HALIGN_CENTER );
 
   fx2d_SetVCA( $FF0000, $00FF00, $0000FF, $FFFFFF, 255, 255, 255, 255 );
   text_Draw( fntMain, 400, 125, 'Gradient color for every symbol', TEXT_FX_VCA or TEXT_HALIGN_CENTER );
@@ -80,7 +80,7 @@ begin
   r.Y := 300 - 128;
   r.W := 192;
   r.H := 256;
-  pr2d_Rect( r.X, r.Y, r.W, r.H, {$IfDef OLD_METHODS} $FF0000 {$Else}cl_Red{$EndIf} );
+  pr2d_Rect( r.X, r.Y, r.W, r.H, {$IfDef OLD_METHODS} $FF0000 {$Else}cl_Yellow{$EndIf} );
   text_DrawInRect( fntMain, r, 'Text rendering using horizontal right alignment and vertical bottom alignment', TEXT_HALIGN_RIGHT or TEXT_VALIGN_BOTTOM );
 
   r.X := 400 - 192;
@@ -95,7 +95,7 @@ begin
   r.Y := 300 + 160;
   r.W := 640;
   r.H := 128;
-  pr2d_Rect( r.X, r.Y, r.W, r.H, {$IfDef OLD_METHODS} $FF0000 {$Else}cl_Red{$EndIf} );
+  pr2d_Rect( r.X, r.Y, r.W, r.H, {$IfDef OLD_METHODS} $FF0000 {$Else}cl_Blue{$EndIf} );
   text_DrawInRect( fntMain, r, 'For starting new line LF symbol can be used' + #10 + 'code of which is equal to 10 and named in Unicode as "Line Feed"',
                    TEXT_HALIGN_CENTER or TEXT_VALIGN_CENTER );
 

@@ -37,7 +37,7 @@ uses
 
 var
   dirRes    : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
-  fntMain   : Byte;
+  fntMain   : LongWord;
   video     : zglPVideoStream;
   videoSeek : Boolean;
 
@@ -66,7 +66,7 @@ begin
 
       // EN: Rendering of progress bar.
       // RU: Рендеринг полосы прогресса.
-      pr2d_Rect( 0, 600 - 100, 800, 20, $00FF00, 255 );
+      pr2d_Rect( 0, 600 - 100, 800, 20, {$IfNDef OLD_METHODS}cl_Green{$Else}$00FF00, 255{$EndIf} );
       pr2d_Rect( 0, 600 - 100, ( 800 / video.Info.Duration ) * video.Time, 20, {$IfDef OLD_METHODS}$00FF00, 155,{$Else}newColor,{$EndIf}PR2D_FILL );
 
       text_Draw( fntMain, 0, 0, 'FPS: ' + u_IntToStr( zgl_Get( RENDER_FPS ) ) );

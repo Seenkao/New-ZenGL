@@ -47,20 +47,20 @@ type
   zglTSymbolNode = record
     leaf  : Boolean;
     ID    : Integer;
-    rect  : zglTRect;
+    rect  : zglTRect2D;
     child : array[0..1] of zglPSymbolNode;
   end;
 
 function  fontgen_Init: Boolean;
-procedure fontgen_BuildFont(var Font: Byte; const FontName: String );
-procedure fontgen_SaveFont(Font: Byte; const FileName: String );
+procedure fontgen_BuildFont(var Font: LongWord; const FontName: String );
+procedure fontgen_SaveFont(Font: LongWord; const FileName: String );
 
 var
-  fg_Font        : Byte;
-  fg_FontNodes   : array of zglTSymbolNode;                     // походу перепись страниц, где существует фонт
+  fg_Font        : LongWord;
+  fg_FontNodes   : array of zglTSymbolNode;
   fg_CharsUse    : array[ 0..65535 ] of Boolean;
   fg_CharsUID    : array of WORD;
-  fg_CharsSize   : array of zglTRect;
+  fg_CharsSize   : array of zglTRect2D;
   fg_CharsP      : array of Integer;
   fg_CharsImage  : array of array of Byte;
   fg_FontList    : zglTStringList;
@@ -212,7 +212,7 @@ begin
     end;
 end;
 
-function fontgen_InsertSymbol(node: zglPSymbolNode; const r: zglTRect; ID: Integer) : zglPSymbolNode;
+function fontgen_InsertSymbol(node: zglPSymbolNode; const r: zglTRect2D; ID: Integer) : zglPSymbolNode;
   var
     dw, dh : Single;
     c1, c2 : zglPSymbolNode;
@@ -366,7 +366,7 @@ function fontgen_Init: Boolean;
     ObjectSet : PFcObjectSet;
     Family    : PChar;
     {$ENDIF}
-    {$IFDEF WIN32}
+    {$IFDEF WINDOWS}
     LFont : LOGFONT;
     {$ENDIF}
 begin
@@ -398,7 +398,7 @@ begin
   FcObjectSetDestroy(ObjectSet);
   FcPatternDestroy(Pattern);
 {$ENDIF}
-{$IFDEF WIN32}
+{$IFDEF WINDOWS}
   FillChar(LFont, SizeOf(LFont), 0);
   LFont.lfCharSet := DEFAULT_CHARSET;
   EnumFontFamiliesEx(wndDC, LFont, @FontEnumProc, 0, 0);
@@ -435,7 +435,7 @@ begin
       end;
 end;
 
-procedure fontgen_BuildFont( var Font : Byte; const FontName : String );
+procedure fontgen_BuildFont( var Font : LongWord; const FontName : String );
   var
     pData    : Pointer;
     i, j     : Integer;
@@ -447,7 +447,7 @@ procedure fontgen_BuildFont( var Font : Byte; const FontName : String );
     u, v     : Single;
     MaxWidth : Integer;
     sn       : zglPSymbolNode;
-    sr       : zglTRect;
+    sr       : zglTRect2D;
     {$IFDEF LINUX}
     scrVisual  : PVisual;
     Family     : array[ 0..255 ] of Char;
@@ -645,7 +645,6 @@ begin
       SetLength( fg_CharsImage[ i ], cx * cy );
       FillChar( fg_CharsImage[ i, 0 ], cx * cy, $FF );
 
-      // максимальное значение ширины или высоты
       MaxWidth := Trunc( Max( MaxWidth, fg_CharsSize[ i ].W + fg_FontPadding[ 0 ] + fg_FontPadding[ 2 ] + Byte( fg_FontAA ) ) );
       MaxWidth := Trunc( Max( MaxWidth, fg_CharsSize[ i ].H + fg_FontPadding[ 1 ] + fg_FontPadding[ 3 ] + Byte( fg_FontAA ) ) );
 
@@ -818,7 +817,7 @@ begin
   managerFont.Font[Font].Padding[ 3 ] := fg_FontPadding[ 3 ];
 end;
 
-procedure fontgen_SaveFont( Font: Byte; const FileName : String );
+procedure fontgen_SaveFont( Font: LongWord; const FileName : String );
   type
     zglPTGAHeader = ^zglTTGAHeader;
     zglTTGAHeader = packed record

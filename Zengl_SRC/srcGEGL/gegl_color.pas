@@ -77,26 +77,29 @@ type
     count, len: Cardinal;
   end;
 
-// Rus: ищем или добавляем цвет
-// Eng:
+// Rus: ищем или добавляем цвет. Цвет добавляется, если его нет в списке.
+// Eng: looking for or adding color. The color is added if it is not in the list.
 function Color_FindOrAdd(Color: LongWord): LongWord;
-// Rus: добавляем цвет без проверки на существование
-// Eng:
+// Rus: добавляем цвет без проверки на существование.
+// Eng: add a color without checking for existence.
 function Color_UAdd(Color: LongWord): LongWord;
-// Rus: уничтожаем менеждер. Вызывать не требуется.
-// Eng:
+// Rus: уничтожаем менеждер цвета. Вызывать не требуется.
+// Eng: destroy the color manager. Calling is not required.
 procedure managerColorDestroy;
 // Rus: корректируем цвет.
-// Eng:
+// Eng: correcting the color.
 procedure Correct_Color(num, Color: LongWord);
-// Rus: устанавливаем цвет (для совместимости с OpenGL ES). Здесь указывается
-//      номер цвета, а не сам цвет.
-// Eng:
+// Rus: устанавливаем цвет (для совместимости с OpenGL ES). Указывается номер
+//      цвета, а не сам цвет.
+// Eng: set the color (for compatibility with OpenGL ES). The color number is
+//      specified, not the color itself.
 procedure Set_numColor(numColor: LongWord); {$IfDef USE_INLINE} inline;{$EndIf}
 // Rus: получаем значение цвета. Значение цвета идёт в обратном порядке! Это
 //      удобно для передачи ссылкой в glColor4ubv делая вид, что это ссылка на
 //      массив байт.
-// Eng:
+// Eng: get the color value. The color value goes in reverse order! This is handy
+//      for passing by reference to glColor4ubv. Pretending it's a reference to
+//      an array of bytes.
 function Get_Color(num: LongWord): LongWord;
 
 var

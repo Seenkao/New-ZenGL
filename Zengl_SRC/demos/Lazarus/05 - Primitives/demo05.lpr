@@ -21,7 +21,9 @@ uses
   zgl_primitives_2d,
   zgl_types,
   zgl_math_2d,
+  {$IfNDef OLD_METHODS}
   gegl_color,
+  {$EndIf}
   zgl_utils
   {$Else}
   zglHeader
@@ -31,7 +33,7 @@ uses
 var
   calc   : Integer;
   points : array[ 0..359 ] of zglTPoint2D;
-  TimeStart  : Byte = 0;
+  TimeStart  : LongWord = 0;
   {$IfNDef OLD_METHODS}
   dirRes : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
   newColor: array[0..1] of LongWord;
@@ -47,8 +49,8 @@ begin
     points[ i ].Y := 300 + m_Sin( i ) * ( 96 + random( 32 ) );
   end;
   {$IfNDef OLD_METHODS}
-  // Rus: устанавливаем новый цвет. Которого нет в списке стандартных. Константы в gegl_color.
-  // Eng:
+  // Rus: устанавливаем новый цвет. Которого нет в списке стандартных. Все константы в gegl_color.
+  // Eng: set a new color. Which is not in the standard list. All constants in gegl_color.
   newColor[0] := Color_FindOrAdd($0000009B);
   newColor[1] := Color_FindOrAdd($FFFFFF4B);
   {$EndIf}

@@ -1,6 +1,7 @@
 program demo08;
 
 {$I zglCustomConfig.cfg}
+{$I zgl_config.cfg}
 
 uses
   {$IFDEF UNIX}
@@ -23,6 +24,9 @@ uses
   zgl_text,
   zgl_types,
   zgl_utils
+  {$IfNDef OLD_METHODS}
+  , gegl_color
+  {$EndIf}
   {$ELSE}
   zglHeader
   {$ENDIF}
@@ -42,14 +46,17 @@ type
 
 var
   dirRes    : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
-  fntMain   : Byte; // zglPFont;
+  fntMain   : LongWord;
   texLogo   : zglPTexture;
   texMiku   : zglPTexture;
   time      : Integer;
   sengine2d : zglTSEngine2D;
 
-  TimeStart : Byte;
-  TimeMiku  : Byte;
+  TimeStart : LongWord;
+  TimeMiku  : LongWord;
+  
+  newColor  : LongWord;
+  correctColor: LongWord; 
 
 // Miku
 procedure MikuInit( var Miku : zglTMikuSprite );
@@ -141,9 +148,14 @@ begin
 
   fntMain := font_LoadFromFile( dirRes + 'font.zfi' );
   setFontTextScale(15, fntMain);
+  
+  newColor := Color_FindOrAdd($80A080FF - 55);
+  correctColor := Color_FindOrAdd($AFAFAFFF); 
 end;
 
 procedure Draw;
+var
+  i: LongWord;
 begin
   batch2d_Begin();
   // RU: Рисуем все спрайты находящиеся в текущем спрайтовом менеджере.
@@ -156,13 +168,18 @@ begin
   else
     if time < 510 Then
       begin
-        pr2d_Rect( 0, 0, 800, 600, $AFAFAF, 510 - time, PR2D_FILL );
+        i := Get_Color(correctColor);
+        pr2d_Rect( 0, 0, 800, 600, {$IfDef OLD_METHODS}$AFAFAF, 510 - time,{$Else}correctColor,{$EndIf} PR2D_FILL );
+        dec(i);
+        if i < $AFAFAF00 then
+          i := $AFAFAF00;
+        Correct_Color(correctColor, i);   
         ssprite2d_Draw( texLogo, 400 - 256, 300 - 128, 512, 256, 0, 510 - time );
       end;
 
   if time > 255 Then
     begin
-      pr2d_Rect( 0, 0, 256, 64, $80A080, 200, PR2D_FILL );
+      pr2d_Rect( 0, 0, 256, 64, {$IfDef OLD_METHODS} $80A080, 200,{$Else}newColor,{$EndIf} PR2D_FILL );
       text_Draw( fntMain, 0, 0, 'FPS: ' + u_IntToStr( zgl_Get( RENDER_FPS ) ) );
       text_Draw( fntMain, 0, 20, 'Sprites: ' + u_IntToStr( sengine2d.Count ) );
       text_Draw( fntMain, 0, 40, 'Up/Down - Add/Delete Miku :)' );
@@ -206,10 +223,10 @@ Begin
 
   randomize;
 
-  TimeStart := timer_Add( @Timer, 16, Start );
+  TimeStart := timer_Add( @Timer, 16, t_Start );
   // RU: Таймер с задержкой в 6 секунд.
   // EN: Timer with a 6 second delay.
-  TimeMiku := timer_Add( @AddMiku, 1000, SleepToStart, 6);
+  TimeMiku := timer_Add( @AddMiku, 1000, t_SleepToStart, 6);
 
   zgl_SetEventsInterval(16);
   zgl_Reg(SYS_EVENTS, @KEyMouseEvent);

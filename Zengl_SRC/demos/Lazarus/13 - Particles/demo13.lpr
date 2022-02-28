@@ -1,6 +1,7 @@
 program demo13;
 
 {$I zglCustomConfig.cfg}
+{$I zgl_config.cfg}
 
 {$IFDEF WINDOWS}
   {$R *.res}
@@ -27,7 +28,9 @@ uses
   zgl_text,
   zgl_math_2d,
   zgl_utils,
+  {$IfNDef OLD_METHODS}
   gegl_color
+  {$EndIf}
   {$ELSE}
   zglHeader
   {$ENDIF}
@@ -35,7 +38,7 @@ uses
 
 var
   dirRes         : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
-  fntMain        : Byte;
+  fntMain        : LongWord;
   texBack        : zglPTexture;
   debug          : Boolean;
   particles      : zglTPEngine2D;
@@ -85,7 +88,7 @@ procedure Draw;
   var
     i : Integer;
 begin
-//  batch2d_Begin();
+  batch2d_Begin();
 
   ssprite2d_Draw( texBack, 0, 0, 800, 600, 0 );
 
@@ -96,18 +99,19 @@ begin
   if debug Then
     for i := 0 to particles.Count.Emitters - 1 do
       with particles.List[ i ].BBox do
-        pr2d_Rect( MinX, MinY, MaxX - MinX, MaxY - MinY, $FF0000, 255 );
+        pr2d_Rect( MinX, MinY, MaxX - MinX, MaxY - MinY,{$IfNDef OLD_METHODS}cl_Red{$Else} $FF0000, 255{$EndIf} );
 
   text_Draw( fntMain, 0, 0, 'FPS: ' + u_IntToStr( zgl_Get( RENDER_FPS ) ) );
   text_Draw( fntMain, 0, 20, 'Particles: ' + u_IntToStr( particles.Count.Particles ) );
   text_Draw( fntMain, 0, 40, 'Debug(F1): ' + u_BoolToStr( debug ) );
 
-//  batch2d_End();
+  batch2d_End();
 end;
 
 procedure KeyMouseEvent;
 begin
-  if key_Press( K_F1 ) Then debug := not debug;
+  if key_Press( K_F1 ) Then
+    debug := not debug;
 end;
 
 procedure Update( dt : Double );

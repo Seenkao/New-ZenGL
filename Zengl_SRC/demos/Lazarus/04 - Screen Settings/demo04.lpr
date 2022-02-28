@@ -39,7 +39,7 @@ uses
 var
   dirRes  : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
 
-  fntMain : Byte;
+  fntMain : LongWord;
   texBack : zglPTexture;
 
 procedure Init;

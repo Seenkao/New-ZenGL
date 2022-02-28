@@ -1,6 +1,7 @@
 program demo04;
 
 {$I zglCustomConfig.cfg}
+{$I zgl_config.cfg} 
 
 // не рекомендуется к использованию!!! Особенно на MacOS Cocoa! Желательно перезагружать программу,
 // в особенности, если вы делаете полноэкранное окно
@@ -23,6 +24,9 @@ uses
   zgl_textures_png,
   zgl_textures_jpg,
   zgl_utils
+  {$IfNDef OLD_METHODS}
+  , gegl_color
+  {$EndIf}
   {$ELSE}
   zglHeader
   {$ENDIF}
@@ -31,7 +35,7 @@ uses
 var
   dirRes  : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
 
-  fntMain : Byte;
+  fntMain : LongWord;
   texBack : zglPTexture;
 
 procedure Init;
@@ -39,6 +43,7 @@ begin
   fntMain := font_LoadFromFile( dirRes + 'font.zfi' );
   texBack := tex_LoadFromFile( dirRes + 'back03.jpg' );
 
+  setTextColor(Get_Color(cl_White));
   setFontTextScale(15, fntMain);                  // razmery shrifta
 end;
 

@@ -1,6 +1,7 @@
 program demo11;
 
 {$I zglCustomConfig.cfg}
+{$I zgl_config.cfg}
 
 {$R *.res}
 
@@ -22,11 +23,11 @@ uses
 
 var
   dirRes     : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
-  fntMain    : Byte;
+  fntMain    : LongWord;
   texBack    : zglPTexture;
   grid       : zglTGrid2D;
   wave       : Single;
-  TimeStart  : Byte;
+  TimeStart  : LongWord;
 
 procedure Init;
   var
@@ -89,7 +90,7 @@ end;
 Begin
   randomize();
 
-  TimeStart := timer_Add(@Timer, 16, SleepToStart, 3);
+  TimeStart := timer_Add(@Timer, 16, t_SleepToStart, 3);
 
   zgl_Reg(SYS_LOAD, @Init);
   zgl_Reg(SYS_DRAW, @Draw);

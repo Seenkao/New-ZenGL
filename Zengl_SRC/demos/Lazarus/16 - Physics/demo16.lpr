@@ -3,6 +3,7 @@ program demo16;
 // RU: В этом файле конфигурации содержится "опция" USE_CHIPMUNK_STATIC для статической компиляции с Chipmunk
 // EN: This file contains "option" USE_CHIPMUNK_STATIC for static compilation with Chipmunk
 {$I zglCustomConfig.cfg}
+{$I zgl_config.cfg}
 
 {$IFDEF WINDOWS}
   {$R *.res}
@@ -35,13 +36,13 @@ uses
 
 var
   dirRes  : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
-  fntMain : Byte;
+  fntMain : LongWord;
   space   : PcpSpace;
   bCount  : Integer;
   Bodies  : array of PcpBody;
   Shapes  : array of PcpShape;
 
-  TimePhisics: Byte;
+  TimePhisics: LongWord;
 
 // RU: Добавить объект "шар"
 //     x, y - координаты центра
@@ -111,10 +112,10 @@ begin
 end;
 
 procedure Init;
-  var
-    staticBody : PcpBody;
-    ground     : PcpShape;
-    e, u       : cpFloat;
+var
+  staticBody : PcpBody;
+  ground     : PcpShape;
+  e, u       : cpFloat;
 begin
   fntMain := font_LoadFromFile(dirRes + 'font.zfi');
   setFontTextScale(15, fntMain);
@@ -190,9 +191,8 @@ begin
   if (mouseAction[M_BLEFT].state and is_down) > 0 Then
     cpAddBox(mouseX - 10, mouseY - 10, 48, 32, 1, 0.5, 0.5);
 
-  if mouseBClick(M_BMIDDLE) Then
+  if mouseBClick(M_BRIGHT) Then
     cpAddBall(mouseX, mouseY, 16, 2, 0.5, 0.1);
- // if mouseBDown(4) then ;
 end;
 
 procedure Phisics;

@@ -29,7 +29,11 @@ uses
 var
   dirRes  : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
 
-  fntMain, fntEdit: Byte;
+  // Ru: номера шрифтов. Вся работа со шрифтами происходит именно от этих номеров.
+  fntMain, fntEdit: LongWord;
+
+  // Ru: номер цвета. Работа с цветом происходит именно от этого номера.
+  EditColor: LongWord;
 
   joyCount   : Integer;
   // RU: строка для получения значения из поля ввода
@@ -44,7 +48,7 @@ var
   {$Else}
   // RU: прямоугольник, описывающий поле ввода
   // EN: rectangle describing the input field
-  myRect: zglTRect;
+  myRect: zglTRect2D;
 
   // "перепись" полей ввода для того, чтоб знать с каким полем работаем
 
@@ -63,17 +67,16 @@ begin
   // Текст будет выведен поверх того, что вы тут нарисуете.
   // EN: displacement and rotation will be done prior to performing the procedure. I am showing you how to draw a frame.
   // The text will be drawn on top of what you draw here.
-  pr2d_Rect(- 2, - 1, myRect.W + 5, myRect.H, cl_white, PR2D_FILL);
+  pr2d_Rect(- 2, - 1, myRect.W + 5, myRect.H, cl_white{$IfDef OLD_METHODS}, 128{$EndIf}, PR2D_FILL);
 end;
 {$EndIf}
 
 procedure Init;
 {$IfNDef OLD_METHODS}
 var
-  TextColor: zglTColor;
+  EScale: Word;
 {$EndIf}
 begin
-  SetAndAddDefaultColor;
   fntMain := font_LoadFromFile(dirRes + 'font.zfi');
   {$IfNDef OLD_METHODS}
   // RU: Загружаем данные о шрифте.
@@ -83,6 +86,12 @@ begin
   // EN: set font sizes
   setFontTextScale(15, fntMain);
   setFontTextScale(20, fntEdit);
+  // RU: размер шрифта поля ввода (для понимания что происходит). Изменяя размер шрифта, мы должны менять и
+  //     размеры поля ввода - myRect в данном случае. Сами они не изменятся.
+  // EN: the font size of the input field (to understand what's going on). By changing the font size,
+  //     we must also change the size of the input field - myRect in this case. They themselves will not change.
+  EScale := 20;
+  setFontTextScale(EScale, fntEdit);
   // RU: указываем размеры поля ввода
   // EN: specify the size of the input field
   myRect.X := 200;
@@ -92,22 +101,25 @@ begin
   // RU: указываем точку вращения, в данном случае центр поля ввода(по необходимости) и угол поворота(например 45)
   // EN: specify the point of rotation, in this case the center of the input field (if necessary) and the angle of rotation (for example 45)
   SetOfRotateAngleAndPoint(myRect.x + myRect.W / 2, myRect.y + myRect.H / 2, 30);
-  // RU: указываем цвет текста
-  // EN: specify the color of the text
-  TextColor.R := 0.1;
-  TextColor.G := 0.5;
-  TextColor.B := 0.3;
-  TextColor.A := 1;            // max = 1, min = 0
-  // RU: передаём цвет в данные менеджера
-  // EN: transfer the color to the manager data
-  SetColorElementText(@TextColor);
+  // RU: указываем цвет текста (добавляем новый номер цвета, хотя данная функция вам возвратит цвет, если он уже был прописан).
+  // EN: specify the color of the text (we add a new color number, although this function will return the color to you if it
+  //     has already been assigned).
+  EditColor := Color_FindOrAdd($208055FF);
+  // Ru: устанавливаем цвета по умолчанию для всех  элементов API. Эти цвета будут задействованы только при создании
+  //     определённого элемента. Для изменения цвета в самом (уже созданном) элементе, ни чего не прилагается.
+  //     Дальнейшие измениня этих значений цвета, ни как не скажется на уже созданных элементах.
+  // En: set default colors for all API elements. These colors will only be used when creating a specific element.
+  //     To change the color in the (already created) element itself, nothing is attached. Further changes to these
+  //     color values will not affect the already created elements in any way.
+  SetEditColor(fntEdit, EditColor, 1);
+
   // RU: создаём само поле ввода с данными указанными выше
   // EN: create the input field itself with the data specified above
   myEdit := CreateEdit(myRect, fntEdit, 20, @EditCont);
 
   // RU: корректируем курсор.
   // EN: adjust the cursor
-//  CorrectEditCursor(myEdit, 3);
+  CorrectEditCursor(myEdit, 3);
 
   // RU: задаём очистку экрана заданным цветом
   // EN: set the screen to clear with a specified color
@@ -131,6 +143,10 @@ var
   w : Single;
 {$EndIf}
 begin
+  // Ru: балуемся цветом шрифта.
+  // En: indulge in the color of the font.
+  setTextColor(Get_Color(cl_Blue));
+
   text_Draw(fntMain, 0, 0, 'Escape - Exit');
 
   // RU: Координаты мыши можно получить при помощи функций mouse_X и mouse_Y.
@@ -160,15 +176,20 @@ begin
   // EN: Show the state of axes and buttons of first joystick in the system.
   text_Draw(fntMain, 400, 360, 'JOYSTICK ( Found: ' + u_IntToStr(joyCount) + ' )', TEXT_HALIGN_CENTER);
 
-  text_Draw(fntMain, 100, 400, 'Axis X: ' + u_FloatToStr(joy_AxisPos(0, JOY_AXIS_X)));
-  text_Draw(fntMain, 100, 420, 'Axis Y: ' + u_FloatToStr(joy_AxisPos(0, JOY_AXIS_Y)));
-  text_Draw(fntMain, 100, 440, 'Axis Z: ' + u_FloatToStr(joy_AxisPos(0, JOY_AXIS_Z)));
-  text_Draw(fntMain, 100, 460, 'Axis R: ' + u_FloatToStr(joy_AxisPos(0, JOY_AXIS_R)));
-  text_Draw(fntMain, 100, 480, 'Axis U: ' + u_FloatToStr(joy_AxisPos(0, JOY_AXIS_U)));
-  text_Draw(fntMain, 100, 500, 'Axis V: ' + u_FloatToStr(joy_AxisPos(0, JOY_AXIS_V)));
-  text_Draw(fntMain, 100, 520, 'POVX: ' + u_FloatToStr(joy_AxisPos(0, JOY_POVX)));
-  text_Draw(fntMain, 100, 540, 'POVY: ' + u_FloatToStr(joy_AxisPos(0, JOY_POVY)));
+  setTextColor(Get_Color(cl_Black));
+  text_Draw( fntMain, 100, 400, 'Axis X: ' + u_FloatToStr( joy_AxisPos( 0, JOY_AXIS_X ) ) );
+  text_Draw( fntMain, 100, 420, 'Axis Y: ' + u_FloatToStr( joy_AxisPos( 0, JOY_AXIS_Y ) ) );
+  setTextColor(Get_Color(cl_Black05));
+  text_Draw( fntMain, 100, 440, 'Axis Z: ' + u_FloatToStr( joy_AxisPos( 0, JOY_AXIS_Z ) ) );
+  setTextColor(Get_Color(cl_Green));
+  text_Draw( fntMain, 100, 460, 'Axis R: ' + u_FloatToStr( joy_AxisPos( 0, JOY_AXIS_R ) ) );
+  text_Draw( fntMain, 100, 480, 'Axis U: ' + u_FloatToStr( joy_AxisPos( 0, JOY_AXIS_U ) ) );
+  setTextColor(Get_Color(cl_Green05));
+  text_Draw( fntMain, 100, 500, 'Axis V: ' + u_FloatToStr( joy_AxisPos( 0, JOY_AXIS_V ) ) );
+  text_Draw( fntMain, 100, 520, 'POVX: ' + u_FloatToStr( joy_AxisPos( 0, JOY_POVX ) ) );
+  text_Draw( fntMain, 100, 540, 'POVY: ' + u_FloatToStr( joy_AxisPos( 0, JOY_POVY ) ) );
 
+  setTextColor(Get_Color(cl_Red05));
   text_Draw(fntMain, 400, 400, 'Button1: ' + u_BoolToStr(joy_Down(0, 0)));
   text_Draw(fntMain, 400, 420, 'Button2: ' + u_BoolToStr(joy_Down(0, 1)));
   text_Draw(fntMain, 400, 440, 'Button3: ' + u_BoolToStr(joy_Down(0, 2)));
@@ -187,23 +208,22 @@ begin
   text_Draw(fntMain, 550, 540, 'Button16: ' + u_BoolToStr(joy_Down(0, 15)));
 end;
 
-
+{$IfDef OLD_METHODS}
 procedure Timer;
 begin
-(*        // расскомметировать, если хотите использовать старый способ
   if lineAlpha > 5 Then
     DEC(lineAlpha, 10)
   else
     lineAlpha := 255;
-  *)
 end;
+{$EndIf}
 
 procedure KeyMouseEvent;
 begin
   {$IfDef OLD_METHODS}
   // RU: Проверить нажата ли левая кнопка мыши в пределах inputRect и начать отслеживать ввод текста.
   // EN: Check if left mouse button was pressed inside inputRect and start to track text input.
-  if mBClickCanClick(M_BLEFT_CLICK) and col2d_PointInRect(mouseX, mouseY, inputRect) Then
+  if mouseBClick(M_BLEFT) and col2d_PointInRect(mouseX, mouseY, inputRect) Then
   begin
     trackInput := TRUE;
     key_BeginReadText(userInput, 24);
@@ -233,7 +253,7 @@ end;
 
 Begin
   {$IfDef OLD_METHODS}
-  TimeStart := timer_Add(@Timer, 16, Start);
+  TimeStart := timer_Add(@Timer, 16, t_Start);
   {$EndIf}
 
   zgl_Reg(SYS_EVENTS, @KeyMouseEvent);

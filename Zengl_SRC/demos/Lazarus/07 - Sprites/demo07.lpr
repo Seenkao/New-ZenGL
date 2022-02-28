@@ -45,7 +45,7 @@ end;
 
 var
   dirRes      : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
-  fntMain     : Byte;
+  fntMain     : LongWord;
   texLogo     : zglPTexture;
   texBack     : zglPTexture;
   texGround   : zglPTexture;
@@ -58,11 +58,11 @@ var
   newColor    : LongWord;
   correctColor: LongWord;
 
-  TimeStart  : Byte = 0;
+  TimeStart   : LongWord = 0;
 
 procedure Init;
-  var
-    i : Integer;
+var
+  i : Integer;
 begin
   // RU: Т.к. по умолчанию вся структура камеры заполняется нулями, следует инициализировать её стандартными значениями.
   // EN: Camera must be initialized, because camera structure is zero-filled by default.
@@ -116,10 +116,10 @@ begin
   // EN: Set FPS.
   scr_SetFPS(60);
   // Rus: задаём новый цвет. Это чёрный и немного прозрачный.
-  // Eng:
+  // Eng: set a new color. It is black and slightly transparent.
   newColor := Color_FindOrAdd(200);
   // Rus: задаём новый цвет, без проверки на существование. Это чёрный не прозрачный.
-  // Eng:
+  // Eng: we set a new color, without checking for existence. It's black and not transparent.
   correctColor := Color_UAdd(255);
 end;
 
@@ -230,11 +230,15 @@ begin
   else
     if time < 510 Then
       begin
+        // Rus: получаем значение цвета.
+        // Eng: Get the color value.
         i := Get_Color(correctColor);
         pr2d_Rect( 0, 0, 800, 600,{$IfDef OLD_METHODS} $000000, 510 - time,{$Else} correctColor,{$EndIf} PR2D_FILL );
         dec(i);
         if i < 0 then
           i := 0;
+        // Rus: корректируем значение цвета.
+        // Eng: adjusting the color value.
         Correct_Color(correctColor, i);
         ssprite2d_Draw( texLogo, 400 - 256, 300 - 128, 512, 256, 0, 510 - time );
       end;
@@ -247,8 +251,8 @@ begin
 end;
 
 procedure Timer;
-  var
-    i : Integer;
+var
+  i : Integer;
 begin
   INC( time, 2 );
 

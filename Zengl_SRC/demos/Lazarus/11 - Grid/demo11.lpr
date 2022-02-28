@@ -1,6 +1,7 @@
 program demo11;
 
 {$I zglCustomConfig.cfg}
+{$I zgl_config.cfg}
 
 {$IFDEF WINDOWS}
   {$R *.res}
@@ -31,12 +32,12 @@ uses
 
 var
   dirRes      : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
-  fntMain     : Byte;
+  fntMain     : LongWord;
   texBack     : zglPTexture;
   grid        : zglTGrid2D;
   wave        : Single;
 
-  TimeStart  : Byte = 0;
+  TimeStart  : LongWord = 0;
 
 procedure Init;
 var

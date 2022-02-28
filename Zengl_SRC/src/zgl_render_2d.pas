@@ -115,7 +115,7 @@ end;
 
 function batch2d_Check(Mode, FX: LongWord; Texture: zglPTexture): Boolean;
 begin
-  if (b2dCurMode <> Mode) or (b2dCurTexture <> Texture) or (b2dCurBlend <> FX and FX_BLEND) or (b2dCurSmooth <> FX and PR2D_SMOOTH) Then
+  if (b2dCurMode <> Mode) or (Mode = GL_LINE_LOOP) or (b2dCurTexture <> Texture) or (b2dCurBlend <> FX and FX_BLEND) or (b2dCurSmooth <> FX and PR2D_SMOOTH) Then
   begin
     if not b2dNew Then
       batch2d_Flush();

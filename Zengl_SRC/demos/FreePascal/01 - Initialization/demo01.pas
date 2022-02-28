@@ -3,6 +3,8 @@ program demo01;
 // RU: Этот файл содержит некоторые настройки(например использовать ли статическую компиляцию) и определения ОС под которую происходит компиляция.
 // EN: This file contains some options(e.g. whether to use static compilation) and defines of OS for which is compilation going.
 {$I zglCustomConfig.cfg}
+{$I zgl_config.cfg}
+{$I GLdefine.cfg}
 
 uses
   {$IFDEF UNIX}
@@ -27,7 +29,7 @@ var
   DirApp  : UTF8String;
   DirHome : UTF8String;
 
-  TimeStart  : Byte = 0;
+  TimeStart  : LongWord = 0;
 
 procedure Init;
 begin
@@ -111,7 +113,7 @@ Begin
 
   // RU: Создаем таймер с интервалом 1000мс.
   // EN: Create a timer with interval 1000ms.
-  TimeStart := timer_Add( @Timer, 1000, Start );
+  TimeStart := timer_Add( @Timer, 1000, t_Start );
 
   // RU: Регистрируем процедуру, что выполнится сразу после инициализации ZenGL.
   // EN: Register the procedure, that will be executed after ZenGL initialization.
@@ -137,8 +139,12 @@ Begin
   // EN: Set screen options.
   zgl_SetParam(800, 600, false, false);
 
-  scr_SetOptions();                              // это тоже не обязательно вызывать, по умолчанию прописано при инициализации
-
+  {$IfNDef USE_MIN_OPENGL}
+  // RU: Устанавливаем контекст OpenGL 3.3. Для этого надо отключить дефайн USE_MIN_OPENGL в GLdefine.cfg
+  // EN: Setting context OpenGL 3.3. Disable "USE_MIN_OPENGL" in GLdefine.cfg
+  SetGLVersionAndFlags(3, 3);
+  {$EndIf}
+  
   // RU: Инициализируем ZenGL.
   // EN: Initialize ZenGL.
   zgl_Init();

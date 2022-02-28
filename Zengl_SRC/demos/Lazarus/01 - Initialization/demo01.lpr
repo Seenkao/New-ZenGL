@@ -32,7 +32,7 @@ var
   DirApp  : UTF8String;
   DirHome : UTF8String;
 
-  TimeStart  : Byte = 0;
+  TimeStart  : LongWord = 0;
 
 procedure Init;
 begin

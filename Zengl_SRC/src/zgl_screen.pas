@@ -26,6 +26,8 @@
 unit zgl_screen;
 
 {$I zgl_config.cfg}
+{$I GLdefine.cfg}
+
 {$IF defined(iOS) or defined(MAC_COCOA)}
   {$modeswitch objectivec1}
 {$IfEnd}
@@ -126,11 +128,13 @@ procedure scr_ReadPixels(var pData: Pointer; X, Y, Width, Height: Word);
 // Eng: depth setting for 2D mode. Can be used for 3D as well, given that Far
 //      must not be less than zero.
 procedure Set2DNearFar(newNear, newFar: {$IfNDef USE_GLES}Double{$Else}{$IF DEFINED(USE_GLES_ON_DESKTOP) and DEFINED(USE_AMD_DRIVERS)}Double{$Else}Single{$IfEnd}{$EndIf});
+{$IfDef GL_VERSION_3_0}
 // Rus: установка версии OpenGL, маски и флагов. Вызывать обязательно до
 //      создания окна (до zgl_Init)!!! Совместимые версии только до OpenGL 3.1,
 //      далее они не совместимы со старым контекстом.
 // Eng:
 procedure SetGLVersionAndFlags({$IfNDef MAC_COCOA}major, minor: Integer; flag: LongWord = COMPATIBILITY_VERSION{$Else}mode: LongWord{$EndIf});
+{$EndIf}
 
 type
   zglPResolutionList = ^zglTResolutionList;
@@ -234,7 +238,7 @@ var
   {$Else}
   scrFar: Single = 1;
   scrNear: Single = - 1;
-  {$EndIf}
+  {$IfEnd}
   {$EndIf}
 
 
@@ -1004,6 +1008,7 @@ begin
   scrNear := newNear;
 end;
 
+{$IfDef GL_VERSION_3_0}
 procedure SetGLVersionAndFlags({$IfNDef MAC_COCOA}major, minor: Integer; flag: LongWord = COMPATIBILITY_VERSION{$Else}mode: LongWord{$EndIf});
   {$IfNDef MAC_COCOA}
   procedure MajorMinor;
@@ -1073,5 +1078,6 @@ begin
   {$EndIf}
   {$EndIf}
 end;
+{$EndIf}
 
 end.

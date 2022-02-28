@@ -1,6 +1,7 @@
 program demo12;
 
 {$I zglCustomConfig.cfg}
+{$I zgl_config.cfg}
 
   // MacOS Cocoa not work. Deprecated.
 uses
@@ -29,7 +30,7 @@ uses
 
 var
   dirRes    : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
-  fntMain   : Byte;
+  fntMain   : LongWord;
   texTux    : zglPTexture;
   rtFull    : zglPRenderTarget;
   rtDefault : zglPRenderTarget;

@@ -40,7 +40,7 @@ const
 
 var
   dirRes  : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
-  fntMain : Byte;
+  fntMain : LongWord;
   icon    : array[ 0..1 ] of zglPTexture;
   sound   : zglPSound;
   audio   : Integer;
@@ -49,7 +49,7 @@ var
   // добавляем номер звука, пока для одного звука
   IDSound : Integer;
 
-  TimeStart: Byte = 0;
+  TimeStart: LongWord = 0;
 
   p : Integer;
 
@@ -85,8 +85,8 @@ begin
 end;
 
 procedure Draw;
-  var
-    r : zglTRect2D;
+var
+  r : zglTRect2D;
 begin
   ssprite2d_Draw( icon[ state ], ( SCREEN_WIDTH - 128 ) / 2, ( SCREEN_HEIGHT - 128 ) / 2, 128, 128, 0 );
   text_Draw( fntMain, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 64, 'Skillet - Comatose - Whispers In The Dark', TEXT_HALIGN_CENTER );
@@ -127,7 +127,7 @@ end;
 
 procedure KeyMouseEvent;
 var
-    r : zglTRect2D;
+  r : zglTRect2D;
 begin
   if mouseBClick(M_BLEFT) Then
   begin

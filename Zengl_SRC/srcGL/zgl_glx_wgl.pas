@@ -37,6 +37,7 @@ uses
   {$IfDef WINDOWS}
   Windows,
   {$EndIf}
+//  zgl_opengl_all,
   zgl_gltypeconst;
 
 {$IfDef WINDOWS}
@@ -101,7 +102,7 @@ var
 
 { wgl Windows OpenGL helper functions }
 {$IfNDef FPC}
-  function wglGetProcAddress(ProcName: LPCSTR): PROC; stdcall; external libGL;
+  function wglGetProcAddress(ProcName: LPCSTR): Pointer; stdcall; external 'opengl32.dll';
   {$IfDef USE_FULL_WGL}
 var
   (* WGL_VERSION_1_0 *)
@@ -1220,11 +1221,11 @@ begin
   wglUseFontOutlines := gl_GetProc('wglUseFontOutlines');
   wglUseFontOutlinesA := gl_GetProc('wglUseFontOutlinesA');
   wglUseFontOutlinesW := gl_GetProc('wglUseFontOutlinesW');   }
-  {$IfDef WGL_ARB_extensions_string or WGL_EXT_extensions_string}
+  {$If defined(WGL_ARB_extensions_string) or defined(WGL_EXT_extensions_string)}
   if WGL_ARB_extensions_string or WGL_EXT_extensions_string then
     wglGetExtensionsStringARB := gl_GetProc('wglGetExtensionsString');
   {$IfEnd}
-  {$ifdef WGL_ARB_pixel_format or WGL_EXT_pixel_format}
+  {$if defined(WGL_ARB_pixel_format) or defined(WGL_EXT_pixel_format)}
   if WGL_ARB_pixel_format or WGL_EXT_pixel_format then
   begin
     wglChoosePixelFormatARB := gl_GetProc('wglChoosePixelFormat');
@@ -1259,7 +1260,7 @@ begin
     wglRestoreBufferRegionARB := gl_GetProc('wglRestoreBufferRegionARB');
   end;
   {$EndIf}
-  {$ifdef WGL_ARB_make_current_read or WGL_EXT_make_current_read}
+  {$if defined(WGL_ARB_make_current_read) or defined(WGL_EXT_make_current_read)}
   if WGL_ARB_make_current_read or WGL_EXT_make_current_read then
   begin
     wglMakeContextCurrentARB := gl_GetProc('wglMakeContextCurrent');

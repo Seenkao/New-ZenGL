@@ -86,7 +86,7 @@ var
   {$Else}
   rs0: Single = 0;
   rs2: Single = 2;
-  {$EndIf}
+  {$IfEnd}
   {$EndIf}
 
 procedure Set2DMode;
@@ -98,7 +98,7 @@ var
   scrLeft, scrRight, scrTop, scrBottom: Double;
 {$Else}
   scrLeft, scrRight, scrTop, scrBottom: Single;
-{$EndIf}
+{$IfEnd}
 {$EndIf}
 begin
   oglMode := 2;

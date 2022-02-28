@@ -49,14 +49,14 @@ type
 
 var
   dirRes    : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
-  fntMain   : Byte;
+  fntMain   : LongWord;
   texLogo   : zglPTexture;
   texMiku   : zglPTexture;
   time      : Integer;
   sengine2d : zglCSEngine2D;
 
-  TimeStart : Byte = 0;
-  TimeMiku  : Byte = 0;
+  TimeStart : LongWord = 0;
+  TimeMiku  : LongWord = 0;
 
   newColor  : LongWord;
   correctColor: array[0..1] of LongWord;
@@ -137,8 +137,6 @@ begin
 end;
 
 procedure Init;
-  var
-    i : Integer;
 begin
   texLogo := tex_LoadFromFile( dirRes + 'zengl.png' );
 

@@ -1,6 +1,7 @@
 program demo12;
 
 {$I zglCustomConfig.cfg}
+{$I zgl_config.cfg}
 
 {$R *.res}
 
@@ -23,7 +24,7 @@ uses
 
 var
   dirRes   : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
-  fntMain  : Byte;
+  fntMain  : LongWord;
   texTux   : zglPTexture;
   rtFull   : zglPRenderTarget;
   rtDefault: zglPRenderTarget;

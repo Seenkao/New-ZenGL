@@ -1,6 +1,7 @@
 program demo09;
 
 {$I zglCustomConfig.cfg}
+{$I zgl_config.cfg}
 
 uses
   {$IFDEF UNIX}
@@ -23,6 +24,9 @@ uses
   zgl_text,
   zgl_types,
   zgl_utils
+  {$IfNDef OLD_METHODS}
+  , gegl_color
+  {$EndIf}
   {$ELSE}
   zglHeader
   {$ENDIF}
@@ -41,14 +45,17 @@ type
 
 var
   dirRes    : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
-  fntMain   : Byte;
+  fntMain   : LongWord;
   texLogo   : zglPTexture;
   texMiku   : zglPTexture;
   time      : Integer;
   sengine2d : zglCSEngine2D;
 
-  TimeStart : Byte = 0;
-  TimeMiku  : Byte = 0;
+  TimeStart : LongWord = 0;
+  TimeMiku  : LongWord = 0;
+
+  newColor  : LongWord;
+  correctColor: array[0..1] of LongWord;
 
 // Miku
 procedure CMiku.OnInit( _Texture : zglPTexture; _Layer : Integer );
@@ -126,8 +133,6 @@ begin
 end;
 
 procedure Init;
-  var
-    i : Integer;
 begin
   texLogo := tex_LoadFromFile( dirRes + 'zengl.png' );
 
@@ -145,11 +150,17 @@ begin
 
   fntMain := font_LoadFromFile( dirRes + 'font.zfi' );
   setFontTextScale(15, fntMain);
+  
+  newColor := Color_FindOrAdd($80A080FF - 55);
+  correctColor[1] := Color_FindOrAdd($7FAF7FFF);
+  correctColor[0] := Color_FindOrAdd($AFAFAFFF);
 end;
 
 procedure Draw;
+var
+  i : Integer;   
 begin
-//  batch2d_Begin();
+  batch2d_Begin();
   // RU: Рисуем все спрайты находящиеся в текущем спрайтовом менеджере.
   // EN: Render all sprites contained in current sprite engine.
   if time > 255 Then
@@ -157,24 +168,34 @@ begin
 
   if time <= 255 Then
   begin
-    pr2d_Rect(0, 0, 800, 600, $7FAF7F, 255, PR2D_FILL);
+    i := Get_Color(correctColor[1]);
+      pr2d_Rect(0, 0, 800, 600,{$IfDef OLD_METHODS} $7FAF7F, 255,{$Else}correctColor[1],{$EndIf} PR2D_FILL);
+      dec(i);
+      if i < $7FAF7F00 then
+        i := $7FAF7F00;
+      Correct_Color(correctColor[1], i);
     ssprite2d_Draw(texLogo, 400 - 256, 300 - 128, 512, 256, 0, time)
   end
   else
     if time < 510 Then
       begin
-        pr2d_Rect( 0, 0, 800, 600, $AFAFAF, 510 - time, PR2D_FILL );
+        i := Get_Color(correctColor[0]);
+        pr2d_Rect( 0, 0, 800, 600,{$IfDef OLD_METHODS} $AFAFAF, 510 - time,{$Else}correctColor[0],{$EndIf} PR2D_FILL );
+        dec(i);
+        if i < $AFAFAF00 then
+          i := $AFAFAF00;
+        Correct_Color(correctColor[0], i);
         ssprite2d_Draw( texLogo, 400 - 256, 300 - 128, 512, 256, 0, 510 - time );
       end;
 
   if time > 255 Then
     begin
-      pr2d_Rect( 0, 0, 256, 64, $80A080, 200, PR2D_FILL );
+      pr2d_Rect( 0, 0, 256, 64, {$IfDef OLD_METHODS} $80A080, 200,{$Else}newColor,{$EndIf} PR2D_FILL );
       text_Draw( fntMain, 0, 0, 'FPS: ' + u_IntToStr( zgl_Get( RENDER_FPS ) ) );
       text_Draw( fntMain, 0, 20, 'Sprites: ' + u_IntToStr( sengine2d.Count ) );
       text_Draw( fntMain, 0, 40, 'Up/Down - Add/Delete Miku :)' );
     end;
-//  batch2d_End();
+  batch2d_End();
 end;
 
 procedure Timer;
@@ -212,8 +233,8 @@ Begin
 
   randomize();
 
-  TimeStart := timer_Add( @Timer, 16, Start );
-  TimeMiku := timer_Add( @AddMiku, 1000, SleepToStart, 6 );
+  TimeStart := timer_Add( @Timer, 16, t_Start );
+  TimeMiku := timer_Add( @AddMiku, 1000, t_SleepToStart, 6 );
 
   zgl_Reg(SYS_EVENTS, @KeyMouseEvent);
   zgl_Reg( SYS_LOAD, @Init );

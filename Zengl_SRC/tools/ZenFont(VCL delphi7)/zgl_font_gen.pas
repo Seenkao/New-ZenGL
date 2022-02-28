@@ -313,7 +313,6 @@ begin
 
   MaxWidth := 0;
 
-  // установка размерностей
   SetLength(fg_CharsSize,  managerFont.Font[Font].Count.Chars);
   SetLength(fg_CharsUID,   managerFont.Font[Font].Count.Chars);
   SetLength(fg_CharsImage, managerFont.Font[Font].Count.Chars);
@@ -321,7 +320,7 @@ begin
 
   j := 0;
   for i := 0 to 65535 do
-    if fg_CharsUse[i] Then                        // "определяем" конкретное число символов.
+    if fg_CharsUse[i] Then
     begin
       SetLength(fg_CharsUID, j + 1);
       fg_CharsUID[j] := i;
@@ -585,7 +584,6 @@ begin
   file_Write(F, managerFont.Font[Font].MaxHeight,   4);
   file_Write(F, managerFont.Font[Font].MaxShiftY,   4);
   file_Write(F, fg_FontPadding[0],  4);
-  // сохраняем .zfi
   for i := 0 to managerFont.Font[Font].Count.Chars - 1 do
   begin
     c := fg_CharsUID[i];
@@ -599,7 +597,6 @@ begin
     file_Write(F, managerFont.Font[Font].CharDesc[c].TexCoords[0], SizeOf(zglTPoint2D) * 4);
   end;
   file_Close(F);
-  // сохраняем сам фонт
   for i := 0 to managerFont.Font[Font].Count.Pages - 1 do
   begin
     FillChar(TGA, SizeOf(zglTTGAHeader), 0);

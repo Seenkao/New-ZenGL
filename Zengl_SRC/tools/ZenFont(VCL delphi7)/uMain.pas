@@ -106,7 +106,7 @@ begin
   wnd_SetSize( Form1.Panel1.ClientWidth, Form1.Panel1.ClientHeight);
   scrVSync := True;
 
-  fontgen_Init();                                                         // это "установка" (выбор) шрифта
+  fontgen_Init();
   fg_Font := font_Add();
 
   Form1.SetDefaultSymbolList();
@@ -160,11 +160,11 @@ begin
   while i <= len do
   begin
     c := utf8_toUnicode(EditChars.Text, i, @j);
-    if not fg_CharsUse[c] Then                          // если не прописан(не назначен) символ
+    if not fg_CharsUse[c] Then
     begin
-      fg_CharsUse[c] := TRUE;                           // назначаем
-      FillChar(utf8chars[c, 0], 6, 0);                  // заполняем 6 значений нулями
-      Move(EditChars.Text[i], utf8chars[c, 0], j - i);  // и перемещаем туда символ???
+      fg_CharsUse[c] := TRUE;
+      FillChar(utf8chars[c, 0], 6, 0);
+      Move(EditChars.Text[i], utf8chars[c, 0], j - i);
       INC(managerFont.Font[fg_Font].Count.Chars);
     end;
     i := j;
@@ -185,7 +185,7 @@ end;
 procedure TForm1.UpdateFont;
 begin
   UpdateSymbolList();
-  fontgen_BuildFont(fg_Font, FontDialog.Font.Name);                       // генерация символов шрифта
+  fontgen_BuildFont(fg_Font, FontDialog.Font.Name);
   SpinCurrentPage.MaxValue := managerFont.Font[fg_Font].Count.Pages;
   if (managerFont.Font[fg_Font].Count.Pages = 0) or (managerFont.Font[fg_Font].Count.Pages = 1) then
   begin

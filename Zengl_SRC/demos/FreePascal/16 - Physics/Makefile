@@ -14,9 +14,10 @@ else ifeq ($(shell uname), Darwin)
 endif
 
 # Variables
+# enter your path to FPC
 FPC     = fpc
-FLAGS   = -O3 -XsX -CX -Sd
-INCLUDE = -Fu../../../headers -Fi../../../headers -Fu../../../extra -Fu../../../src -Fi../../../srcGEGL -Fi../../../src  -Fu../../../srcGEGL
+FLAGS   = -O3 -XsX -CX -Sd -al
+INCLUDE = -Fu../../../headers -Fi../../../headers -Fi../../../srcGEGL -Fi../../../src -Fi../../../srcGL -Fu../../../srcGEGL -Fu../../../extra -Fu../../../src -Fu../../../srcGL
 LIBS    = -Fu../../../lib/chipmunk/$(ARCH)-$(OS) -Fu../../../lib/jpeg/$(ARCH)-$(OS) -Fu../../../lib/ogg/$(ARCH)-$(OS) -Fu../../../lib/theora/$(ARCH)-$(OS) -Fu../../../lib/zlib/$(ARCH)-$(OS) -Fu../../../lib/zip/$(ARCH)-$(OS)
 LIBSPPC = -Fu../../../lib/chipmunk/powerpc-$(OS) -Fu../../../lib/jpeg/powerpc-$(OS) -Fu../../../lib/ogg/powerpc-$(OS) -Fu../../../lib/theora/powerpc-$(OS) -Fu../../../lib/zlib/powerpc-$(OS) -Fu../../../lib/zip/powerpc-$(OS)
 OUTPUT  = ../../../bin/

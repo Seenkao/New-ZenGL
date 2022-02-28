@@ -8,18 +8,20 @@
 *)
 
 unit zgl_gltypeconst;
+{$I zgl_config.cfg}
 {$I GLdefine.cfg}
 
 interface
 
-uses
   {$IfDef LINUX}
-  X
+uses
+  X;
   {$EndIf}
   {$IfDef WINDOWS}
-  Windows
+uses
+  Windows;
   {$EndIf}
-  ;
+
 
 Type
   P_cl_context  = ^_cl_context;
@@ -57,13 +59,13 @@ Type
   PGLvdpauSurfaceNV  = ^GLvdpauSurfaceNV;
 
   GLvoid = pointer;
-  GLenum = dword;
+  GLenum = Cardinal;
   GLfloat = Single;     // khronos_float_t;
   GLint = longint;
   GLsizei = longint;
-  GLbitfield = dword;
+  GLbitfield = Cardinal;
   GLdouble = double;
-  GLuint = dword;
+  GLuint = Cardinal;
   GLboolean = byte;
   GLubyte = Byte;       // khronos_uint8_t;
   GLclampf = Single;    // khronos_float_t;
@@ -80,9 +82,10 @@ Type
   {$Else}
   GLsizeiptr = LongInt;    // khronos_ssize_t;
   GLintptr = LongInt;      // khronos_intptr_t;
-  GLuint64 = DWord;        // khronos_uint64_t;
+  GLuint64 = Cardinal;     // khronos_uint64_t;
   GLint64 = LongInt;       // khronos_int64_t;
-  GLuint64EXT = DWord;     // khronos_uint64_t;
+  GLuint64EXT = Cardinal;  // khronos_uint64_t;
+  GLint64EXT = LongInt;
   GLsizeiptrARB = LongInt; // khronos_ssize_t;
   GLintptrARB = LongInt;   // khronos_intptr_t;
   {$EndIf}
@@ -105,7 +108,7 @@ Type
   {$ifdef __APPLE__}
   GLhandleARB = pointer;
   {$else}
-  GLhandleARB = dword;
+  GLhandleARB = Cardinal;
   {$EndIf}
   GLcharARB = char;
 
@@ -1081,6 +1084,7 @@ const
 *******************************************************************************)
 {$EndIf}
 
+const
   // AccumOp
   GL_ACCUM                          = $0100;
   GL_LOAD                           = $0101;

@@ -23,7 +23,9 @@
  !!! modification from Serge 26.02.2022
 }
 unit zgl_opengl;
+{$IFDEF LINUX}
 {$mode objfpc}  // delphi???
+{$EndIf}
 {$I zgl_config.cfg}
 {$I GLdefine.cfg}
 {$IfDef MAC_COCOA}
@@ -584,6 +586,9 @@ begin
   end;
   CheckGLVersion;
   LoadOpenGL;
+
+//  log_Add(oglExtensions);
+
 {$ENDIF}
 {$IFDEF WINDOWS}
   if not SetPixelFormat(wndDC, oglFormat, @oglFormatDesc) Then

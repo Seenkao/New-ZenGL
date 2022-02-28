@@ -22,11 +22,11 @@ uses
   zgl_text,
   zgl_textures_png,
   zgl_types,
-  gegl_color,
   {$IfDef OLD_METHODS}
   zgl_collision_2d,
   {$Else}
   gegl_VElements,
+  gegl_color,
   {$EndIf}
   zgl_utils
   ;
@@ -34,10 +34,12 @@ uses
 var
   dirRes  : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
 
-  // Ru: номера шрифтов. Вся работа со шрифтами происходит именно от этих номеров.
+  // Rus: номера шрифтов. Вся работа со шрифтами происходит именно от этих номеров.
+  // Eng: font numbers. All work with fonts comes from these numbers.
   fntMain, fntEdit: LongWord;
 
-  // Ru: номер цвета. Работа с цветом происходит именно от этого номера.
+  // Rus: номер цвета. Работа с цветом происходит именно от этого номера.
+  // Eng: color number. Work with color comes from this number.
   EditColor: LongWord;
 
   joyCount   : Integer;
@@ -47,9 +49,9 @@ var
   {$IfDef OLD_METHODS}
   trackInput : Boolean;
   inputRect  : zglTRect;
-  lineAlpha  : Byte;
+  lineAlpha  : LongWord;
 
-  TimeStart  : Byte;
+  TimeStart  : LongWord;
   {$Else}
   // RU: прямоугольник описывающий поле ввода
   // EN: rectangle describing the input field
@@ -58,7 +60,7 @@ var
   // "перепись" полей ввода для того, чтоб знать с каким полем работаем.
   // RU: объявляем переменную для работы с полем ввода
   // EN: we declare a variable to work with the input field
-  myEdit, myEdit2: Word;
+  myEdit, myEdit2: LongWord;
 
 // RU: прорисовываем основание поля ввода. Всё ограничено только вашим воображением. )))
 // EN: draw the base of the input field. Everything is limited only by your imagination. )))
@@ -68,14 +70,14 @@ begin
   //     Текст будет выведен поверх того, что вы здесь нарисуете.
   // EN: displacement and rotation will be done prior to performing the procedure. I am showing you how to draw a frame.
   //     The text will be drawn on top of what you draw here.
-  pr2d_Rect(- 2, - 1, myRect.W + 5, myRect.H, cl_White {$IfDef OLD_METHODS}, 128{$EndIf}, PR2D_FILL);
+  pr2d_Rect(- 2, - 1, myRect.W + 5, myRect.H,  {$IfnDef OLD_METHODS}cl_White{$else}, $FFFFFF, 128{$EndIf}, PR2D_FILL);
 end;
   {$EndIf}
 
 procedure Init;
 {$IfNDef OLD_METHODS}
 var
-  EScale: Word;
+  EScale: LongWord;
 {$EndIf}
 begin
   fntMain := font_LoadFromFile( dirRes + 'font.zfi' );
@@ -86,6 +88,7 @@ begin
   // RU: устанавливаем размеры шрифтов
   // EN: set font sizes
   setFontTextScale(15, fntMain);
+  setFontTextScale(20, fntEdit);
   // RU: размер шрифта поля ввода (для понимания что происходит). Изменяя размер шрифта, мы должны менять и
   //     размеры поля ввода - myRect в данном случае. Сами они не изменятся.
   // EN: the font size of the input field (to understand what's going on). By changing the font size,
@@ -224,7 +227,7 @@ begin
   {$IfDef OLD_METHODS}
   // RU: Проверить нажата ли левая кнопка мыши в пределах inputRect и начать отслеживать ввод текста.
   // EN: Check if left mouse button was pressed inside inputRect and start to track text input.
-  if mBClickCanClick( M_BLEFT_CLICK ) and col2d_PointInRect( mouseX, mouseY, inputRect ) Then
+  if mouseBClick( M_BLEFT ) and col2d_PointInRect( mouseX, mouseY, inputRect ) Then
   begin
     trackInput := TRUE;
     key_BeginReadText( userInput, 24 );
@@ -254,7 +257,7 @@ end;
 
 Begin
   {$IfDef OLD_METHODS}
-  TimeStart := timer_Add( @Timer, 16, Start );
+  TimeStart := timer_Add( @Timer, 16, t_Start );
   {$EndIf}
 
   zgl_Reg(SYS_EVENTS, @KeyMouseEvent);

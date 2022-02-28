@@ -1,6 +1,7 @@
 program demo15;
 
 {$I zglCustomConfig.cfg}
+{$I zgl_config.cfg}
 
 {$R *.res}
 
@@ -18,14 +19,20 @@ uses
   zgl_sprite_2d,
   zgl_video,
   zgl_video_theora,
-  zgl_utils
+  zgl_utils,
+  zgl_types
+  {$IfNDef OLD_METHODS}
+  , gegl_color
+  {$EndIf}
   ;
 
 var
   dirRes   : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
-  fntMain  : Byte;
+  fntMain  : LongWord;
   video    : zglPVideoStream;
   videoSeek: Boolean;
+
+  newColor  : LongWord;
 
 procedure Init;
 begin
@@ -36,6 +43,8 @@ begin
   video := video_OpenFile(dirRes + 'video.ogv');
 
   setFontTextScale(15, fntMain);
+
+  newColor := Color_FindOrAdd($00FF0090);
 end;
 
 procedure Draw;
@@ -49,7 +58,7 @@ begin
       // EN: Rendering of progress bar.
       // RU: Рендеринг полосы прогресса.
       pr2d_Rect(0, 600 - 100, 800, 20, $00FF00, 255);
-      pr2d_Rect(0, 600 - 100, (800 / video.Info.Duration) * video.Time, 20, $00FF00, 155, PR2D_FILL);
+      pr2d_Rect(0, 600 - 100, (800 / video.Info.Duration) * video.Time, 20, {$IfDef OLD_METHODS}$00FF00, 155,{$Else}newColor,{$EndIf}PR2D_FILL);
 
       text_Draw(fntMain, 0, 0, 'FPS: ' + u_IntToStr(zgl_Get(RENDER_FPS)));
       text_Draw(fntMain, 0, 20, 'Frame: ' + u_IntToStr(video.Frame));
@@ -63,7 +72,7 @@ procedure KeyMouseEvent;
 begin
     // EN: If left mouse button is down on progress bar, then seek the video.
   // RU: Если зажата левая кнопка мыши над полосой прогресса - перемещаться по видео.
-  if mBUpDown(M_BLEFT_DOWN) and (mouse_Y > 500) and (mouse_Y < 520) Then
+  if mouseBDown(M_BLEFT) and (mouse_Y > 500) and (mouse_Y < 520) Then
   begin
     videoSeek := TRUE;
     video_Seek(video, (mouse_X / 800) * video.Info.Duration);

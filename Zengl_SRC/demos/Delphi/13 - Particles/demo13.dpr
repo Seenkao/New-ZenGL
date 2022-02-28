@@ -1,6 +1,7 @@
 program demo13;
 
 {$I zglCustomConfig.cfg}
+{$I zgl_config.cfg}
 
 {$R *.res}
 
@@ -25,14 +26,13 @@ uses
 
 var
   dirRes        : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
-  fntMain       : Byte;
+  fntMain       : LongWord;
   texBack       : zglPTexture;
   debug         : Boolean;
   particles     : zglTPEngine2D;
   emitterFire   : array[0..2] of zglPEmitter2D;
   emitterDiamond: zglPEmitter2D;
   emitterRain   : zglPEmitter2D;
-  TimeStart     : Byte;
 
 procedure Init;
 begin
@@ -72,8 +72,8 @@ begin
 end;
 
 procedure Draw;
-  var
-    i: Integer;
+var
+  i: Integer;
 begin
   ssprite2d_Draw(texBack, 0, 0, 800, 600, 0);
 

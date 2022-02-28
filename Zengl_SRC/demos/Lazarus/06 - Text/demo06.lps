@@ -9,8 +9,9 @@
         <Filename Value="demo06.lpr"/>
         <IsPartOfProject Value="True"/>
         <IsVisibleTab Value="True"/>
-        <CursorPos X="9" Y="28"/>
-        <UsageCount Value="96"/>
+        <TopLine Value="35"/>
+        <CursorPos X="57" Y="113"/>
+        <UsageCount Value="97"/>
         <Loaded Value="True"/>
       </Unit0>
       <Unit1>
@@ -34,6 +35,7 @@
         <TopLine Value="45"/>
         <CursorPos X="11" Y="69"/>
         <UsageCount Value="11"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit3>
       <Unit4>
         <Filename Value="..\..\..\src\zgl_font.pas"/>
@@ -110,10 +112,9 @@
       <Unit13>
         <Filename Value="..\..\..\src\zgl_text.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="711"/>
-        <CursorPos X="54" Y="732"/>
+        <TopLine Value="41"/>
+        <CursorPos X="11" Y="58"/>
         <UsageCount Value="30"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit13>
       <Unit14>
         <Filename Value="..\04 - Screen Settings\demo04.lpr"/>
@@ -329,7 +330,7 @@
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit42>
     </Units>
-    <JumpHistory Count="17" HistoryIndex="16">
+    <JumpHistory Count="19" HistoryIndex="18">
       <Position1>
         <Filename Value="demo06.lpr"/>
         <Caret Line="23" Column="15"/>
@@ -398,6 +399,14 @@
         <Filename Value="demo06.lpr"/>
         <Caret Line="28" Column="9"/>
       </Position17>
+      <Position18>
+        <Filename Value="demo06.lpr"/>
+        <Caret Line="64" Column="12" TopLine="43"/>
+      </Position18>
+      <Position19>
+        <Filename Value="demo06.lpr"/>
+        <Caret Line="74" Column="6" TopLine="59"/>
+      </Position19>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>

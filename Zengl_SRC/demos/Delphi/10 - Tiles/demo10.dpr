@@ -1,6 +1,7 @@
 program demo10;
 
 {$I zglCustomConfig.cfg}
+{$I zgl_config.cfg}
 
 {$R *.res}
 

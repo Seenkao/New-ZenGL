@@ -1,6 +1,7 @@
 program demo13;
 
 {$I zglCustomConfig.cfg}
+{$I zgl_config.cfg}
 
 uses
   {$IFDEF UNIX}
@@ -30,7 +31,7 @@ uses
 
 var
   dirRes         : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
-  fntMain        : Byte;
+  fntMain        : LongWord;
   texBack        : zglPTexture;
   debug          : Boolean;
   particles      : zglTPEngine2D;
@@ -39,8 +40,6 @@ var
   emitterRain    : zglPEmitter2D;
 
 procedure Init;
-  var
-    i : Integer;
 begin
   texBack := tex_LoadFromFile( dirRes + 'back02.png' );
 
@@ -80,7 +79,7 @@ procedure Draw;
   var
     i : Integer;
 begin
-//  batch2d_Begin();
+  batch2d_Begin();
 
   ssprite2d_Draw( texBack, 0, 0, 800, 600, 0 );
 
@@ -97,7 +96,7 @@ begin
   text_Draw( fntMain, 0, 20, 'Particles: ' + u_IntToStr( particles.Count.Particles ) );
   text_Draw( fntMain, 0, 40, 'Debug(F1): ' + u_BoolToStr( debug ) );
 
-//  batch2d_End();
+  batch2d_End();
 end;
 
 procedure KeyMouseEvent;

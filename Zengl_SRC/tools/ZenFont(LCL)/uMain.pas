@@ -22,6 +22,10 @@ uses
   zgl_font,
   zgl_text,
   zgl_file,
+  zgl_types,
+  {$IfNDef OLD_METHODS}
+  gegl_color,
+  {$EndIf}
   zgl_font_gen;
 
 type
@@ -102,6 +106,8 @@ var
   lastX, lastY : Integer;
   utf8chars    : array[ 0..65535, 0..5 ] of AnsiChar;
 
+  newColor     : LongWord;
+
 implementation
 
 {$R *.lfm}
@@ -117,21 +123,26 @@ begin
   Form1.UpdateFont();
   fontX := ( Form1.Panel1.Width - fg_PageSize ) div 2;
   fontY := ( Form1.Panel1.Height - fg_PageSize ) div 2;
+  newColor := Color_FindOrAdd($505050FF);
+  setTextColor(Get_Color(cl_Yellow));
 end;
 
 procedure Draw;
-  var
-    w : Single;
+var
+  r: zglTRect2D;
 begin
-  pr2d_Rect( 0, 0, Form1.Panel1.Width, Form1.Panel1.Height, $505050, 255, PR2D_FILL );
-  pr2d_Rect( fontX, fontY, fg_PageSize, fg_PageSize, $000000, 255, PR2D_FILL );
+  pr2d_Rect( 0, 0, Form1.Panel1.Width, Form1.Panel1.Height, {$IfNDef OLD_METHODS}newColor,{$Else}$505050, 255,{$EndIf} PR2D_FILL );
+  pr2d_Rect( fontX, fontY, fg_PageSize, fg_PageSize, {$IfNDef OLD_METHODS}cl_Black,{$Else}$000000, 255,{$EndIf} PR2D_FILL );
 
   if ( fg_Font <> 0) and Assigned(managerFont.Font[fg_Font].Pages) Then
     begin
       ssprite2d_Draw( managerFont.Font[fg_Font].Pages[ Form1.SpinCurrentPage.Value - 1 ], fontX, fontY, fg_PageSize, fg_PageSize, 0 );
 
-      w := text_GetWidth( fg_Font, Form1.EditTest.Text );
-      pr2d_Rect( ( Form1.Panel1.Width - w ) / 2, Form1.Panel1.Height - managerFont.Font[fg_Font].MaxShiftY - managerFont.Font[fg_Font].MaxHeight, w, managerFont.Font[fg_Font].MaxShiftY + managerFont.Font[fg_Font].MaxHeight, $000000, 255, PR2D_FILL );
+      r.W := text_GetWidth( fg_Font, Form1.EditTest.Text );
+      r.X := ( Form1.Panel1.Width - r.W ) / 2;
+      r.Y := Form1.Panel1.Height - managerFont.Font[fg_Font].MaxShiftY - managerFont.Font[fg_Font].MaxHeight;
+      r.H := managerFont.Font[fg_Font].MaxShiftY + managerFont.Font[fg_Font].MaxHeight;
+      pr2d_Rect( r.X, r.Y, r.W, r.H, {$IfNDef OLD_METHODS}cl_Black,{$Else}$000000, 255,{$EndIf} PR2D_FILL );
       text_Draw( fg_Font, Form1.Panel1.Width div 2, Form1.Panel1.Height - managerFont.Font[fg_Font].MaxHeight, Form1.EditTest.Text, TEXT_HALIGN_CENTER );
     end;
 
@@ -153,23 +164,23 @@ procedure TForm1.UpdateSymbolList;
     i, j, len : Integer;
     c : Word;
 begin
-  len := length(EditChars.Text);                               // длина всего текста
+  len := length(EditChars.Text);
 
   Panel1.Canvas.Clear();
   Application.ProcessMessages();
 
   i := 1;
-  FillChar(fg_CharsUse, 65536, 0);                             // очищаем булевы значения
-  managerFont.Font[fg_Font].Count.Chars := 0;                  // нулевое значение
+  FillChar(fg_CharsUse, 65536, 0);
+  managerFont.Font[fg_Font].Count.Chars := 0;
 
   while i <= len do
     begin
-      c := utf8_toUnicode(EditChars.Text, i, @j);              // получаем ID символа, в (J - I)  - количество байт
+      c := utf8_toUnicode(EditChars.Text, i, @j);
       if not fg_CharsUse[c] Then
       begin
-        fg_CharsUse[c] := TRUE;                                // и начинаем заново заполнять булевы значения
-        FillChar(utf8chars[ c, 0], 6, 0);                      // а это как раз очистка символики UTF8
-        Move(EditChars.Text[i], utf8chars[c, 0], j - i);       // просто перебрасываем...
+        fg_CharsUse[c] := TRUE;
+        FillChar(utf8chars[ c, 0], 6, 0);
+        Move(EditChars.Text[i], utf8chars[c, 0], j - i);
         inc(managerFont.Font[fg_Font].Count.Chars);
       end;
       i := j;

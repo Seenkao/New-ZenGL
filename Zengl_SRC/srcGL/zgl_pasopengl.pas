@@ -5736,6 +5736,8 @@ begin
 end;
 
 function LoadOpenGL: Boolean;
+var
+  i, j: Integer;
 begin
 {  Result := False;
   if gl_Library <> Nil then
@@ -5745,6 +5747,26 @@ begin
     exit;                    // Error!!! }
 
   Result := True;
+
+  {$IfDef LINUX}
+  oglExtensions := '';
+  {$IfDef GL_VERSION_3_0}
+  if use_glMajorVer >= 3 then
+  begin
+    if not Assigned(glGetStringi) then
+      glGetStringi := gl_GetProc('glGetStringi');
+    if Assigned(glGetStringi) then
+    begin
+      glGetIntegerv(GL_NUM_EXTENSIONS, @j);
+      for i := 0 to j - 1 do
+        oglExtensions := oglExtensions + PAnsiChar(glGetStringi(GL_EXTENSIONS, i)) + #32;
+    end;
+  end;
+  {$EndIf}
+  if oglExtensions = '' then
+    oglExtensions := glGetString(GL_EXTENSIONS);
+  {$EndIf}
+
   {$If defined(USE_GLEXT) or defined(USE_GLCORE)}
   AllCheckGLExtension;
   {$IfEnd}

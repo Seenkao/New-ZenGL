@@ -50,14 +50,14 @@ type
 
 var
   dirRes    : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
-  fntMain   : Byte; // zglPFont;
+  fntMain   : LongWord;
   texLogo   : zglPTexture;
   texMiku   : zglPTexture;
   time      : Integer;
   sengine2d : zglTSEngine2D;
 
-  TimeStart : Byte;
-  TimeMiku  : Byte;
+  TimeStart : LongWord;
+  TimeMiku  : LongWord;
 
   newColor  : LongWord;
   correctColor: LongWord;
@@ -242,3 +242,4 @@ Begin
 
   zgl_Init();
 End.
+

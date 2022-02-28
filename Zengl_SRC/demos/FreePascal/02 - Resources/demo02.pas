@@ -1,6 +1,7 @@
 program demo02;
 
 {$I zglCustomConfig.cfg}
+{$I zgl_config.cfg} 
 
 uses
   {$IFDEF UNIX}
@@ -51,7 +52,7 @@ var
 
   // RU: У каждого ресурса есть свой определённый тип, который является указателем на структуру.
   // EN: Every resource has its own typem which is just a pointer to structure.
-  fntMain  : Byte;
+  fntMain  : LongWord;
   //
   texLogo  : zglPTexture;
   texTest  : zglPTexture;

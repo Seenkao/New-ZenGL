@@ -1,6 +1,7 @@
 program demo05;
 
 {$I zglCustomConfig.cfg}
+{$I zgl_config.cfg} 
 
 uses
   {$IFDEF UNIX}
@@ -16,6 +17,9 @@ uses
   zgl_primitives_2d,
   zgl_types,
   zgl_math_2d,
+  {$IfNDef OLD_METHODS}
+  gegl_color,
+  {$EndIf}  
   zgl_utils
   {$Else}
   zglHeader
@@ -25,7 +29,11 @@ uses
 var
   calc   : Integer;
   points : array[ 0..359 ] of zglTPoint2D;
-  TimeStart  : Byte = 0;
+  TimeStart  : LongWord = 0;
+  {$IfNDef OLD_METHODS}
+  dirRes : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
+  newColor: array[0..1] of LongWord;
+  {$EndIf} 
 
 procedure Init;
 var
@@ -36,6 +44,12 @@ begin
     points[ i ].X := 400 + m_Cos( i ) * ( 96 + random( 32 ) );
     points[ i ].Y := 300 + m_Sin( i ) * ( 96 + random( 32 ) );
   end;
+  {$IfNDef OLD_METHODS}
+  // Rus: устанавливаем новый цвет. Которого нет в списке стандартных. Все константы в gegl_color.
+  // Eng: set a new color. Which is not in the standard list. All constants in gegl_color.
+  newColor[0] := Color_FindOrAdd($0000009B);
+  newColor[1] := Color_FindOrAdd($FFFFFF4B);
+  {$EndIf}  
 end;
 
 procedure Draw;
@@ -47,24 +61,24 @@ begin
   fx2d_SetVCA( $FF0000, $00FF00, $0000FF, $FFFFFF, 255, 255, 255, 255 );
   // RU: Рисуем прямоугольник с заливкой(флаг PR2D_FILL) с использованием отдельных цветов для каждой вершины(флаг FX2D_VCA).
   // EN: Render filled rectangle(flag PR2D_FILL) and use different colors for each vertex(flag FX2D_VCA).
-  pr2d_Rect( 0, 0, 800, 600, $000000, 255, FX2D_VCA or PR2D_FILL );
+  pr2d_Rect( 0, 0, 800, 600, {$IfDef OLD_METHODS}$000000, 255{$Else}cl_Black{$EndIf}, FX2D_VCA or PR2D_FILL );
 
   // RU: Рисуем в центре экрана круг с радиусом 128 пиксела.
   // EN: Render circle in the center of screen with radius 128 pixels.
-  pr2d_Circle( 400, 300, 128, $000000, 155, 32, PR2D_FILL );
+  pr2d_Circle( 400, 300, 128, {$IfDef OLD_METHODS}$000000, 155{$Else}newColor[0]{$EndIf}, 32, PR2D_FILL );
 
   // RU: Рисуем линии внутри круга.
   // EN: Render lines inside the circle.
   for i := 0 to 359 do
-    pr2d_Line( 400, 300, points[ i ].X, points[ i ].Y, $FFFFFF, 255 );
+    pr2d_Line( 400, 300, points[ i ].X, points[ i ].Y, {$IfDef OLD_METHODS}$FFFFFF, 255{$Else}cl_White{$EndIf} );
 
   // RU: Рисуем эллипсы с заливкой и без, со сглаженными контурами(флаг PR2D_SMOOTH).
   // EN: Render filled ellipses with smoothed edges(flag PR2D_SMOOTH).
-  pr2d_Ellipse( 400 + 300, 300, 64, 256, $FFFFFF, 75, 64, PR2D_FILL or PR2D_SMOOTH );
-  pr2d_Ellipse( 400 + 300, 300, 64, 256, $000000, 255, 32, PR2D_SMOOTH );
+  pr2d_Ellipse( 400 + 300, 300, 64, 256, {$IfDef OLD_METHODS}$FFFFFF, 75{$Else}newColor[1]{$EndIf}, 64, PR2D_FILL or PR2D_SMOOTH );
+  pr2d_Ellipse( 400 + 300, 300, 64, 256, {$IfDef OLD_METHODS}$000000, 255{$Else}cl_Black{$EndIf}, 32, PR2D_SMOOTH );
 
-  pr2d_Ellipse( 400 - 300, 300, 64, 256, $FFFFFF, 75, 64, PR2D_FILL{ or PR2D_SMOOTH });
-  pr2d_Ellipse( 400 - 300, 300, 64, 256, $000000, 255, 32, PR2D_SMOOTH );
+  pr2d_Ellipse( 400 - 300, 300, 64, 256, {$IfDef OLD_METHODS}$FFFFFF, 75{$Else}newColor[1]{$EndIf}, 64, PR2D_FILL{ or PR2D_SMOOTH });
+  pr2d_Ellipse( 400 - 300, 300, 64, 256, {$IfDef OLD_METHODS}$000000, 255{$Else}cl_Black{$EndIf}, 32, PR2D_SMOOTH );  
 end;
 
 procedure Timer;
@@ -80,7 +94,7 @@ Begin
   {$IFNDEF USE_ZENGL_STATIC}
   if not zglLoad( libZenGL ) Then exit;
   {$ENDIF}
-  TimeStart := timer_Add( @Timer, 16, Start );
+  TimeStart := timer_Add( @Timer, 16, t_Start );
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );

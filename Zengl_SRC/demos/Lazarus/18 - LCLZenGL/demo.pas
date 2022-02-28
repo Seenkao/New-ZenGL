@@ -59,6 +59,7 @@ type
     procedure FormActivate(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
+    procedure FormDeactivate(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormMouseDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
@@ -166,6 +167,11 @@ begin
   // Form1.BorderStyle := bsSingle;
 end;
 
+procedure TForm1.FormDeactivate(Sender: TObject);
+begin
+  Timer1.Enabled := false;
+end;
+
 // закрываем форму
 procedure TForm1.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
@@ -224,13 +230,15 @@ end;
 // проверка нажатия клавиши
 procedure TForm1.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  if Key = 27 then Form1.Close;
+  if Key = 27 then
+    Form1.Close;
 end;
 
 // обработка мыши и проигрывание музыки
 procedure TForm1.FormMouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 begin
+  Timer1.Enabled := false;
   if Button = mbLeft then
   begin
     // RU: В данном случаи мы начинаем воспроизводить звук сразу в указанных координатах, но их можно менять и в процессе используя процедуру snd_SetPos.
@@ -255,18 +263,22 @@ begin
       audioPlay := not audioPlay;
     end;
   end;
+  Timer1.Enabled := true;
 end;
 
 // для примера использования перемещения мышки
 procedure TForm1.FormMouseMove(Sender: TObject; Shift: TShiftState; X,
   Y: Integer);
 begin
+  Timer1.Enabled := False;
   mouseX := X;
   mouseY := Y;
+  Timer1.Enabled := True;
 end;
 
 procedure TForm1.Timer1Timer(Sender: TObject);
 begin
+  Timer1.Enabled := False;
   app_PLoop;
 
   // RU: Проверяем играет ли музыка(1 - играет, 0 - не играет). Так же можно проверить и звуки - подставив zglPSound и ID вот так:
@@ -287,6 +299,7 @@ begin
     snd_SetVolume(audio, IDSound[1], ( 1 / 24 ) * p );
   if ( p >= 75 ) and ( p < 100 ) Then
     snd_SetVolume(audio, IDSound[1], 1 - ( 1 / 24 ) * ( p - 75 ) );
+  Timer1.Enabled := True;
 end;
 
 end.

@@ -402,8 +402,9 @@ end;
 
 function gl_GetProc(const Proc: UTF8String): Pointer;
 var
-  s: String = '';
+  s: String;
 begin
+  s := '';
   {$IFDEF WINDOWS}
   Result := wglGetProcAddress(PAnsiChar(Proc));                
   if Result = nil Then

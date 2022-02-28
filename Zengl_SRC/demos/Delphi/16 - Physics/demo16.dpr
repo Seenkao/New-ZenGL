@@ -3,6 +3,7 @@ program demo16;
 // RU: В этом файле конфигурации содержится "опция" USE_CHIPMUNK_STATIC для статической компиляции с Chipmunk
 // EN: This file contains "option" USE_CHIPMUNK_STATIC for static compilation with Chipmunk
 {$I zglCustomConfig.cfg}
+{$I zgl_config.cfg}
 
 {$R *.res}
 
@@ -25,13 +26,13 @@ uses
 
 var
   dirRes : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
-  fntMain: Byte;
+  fntMain: LongWord;
   space  : PcpSpace;
   bCount : Integer;
   Bodies : array of PcpBody;
   Shapes : array of PcpShape;
 
-  TimePhisics: Byte;
+  TimePhisics: LongWord;
 
 // RU: Добавить объект "шар"
 //     x, y - координаты центра
@@ -164,7 +165,7 @@ end;
 
 procedure Draw;
 begin
-//  batch2d_Begin();
+  batch2d_Begin();
 
   // RU: Рендерим объекты указанного "мира". Второй аргумент функции отвечает за показ точек соприкосновения.
   // EN: Render objects for specified "world". Second argument responsible for rendering of collision points.
@@ -172,7 +173,7 @@ begin
 
   text_Draw(fntMain, 10, 5,  'FPS: ' + u_IntToStr(zgl_Get(RENDER_FPS)));
   text_Draw(fntMain, 10, 25, 'Use your mouse: Left Click - box, Right Click - ball');
-//  batch2d_End();
+  batch2d_End();
 end;
 
 procedure KeyMouseEvent;
@@ -206,7 +207,7 @@ Begin
   if not cpLoad(libChipmunk) Then exit;
   {$ENDIF}
 
-  TimePhisics := timer_Add(@Phisics, 16, Start);
+  TimePhisics := timer_Add(@Phisics, 16, t_Start);
 
   zgl_Reg(SYS_EVENTS, @KeyMouseEvent);
   zgl_Reg(SYS_LOAD, @Init);

@@ -1,6 +1,7 @@
 program demo14;
 
 {$I zglCustomConfig.cfg}
+{$I zgl_config.cfg}
 
 uses
   {$IFDEF UNIX}
@@ -36,7 +37,7 @@ const
 
 var
   dirRes  : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
-  fntMain : Byte;
+  fntMain : LongWord;
   icon    : array[ 0..1 ] of zglPTexture;
   sound   : zglPSound;
   audio   : Integer;
@@ -82,7 +83,7 @@ end;
 
 procedure Draw;
   var
-    r : zglTRect;
+    r : zglTRect2D;
 begin
   ssprite2d_Draw( icon[ state ], ( SCREEN_WIDTH - 128 ) / 2, ( SCREEN_HEIGHT - 128 ) / 2, 128, 128, 0 );
   text_Draw( fntMain, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 64, 'Skillet - Comatose - Whispers In The Dark', TEXT_HALIGN_CENTER );
@@ -123,9 +124,9 @@ end;
 
 procedure KeyMouseEvent;
 var
-    r : zglTRect;
+  r : zglTRect2D;
 begin
-  if mBClickCanClick(M_BLEFT_CLICK) Then
+  if mouseBClick(M_BLEFT) Then
   begin
       // RU: В данном случаи мы начинаем воспроизводить звук сразу в указанных координатах, но их можно менять и в процессе используя процедуру snd_SetPos.
       //     Важно: Для OpenAL можно позиционировать только mono-звуки
@@ -166,7 +167,7 @@ Begin
 
   randomize();
 
-  TimeStart := timer_Add( @Timer, 16, Start );
+  TimeStart := timer_Add( @Timer, 16, t_Start );
 
   zgl_Reg(SYS_EVENTS, @KeyMouseEvent);
   zgl_Reg( SYS_LOAD, @Init );
