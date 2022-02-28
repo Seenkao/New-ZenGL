@@ -8,6 +8,8 @@
 
 [zengl](https://zengl.org) - the original site of the library's creator.
 
+[google arhive](https://code.google.com/archive/p/zengl/)
+
 **ZenGL** - it is a library that creates window context for working with OpenGL on different platforms.
 
 **Development environment**
@@ -53,6 +55,8 @@ Please write about the errors found in the process of working with ZenGL. )))
 -------------
 
 [zengl](https://zengl.org) - изначальный сайт создателя библиотеки.
+
+[архив гугла](https://code.google.com/archive/p/zengl/)
 
 **ZenGL** - это бибилотека создающая контекст окна для работы с OpenGL на разных платформах.
 
