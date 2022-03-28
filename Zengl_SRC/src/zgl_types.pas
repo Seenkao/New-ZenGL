@@ -21,7 +21,7 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 24.01.2022
+ !!! modification from Serge 24.03.2022
 }
 unit zgl_types;
 
@@ -52,6 +52,9 @@ const
   {$EndIf}
 
   // OpenGL
+  ModeUser       = 1;                      // MatrixMode
+  Mode2D         = 2;
+  Mode3D         = 3;
   {$IfDef MACOSX}
   CORE_2_1 = 1;
   CORE_3_2 = 2;
@@ -373,4 +376,3 @@ type
 implementation
 
 end.
-
