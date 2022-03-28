@@ -65,34 +65,48 @@ type
     Timers: array of zglPTimer;
   end;
 
-// Все таймера работают в милисекундах! (отсчёт в милисекундах)
+// Rus: Все таймера работают в милисекундах! (отсчёт в милисекундах).
+// Eng: All timers run in milliseconds! (count in milliseconds).
 
-(*  получить данное время  *)
+// Rus: получить данное время.
+// Eng: get the given time.
 function  timer_GetTicks: Double;
 
-(*  добавить процедуру-таймер (если не добавить обрабатываемую процедуру таймер "как бы" будет работать)
-  *)
+// Rus: добавить процедуру-таймер (если не добавить обрабатываемую процедуру
+//      таймер "как бы" будет работать).
+// Eng: add a timer procedure (if you do not add a processed procedure, the
+//      timer "as if" will work).
 function timer_Add(OnTimer: Pointer; Interval: Cardinal; Flags: LongWord = t_Start; SleepInterval: Cardinal = 5): Byte;
 
-(*  Удаляется таймер, но не уничтожается
-    Если во время удаления таймера создаётся новый таймер, то большая вероятность, что удалённый таймер уничтожится.
-    (новый таймер займёт его место)    *)
+// Rus: удаляется таймер, но не уничтожается.
+//      Если во время удаления таймера создаётся новый таймер, то большая
+//      вероятность, что удалённый таймер уничтожится. (новый таймер займёт его
+//      место).
+// Eng: the timer is removed, but not destroyed.
+//      If a new timer is created while deleting a timer, there is a good chance
+//      that the deleted timer will be destroyed. (a new timer will take its place).
 procedure timer_Del(var num: Byte);
 
-(*  Уничтожает все таймера, процедура нужна только по закрытию программы или внепланового закрытия
-    происходит по умолчанию (как закрывается программа)        *)
+// Rus: уничтожает все таймера, процедура нужна только по закрытию программы или
+//      внепланового закрытия происходит по умолчанию (как закрывается программа).
+// Eng: destroys all timers, the procedure is only needed to close the program
+//      or an unscheduled shutdown occurs by default (as the program closes).
 procedure timers_Destroy;
 
-(* Запускает/останавливает незамедлительно СУЩЕСТВУЮЩИЙ таймер   *)
+// Rus: запускает/останавливает незамедлительно СУЩЕСТВУЮЩИЙ таймер.
+// Eng: starts/stops an EXISTING timer immediately.
 function timer_StartStop(num: Byte; Flags: Byte = 2): Boolean;
 
-(* Запускает/останавливает через определённое время СУЩЕСТВУЮЩИЙ таймер   *)
+// Rus: запускает/останавливает через определённое время СУЩЕСТВУЮЩИЙ таймер.
+// Eng: starts/stops an EXISTING timer after a certain time.
 function timer_SleepStartStop(num: Byte; Flags: Byte = 2; IntervalSleep: Cardinal = 3): Boolean;
 
-// Обработка всех запущенных процедур-таймеров
+// Rus: обработка всех запущенных процедур-таймеров.
+// Eng: processing of all running timer procedures.
 procedure timer_MainLoop;
 
-// Обнуление всех существующих таймеров
+// Rus: сброс всех существующих таймеров.
+// Eng: resetting all existing timers.
 procedure timer_Reset;
 
 var
