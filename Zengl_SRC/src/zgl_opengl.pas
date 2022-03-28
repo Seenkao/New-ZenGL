@@ -57,18 +57,18 @@ const
   TARGET_TEXTURE = 2;                    // цель - часть экрана
 
 // Rus: инициализация OpenGL и подготовка формата пиксела.
-// Eng:
+// Eng: initializing OpenGL and preparing the pixel format.
 function  gl_Create: Boolean;
 {$IfNDef MAC_COCOA}
 // Rus: уничтожение контекста.
-// Eng:
+// Eng: context destroy.
 procedure gl_Destroy;
 {$EndIf}
-// Rus: создание контекста.
-// Eng:
+// Rus: создание и инициализация контекста.
+// Eng: context creation and initialization.
 function  gl_Initialize: Boolean;
 // Rus: возвращение к первоначальным заданным данным.
-// Eng:
+// Eng: return to the original given data.
 procedure gl_ResetState;
 
 var
@@ -167,7 +167,7 @@ uses
 function gl_Create: Boolean;
 var
   i, j: Integer;
-  {$IfDef LINUX}
+  {$IfDef LINUX}{$IfDef GL_VERSION_3_0}
   FBConfig: GLXFBConfig;
   PFBConfig: PGLXFBConfig;
   fbcount: Integer = 0;
@@ -177,7 +177,7 @@ var
   worst_FBconf: Integer = -1;
   best_num_samp: Integer = -1;
   worst_num_samp: Integer = 9999;
-  {$EndIf}
+  {$EndIf}{$EndIf}
   {$IFDEF WINDOWS}
   pixelFormat: Integer;
   {$ENDIF}
@@ -699,10 +699,10 @@ begin
   glAlphaFunc(GL_GREATER, 0);
 
   if oglSeparate Then
-    begin
-      glBlendEquation(GL_FUNC_ADD_EXT);
-      glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-    end;
+  begin
+    glBlendEquation(GL_FUNC_ADD_EXT);
+    glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+  end;
 
   glDisable(GL_BLEND);
   glDisable(GL_ALPHA_TEST);
