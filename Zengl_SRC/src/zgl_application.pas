@@ -151,6 +151,9 @@ var
   appAutoPause     : Boolean = TRUE;
   appFocus         : Boolean = TRUE;
   appLog           : Boolean;
+  {$IfDef USE_INIT_HANDLE}
+  appInitedToHandle: Boolean = false;
+  {$EndIf}
   appWorkDir       : UTF8String;
   appHomeDir       : UTF8String;
   {$IfDef MAC_COCOA}
@@ -277,7 +280,6 @@ uses
   zgl_resources,
   zgl_textures,
   zgl_log,
-  zgl_types,
   {$IFDEF USE_SOUND}
   zgl_sound,
   {$ENDIF}
@@ -289,6 +291,7 @@ uses
   {$IfDef USE_VKEYBOARD}
   gegl_menu_gui,
   {$EndIf}
+  zgl_types,
   zgl_utils;
 
 procedure app_Draw;
@@ -296,7 +299,7 @@ var
   i: Word;
 begin
   if scrViewPort then
-    SetCurrentMode();
+    SetCurrentMode(oglMode);
   scr_Clear();
   if Assigned(app_PDraw) Then
   begin
@@ -420,7 +423,7 @@ begin
   managerSetOfTools.ActiveElement := 65535;
   {$EndIf}
   if scrViewPort then
-    SetCurrentMode();
+    SetCurrentMode(oglMode);
   scr_Clear();
   if Assigned(app_PLoad) Then
     app_PLoad();
