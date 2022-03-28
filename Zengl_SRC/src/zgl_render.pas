@@ -28,6 +28,7 @@ unit zgl_render;
 interface
 
 uses
+  zgl_types,
   zgl_gltypeconst;
 
 // Rus: установки 2D режима.
@@ -38,7 +39,7 @@ procedure Set2DMode;
 procedure Set3DMode(FOVY: Single = 45);
 // Rus: выбор режима 2D или 3D. Не предоставлено, только 2D.
 // Eng:
-procedure SetCurrentMode;
+procedure SetCurrentMode(mode: LongWord = Mode2D);
 
 // Rus: установка глубины для 3D. то что будет за нулевой точкой (в минусе)
 //      видно не будет. Читаем документацию OpenGL.
@@ -55,11 +56,15 @@ procedure scissor_Begin(X, Y, Width, Height: Integer; ConsiderCamera: Boolean = 
 // Eng:
 procedure scissor_End;
 
+var
+  SetUserMode: procedure;
+
 implementation
 uses
   zgl_application,
   zgl_window,
   zgl_screen,
+  zgl_glu,
   {$IFNDEF USE_GLES}
   zgl_opengl,
   zgl_opengl_all,
@@ -101,7 +106,7 @@ var
 {$IfEnd}
 {$EndIf}
 begin
-  oglMode := 2;
+  oglMode := Mode2D;
   batch2d_Flush();
   if cam2d.Apply Then
     glPopMatrix();
@@ -166,7 +171,7 @@ begin
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-  scr_SetViewPort();
+//  scr_SetViewPort();
 
   if cam2d.Apply Then
     cam2d_Set(cam2d.Global);
@@ -174,34 +179,46 @@ end;
 
 procedure Set3DMode(FOVY: Single = 45);
 begin
-  oglMode := 3;
+  oglMode := Mode3D;
   oglFOVY := FOVY;
   batch2d_Flush();
   if cam2d.Apply Then
     glPopMatrix();
   cam2d := @cam2dTarget[oglTarget];
 
-  glColor4f(rs1, rs1, rs1, rs1);
+//  glColor4f(rs1, rs1, rs1, rs1);
 
   glEnable(GL_DEPTH_TEST);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-//  gluPerspective(oglFOVY, oglWidth / oglHeight, oglzNear, oglzFar);
-  {$IfDef USE_GLES}glFrustumf{$Else}glFrustum{$EndIf}(- oglWidth / 2, oglWidth / 2, oglHeight / 2, - oglHeight / 2, oglzFar, oglzNear);
+  gluPerspective(oglFOVY, oglWidth / oglHeight, oglzNear, oglzFar);
+//  {$IfDef USE_GLES}glFrustumf{$Else}glFrustum{$EndIf}(- oglWidth / 2, oglWidth / 2, oglHeight / 2, - oglHeight / 2, oglzNear, oglzFar);
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-  scr_SetViewPort();
+//  scr_SetViewPort();
 
   if cam2d.Apply Then
     cam2d_Set(cam2d.Global);
 end;
 
-procedure SetCurrentMode;
+procedure SetCurrentMode(mode: LongWord = Mode2D);
 begin
-  if oglMode = 2 Then
+  if (mode > 3) or ((mode = ModeUser) and not Assigned(SetUserMode)) then
+    mode := Mode2D;
+
+  oglMode := mode;
+  if not winOn then
+    exit;
+
+  if mode = Mode2D Then
     Set2DMode()
   else
-    Set3DMode(oglFOVY);
+    if mode = Mode3D then
+      Set3DMode(oglFOVY)
+    else
+      SetUserMode;
+  if Assigned(SetViewPort) then
+    SetViewPort;
   scrViewPort := False;
 end;
 
