@@ -213,8 +213,7 @@ begin
     alBufferData           := dlsym(oalLibrary, 'alBufferData');
 
     Result := TRUE;
-  end else
-    Result := FALSE;
+  end;
 {$ELSE}
   Result := TRUE;
 {$ENDIF}
