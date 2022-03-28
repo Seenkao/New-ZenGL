@@ -32,29 +32,30 @@ uses
   zgl_gltypeconst;
 
 // Rus: установки 2D режима.
-// Eng:
+// Eng: 2D mode settings.
 procedure Set2DMode;
 // Rus: установки 3D режима.
-// Eng:
+// Eng: 3D mode settings.
 procedure Set3DMode(FOVY: Single = 45);
-// Rus: выбор режима 2D или 3D. Не предоставлено, только 2D.
-// Eng:
+// Rus: выбор режима 2D, 3D или пользовательского.
+// Eng: select 2D, 3D or custom mode.
 procedure SetCurrentMode(mode: LongWord = Mode2D);
 
-// Rus: установка глубины для 3D. то что будет за нулевой точкой (в минусе)
+// Rus: установка глубины для 3D. То что будет за нулевой точкой (в минусе)
 //      видно не будет. Читаем документацию OpenGL.
-// Eng:
+// Eng: depth setting for 3D. What will be beyond the zero point (negative
+//      numbers) will not be visible. Reading the OpenGL documentation.
 procedure zbuffer_SetDepth(zNear, zFar: Single);
 // Rus: очистка буфера глубины, но его можно очистить и при обычной очистке.
-// Eng:
+// Eng: clearing the depth buffer, but it can be cleared with a normal clear as well.
 procedure zbuffer_Clear;
 
 // Rus: начало вырезки. Вставить в том месте, где хотим вырезать.
-// Eng:
+// Eng: start of cut. Paste where you want to cut.
 procedure scissor_Begin(X, Y, Width, Height: Integer; ConsiderCamera: Boolean = TRUE);
 // Rus: конец вырезки.
-// Eng:
-procedure scissor_End;
+// Eng: end of cut.
+procedure scissor_End; 
 
 var
   SetUserMode: procedure;
