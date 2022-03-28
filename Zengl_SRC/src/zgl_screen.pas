@@ -58,6 +58,9 @@ const
   REFRESH_MAXIMUM = 0;
   REFRESH_DEFAULT = 1;
 
+var
+  SetViewPort: procedure;
+
 {$IfNDef ANDROID}
 // Rus: инициализация окна.
 // Eng: window initialization.
@@ -82,18 +85,16 @@ procedure scr_Clear;
 // Eng:
 procedure scr_Flush;
 
-{$IfNDef USE_INIT_HANDLE}
 // Rus: установка заданных значений окна. Значения заданы посредством
 //      zgl_SetParam или по умолчанию.
 // Eng: setting window preset values. Values are set via zgl_SetParam or by default.
 function  scr_SetOptions(): Boolean;
-{$EndIf}
 // Rus: корректировка окна вывода заданным значениям.
 // Eng: adjustment of the output window to the given values.
 procedure scr_CorrectResolution(Width, Height: Word);
 // Rus: установка порта вывода. На данное время только 2D.
 // Eng: setting the output port. Currently only 2D.
-procedure scr_SetViewPort;
+procedure scr_SetViewPort2D;
 // Rus: включение/выключение вертикальной синхронизации.
 // Eng: enable/disable vertical sync.
 procedure scr_SetVSync(WSync: Boolean);
@@ -663,7 +664,6 @@ begin
 {$ENDIF}
 end;
 
-{$IfNDef USE_INIT_HANDLE}
 function scr_SetOptions(): Boolean;
   {$IFDEF USE_X11}
   var
@@ -819,15 +819,19 @@ begin
     log_Add('Screen options changed to: ' + u_IntToStr(wndWidth) + ' x ' + u_IntToStr(wndHeight) + ' fullscreen')
   else
     log_Add('Screen options changed to: ' + u_IntToStr(wndWidth) + ' x ' + u_IntToStr(wndHeight) + ' windowed');
-  {$IfNDef ANDROID}
 
+  {$IfDef USE_INIT_HANDLE}
+  if (not wndFullScreen) and (appFlags and WND_USE_AUTOCENTER > 0) Then
+    wnd_SetPos((zgl_Get(DESKTOP_WIDTH) - wndWidth) div 2, (zgl_Get(DESKTOP_HEIGHT) - wndHeight) div 2);
+  wnd_SetSize(wndWidth, wndHeight);
+  {$Else}
+  {$IfNDef ANDROID}
   if winOn Then
     wnd_Update();
   {$Else}
   wnd_SetSize(wndWidth, wndHeight);
-  {$EndIf}
+  {$EndIf}{$EndIf}
 end;
-{$EndIf}
 
 procedure scr_CorrectResolution(Width, Height: Word);
 begin
@@ -870,11 +874,11 @@ begin
   oglHeight := Round(wndHeight / scrResCY);
   scrSubCX  := oglWidth - Width;
   scrSubCY  := oglHeight - Height;
-  SetCurrentMode();
+  SetCurrentMode(oglMode);
   {$EndIf}
 end;
 
-procedure scr_SetViewPort;
+procedure scr_SetViewPort2D;
 begin
   if oglTarget = TARGET_SCREEN Then
   begin
