@@ -97,10 +97,10 @@ procedure setTextColor(Color: Cardinal);
 
 // Rus: загрузка текстового файла в формате UTF-8.
 // Eng:
-procedure txt_LoadFromFile(const FileName: UTF8String; out Buf: UTF8String);
+function txt_LoadFromFile(const FileName: UTF8String; out Buf: UTF8String): Boolean;
 // Rus: сохранение текстового UTF-8 файла.
 // Eng:
-procedure txt_SaveFromFile(const FileName: UTF8String; const Buf: UTF8String);
+function txt_SaveFromFile(const FileName: UTF8String; const Buf: UTF8String): Boolean;
 
 var
   TextScaleStandart : Single;
@@ -722,11 +722,12 @@ begin
   textLCharDesc := LastCharDesc;
 end;
 
-procedure txt_LoadFromFile(const FileName: UTF8String; out Buf: UTF8String);
+function txt_LoadFromFile(const FileName: UTF8String; out Buf: UTF8String): Boolean;
 var
   Size: LongWord;
   f: zglTFile;
 begin
+  Result := False;
   if not file_Exists(FileName) then
     exit;                      // file error = file not exist!!!
 
@@ -737,21 +738,22 @@ begin
     file_Read(f, Buf[1], Size);
     file_Close(f);
     log_Add('File ' + FileName + ' loaded.');
+    Result := True;
   end;
 end;
 
-procedure txt_SaveFromFile(const FileName: UTF8String; const Buf: UTF8String);
+function txt_SaveFromFile(const FileName: UTF8String; const Buf: UTF8String): Boolean;
 var
   f: zglTFile;
 begin
+  Result := False;
   if not file_Exists(FileName) then
     if file_Open(f, FileName, FOM_CREATE) then
     begin
       file_Write(f, Buf[1], Length(Buf));
       file_Close(f);
-      log_Add('File ' + FileName + ' saved.');
-    end else
-      log_Add('File ' + FileName + ' not create!');
+      Result := True;
+    end;
 end;
 
 initialization
