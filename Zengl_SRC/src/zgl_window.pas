@@ -75,6 +75,8 @@ const
   SYS_CLOSE_QUERY        = $000008;
   SYS_APP_LOOP           = $000002;
   {$EndIf}
+  OGL_USER_MODE          = $000014;
+  OGL_VIEW_PORT          = $000016;
   {$IFDEF iOS}
   SYS_iOS_MEMORY_WARNING     = $000010;
   SYS_iOS_CHANGE_ORIENTATION = $000011;
@@ -158,7 +160,7 @@ const
   SND_CAN_PLAY_FILE     = $004000;
   CLIP_INVISIBLE        = $008000;
 
-  XY_IN_CENTER_WINDOW   = $020000;               // окно выводится от центра экрана
+  XY_IN_CENTER_WINDOW   = $020000;               // окно выводится от центра экрана когда oglMode = Mode2D
                                                  // при этом надо перерабатывать прорисовку примитивов
                                                  // весь ZenGL сделан от края окна, могут быть не состыковки.
   {$IFDEF iOS}
@@ -764,7 +766,6 @@ begin
   wnd_UpdateCaption();
   wndUpdateWin := False;
 
-
   if (not wndFullScreen) and (appFlags and WND_USE_AUTOCENTER > 0) Then
     wnd_SetPos((zgl_Get(DESKTOP_WIDTH) - wndWidth) div 2, (zgl_Get(DESKTOP_HEIGHT) - wndHeight) div 2);
   wnd_SetSize(wndWidth, wndHeight);
@@ -881,7 +882,7 @@ begin
   if appFlags and CORRECT_RESOLUTION > 0 Then
     scr_CorrectResolution(scrResW, scrResH)
   else
-    SetCurrentMode();
+    SetCurrentMode(oglMode);
 end;
 
 procedure wnd_SetPos(X, Y: Integer);
@@ -1033,6 +1034,9 @@ begin
     exit;
   end;
 
+  if not Assigned(SetViewPort) then
+    SetViewPort := scr_SetViewPort2D;
+
   appInitialized := TRUE;
 
   InitSoundVideo();
@@ -1109,6 +1113,8 @@ begin
   winOn := TRUE;
 
   app_PInit();
+
+  appInitedToHandle := true;
 end;
 {$EndIf}
 
@@ -1122,6 +1128,10 @@ begin
   app_UseMenuDown := nil;
   app_UseMenuUp := nil;
   app_DrawGui := nil;
+  {$EndIf}
+
+  {$IfDef USE_INIT_HANDLE}
+  appInitedToHandle := False;
   {$EndIf}
 
   if appWorkTime <> 0 Then
@@ -1232,6 +1242,8 @@ procedure zgl_Reg(What: LongWord; UserData: Pointer);
 var
   i: Integer;
 begin
+  if UserData = nil then
+    exit;
   case What of
     // Callback
     SYS_APP_INIT:
@@ -1268,11 +1280,26 @@ begin
       begin
         app_PActivate := UserData;
       end;
+    OGL_USER_MODE:
+      begin
+        SetUserMode := UserData;
+        oglMode := ModeUser;
+      end;
+    OGL_VIEW_PORT:
+      begin
+        if Assigned(UserData) then
+          SetViewPort := UserData
+        else
+          SetViewPort := @scr_SetViewPort2D;
+      end;
     {$IfNDef USE_INIT_HANDLE}
-    SYS_EVENTS: app_PEvents := UserData;
+    SYS_EVENTS:
+      app_PEvents := UserData;
     {$EndIf}
-    SYS_POSTDRAW: app_PostPDraw := UserData;
-    SYS_RESET: app_PReset := UserData;
+    SYS_POSTDRAW:
+      app_PostPDraw := UserData;
+    SYS_RESET:
+      app_PReset := UserData;
     {$IFDEF iOS}
     SYS_iOS_MEMORY_WARNING:
       begin
