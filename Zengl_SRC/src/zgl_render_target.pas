@@ -29,7 +29,9 @@ interface
 uses
   {$IFDEF USE_X11}
   X, XLib, XUtil,
+  {$IfNDef USE_GLES}
   zgl_glx_wgl,
+  {$EndIf}
   {$ENDIF}
   {$IFDEF WINDOWS}
   Windows,
@@ -103,6 +105,7 @@ uses
   zgl_render_2d,
   zgl_sprite_2d,
   zgl_log,
+  zgl_types,
   zgl_utils;
 
 {$IFNDEF USE_GLES}
