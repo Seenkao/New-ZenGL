@@ -21,7 +21,7 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 04.08.2020
+ !!! modification from Serge 02.05.2022
 }
 unit zgl_touch;
 
@@ -46,7 +46,7 @@ function touch_XY(ID: Byte): zglTPoint2D;
 //     использовать константы M_BLEFT и M_BRIGHT.
 // En: we return the state of pressing at the moment. To emulate a mouse, you
 //     can use the constants M_BLEFT and M_BRIGHT.
-function touch_Down(ID: Byte): Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
+function touch_Click(ID: Byte): Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
 // Ru: возвращаем состояние отжатия в данный момент. Для эмуляции мыши можно
 //     использовать константы M_BLEFT и M_BRIGHT.
 // En: we return the state of the release at the moment. To emulate a mouse, you
@@ -61,19 +61,22 @@ function touch_Tap(ID: Byte): Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
 //     использовать константы M_BLEFT и M_BRIGHT.
 // En: return the double-click state. To emulate a mouse, you
 //     can use the constants M_BLEFT and M_BRIGHT.
-function touch_DoubleTap(ID: Byte): Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
+function touch_DoubleClick(ID: Byte): Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
 // Ru: возвращаем состояние тройного клика.
 // En: we return the state of the triple click.
-function touch_TripleTap(ID: Byte): Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
+function touch_TripleClick(ID: Byte): Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
 {$EndIf}
 // Ru: очистка всех нажатий.
 // En: clearing all clicks.
 procedure touch_ClearState; {$IfDef USE_INLINE}inline;{$EndIf}
 
 var
-  // Ru: состояния всех клавиш.
-  // En: the states of all keys.
-  Andr_Touch: array[0..MAX_TOUCH - 1] of m_touch;
+  // Rus: состояния всех клавиш.
+  // Eng: the states of all keys.
+  Mobile_Touch: array[0..MAX_TOUCH - 1] of m_touch;
+  // Rus: какой из тапов первым попал на клавиатуру. 255 - ни какой.
+  // Eng:
+  firstTapKey: LongWord = is_notTouch;
 
 implementation
 
@@ -92,11 +95,10 @@ begin
     Exit;
   end;
   {$EndIf}
-  // если запредельное значение или статус не нажат (не происходило события), то указываем на это
-  if (ID > MAX_TOUCH - 1) or ((Andr_Touch[ID].state and is_canPress) = 0) then
+  if (ID > MAX_TOUCH - 1) or ((Mobile_Touch[ID].state and is_Press) = 0) then
     Result := - 1
   else
-    Result := Andr_Touch[ID].x;
+    Result := Mobile_Touch[ID].newX;
 end;
 
 function touch_Y(ID: Byte): Integer;
@@ -109,11 +111,10 @@ begin
     Exit;
   end;
   {$EndIf}
-  // если запредельное значение или статус не нажат (не происходило события), то указываем на это
-  if (ID > MAX_TOUCH - 1) or ((Andr_Touch[ID].state and is_canPress) = 0) then
+  if (ID > MAX_TOUCH - 1) or ((Mobile_Touch[ID].state and is_Press) = 0) then
     Result := - 1
   else
-    Result := Andr_Touch[ID].y;
+    Result := Mobile_Touch[ID].newY;
 end;
 
 function touch_XY(ID: Byte): zglTPoint2D;
@@ -127,20 +128,19 @@ begin
     Exit;
   end;
   {$EndIf}
-  // если запредельное значение или статус не нажат (не происходило события), то указываем на это
-  if (ID > MAX_TOUCH - 1) or ((Andr_Touch[ID].state and is_canPress) = 0) then
+  if (ID > MAX_TOUCH - 1) or ((Mobile_Touch[ID].state and is_Press) = 0) then
   begin
     Result.X := - 1;
     Result.Y := - 1;
   end
   else begin
-    Result.Y := Andr_Touch[ID].y;
-    Result.X := Andr_Touch[ID].x;
+    Result.Y := Mobile_Touch[ID].newY;
+    Result.X := Mobile_Touch[ID].newX;
   end;
 end;
 
 {$IfDef LIBRARY_COMPILE}
-function touch_Down(ID: Byte): Boolean;
+function touch_Click(ID: Byte): Boolean;
 begin
   {$IfDef FULL_LOGGING}
   if ID > 9 then
@@ -150,7 +150,7 @@ begin
     Exit;
   end;
   {$EndIf}
-  if ((Andr_Touch[ID].state and is_down) > 0) then
+  if ((Mobile_Touch[ID].state and is_down) > 0) then
     Result := True
   else
     Result := False;
@@ -166,13 +166,13 @@ begin
     Exit;
   end;
   {$EndIf}
-  if ((Andr_Touch[ID].state and is_up) > 0) then
+  if ((Mobile_Touch[ID].state and is_up) > 0) then
     Result := True
   else
     Result := False;
 end;
 
-function touch_Tap(Finger: Byte): Boolean;
+function touch_Tap(ID: Byte): Boolean;
 begin
   {$IfDef FULL_LOGGING}
   if ID > 9 then
@@ -182,13 +182,13 @@ begin
     Exit;
   end;
   {$EndIf}
-  if ((Andr_Touch[ID].state and is_Press) > 0) then
+  if ((Mobile_Touch[ID].state and is_Press) > 0) then
     Result := True
   else
     Result := False;
 end;
 
-function touch_DoubleTap(ID: Byte): Boolean;
+function touch_DoubleClick(ID: Byte): Boolean;
 begin
   {$IfDef FULL_LOGGING}
   if ID > 9 then
@@ -198,14 +198,14 @@ begin
     Exit;
   end;
   {$EndIf}
-  if ((Andr_Touch[ID].state and is_DoubleTap) > 0) then
+  if ((Mobile_Touch[ID].state and is_DoubleDown) > 0) then
     Result := True
   else
     Result := False;
 end;
 {$EndIf}
 
-function touch_TripleTap(ID: Byte): Boolean;
+function touch_TripleClick(ID: Byte): Boolean;
 begin
   {$IfDef FULL_LOGGING}
   if ID > 9 then
@@ -215,7 +215,7 @@ begin
     Exit;
   end;
   {$EndIf}
-  if ((Andr_Touch[ID].state and is_TripleDown) > 0) then
+  if ((Mobile_Touch[ID].state and is_TripleDown) > 0) then
     Result := True
   else
     Result := False;
@@ -223,11 +223,16 @@ end;
 
 procedure touch_ClearState;
 var
-  i: Byte;
+  i: LongWord;
+  ps: Pm_touch;
 begin
+  ps := @Mobile_Touch[0];
   for i := 0 to MAX_TOUCH - 1 do
-    // очистка всех данных, кроме удержания в данный момент времени
-    Andr_Touch[i].state := Andr_Touch[i].state and (is_Press or is_canPress);
+  begin
+    ps^.state := ps^.state and (is_Press or is_canPress);
+    inc(ps);
+  end;
+  ps := nil;
 end;
 
 end.
