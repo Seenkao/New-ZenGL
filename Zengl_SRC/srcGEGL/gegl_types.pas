@@ -30,15 +30,15 @@ uses
   zgl_types;
 
 const
-  // RU: частота мигания курсора
-  // EN: cursor blinking frequency
+  // Rus: частота мигания курсора
+  // Eng: cursor blinking frequency
   CUR_FLASH = 15;
-  // RU: максимальное количество символов в строке (сделать как переменную?)
-  // EN: maximum number of characters in a line
+  // Rus: максимальное количество символов в строке (сделать как переменную?)
+  // Eng: maximum number of characters in a line
   MAX_SYMBOL_LINE = 80;
 
-  // RU: константы для менеджера элементов, их перечисление.
-  // EN: constants for the element manager, their enumeration.
+  // Rus: константы для менеджера элементов, их перечисление.
+  // Eng: constants for the element manager, their enumeration.
   is_Edit        = 1;
   is_Label       = 2;
   is_Memo        = 3;
@@ -68,6 +68,10 @@ const
   el_Enable_or_Visible = el_Enable or el_Visible;
 
 type
+  geglDefColor = record
+    Text, Ground, Cursor: LongWord;    // цвет для всех элементов по умолчанию
+  end;
+
   geglTCursor = record
     curRect: zglTRect2D;               // вид курсора
     NSleep: Byte;                      // задержка для "мигания"
@@ -144,4 +148,3 @@ type
 implementation
 
 end.
-
