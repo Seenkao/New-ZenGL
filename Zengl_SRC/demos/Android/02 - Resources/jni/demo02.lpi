@@ -11,7 +11,7 @@
       </Flags>
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
-      <Title Value="demo02"/>
+      <Title Value="demo01"/>
       <UseAppBundle Value="False"/>
       <ResourceType Value="res"/>
     </General>
@@ -28,7 +28,7 @@
     </RunParams>
     <Units Count="1">
       <Unit0>
-        <Filename Value="demo02.lpr"/>
+        <Filename Value="demo01.lpr"/>
         <IsPartOfProject Value="True"/>
       </Unit0>
     </Units>
@@ -37,12 +37,12 @@
     <Version Value="11"/>
     <PathDelim Value="\"/>
     <Target>
-      <Filename Value="demo02"/>
+      <Filename Value="..\libs\armeabi\demo01"/>
     </Target>
     <SearchPaths>
-      <IncludeFiles Value="..\..\..\..\headers;..\..\..\..\headers\android;$(ProjOutDir)"/>
-      <Libraries Value="..\libs\armeabi;C:\codetyphon\binLibraries\android-4.0-api14-arm\"/>
-      <OtherUnitFiles Value="..\..\..\..\src;..\..\..\..\lib\zlib\arm-linux;..\..\..\..\lib\zip\arm-linux;..\..\..\..\lib\theora\arm-linux;..\..\..\..\lib\ogg\arm-linux"/>
+      <IncludeFiles Value="..\..\..\..\headers;..\..\..\..\headers\android;$(ProjOutDir);..\..\..\..\src;..\..\..\..\srcGL;..\..\..\..\srcGEGL"/>
+      <Libraries Value="..\..\..\..\bin\Android\armv6;C:\codetyphon\binLibraries\android-4.0.2-api14-arm"/>
+      <OtherUnitFiles Value="..\..\..\..\src;..\..\..\..\srcGL;..\..\..\..\srcGEGL;..\..\..\..\lib\zlib\arm-linux;..\..\..\..\lib\zip\arm-linux;..\..\..\..\lib\ogg\arm-linux;..\..\..\..\lib\theora\arm-linux"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <CodeGeneration>
@@ -51,7 +51,7 @@
       <TargetCPU Value="arm"/>
       <TargetOS Value="android"/>
       <Optimizations>
-        <OptimizationLevel Value="3"/>
+        <OptimizationLevel Value="2"/>
       </Optimizations>
     </CodeGeneration>
     <Linking>
