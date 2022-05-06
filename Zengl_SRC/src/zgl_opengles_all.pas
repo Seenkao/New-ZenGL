@@ -26,6 +26,8 @@
 unit zgl_opengles_all;
 
 {$I zgl_config.cfg}
+{$I GLdefine.cfg}
+
 {$IFDEF UNIX}
   {$DEFINE stdcall := cdecl}
 {$ENDIF}
@@ -82,6 +84,7 @@ const
     libGLES_CM = 'libGLESv1_CM.so';
     libGLESv1  = 'libGLESv1_CM.so';
     libGLESv2  = 'libGLESv2.so';
+    libGLU     = 'libGLU';
     {$ENDIF}
   {$ELSE}
     // нужен этот дальнейший код или нет? Может для 32-х битных систем?
@@ -912,7 +915,7 @@ var
   glShadeModel          : procedure(mode: GLenum); stdcall;
   glReadPixels          : procedure(x, y: GLint; width, height: GLsizei; format, atype: GLenum; pixels: Pointer); stdcall;
   // Color
-//  glColor4f             : procedure(red, green, blue, alpha: GLfloat); stdcall;
+  _glColor4f            : procedure(red, green, blue, alpha: GLfloat); stdcall;
   // Clear
   glClear               : procedure(mask: GLbitfield); stdcall;
   glClearColor          : procedure(red, green, blue, alpha: GLclampf); stdcall;
@@ -1257,18 +1260,6 @@ var
   procedure glTexCoord2f(s, t: GLfloat);
   procedure glTexCoord2fv(v: PGLfloat);
 
-// Triangulation
-  {$IFDEF USE_TRIANGULATION}
-  procedure gluDeleteTess(tess: Integer); stdcall external {$IFDEF ANDROID} 'libGLU' {$ENDIF};
-  function  gluErrorString(error: Integer): PChar; stdcall external {$IFDEF ANDROID} 'libGLU' {$ENDIF};
-  function  gluNewTess: Integer; stdcall external {$IFDEF ANDROID} 'libGLU' {$ENDIF};
-  procedure gluTessBeginContour(tess: Integer); stdcall external {$IFDEF ANDROID} 'libGLU' {$ENDIF};
-  procedure gluTessBeginPolygon(tess: Integer; data: Pointer); stdcall external {$IFDEF ANDROID} 'libGLU' {$ENDIF};
-  procedure gluTessCallback(tess: Integer; which: Integer; fn: Pointer); stdcall external {$IFDEF ANDROID} 'libGLU' {$ENDIF};
-  procedure gluTessEndContour(tess: Integer); stdcall external {$IFDEF ANDROID} 'libGLU' {$ENDIF};
-  procedure gluTessEndPolygon(tess: Integer); stdcall external {$IFDEF ANDROID} 'libGLU' {$ENDIF};
-  procedure gluTessVertex(tess: Integer; vertex: PDouble; data: Pointer); stdcall external {$IFDEF ANDROID} 'libGLU' {$ENDIF};
-  {$ENDIF}
 
   (*****************************************************************************
   *                                EGL                                         *
@@ -1449,7 +1440,7 @@ implementation
 uses
   zgl_math_2d,
   zgl_types,
-  zgl_gl_const_all,
+  zgl_gltypeconst,
   zgl_utils;
 
 // temporary type
@@ -1552,7 +1543,7 @@ begin
   glReadPixels            := dlsym( glesLibrary, 'glReadPixels' );
   glClear                 := dlsym( glesLibrary, 'glClear' );
   glClearColor            := dlsym( glesLibrary, 'glClearColor' );
-//  glColor4f               := dlsym( glesLibrary, 'glColor4f' );
+  _glColor4f               := dlsym( glesLibrary, 'glColor4f' );
   {$IF DEFINED(USE_GLES_ON_DESKTOP) and DEFINED(USE_AMD_DRIVERS)}
   glClearDepthf           := dlsym( glesLibrary, 'glClearDepth' );
   {$ELSE}
@@ -1760,6 +1751,7 @@ begin
   glDisableClientState( GL_COLOR_ARRAY );
   if RenderTextured Then
     glDisableClientState( GL_TEXTURE_COORD_ARRAY );
+  bSize := 0;
 end;
 
 procedure glColor4ub(red, green, blue, alpha: GLubyte);
