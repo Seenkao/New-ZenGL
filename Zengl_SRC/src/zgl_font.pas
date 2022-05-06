@@ -248,6 +248,7 @@ begin
   font_Load(Result, fntMem);
   mem_Free(fntMem);
 
+
   if Result = 255 Then
   begin
     log_Add('Unable to load font: "' + FileName + '" - program terminate');
@@ -272,7 +273,9 @@ begin
   useFont.ScaleNorm := 16 / TextScaleStandart ;
 
   setFontTextScale(15, Result);
-  useScaleEx := useFont.Scale;
+  setTextScaleEx(useFont.Scale);
+
+//  useScaleEx := useFont.Scale;
   useFont := nil;
 end;
 
@@ -346,7 +349,7 @@ begin
 
   useFont.ScaleNorm := 16 / TextScaleStandart ;
 
-  setFontTextScale(15, Result);
+  setFontTextScale(15, Font);
   useScaleEx := useFont.Scale;
   useFont := nil;
 end;
@@ -431,18 +434,18 @@ begin
   // "tab"
   zgl_GetMem(Pointer(useFont.CharDesc[9]), SizeOf(zglTCharDesc));
   charDesc9 := useFont.CharDesc[9];
-  charDesc9.Page := charDesc32.Page;
-  charDesc9.Width := charDesc32.Width * 4;
-  charDesc9.Height := charDesc32.Height;
-  charDesc9.ShiftX := charDesc32.ShiftX;
-  charDesc9.ShiftY := charDesc32.ShiftY;
-  charDesc9.ShiftP := charDesc32.ShiftP * 4;
+  charDesc9^.Page := charDesc32.Page;
+  charDesc9^.Width := charDesc32.Width * 4;
+  charDesc9^.Height := charDesc32.Height;
+  charDesc9^.ShiftX := charDesc32.ShiftX;
+  charDesc9^.ShiftY := charDesc32.ShiftY;
+  charDesc9^.ShiftP := charDesc32.ShiftP * 4;
   charDesc9.TexCoords[0] := charDesc32.TexCoords[0];
   charDesc9.TexCoords[1] := charDesc32.TexCoords[1];
   charDesc9.TexCoords[2] := charDesc32.TexCoords[2];
   charDesc9.TexCoords[3] := charDesc32.TexCoords[3];
   charDesc9._x1 := charDesc9.ShiftX - useFont.Padding[PaddingX1];
-  charDesc9._x2 := charDesc9.ShiftX + charDesc9.Width + useFont.Padding[PaddingX2];
+  charDesc9^._x2 := charDesc9^.ShiftX + charDesc9^.Width + useFont^.Padding[PaddingX2];
   charDesc9._y1 := charDesc9.ShiftY + useFont.MaxHeight - charDesc9.Height - useFont.Padding[PaddingY1];
   charDesc9._y2 := charDesc9.ShiftY + useFont.MaxHeight + useFont.Padding[PaddingY2];
   charDesc32._x1 := charDesc32.ShiftX - useFont.Padding[PaddingX1];
