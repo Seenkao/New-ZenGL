@@ -20,7 +20,9 @@ uses
   zgl_text,
   zgl_types,
   zgl_utils,
-
+  {$IfNDef OLD_METHODS}
+  gegl_color,
+  {$EndIf}
   zglSpriteEngine                       // переместили ниже, видимо какая-то активация проходит и вызывает ошибку при работе приложения
   ;
 
@@ -37,13 +39,16 @@ type
 
 var
   dirRes    : UTF8String = 'assets/';
-  fntMain   : Byte;
+  fntMain   : LongWord;
   texLogo   : zglPTexture;
   texMiku   : zglPTexture;
   time      : Integer;
   sengine2d : zglCSEngine2D;
-  TimeStart : Byte;
-  TimeMiku  : Byte;
+  TimeStart : LongWord;
+  TimeMiku  : LongWord;
+
+  newColor  : LongWord;
+  correctColor: LongWord;
 
 // Miku
 procedure CMiku.OnInit( _Texture : zglPTexture; _Layer : Integer );
@@ -146,10 +151,15 @@ begin
   fntMain := font_LoadFromFile( dirRes + 'font.zfi' );
 
   file_CloseArchive();
-  setTextScale(15, fntMain);
+  setFontTextScale(15, fntMain);
+
+  newColor := Color_FindOrAdd($80A080FF - 55);
+  correctColor := Color_FindOrAdd($AFAFAFFF);
 end;
 
 procedure Draw;
+var
+  i: Integer;
 begin
   batch2d_Begin();
   // RU: Рисуем все спрайты находящиеся в текущем спрайтовом менеджере.
@@ -161,14 +171,19 @@ begin
     ssprite2d_Draw( texLogo, 400 - 256, 300 - 128, 512, 256, 0, time )
   else
     if time < 510 Then
-      begin
-        pr2d_Rect( 0, 0, 800, 600, $000000, 510 - time, PR2D_FILL );
-        ssprite2d_Draw( texLogo, 400 - 256, 300 - 128, 512, 256, 0, 510 - time );
-      end;
+    begin
+      i := Get_Color(correctColor);
+      pr2d_Rect( 0, 0, 800, 600, {$IfDef OLD_METHODS}$AFAFAF, 510 - time,{$Else}correctColor,{$EndIf} PR2D_FILL );
+      dec(i);
+      if i < $AFAFAF00 then
+        i := $AFAFAF00;
+      Correct_Color(correctColor, i);
+      ssprite2d_Draw( texLogo, 400 - 256, 300 - 128, 512, 256, 0, 510 - time );
+    end;
 
   if time > 255 Then
     begin
-      pr2d_Rect( 0, 0, 256, 110, $000000, 200, PR2D_FILL );
+      pr2d_Rect( 0, 0, 256, 100, {$IfDef OLD_METHODS} $80A080, 200,{$Else}newColor,{$EndIf} PR2D_FILL );
       text_Draw( fntMain, 0, 0, 'FPS: ' + u_IntToStr( zgl_Get( RENDER_FPS ) ) );
       text_Draw( fntMain, 0, 20, 'Sprites: ' + u_IntToStr( sengine2d.Count ) );
       text_Draw( fntMain, 0, 40, 'Tap at the top - Add Miku' );
@@ -185,24 +200,24 @@ begin
   // RU: Выполняем обработку всех спрайтов в текущем спрайтовом менеджере.
   // EN: Process all sprites contained in current sprite engine.
   sengine2d.Proc();
+end;
 
+procedure KeyMouseEvents;
+begin
   // RU: По двойному тапу очистить все спрайты.
   // EN: Delete all sprites if there was double tap.
-//  if touch_DblTap( 0 ) Then
-  if mBDblClickWheel(M_BLEFT_DBLCLICK) then
+  if mouseBDblClick(M_BLEFT) then
     sengine2d.ClearAll()
   else
     begin
-      if touch_Tap( 0 ) Then
-        begin
-          if touch_Y( 0 ) < 300 Then
-            AddMiku()
-          else
-            DelMiku();
-        end;
+      if touch_Click( 0 ) Then
+      begin
+        if touch_Y( 0 ) < 300 Then
+          AddMiku()
+        else
+          DelMiku();
+      end;
     end;
-  mouse_ClearState;
-  touch_ClearState();
 end;
 
 procedure Restore;
@@ -228,9 +243,11 @@ procedure Java_zengl_android_ZenGL_Main( var env; var thiz ); cdecl;
 begin
   randomize();
 
-  TimeStart := timer_Add( @Timer, 16, Start );
-  TimeMiku := timer_Add( @AddMiku, 3000, SleepToStart, 8 );
+  TimeStart := timer_Add( @Timer, 16, t_Start );
+  TimeMiku := timer_Add( @AddMiku, 3000, t_SleepToStart, 8 );
 
+  zgl_SetEventsInterval(16);
+  zgl_Reg(SYS_EVENTS, @KeyMouseEvents);
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );
   zgl_Reg( SYS_ANDROID_RESTORE, @Restore );
