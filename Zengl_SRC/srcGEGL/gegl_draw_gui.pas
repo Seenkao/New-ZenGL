@@ -33,7 +33,7 @@ uses
   zgl_textures;
 
 var
-  fontUse: Byte;
+  fontUse: LongWord;
   JoyArrow: zglPTexture;
 
   MenuRed: array[0..2] of Single    = ($AF / 255, $7F / 255, $7F / 255);
@@ -48,7 +48,7 @@ var
   MenuColorText: Cardinal = $000000B0;
 
 procedure DrawCircle(x, y, R: Single);
-procedure DrawButton(x, y, w, h: Single; nColor: Byte);
+procedure DrawButton(x, y, w, h: Single; nColor: LongWord);
 procedure DrawGameJoy01;
 procedure DrawGameJoy02;
 procedure DrawTouchKeyboard;
@@ -64,31 +64,44 @@ uses
   zgl_sprite_2d,
   zgl_keyboard,
   zgl_fx,
+  zgl_gltypeconst,
   {$IFNDEF USE_GLES}
-  zgl_opengl_all,
-  zgl_gltypeconst
+  zgl_opengl_all
   {$ELSE}
   zgl_opengles_all
   {$ENDIF}
   ;
 
+var
+  rs0:   Single = 0;
+  rs05:  Single = 0.5;
+  rs1:   Single = 1;
+  rs1_5: Single = 1.5;
+  rs2:   Single = 2;
+  rs3:   Single = 3;
+  rs5:   Single = 5;
+  rs10:  Single = 10;
+  rs16:  Single = 16;
+  rs90:  Single = 90;
+  rs270: Single = 270;
+
 procedure DrawCircle(x, y, R: Single);
 var
-  dx, dy: single;
-  n: byte;
+  dx, dy, dx_05, dy_05: single;
+  n: LongWord;
 begin
-  dx := 0;
+  dx := rs0;
   dy := R;
   n := 0;
   while dy >= 0 do
   begin
     if (n and 1) > 0 then
     begin
-      dy := dy - 1;
+      dy := dy - rs1;
       dx := sqrt(sqr(R) - sqr(dy));
     end
     else begin
-      dx := dx + 1;
+      dx := dx + rs1;
       dy := sqrt(sqr(R) - sqr(dx));
       if dy < dx then
       begin
@@ -96,24 +109,28 @@ begin
         dy := round(dy);
       end;
     end;
+    dx_05 := dx - rs05;
+    dy_05 := dy - rs05;
     glBegin(GL_LINES);
-      glVertex3f(x + dx - 0.5, y + dy - 0.5, 0);
-      glVertex3f(x - (dx - 0.5), y + dy - 0.5, 0);
-      glVertex3f(x + dx - 0.5, y - (dy - 0.5), 0);
-      glVertex3f(x - (dx - 0.5), y - (dy - 0.5), 0);
+      glVertex3f(x + dx_05, y + dy_05, rs0);
+      glVertex3f(x - (dx_05), y + dy_05, rs0);
+      glVertex3f(x + dx_05, y - (dy_05), rs0);
+      glVertex3f(x - (dx_05), y - (dy_05), rs0);
     glEnd;
   end;
 end;
 
-procedure DrawButton(x, y, w, h: Single; nColor: Byte);
+procedure DrawButton(x, y, w, h: Single; nColor: LongWord);
 var
   Box: array[0..3, 0..2] of Single;
+  rrs0: Single;
 begin
   glEnable(GL_BLEND);
-  Box[0, 2] := 0;
-  Box[1, 2] := 0;
-  Box[2, 2] := 0;
-  Box[3, 2] := 0;
+  rrs0 := rs0;
+  Box[0, 2] := rrs0;
+  Box[1, 2] := rrs0;
+  Box[2, 2] := rrs0;
+  Box[3, 2] := rrs0;
   Box[0, 0] := x + w;
   Box[0, 1] := y;
   Box[1, 0] := x + w;
@@ -122,19 +139,19 @@ begin
   Box[2, 1] := y;
   Box[3, 0] := x;
   Box[3, 1] := y + h;
-  glColor4f(MenuRed[nColor], MenuGreen[nColor], MenuBlue[nColor], MenuAlpha[nColor]);
+  {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(MenuRed[nColor], MenuGreen[nColor], MenuBlue[nColor], MenuAlpha[nColor]);
   glVertexPointer(3, GL_FLOAT, 0, @Box);
   glEnableClientState(GL_VERTEX_ARRAY);
   glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-  Box[0, 0] := x + 1.5;
-  Box[0, 1] := y + 1.5;
-  Box[1, 0] := x + w - 1.5;
-  Box[1, 1] := y + 1.5;
-  Box[2, 0] := x + w - 1.5;
-  Box[2, 1] := y + h - 1.5;
-  Box[3, 0] := x + 1.5;
-  Box[3, 1] := y + h - 1.5;
-  glColor4f(MenuRed[1], MenuGreen[1], MenuBlue[1], MenuAlpha[1]);
+  Box[0, 0] := x + rs1_5;
+  Box[0, 1] := y + rs1_5;
+  Box[1, 0] := x + w - rs1_5;
+  Box[1, 1] := y + rs1_5;
+  Box[2, 0] := x + w - rs1_5;
+  Box[2, 1] := y + h - rs1_5;
+  Box[3, 0] := x + rs1_5;
+  Box[3, 1] := y + h - rs1_5;
+  {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(MenuRed[1], MenuGreen[1], MenuBlue[1], MenuAlpha[1]);
   glDrawArrays(GL_LINE_LOOP, 0, 4);
   glDisableClientState(GL_VERTEX_ARRAY);
   glDisable(GL_BLEND);
@@ -145,31 +162,29 @@ var
   r: zglTRect2D;
   i: Integer;
 begin
-//  setTextScale(22, fontUse);
-  setTextColor(MenuColorText);
-  glColor4f(CircleRed[0], CircleGreen[0], CircleBlue[0], CircleAlpha[0]);
+  {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(CircleRed[0], CircleGreen[0], CircleBlue[0], CircleAlpha[0]);
   DrawCircle(TouchJoyRolling.Rolling.X, TouchJoyRolling.Rolling.Y, TouchJoyRolling.Rolling.R);
 
   if (TouchJoyRolling.Rolling.bPush and 1) > 0 then                             
   begin
-    glColor4f(CircleRed[1], CircleGreen[1], CircleBlue[1], CircleAlpha[1]);
-    DrawCircle(TouchJoyRolling.Rolling._x, TouchJoyRolling.Rolling._y, 5);
+    {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(CircleRed[1], CircleGreen[1], CircleBlue[1], CircleAlpha[1]);
+    DrawCircle(TouchJoyRolling.Rolling._x, TouchJoyRolling.Rolling._y, rs5);
   end;
 
-  glColor4f(CircleRed[2], CircleGreen[2], CircleBlue[2], CircleAlpha[2]);      
-  DrawCircle(TouchJoyRolling.Rolling.X, TouchJoyRolling.Rolling.Y, 10);
+  {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(CircleRed[2], CircleGreen[2], CircleBlue[2], CircleAlpha[2]);
+  DrawCircle(TouchJoyRolling.Rolling.X, TouchJoyRolling.Rolling.Y, rs10);
 
   r.W := TouchJoyRolling.Width;
   r.H := TouchJoyRolling.Height;
   for i := 1 to TouchJoyRolling.count do
   Begin
     r.X := TouchJoyRolling.OneButton[i].X;
-    r.Y := TouchJoyRolling.OneButton[i].Y + 3;
+    r.Y := TouchJoyRolling.OneButton[i].Y + rs3;
 
     if ((TouchJoyRolling.OneButton[i].bPush and 1) > 0) then
     begin
       setFontTextScale(21, fontUse);
-      DrawButton(TouchJoyRolling.OneButton[i].X + 1, TouchJoyRolling.OneButton[i].Y + 1, TouchJoyRolling.Width - 2, TouchJoyRolling.Height - 2, 2);
+      DrawButton(TouchJoyRolling.OneButton[i].X + rs1, TouchJoyRolling.OneButton[i].Y + rs1, TouchJoyRolling.Width - rs2, TouchJoyRolling.Height - rs2, 2);
       text_DrawInRect(fontUse, r, TouchJoyRolling.OneButton[i].symb, TEXT_HALIGN_CENTER or TEXT_VALIGN_CENTER);
       setFontTextScale(22, fontUse);
     end
@@ -185,8 +200,6 @@ var
   i: Integer;
   r: zglTRect2D;
 begin
-//  setTextScale(22, fontUse);
-  setTextColor(MenuColorText);
   for i := 1 to 9 do
   begin
     if i <> 5 then
@@ -201,11 +214,11 @@ begin
   for i := 1 to TouchJoy.count do
   Begin
     r.X := TouchJoy.OneButton[i].X;
-    r.Y := TouchJoy.OneButton[i].Y + 3;
+    r.Y := TouchJoy.OneButton[i].Y + rs3;
     if (TouchJoy.OneButton[i].bPush and 1) > 0 then
     begin
       setFontTextScale(21, fontUse);
-      DrawButton(TouchJoy.OneButton[i].X + 1, TouchJoy.OneButton[i].Y + 1, TouchJoy.Width - 2, TouchJoy.Height - 2, 2);
+      DrawButton(TouchJoy.OneButton[i].X + rs1, TouchJoy.OneButton[i].Y + rs1, TouchJoy.Width - rs2, TouchJoy.Height - rs2, 2);
       text_DrawInRect(fontUse, r, TouchJoy.OneButton[i].symb,  TEXT_HALIGN_CENTER or TEXT_VALIGN_CENTER);
       setFontTextScale(22, fontUse);
     end
@@ -218,14 +231,14 @@ end;
 
 procedure DrawTouchKeyboard;
 var
-  n: Byte;
+  n: LongWord;
   i: Integer;
   r: zglTRect2D;
+  oldTextScaleEx: Single;
 begin
-//  setTextScale(TouchKey.textScale, fontUse);
-//  Off_TextScale := True;
-//  useScaleEx := TouchKey.textScale * managerFont.Font[fontUse].ScaleNorm;
-  setTextColor(MenuColorText);
+  oldTextScaleEx := getTextScaleEx();
+  setTextFontScaleEx(TouchKey.textScale / rs10, fontUse);
+  setScallingOff(True);                 // отключаем шкалу
   if (keybFlags and keyboardLatinRus) > 0 then
     if ((keybFlags and keyboardCaps) > 0) or ((keybFlags and keyboardShift) > 0) then
       n := 3
@@ -241,12 +254,12 @@ begin
   for i := 1 to TouchKey.count do
   Begin
     r.X := TouchKey.OneButton[i].X;
-    r.Y := TouchKey.OneButton[i].Y + 2;
+    r.Y := TouchKey.OneButton[i].Y + rs2;
     if keysDown[TouchKey.OneButton[i]._key] then
     begin
       r.X := r.X + 1;
       r.Y := r.Y + 1;
-      DrawButton(TouchKey.OneButton[i].X + 1, TouchKey.OneButton[i].Y + 1, TouchKey.OWidth, TouchKey.Height, 2);
+      DrawButton(TouchKey.OneButton[i].X + rs1, TouchKey.OneButton[i].Y + rs1, TouchKey.OWidth, TouchKey.Height, 2);
       text_DrawInRect(fontUse, r, Unicode_toUTF8( TouchKey.OneButton[i].symb[n]), TEXT_HALIGN_CENTER or TEXT_VALIGN_CENTER);
       Continue;                 
     end;
@@ -261,15 +274,15 @@ begin
     if (i = _Latin) and ((keybFlags and keyboardLatinRus) = 0) then
       Continue;
     r.X := TouchKey.StringButton[i].X;
-    r.Y := TouchKey.StringButton[i].Y + 2;
+    r.Y := TouchKey.StringButton[i].Y + rs2;
     r.W := TouchKey.StringButton[i].Width;
     if (keysDown[TouchKey.StringButton[i]._key]) or (((keybFlags and keyboardCaps) > 0) and (i = _CapsLock)) or
           (((keybFlags and keyboardInsert) > 0) and (i = _Insert)) or ((i = _Shift) and
           ((keybFlags and keyboardShift) > 0)) then
     begin
-      r.X := r.X + 1;
-      r.Y := r.Y + 1;
-      DrawButton(TouchKey.StringButton[i].X + 1, TouchKey.StringButton[i].Y + 1, TouchKey.StringButton[i].Width, TouchKey.Height, 2);
+      r.X := r.X + rs1;
+      r.Y := r.Y + rs1;
+      DrawButton(TouchKey.StringButton[i].X + rs1, TouchKey.StringButton[i].Y + rs1, TouchKey.StringButton[i].Width, TouchKey.Height, 2);
       text_DrawInRect(fontUse, r, TouchKey.StringButton[i].bString, TEXT_HALIGN_CENTER or TEXT_VALIGN_CENTER);
       Continue;                
     end;
@@ -277,19 +290,16 @@ begin
     DrawButton(TouchKey.StringButton[i].X, TouchKey.StringButton[i].Y, TouchKey.StringButton[i].Width, TouchKey.Height, 0);
     text_DrawInRect(fontUse, r, TouchKey.StringButton[i].bString, TEXT_HALIGN_CENTER or TEXT_VALIGN_CENTER);
   end;
-//  Off_TextScale := False;
+  setScallingOff(False);
+  setTextScaleEx(oldTextScaleEx);
 end;
 
 procedure DrawTouchSymbol;
 var
-  n: Byte;
+  n: LongWord;
   i: Integer;
   r: zglTRect2D;
 begin
-//  setTextScale(TouchKeySymb.textScale, fontUse);
-//  Off_TextScale := True;
-//  useScaleEx := TouchKey.textScale * managerFont.Font[fontUse].ScaleNorm;
-  setTextColor(MenuColorText);
   if (keybFlags and keyboardShift) > 0 then
     n := 2
   else
@@ -299,13 +309,13 @@ begin
   for i := 1 to TouchKeySymb.count do
   Begin
     r.X := TouchKeySymb.OneDoubleButton[i].X;
-    r.Y := TouchKeySymb.OneDoubleButton[i].Y + 2;
+    r.Y := TouchKeySymb.OneDoubleButton[i].Y + rs2;
 
     if keysDown[TouchKeySymb.OneDoubleButton[i]._key] then
     begin
-      r.X := r.X + 1;
-      r.Y := r.Y + 1;
-      DrawButton(TouchKeySymb.OneDoubleButton[i].X + 1, TouchKeySymb.OneDoubleButton[i].Y + 1, TouchKeySymb.OWidth, TouchKeySymb.Height, 2);
+      r.X := r.X + rs1;
+      r.Y := r.Y + rs1;
+      DrawButton(TouchKeySymb.OneDoubleButton[i].X + rs1, TouchKeySymb.OneDoubleButton[i].Y + rs1, TouchKeySymb.OWidth, TouchKeySymb.Height, 2);
       text_DrawInRect(fontUse, r, TouchKeySymb.OneDoubleButton[i].symb[n], TEXT_HALIGN_CENTER or TEXT_VALIGN_CENTER);
       Continue;                 
     end;
@@ -316,7 +326,7 @@ begin
   for i := 36 to 44 do
   Begin
     r.X := TouchKeySymb.StringButton[i].X;
-    r.Y := TouchKeySymb.StringButton[i].Y + 2;
+    r.Y := TouchKeySymb.StringButton[i].Y + rs2;
     r.W := TouchKeySymb.StringButton[i].Width;
     if (i = _home) or (i = _end) then
       setFontTextScale(Round(TouchKeySymb.textScale / 2), fontUse);
@@ -326,7 +336,7 @@ begin
     begin
       r.X := r.X + 1;
       r.Y := r.Y + 1;
-      DrawButton(TouchKeySymb.StringButton[i].X + 1, TouchKeySymb.StringButton[i].Y + 1, TouchKeySymb.StringButton[i].Width, TouchKeySymb.Height, 2);
+      DrawButton(TouchKeySymb.StringButton[i].X + rs1, TouchKeySymb.StringButton[i].Y + rs1, TouchKeySymb.StringButton[i].Width, TouchKeySymb.Height, 2);
       text_DrawInRect(fontUse, r, TouchKeySymb.StringButton[i].bString, TEXT_HALIGN_CENTER or TEXT_VALIGN_CENTER);
     end
     else begin
@@ -339,24 +349,24 @@ begin
   for i := 24 to 27 do
   begin
     fx2d_SetColor(0);
-    if (TouchKeySymb.BArrow[i].Angle = 90) or (TouchKeySymb.BArrow[i].Angle = 270) then
+    if (TouchKeySymb.BArrow[i].Angle = rs90) or (TouchKeySymb.BArrow[i].Angle = rs270) then
     begin
-      r.W := 16;
-      r.H := 0;
+      r.W := rs16;
+      r.H := rs0;
     end
     else begin
-      r.W := 0;
-      r.H := 16;
+      r.W := rs0;
+      r.H := rs16;
     end;
     if keysDown[TouchKeySymb.BArrow[i]._key] then
     begin
-      DrawButton(TouchKeySymb.BArrow[i].X + 1, TouchKeySymb.BArrow[i].Y + 1, TouchKeySymb.OWidth, TouchKeySymb.Height, 2);
-      asprite2d_Draw(JoyArrow, TouchKeySymb.BArrow[i].X + 1 + r.W / 2, TouchKeySymb.BArrow[i].Y + 1 + r.H / 2, TouchKeySymb.OWidth - 1 - r.W, TouchKeySymb.Height - 1 - r.H,
+      DrawButton(TouchKeySymb.BArrow[i].X + rs1, TouchKeySymb.BArrow[i].Y + rs1, TouchKeySymb.OWidth, TouchKeySymb.Height, 2);
+      asprite2d_Draw(JoyArrow, TouchKeySymb.BArrow[i].X + rs1 + r.W / rs2, TouchKeySymb.BArrow[i].Y + rs1 + r.H / rs2, TouchKeySymb.OWidth - rs1 - r.W, TouchKeySymb.Height - rs1 - r.H,
             TouchKeySymb.BArrow[i].Angle, TouchKeySymb.TextureDown, 192, FX_COLOR or FX_BLEND);
     end
     else begin
       DrawButton(TouchKeySymb.BArrow[i].X, TouchKeySymb.BArrow[i].Y, TouchKeySymb.OWidth, TouchKeySymb.Height, 0);
-      asprite2d_Draw(JoyArrow, TouchKeySymb.BArrow[i].X + r.W / 2, TouchKeySymb.BArrow[i].Y + r.H / 2, TouchKeySymb.OWidth - r.W, TouchKeySymb.Height - r.H,
+      asprite2d_Draw(JoyArrow, TouchKeySymb.BArrow[i].X + r.W / rs2, TouchKeySymb.BArrow[i].Y + r.H / rs2, TouchKeySymb.OWidth - r.W, TouchKeySymb.Height - r.H,
             TouchKeySymb.BArrow[i].Angle, TouchKeySymb.TextureUp, 192, FX_COLOR or FX_BLEND);
     end;
   end;
