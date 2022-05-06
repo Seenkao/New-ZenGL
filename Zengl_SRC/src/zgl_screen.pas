@@ -21,7 +21,7 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 26.02.2022
+ !!! modification from Serge 23.04.2022
 }
 unit zgl_screen;
 
@@ -37,7 +37,9 @@ interface
 uses
 {$IFDEF USE_X11}
   X, XLib, XRandr, UnixType,
+  {$IfNDef USE_GLES}
   zgl_glx_wgl,
+  {$EndIf}
 {$ENDIF}
 {$IFDEF WINDOWS}
   Windows,
@@ -51,7 +53,7 @@ uses
 {$IFDEF iOS}
   iPhoneAll, CFBase, CFString,
 {$ENDIF}
-  zgl_gltypeconst,
+
   zgl_types;
 
 const
@@ -247,6 +249,7 @@ implementation
 uses
   zgl_application,
   zgl_window,
+  zgl_gltypeconst,
   {$IFNDEF USE_GLES}
   zgl_opengl,
   zgl_opengl_all,
@@ -258,6 +261,9 @@ uses
   zgl_render_2d,
   zgl_camera_2d,
   zgl_log,
+  {$IfDef USE_VKEYBOARD}
+  gegl_menu_gui,
+  {$EndIf}
   zgl_utils
   ;
 
@@ -564,7 +570,7 @@ begin
   if not Assigned(appXIM) Then
     log_Add('XOpenIM - Fail')
   else
-    log_Add('XOpenIM - ok'); }
+    log_Add('XOpenIM - ok');
 
   appXIC := XCreateIC(appXIM, [XNInputStyle, XIMPreeditNothing or XIMStatusNothing, 0]);
   if not Assigned(appXIC) Then
@@ -687,6 +693,10 @@ begin
   wndFullScreen := TRUE;
   scrVsync      := TRUE;
 {$IFEND}
+  {$IfDef USE_VKEYBOARD}
+  _wndWidth     := wndWidth;
+  _wndHeight    := wndHeight;
+  {$EndIf}
 
   Result        := TRUE;
   if not appInitialized Then
@@ -835,6 +845,10 @@ end;
 
 procedure scr_CorrectResolution(Width, Height: Word);
 begin
+  {$IfDef ANDROID}
+  _wndWidth := Width;
+  _wndHeight := Height;
+  {$EndIf}
   {$IfDef MAC_COCOA}
   zgl_Disable(CORRECT_RESOLUTION);
   {$Else}
