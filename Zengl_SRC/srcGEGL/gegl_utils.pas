@@ -28,21 +28,37 @@ unit gegl_utils;
 interface
 
 var
+  // Rus: глобальная строка, для любого использования. Удобно для использования
+  //      для загрузки разных ресурсов.
+  // Eng:
   LoadText: UTF8String;
+  // Rus: флаг, показывающий, занята глобальная строка или нет. Вы должны его
+  //      включать если загрузили ресурс и отключать, когда больше этот ресурс
+  //      не нужен. И желательно освобождать строку полностью.
+  // Eng:
+  fLoadTextClearing: Boolean = True;
 
 {$IfDef DELPHI7_AND_DOWN}
 // Delphi 7 and down - UTF8. Rus only.
 function AscToUtf8Rus(text: AnsiString): UTF8String;
 function ByteToUtf8Rus(myByte: Byte): UTF8String;
 {$EndIf}
-// RU: переводим клавиатурные коды в русскую символику. Для других языков, надо свою функцию делать.
-//     И знать клавиатурную раскладку.
-// EN: we translate keyboard codes into Russian symbols. For other languages, you need to do your own
-//     function. It is imperative to know the keyboard layout for this language.
+// Rus: переводим клавиатурные коды в русскую символику. Для других языков, надо
+//      свою функцию делать. И знать клавиатурную раскладку.
+// Eng: we translate keyboard codes into Russian symbols. For other languages, you
+//      need to do your own function. It is imperative to know the keyboard layout
+//      for this language.
 procedure EngToRus(var symb: LongWord);
-// RU: то же самое, но только переводим в Unicode.
-// EN: the same, but only translating to Unicode.
+// Rus: то же самое, но только переводим в Unicode.
+// Eng: the same, but only translating to Unicode.
 procedure EngToRusUnicode(var symb: LongWord);
+// Rus: установка значения флага для глобальной загружаемой строки. Указываем что
+//      строка занята или свободна. Если освобождаем, то строка очистится.
+// Eng:
+procedure set_FlagForLoadText(flag: Boolean); {$IfDef USE_INLINE}inline;{$EndIf}
+// Rus: возвращаем значение флага для глобальной строки. Занята строка или свободна?
+// Eng:
+function get_FlagForLoadText: Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
 
 implementation
 
@@ -235,6 +251,18 @@ begin
 
     35  : symb := 8470;         // №
   end;
+end;
+
+procedure set_FlagForLoadText(flag: Boolean);
+begin
+  if flag = True then
+    LoadText := '';
+  fLoadTextClearing := flag;
+end;
+
+function get_FlagForLoadText: Boolean;
+begin
+  Result := fLoadTextClearing;
 end;
 
 end.
