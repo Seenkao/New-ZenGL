@@ -34,96 +34,108 @@ uses
   zgl_keyboard,
   zgl_timers,
   gegl_utils,
-  {$IfNDef MOBILE}
   zgl_mouse,
-  {$Else}
+  {$IfDef MOBILE}
   zgl_touch,
   {$EndIf}
   zgl_collision_2d,
+  {$IfNDef OLD_METHODS}
+  gegl_color,
+  {$EndIf}
   zgl_window;
 
 var
   managerSetOfTools: geglTSetOfToolsManager;
 
-// RU: создание поля ввода. Заданный прямоугольник; шрифт; размер шрифта;
-//     заданные процедуры: вывода поля ввода и ограничению вводимых символов;
-//     длина строки. По умолчанию, заданных процедур нет, длина строки = 80.
+// Rus: создание поля ввода. Заданный прямоугольник; шрифт; размер шрифта;
+//      заданные процедуры: вывода поля ввода и ограничению вводимых символов;
+//      длина строки. По умолчанию, заданных процедур нет, длина строки = 80.
 //
-// EN: creating an input field. The specified rectangle; font; font size; the
-//     specified procedures: output of the input field and the limitation of the
-//     entered characters; the length of the string. By default, there are no
-//     specified procedures, line length = 80.
+// Eng: creating an input field. The specified rectangle; font; font size; the
+//      specified procedures: output of the input field and the limitation of the
+//      entered characters; the length of the string. By default, there are no
+//      specified procedures, line length = 80.
 function CreateEdit(Rect: zglTRect2D; fnt, Scale: LongWord; UserData1: Pointer = nil; UserData2: Pointer = nil; Len: Word = MAX_SYMBOL_LINE): Word;         // функция с запасом на будущее
-// RU: обработка событий поля ввода, вызывать не надо. Менеджер всё сделает
-//     за вас.
-// EN: event handling of the input field, no need to call. The manager will do
-//     everything for you.
-procedure EventsEdit(num: LongWord);
-// RU: удаление определённого элемента API, по его номеру. И без разницы какой
-//     это элемент, он будет удалён, не выключен.
-// EN: deleting a specific API element by its number. And no matter what element
-//     it is, it will be deleted, not turned off.
-procedure DeleteElementSOT(num: LongWord);
-// Ru: Установка цвета в уже созданном поле ввода (а точнее указание номеров
-//     использыемых цветов). Вы можете использовать эту функцию для настройки
-//     как после создания поля ввода, так и во время работы программы (в меню
-//     настроек).
-procedure SetEditColor(num: LongWord; ColorText, ColorBackground: LongWord; ColorCursor: LongWord = 0);
-// RU: уничтожение всех элементов API. Вызывать не нужно!!! Производится по
-//     закрытию программы!!!
-// EN: destruction of all API elements. Don't Run !!! It is performed when the
+// Rus: обработка событий поля ввода, вызывать не надо. Менеджер всё сделает
+//      за вас.
+// Eng: event handling of the input field, no need to call. The manager will do
+//      everything for you.
+procedure EventsEdit(numElement: LongWord);
+// Rus: удаление определённого элемента API, по его номеру. И без разницы какой
+//      это элемент, он будет удалён, не выключен.
+// Eng: deleting a specific API element by its number. And no matter what element
+//      it is, it will be deleted, not turned off.
+procedure DeleteElementSOT(numElement: LongWord);
+// Rus: Установка цвета в уже созданном поле ввода (а точнее указание номеров
+//      использыемых цветов). Вы можете использовать эту функцию для настройки
+//      как после создания поля ввода, так и во время работы программы (в меню
+//      настроек).
+// Eng: Setting a color in an already created input field (or rather, specifying
+//		  the numbers of used colors). You can use this function to configure both
+// 		  after creating the input field and while the program is running (in the
+//		  settings menu).
+procedure SetDefColor(ColorText, ColorBackground: LongWord; ColorCursor: LongWord = cl_Black);
+// Rus: уничтожение всех элементов API. Вызывать не нужно!!! Производится по
+//      закрытию программы!!!
+// Eng: destruction of all API elements. Don't Run !!! It is performed when the
 //     program is closed !!!
 procedure DestroyManagerSOT();
-// RU: Установка точки вращения и угла вращения (если это необходимо).
-//     Обратить внимание! Заданная точка, будет работать для всех элементов!!!
-//     Потому, для создания нового элемента, её надо пересчитать или обнулить.
-//     Запускать до создания элемента API!!!
-// EN: Set pivot point and pivot angle (if necessary).
-//     Note! The set point will work for all elements !!! Therefore, to create a
-//     new element, it must be recalculated or reset to zero.
-//     Run before API element is created !!!
+// Rus: Установка точки вращения и угла вращения (если это необходимо).
+//      Обратить внимание! Заданная точка, будет работать для всех элементов!!!
+//      Потому, для создания нового элемента, её надо пересчитать или обнулить.
+//      Запускать до создания элемента API!!!
+// Engv: Set pivot point and pivot angle (if necessary).
+//      Note! The set point will work for all elements !!! Therefore, to create
+//      a new element, it must be recalculated or reset to zero.
+//      Run before API element is created !!!
 procedure SetOfRotateAngleAndPoint(x, y: Single; angle: Single = 0); {$IfDef USE_INLINE} inline; {$EndIf}
-// RU: возвращаем текст из строки
-// EN: return text from string
+// Rus: возвращаем текст из строки
+// Eng: return text from string
 function GetEditToText(num: LongWord): UTF8String;
-// RU: корректировка курсора, + - вниз. Курсор может быть не правильно
-//     скорректирован, это зависит от используемого шрифта. Надо настраивать
-//     вручную для разных шрифтов.
-// EN: cursor adjustment, + - down. The cursor may not be adjusted correctly,
-//     depending on the font used. Must be manually configured for
-//     different fonts.
+// Rus: корректировка курсора, + - вниз. Курсор может быть не правильно
+//      скорректирован, это зависит от используемого шрифта. Надо настраивать
+//      вручную для разных шрифтов.
+// Eng: cursor adjustment, + - down. The cursor may not be adjusted correctly,
+//      depending on the font used. Must be manually configured for
+//      different fonts.
 procedure CorrectEditCursor(num: LongWord; y: Single);
-// RU: активация поля ввода. Сделано автоматическое, при нажатии мыши на поле
-//     ввода. Но это можно отключить и по своему событию произвести активацию.
-// EN: activation of the input field. Made automatic when clicking on the input
-//     field. But this can be turned off and activated according to your event.
+// Rus: активация поля ввода. Сделано автоматическое, при нажатии мыши на поле
+//      ввода. Но это можно отключить и по своему событию произвести активацию.
+// Eng: activation of the input field. Made automatic when clicking on the input
+//      field. But this can be turned off and activated according to your event.
 procedure ActivateEdit(num: LongWord);
-// Ru: Установить флаги поля ввода.
-//     NumOnly      - только цифры
-//     NumDelimeter - цифры и разделитель - точка и запятая
-//     CurEndSymb   - курсор не дальше последнего символа (смещается всё влево)
-//     RightToLeft  - обратное направление?
-//     OnTRightSide - прижато к правой стороне
-//     SymbOnly     - только символы и цифры, ни каких пробелов и знаков препинания.
-//     DelimetrTrue - разделитель уже существует.
-// En:
+// Rus: Установить флаги поля ввода.
+//      NumOnly      - только цифры
+//      NumDelimeter - цифры и разделитель - точка и запятая
+//      CurEndSymb   - курсор не дальше последнего символа (смещается всё влево)
+//      RightToLeft  - обратное направление?
+//      OnTRightSide - прижато к правой стороне
+//      SymbOnly     - только символы и цифры, ни каких пробелов и знаков препинания.
+//      DelimetrTrue - разделитель уже существует.
+// Eng:
 procedure SetFlagsEdit(num: LongWord; var newFlags: Byte);
-// Ru: функции обработки (ограничения) поля ввода. Вызывать не надо,
-//     устанавливаются по функции устновки флагов - SetFlagsEdit.
-// Ru: только числа
+// Rus: функции обработки (ограничения) поля ввода. Вызывать не надо,
+//      устанавливаются по функции устновки флагов - SetFlagsEdit.
+// Eng:
+
+// Rus: только числа
+// Eng:
 function EditNumeric: Boolean;
-// Ru: только числа и разделитель
+// Rus: только числа и разделитель
+// Eng:
 function EditNumericAndDelimetr: Boolean;
-// Ru: символы кроме не учавствующих в именах (буквы, цифры) и исключая пробел - в общем всё для создания имени.
+// Rus: символы кроме не учавствующих в именах (буквы, цифры) и исключая пробел
+//      - в общем всё для создания имени.
+// Eng:
 function EditNotSymbolic: Boolean;
 
 implementation
 
-uses
   {$IfDef FULL_LOGGING}
-  zgl_log,
+uses
+  zgl_application,
+  zgl_log;
   {$EndIf}
-  gegl_color;
 
 var
   // RU: поле ввода (пока просто вывода текста)
@@ -132,6 +144,8 @@ var
   pointManager: zglTPoint2D = (x: 0; y: 0);
   // угол поворота
   geAngle: Single = 0;
+  // цвет по умолчанию.
+  geDefColor: geglDefColor;
 
 function CreateEdit(Rect: zglTRect2D; fnt, Scale: LongWord; UserData1: Pointer = nil; UserData2: Pointer = nil; Len: Word = MAX_SYMBOL_LINE): Word;
 var
@@ -181,9 +195,9 @@ begin
   UseText^.Rect.Y := Rect.Y;
   UseText^.Rect.W := Rect.W;
   UseText^.Rect.H := Rect.H;
-  UseText^.ColorText := cl_Black;
-  UseText^.ColorGround := cl_White;
-  UseText^.ColorCursor := cl_Black;
+  UseText^.ColorText := geDefColor.Text;
+  UseText^.ColorGround := geDefColor.Ground;
+  UseText^.ColorCursor := geDefColor.Cursor;
   UseText^.Scale := Scale;
   UseText^.Rotate := geAngle;
   UseText^.EditString.Len := Len;
@@ -212,7 +226,7 @@ begin
   inc(managerSetOfTools.count);
 end;
 
-procedure EventsEdit(num: LongWord);
+procedure EventsEdit(numElement: LongWord);
 var
   symb, i, j, n: LongWord;
   _JcharSymb: zglPCharDesc;
@@ -259,7 +273,7 @@ label
 
     if UseText^.EditString.UseLen < UseText^.Cursor.position then
     begin
-      if (UseText^.Cursor.curRect.x + UseText^.Cursor.curRect.W + UseText^.translateX) > (UseText^.Rect.W) then
+      if (UseText^.Cursor.curRect.x + UseText^.Cursor.curRect.W - UseText^.translateX) > (UseText^.Rect.W) then
       begin
         UseText^.translateX := (UseText^.Cursor.curRect.x + UseText^.Cursor.curRect.W) - (UseText^.Rect.W );
       end;
@@ -277,16 +291,16 @@ label
 
 begin
   {$IfDef FULL_LOGGING}
-  if (managerSetOfTools.count = 0) or (managerSetOfTools.SetOfTools[num] = nil) then
+  if (managerSetOfTools.count = 0) or (managerSetOfTools.SetOfTools[numElement] = nil) then
   BEGIN
     log_add('Error is EventsEdit!');
     exit;
   end;
   {$EndIf}
 
-  UseText := managerSetOfTools.SetOfTools[num];
+  UseText := managerSetOfTools.SetOfTools[numElement];
   useFont := managerFont.Font[UseText^.font];
-  if managerSetOfTools.ActiveElement <> num then
+  if managerSetOfTools.ActiveElement <> numElement then
     goto jmpMouse;
 
   if keysUp[K_INSERT] then
@@ -310,8 +324,9 @@ begin
         keyDownRepeat := t;
         keyDelayWork := repeatKeyDelay;
       end
-      else
+      else begin
         Exit;
+      end;
 
     case keysLast[KA_DOWN] of
       K_ESCAPE: exit;
@@ -450,7 +465,13 @@ begin
         end;
       K_PAGEDOWN: ;
       K_PAGEUP: ;
-      K_ENTER, K_KP_ENTER: managerSetOfTools.ActiveElement := 65535;
+      K_ENTER, K_KP_ENTER:
+        begin
+          {$IfDef MOBILE}
+          VisibleMenuChange := False;
+          {$EndIf}
+          managerSetOfTools.ActiveElement := 65535;
+        end;
     else
       begin
         if UseText^.EditString.UseLen >= UseText^.EditString.Len then
@@ -570,9 +591,12 @@ jmpMouse:
       UseText^.flags := UseText^.flags or vc_geMDown;
 
       {$IfDef ACTIVATE_MOUSE}
-      if managerSetOfTools.ActiveElement <> num then
+      if managerSetOfTools.ActiveElement <> numElement then
       begin
-        managerSetOfTools.ActiveElement := num;
+        managerSetOfTools.ActiveElement := numElement;
+        {$IfDef MOBILE}
+        VisibleMenuChange := True;
+        {$EndIf}
         if ((PkeybFlags^ and keyboardInsert) > 0) then
           UseText^.Cursor.curRect.H :=  - UseText^.Scale * 1.1
         else
@@ -625,31 +649,23 @@ jmpEnd:
   useFont := nil;
 end;
 
-procedure DeleteElementSOT(num: LongWord);
+procedure DeleteElementSOT(numElement: LongWord);
 begin
   {$IfDef FULL_LOGGING}
-  if (managerSetOfTools.count = 0) or (managerSetOfTools.SetOfTools[num] = nil) then
+  if (managerSetOfTools.count = 0) or (managerSetOfTools.SetOfTools[numElement] = nil) then
   begin
     log_add('Error in DeleteElementSOT!');
     exit;
   end;
   {$EndIf}
-  managerSetOfTools.propElement[num].Flags := 0;
+  managerSetOfTools.propElement[numElement].Flags := 0;
 end;
 
-procedure SetEditColor(num: LongWord; ColorText, ColorBackground: LongWord; ColorCursor: LongWord);
+procedure SetDefColor(ColorText, ColorBackground: LongWord; ColorCursor: LongWord = cl_Black);
 begin
-  {$IfDef FULL_LOGGING}
-  if (managerSetOfTools.count = 0) or (managerSetOfTools.SetOfTools[num] = nil) then
-  begin
-    log_add('Error in SetEditColor!');
-    exit;
-  end;
-  {$EndIf}
-  UseText := managerSetOfTools.SetOfTools[num];
-  UseText^.ColorText := ColorText;
-  UseText^.ColorGround := ColorBackground;
-  UseText^.ColorCursor := ColorCursor;
+  geDefColor.Text := ColorText;
+  geDefColor.Ground := ColorBackground;
+  geDefColor.Cursor := ColorCursor;
 end;
 
 procedure DestroyManagerSOT();
@@ -813,6 +829,9 @@ begin
     exit;
   Result := True;
 end;
+
+initialization
+  SetDefColor(cl_Black, cl_White, cl_Black);
 
 end.
 
