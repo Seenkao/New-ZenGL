@@ -22,13 +22,19 @@
  *     source distribution.
  *)
 unit zgl_glu;
+{$I zgl_config.cfg}
 {$I GLdefine.cfg}
 
 interface
 
 uses
   zgl_gltypeconst,
-  zgl_opengl_all;
+  {$IfNDef USE_GLES}
+  zgl_opengl_all
+  {$Else}
+  zgl_opengles_all
+  {$EndIf}
+  ;
 
 type
   TViewPortArray = array [0..3] of GLint;
@@ -226,24 +232,27 @@ type
 
   PGLchar = PAnsiChar;
 
+  {$IfNDef USE_GLES}
   procedure gluPerspective(fovy, aspect, zNear, zFar: GLdouble); stdcall; external libGLU;
   function  gluBuild2DMipmaps(target: GLenum; components, width, height: GLint; format, atype: GLenum; const data: Pointer): Integer; stdcall; external libGLU;
+  {$EndIf}
 
   // Triangulation
   {$IFDEF USE_TRIANGULATION}
-  procedure gluDeleteTess(tess: PGLUtesselator); stdcall external libGLU;
-  function  gluErrorString(error: GLenum): PAnsiChar; stdcall external libGLU;
-  function  gluNewTess: PGLUtesselator; stdcall external libGLU;
-  procedure gluTessBeginContour(tess: PGLUtesselator); stdcall external libGLU;
-  procedure gluTessBeginPolygon(tess: PGLUtesselator; data: Pointer); stdcall external libGLU;
-  procedure gluTessCallback(tess: PGLUtesselator; which: GLenum; fn: Pointer); stdcall external libGLU;
-  procedure gluTessEndContour(tess: PGLUtesselator); stdcall external libGLU;
-  procedure gluTessEndPolygon(tess: PGLUtesselator); stdcall external libGLU;
-  procedure gluTessVertex(tess: PGLUtesselator; const coords: TVector3d; data: Pointer); stdcall external libGLU;
+  procedure gluDeleteTess(tess: PGLUtesselator); stdcall external {$IfNDef USE_GLES}libGLU{$Else}'libGLU'{$EndIf};
+  function  gluErrorString(error: GLenum): PAnsiChar; stdcall external {$IfNDef USE_GLES}libGLU{$Else}'libGLU'{$EndIf};
+  function  gluNewTess: PGLUtesselator; stdcall external {$IfNDef USE_GLES}libGLU{$Else}'libGLU'{$EndIf};
+  procedure gluTessBeginContour(tess: PGLUtesselator); stdcall external {$IfNDef USE_GLES}libGLU{$Else}'libGLU'{$EndIf};
+  procedure gluTessBeginPolygon(tess: PGLUtesselator; data: Pointer); stdcall external {$IfNDef USE_GLES}libGLU{$Else}'libGLU'{$EndIf};
+  procedure gluTessCallback(tess: PGLUtesselator; which: GLenum; fn: Pointer); stdcall external {$IfNDef USE_GLES}libGLU{$Else}'libGLU'{$EndIf};
+  procedure gluTessEndContour(tess: PGLUtesselator); stdcall external {$IfNDef USE_GLES}libGLU{$Else}'libGLU'{$EndIf};
+  procedure gluTessEndPolygon(tess: PGLUtesselator); stdcall external {$IfNDef USE_GLES}libGLU{$Else}'libGLU'{$EndIf};
+  procedure gluTessVertex(tess: PGLUtesselator; const coords: TVector3d; data: Pointer); stdcall external {$IfNDef USE_GLES}libGLU{$Else}'libGLU'{$EndIf};
+  {$IfNDef USE_GLES}  // ???
   procedure gluTessNormal(tess: PGLUtesselator; valueX: GLdouble; valueY: GLdouble; valueZ: GLdouble); stdcall external libGLU;
   procedure gluTessProperty(tess: PGLUtesselator; which: GLenum; data: GLdouble); stdcall external libGLU;
   function  gluGetString(name: GLenum): PAnsiChar; stdcall external libGLU;
-  {$ENDIF}
+  {$ENDIF}{$ENDIF}
 
   {$IfDef USE_FULL_GLU}
   procedure gluBeginCurve(nurb: PGLUnurbs); stdcall external libGLU;
