@@ -37,25 +37,28 @@
     <Version Value="11"/>
     <PathDelim Value="\"/>
     <Target>
-      <Filename Value="demo01"/>
+      <Filename Value="..\libs\armeabi\demo01"/>
     </Target>
     <SearchPaths>
-      <IncludeFiles Value="..\..\..\..\headers;..\..\..\..\headers\android;$(ProjOutDir)"/>
-      <Libraries Value="..\..\..\..\bin\Android\armv6;C:\codetyphon\binLibraries\android-4.0.2-api14-arm\"/>
-      <OtherUnitFiles Value="..\..\..\..\src;..\..\..\..\lib\zlib\arm-linux;..\..\..\..\lib\zip\arm-linux;..\..\..\..\lib\ogg\arm-linux;..\..\..\..\lib\theora\arm-linux;..\..\..\..\bin\Android\armv5"/>
+      <IncludeFiles Value="..\..\..\..\headers;..\..\..\..\headers\android;$(ProjOutDir);..\..\..\..\src;..\..\..\..\srcGL;..\..\..\..\srcGEGL"/>
+      <Libraries Value="..\..\..\..\bin\Android\armv6;C:\codetyphon\binLibraries\android-4.0.2-api14-arm"/>
+      <OtherUnitFiles Value="..\..\..\..\src;..\..\..\..\srcGL;..\..\..\..\srcGEGL;..\..\..\..\lib\zlib\arm-linux;..\..\..\..\lib\zip\arm-linux;..\..\..\..\lib\ogg\arm-linux;..\..\..\..\lib\theora\arm-linux"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <CodeGeneration>
+      <SmartLinkUnit Value="True"/>
+      <RelocatableUnit Value="True"/>
       <TargetCPU Value="arm"/>
       <TargetOS Value="android"/>
       <Optimizations>
-        <OptimizationLevel Value="3"/>
+        <OptimizationLevel Value="2"/>
       </Optimizations>
     </CodeGeneration>
     <Linking>
       <Debugging>
         <GenerateDebugInfo Value="False"/>
       </Debugging>
+      <LinkSmart Value="True"/>
       <Options>
         <ExecutableType Value="Library"/>
       </Options>
