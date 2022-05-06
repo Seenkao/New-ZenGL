@@ -33,10 +33,8 @@ uses
   zgl_textures,
   zgl_math_2d,
   zgl_gltypeconst,
-  zgl_types
-  {$IfNDef OLD_METHODS}
-  , gegl_color
-  {$EndIf}
+  zgl_types,
+  gegl_color
   ;
 
 const
