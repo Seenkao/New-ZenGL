@@ -30,6 +30,8 @@ uses
   zgl_types;
 
 const
+  // Rus: номер для определённого цвета.
+  // Eng:
   cl_White        = 0;
   cl_Black        = 1;
   cl_Maroon       = 2;
@@ -79,6 +81,7 @@ type
 
 // Rus: ищем или добавляем цвет. Цвет добавляется, если его нет в списке.
 // Eng: looking for or adding color. The color is added if it is not in the list.
+//      Color - RRGGBBAA
 function Color_FindOrAdd(Color: LongWord): LongWord;
 // Rus: добавляем цвет без проверки на существование.
 // Eng: add a color without checking for existence.
@@ -204,37 +207,6 @@ var
   i, j: LongWord;
   useMem: zglTMemory;
 begin
-{  if file_Open(f, 'myColor.txt', FOM_CREATE) then
-  begin
-    for i := 0 to 31 do
-    begin
-      file_Write(f, managerColor.BColor[i].R, SizeOf(Byte));
-      file_Write(f, managerColor.BColor[i].G, SizeOf(Byte));
-      file_Write(f, managerColor.BColor[i].B, SizeOf(Byte));
-      file_Write(f, managerColor.BColor[i].A, SizeOf(Byte));
-    end;
-    file_Close(f);
-  end;          }
- { if not mem_LoadFromFile(useMem, dir + 'myColor.txt') then
-  begin
-    log_Add('File myColor.txt not load!');
-    exit;
-  end;
-  i := 0;
-  j := useMem.Size shr 2;     // делим на 4
-  while i < j do
-  begin
-    if managerColor.count >= managerColor.len then
-    begin
-      inc(managerColor.len, 100);
-      SetLength(managerColor.Color, managerColor.len);
-    end;
-    // читаем из памяти
-    mem_Read(useMem, managerColor.Color[i], 4);
-    inc(i);
-    inc(managerColor.count);
-  end;
-  mem_Free(useMem);  }
   SetLength(managerColor.Color, 32);
   for i := 0 to 31 do
   begin
