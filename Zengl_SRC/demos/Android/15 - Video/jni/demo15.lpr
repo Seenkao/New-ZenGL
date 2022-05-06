@@ -15,19 +15,25 @@ uses
   zgl_font,
   zgl_text,
   zgl_primitives_2d,
+  zgl_render_2d,
   zgl_sprite_2d,
   zgl_video,
   zgl_video_theora,
   zgl_utils
+  {$IfNDef OLD_METHODS}
+  , gegl_color
+  {$EndIf}
   ;
 
 var
   dirRes    : UTF8String = 'assets/';
-  fntMain   : Byte;
+  fntMain   : LongWord;
   video     : zglPVideoStream;
   videoFile : zglTMemory;
   videoSeek : Boolean;
-  TimeStart : Byte;
+  TimeStart : LongWord;
+
+  newColor  : LongWord;
 
 procedure Init;
 begin
@@ -45,41 +51,43 @@ begin
   // EN: Open the video file.
   // RU: Открыть видео файл.
   video := video_OpenMemory( videoFile, 'OGV' );
-  setTextScale(15, fntMain);
+  setFontTextScale(15, fntMain);
+
+  newColor := Color_FindOrAdd($00FF0090);
 end;
 
 procedure Draw;
 begin
   if Assigned( video ) Then
-    begin
-      // EN: Rendering the current video frame in the center of screen using parameters of it from video.Info.
-      // RU: Рендеринг текущего кадра видео в центре экрана используя параметры из video.Info.
-      ssprite2d_Draw( video^.Texture, ( 800 - video^.Info.Width ) / 2, ( 600 - video^.Info.Height ) / 2, video^.Info.Width, video^.Info.Height, 0 );
-      // EN: Rendering of progress bar.
-      // RU: Рендеринг полосы прогресса.
-      pr2d_Rect( 4, 600 - 100, 792, 20, $00FF00, 255 );
-      pr2d_Rect( 4, 600 - 100, ( 792 / video^.Info.Duration ) * video^.Time, 20, $00FF00, 155, PR2D_FILL );
+  begin
+    batch2d_Begin;
+    // EN: Rendering the current video frame in the center of screen using parameters of it from video.Info.
+    // RU: Рендеринг текущего кадра видео в центре экрана используя параметры из video.Info.
+    ssprite2d_Draw( video^.Texture, ( 800 - video^.Info.Width ) / 2, ( 600 - video^.Info.Height ) / 2, video^.Info.Width, video^.Info.Height, 0 );
+    // EN: Rendering of progress bar.
+    // RU: Рендеринг полосы прогресса.
+    pr2d_Rect( 0, 600 - 100, 800, 20, {$IfNDef OLD_METHODS}cl_Green{$Else}$00FF00, 255{$EndIf} );
+    pr2d_Rect( 0, 600 - 100, ( 800 / video^.Info.Duration ) * video^.Time, 20, {$IfDef OLD_METHODS}$00FF00, 155,{$Else}newColor,{$EndIf}PR2D_FILL );
 
-      text_Draw( fntMain, 0, 0, 'FPS: ' + u_IntToStr( zgl_Get( RENDER_FPS ) ) );
-      text_Draw( fntMain, 0, 20, 'Frame: ' + u_IntToStr( video^.Frame ) );
-      text_Draw( fntMain, 100, 0, 'Duration: ' + u_FloatToStr( video^.Info.Duration / 1000 ) );
-      text_Draw( fntMain, 100, 20, 'Frames: ' + u_IntToStr( video^.Info.Frames ) );
-      text_Draw( fntMain, 230, 0, 'Time: ' + u_FloatToStr( video^.Time / 1000 ) );
-    end;
+    text_Draw( fntMain, 0, 0, 'FPS: ' + u_IntToStr( zgl_Get( RENDER_FPS ) ) );
+    text_Draw( fntMain, 0, 20, 'Frame: ' + u_IntToStr( video^.Frame ) );
+    text_Draw( fntMain, 100, 0, 'Duration: ' + u_FloatToStr( video^.Info.Duration / 1000 ) );
+    text_Draw( fntMain, 100, 20, 'Frames: ' + u_IntToStr( video^.Info.Frames ) );
+    text_Draw( fntMain, 230, 0, 'Time: ' + u_FloatToStr( video^.Time / 1000 ) );
+    batch2d_End;
+  end;
 end;
 
-procedure Timer;
+procedure KeyMouseEvents;
 begin
   // EN: Seek the video if finger is on the screen.
   // RU: Перемещаться по видео если пальцем водят по экрану.
-  if touch_Down( 0 ) Then
+  if touch_Click( 0 ) Then
     begin
       videoSeek := TRUE;
       video_Seek( video, ( touch_X( 0 ) / 800 ) * video^.Info.Duration );
     end else
       videoSeek := FALSE;
-
-  touch_ClearState();
 end;
 
 procedure Update( dt : Double );
@@ -101,8 +109,7 @@ procedure Java_zengl_android_ZenGL_Main( var env; var thiz ); cdecl;
 begin
   randomize();
 
-  TimeStart := timer_Add( @Timer, 16, Start );
-
+  zgl_Reg(SYS_EVENTS, @KeyMouseEvents);
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );
   zgl_Reg( SYS_UPDATE, @Update );
