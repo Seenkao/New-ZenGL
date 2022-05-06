@@ -63,7 +63,8 @@ begin
 
    На данное время, работа с разными фонтами, даже менеджера не будет реализовано. Возможно в дальнейшем
    будет реализовано.  *)
-
+//  batch2d_Begin;
+  (* при включении batch2d получаем "весёлый" эффект, когда поле ввода может быть в другом месте, и в нужном. И перемигиваться этими полями. *)
   glPushMatrix;
   // устанавливаем центр вращения
   glTranslatef(UseText^.RotatePoint.X, UseText^.RotatePoint.Y, 0);
@@ -82,7 +83,9 @@ begin
   if UseText^.EditString.UseLen > 0 then
   begin
     Set_numColor(UseText^.ColorText);
+    batch2d_Begin;
     DrawTextEdit(UseText);
+    batch2d_End;
   end;
 
   // рисуем курсор, только если этот элемент активирован
@@ -100,8 +103,10 @@ begin
       UseText^.Cursor.NSleep := 15;
       UseText^.Cursor.Flags := not (UseText^.Cursor.Flags);
     end;
+
   //--------------------------------------------------------------
   glPopMatrix;
+//  batch2d_End;
 
   UseText := nil;
 end;
@@ -117,14 +122,13 @@ var
   lastPage: Integer;
   XLoop, YLoop: Single;
 
-  xx1, xx2, yy1, yy2{, mode}: Single;
+  xx1, xx2, yy1, yy2: Single;
   xTex1, yTex1, xTex2, yTex2: Single;
   useFont: zglPFont;
+  mode: LongWord;
 label
   StartLoop, EndLoop, NextLoop;
 begin
-  // color???         // это должно происходить от менеджера!!! Но пока это только поле ввода, оставлю
-//  glColor4fv(@Edit^.ColorText);
   if managerSetOfTools.count = 0 then
     exit;
 
@@ -134,27 +138,28 @@ begin
   XLoop := 0;
   YLoop :=  - useFont^.MaxShiftY * useFont^.Scale;
 
-{  mode := GL_QUADS;              // надо определиться, нужен этот код или нет
+           // надо определиться, нужен этот код или нет
 
-  charDesc := managerFont.Font[fnt].CharDesc[Edit^.EditString.LineString[i]^.CharSymb];
-  if not b2dStarted Then
-  begin
-    if Assigned(charDesc) Then
+//  charDesc := managerFont.Font[Edit^.font].CharDesc[Edit^.EditString.LineString[i]^.CharSymb];
+ { charDesc := useFont^.CharDesc[Edit^.EditString.CharSymb[i]];
+  if not b2dStarted Then               //  этот код нужен, когда мы закончили рисовать через glEnd, а bSize не обнулился
+  begin                                //  и в следующий момент, мы можем получить наложение двух разных элементов.
+    if Assigned(charDesc) Then         //  это надо проверить при выводе текста. Сработало обнуление или нет.
     begin
       lastPage := charDesc^.Page;
-      batch2d_Check(mode, FX_BLEND, managerFont.Font[fnt].Pages[lastPage]);
+      batch2d_Check(GL_QUADS, FX_BLEND, managerFont.Font[Edit^.font].Pages[lastPage]);
 
       glEnable(GL_BLEND);
       glEnable(GL_TEXTURE_2D);
-      glBindTexture(GL_TEXTURE_2D, managerFont.Font[fnt].Pages[lastPage]^.ID);
-      glBegin(mode);
+      glBindTexture(GL_TEXTURE_2D, managerFont.Font[Edit^.font].Pages[lastPage]^.ID);
+      glBegin(GL_QUADS);
     end else
     begin
       glEnable(GL_BLEND);
       glEnable(GL_TEXTURE_2D);
-      glBegin(mode);
+      glBegin(GL_QUADS);
     end;
-  end;                 }
+  end;        }
 
 StartLoop:
   if Edit^.EditString.CharSymb[i] = 0 then
@@ -173,25 +178,22 @@ StartLoop:
   xTex2 := charDesc^.TexCoords[1].X;
 
   if xx1 > Edit^.translateX + Edit^.Rect.W then
-    goto EndLoop;                    // выходим, если координата за пределами
+    goto EndLoop;
   if xx2 < Edit^.translateX then
-    goto NextLoop;                   // переходим на следующий символ, если ещё не в пределах поля ввода
+    goto NextLoop;
 
-  // вариант когда начали писать, но текст ещё пока находится
   if xx1 < Edit^.translateX then
-  begin                            // за пределами поля ввода
-    xTex1 := xTex2 - (xx2 - Edit^.translateX) * (xTex2 - xTex1) / (xx2 - xx1);                 // или делать пересчёт координат текстуры...
+  begin
+    xTex1 := xTex2 - (xx2 - Edit^.translateX) * (xTex2 - xTex1) / (xx2 - xx1);
     xx1 := Edit^.translateX;
   end;
 
-  // и вариант, когда уже за пределами поля ввода
   if xx2 > Edit^.translateX + Edit^.Rect.W then
   begin
-    xTex2 := xTex2 - (xx2 - Edit^.translateX - Edit^.Rect.W) * (xTex2 - xTex1) / (xx2 - xx1);   // формула не меняется, меняется текстурная координата
+    xTex2 := xTex2 - (xx2 - Edit^.translateX - Edit^.Rect.W) * (xTex2 - xTex1) / (xx2 - xx1);
     xx2 := Edit^.translateX + Edit^.Rect.W;
   end;
 
-  // ниже код, для смены текстуры, если она разбита на части (смена страницы текстуры)
   if lastPage <> charDesc^.Page Then
   begin
     lastPage := charDesc^.Page;
