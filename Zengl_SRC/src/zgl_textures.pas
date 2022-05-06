@@ -695,7 +695,7 @@ begin
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   end;
 
-  if GL_SGIS_generate_mipmap Then
+  if {$IfNDef USE_GLES}GL_SGIS_generate_mipmap{$Else}oglCanAutoMipMap{$EndIf} Then
     glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, Byte(Flags and TEX_MIPMAP > 0));
 
   if Flags and TEX_MIPMAP > 0 Then
@@ -718,7 +718,7 @@ begin
           glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
           glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         end else
-          if (Flags and TEX_FILTER_TRILINEAR > 0) or ((not GL_EXT_texture_filter_anisotropic) and (Flags and TEX_FILTER_ANISOTROPY > 0)) Then
+          if (Flags and TEX_FILTER_TRILINEAR > 0) or ((not {$IfNDef USE_GLES}GL_EXT_texture_filter_anisotropic{$Else}oglCanAnisotropy{$EndIf}) and (Flags and TEX_FILTER_ANISOTROPY > 0)) Then
           begin
             Texture.Flags := Texture.Flags or TEX_FILTER_TRILINEAR;
             glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
