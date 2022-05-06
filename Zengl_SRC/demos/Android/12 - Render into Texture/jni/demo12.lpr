@@ -22,7 +22,7 @@ uses
 
 var
   dirRes    : UTF8String = 'assets/';
-  fntMain   : Byte;
+  fntMain   : LongWord;
   texTux    : zglPTexture;
   rtFull    : zglPRenderTarget;
   rtDefault : zglPRenderTarget;
@@ -50,7 +50,7 @@ begin
   rtDefault := rtarget_Add( tex_CreateZero( 256, 256 ), RT_DEFAULT );
 
   file_CloseArchive();
-  setTextScale(15, fntMain);
+  setFontTextScale(15, fntMain);
 end;
 
 procedure Draw;
