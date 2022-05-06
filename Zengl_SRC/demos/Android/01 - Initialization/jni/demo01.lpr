@@ -1,7 +1,7 @@
 library demo01;
 
-// RU: Этот файл содержит некоторые настройки(например использовать ли статическую компиляцию) и определения ОС под которую происходит
-// компиляция
+// RU: Р­С‚РѕС‚ С„Р°Р№Р» СЃРѕРґРµСЂР¶РёС‚ РЅРµРєРѕС‚РѕСЂС‹Рµ РЅР°СЃС‚СЂРѕР№РєРё(РЅР°РїСЂРёРјРµСЂ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ Р»Рё СЃС‚Р°С‚РёС‡РµСЃРєСѓСЋ РєРѕРјРїРёР»СЏС†РёСЋ) Рё РѕРїСЂРµРґРµР»РµРЅРёСЏ РћРЎ РїРѕРґ РєРѕС‚РѕСЂСѓСЋ РїСЂРѕРёСЃС…РѕРґРёС‚
+// РєРѕРјРїРёР»СЏС†РёСЏ.
 // EN: This file contains some options(e.g. whether to use static compilation) and defines of OS for which is compilation going.
 {$I zglCustomConfig.cfg}
 
@@ -18,24 +18,24 @@ var
   DirApp  : UTF8String;
   DirHome : UTF8String;
 
-  TimeStart  : Byte = 0;
+  TimeStart  : LongWord = 0;
 
 procedure Init;
 begin
-  //  RU: Тут можно выполнять загрузку основных ресурсов.
+  // RU: РўСѓС‚ РјРѕР¶РЅРѕ РІС‹РїРѕР»РЅСЏС‚СЊ Р·Р°РіСЂСѓР·РєСѓ РѕСЃРЅРѕРІРЅС‹С… СЂРµСЃСѓСЂСЃРѕРІ.
   // EN: Here can be loading of main resources.
 
 end;
 
 procedure Draw;
 begin
-  // RU: Тут "рисуем" что угодно :)
+  // RU: РўСѓС‚ "СЂРёСЃСѓРµРј" С‡С‚Рѕ СѓРіРѕРґРЅРѕ :)
   // EN: Here "draw" anything :)
 end;
 
 procedure Update( dt : Double );
 begin
-  // RU:  Эта функция наземенима для реализация плавного движения чего-либо, т.к. точность таймеров ограничена FPS.
+  // RU: Р­С‚Р° С„СѓРЅРєС†РёСЏ РЅР°Р·РµРјРµРЅРёРјР° РґР»СЏ СЂРµР°Р»РёР·Р°С†РёСЏ РїР»Р°РІРЅРѕРіРѕ РґРІРёР¶РµРЅРёСЏ С‡РµРіРѕ-Р»РёР±Рѕ, С‚.Рє. С‚РѕС‡РЅРѕСЃС‚СЊ С‚Р°Р№РјРµСЂРѕРІ РѕРіСЂР°РЅРёС‡РµРЅР° FPS.
   // EN: This function is the best way to implement smooth moving of something, because accuracy of timers are restricted by FPS.
 end;
 
@@ -46,50 +46,50 @@ end;
 
 procedure Restore;
 begin
-  // RU: Восстановление ресурсов нужно реализовывать тут.
+  // RU: Р’РѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёРµ СЂРµСЃСѓСЂСЃРѕРІ РЅСѓР¶РЅРѕ СЂРµР°Р»РёР·РѕРІС‹РІР°С‚СЊ С‚СѓС‚.
   // EN: Restoring of resources should be implemented here.
 end;
 
 procedure Java_zengl_android_ZenGL_Main( var env; var thiz ); cdecl;
 begin
-  // Для загрузки/создания каких-то своих настроек/профилей/etc. можно получить путь к домашенему каталогу пользователя, или к исполняемому
-  // файлу(для GNU/Linux - изменено, если будет программа содержать свой собственный путь, то путь до самого исполняемого файла будет прописан).
-   //     На Android DIRECTORY_APPLICATION возвращает полный путь к apk-файлу
+  // RU: Р”Р»СЏ Р·Р°РіСЂСѓР·РєРё/СЃРѕР·РґР°РЅРёСЏ РєР°РєРёС…-С‚Рѕ СЃРІРѕРёС… РЅР°СЃС‚СЂРѕРµРє/РїСЂРѕС„РёР»РµР№/etc. РјРѕР¶РЅРѕ РїРѕР»СѓС‡РёС‚СЊ РїСѓС‚СЊ Рє РґРѕРјР°С€РµРЅРµРјСѓ РєР°С‚Р°Р»РѕРіСѓ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ, РёР»Рё Рє РёСЃРїРѕР»РЅСЏРµРјРѕРјСѓ
+  //     С„Р°Р№Р»Сѓ(РґР»СЏ GNU/Linux - РёР·РјРµРЅРµРЅРѕ, РµСЃР»Рё Р±СѓРґРµС‚ РїСЂРѕРіСЂР°РјРјР° СЃРѕРґРµСЂР¶Р°С‚СЊ СЃРІРѕР№ СЃРѕР±СЃС‚РІРµРЅРЅС‹Р№ РїСѓС‚СЊ, С‚Рѕ РїСѓС‚СЊ РґРѕ СЃР°РјРѕРіРѕ РёСЃРїРѕР»РЅСЏРµРјРѕРіРѕ С„Р°Р№Р»Р° Р±СѓРґРµС‚ РїСЂРѕРїРёСЃР°РЅ).
+  //     РќР° Android DIRECTORY_APPLICATION РІРѕР·РІСЂР°С‰Р°РµС‚ РїРѕР»РЅС‹Р№ РїСѓС‚СЊ Рє apk-С„Р°Р№Р»Сѓ
 
   // EN: For loading/creating your own options/profiles/etc. you can get path to user home directory, or to executable file(not works for GNU/Linux).
   //     On Android DIRECTORY_APPLICATION returns full path to apk-file
   DirApp  := utf8_Copy( PAnsiChar( zgl_Get( DIRECTORY_APPLICATION ) ) );
   DirHome := utf8_Copy( PAnsiChar( zgl_Get( DIRECTORY_HOME ) ) );
 
-  // RU: Создаем таймер с интервалом 1000мс.
+  // RU: РЎРѕР·РґР°РµРј С‚Р°Р№РјРµСЂ СЃ РёРЅС‚РµСЂРІР°Р»РѕРј 1000РјСЃ.
   // EN: Create a timer with interval 1000ms.
-  TimeStart := timer_Add( @Timer, 100, Start);
+  TimeStart := timer_Add( @Timer, 100, t_Start);
 
-  // RU:  Регистрируем процедуру, что выполнится сразу после инициализации ZenGL.
+  // RU: Р РµРіРёСЃС‚СЂРёСЂСѓРµРј РїСЂРѕС†РµРґСѓСЂСѓ, С‡С‚Рѕ РІС‹РїРѕР»РЅРёС‚СЃСЏ СЃСЂР°Р·Сѓ РїРѕСЃР»Рµ РёРЅРёС†РёР°Р»РёР·Р°С†РёРё ZenGL.
   // EN: Register the procedure, that will be executed after ZenGL initialization.
   zgl_Reg( SYS_LOAD, @Init );
-  // RU:  Регистрируем процедуру, где будет происходить рендер.
+  // RU: Р РµРіРёСЃС‚СЂРёСЂСѓРµРј РїСЂРѕС†РµРґСѓСЂСѓ, РіРґРµ Р±СѓРґРµС‚ РїСЂРѕРёСЃС…РѕРґРёС‚СЊ СЂРµРЅРґРµСЂ.
   // EN: Register the render procedure.
   zgl_Reg( SYS_DRAW, @Draw );
-  // RU: Регистрируем процедуру, которая будет принимать разницу времени между кадрами.
+  // RU: Р РµРіРёСЃС‚СЂРёСЂСѓРµРј РїСЂРѕС†РµРґСѓСЂСѓ, РєРѕС‚РѕСЂР°СЏ Р±СѓРґРµС‚ РїСЂРёРЅРёРјР°С‚СЊ СЂР°Р·РЅРёС†Сѓ РІСЂРµРјРµРЅРё РјРµР¶РґСѓ РєР°РґСЂР°РјРё.
   // EN: Register the procedure, that will get delta time between the frames.
   zgl_Reg( SYS_UPDATE, @Update );
-  // RU: Очень важная для Android функция, которая вызывается при возврате фокуса приложению если необходимо восстановить ресурсы.
+  // RU: РћС‡РµРЅСЊ РІР°Р¶РЅР°СЏ РґР»СЏ Android С„СѓРЅРєС†РёСЏ, РєРѕС‚РѕСЂР°СЏ РІС‹Р·С‹РІР°РµС‚СЃСЏ РїСЂРё РІРѕР·РІСЂР°С‚Рµ С„РѕРєСѓСЃР° РїСЂРёР»РѕР¶РµРЅРёСЋ РµСЃР»Рё РЅРµРѕР±С…РѕРґРёРјРѕ РІРѕСЃСЃС‚Р°РЅРѕРІРёС‚СЊ СЂРµСЃСѓСЂСЃС‹.
   // EN: Very important function for Android, which will be called every time when application gets the focus and resources need to restore.
   zgl_Reg( SYS_ANDROID_RESTORE, @Restore );
 
-  // RU:  Указываем первоначальные настройки.
-  // изменено, указывать ни чего не надо, либо можем указать размеры экрана с которым будем работать.
+  // RU: РЈРєР°Р·С‹РІР°РµРј РїРµСЂРІРѕРЅР°С‡Р°Р»СЊРЅС‹Рµ РЅР°СЃС‚СЂРѕР№РєРё.
+  //     РёР·РјРµРЅРµРЅРѕ, СѓРєР°Р·С‹РІР°С‚СЊ РЅРё С‡РµРіРѕ РЅРµ РЅР°РґРѕ, Р»РёР±Рѕ РјРѕР¶РµРј СѓРєР°Р·Р°С‚СЊ СЂР°Р·РјРµСЂС‹ СЌРєСЂР°РЅР° СЃ РєРѕС‚РѕСЂС‹Рј Р±СѓРґРµРј СЂР°Р±РѕС‚Р°С‚СЊ.
   // EN: Set screen options.
   scr_SetOptions();
 end;
 
 exports
-  // RU: Эта функция должна быть реализована проектом, который использует ZenGL
-  // EN: This function should be implemented by project which is use ZenGL
+  // RU: Р­С‚Р° С„СѓРЅРєС†РёСЏ РґРѕР»Р¶РЅР° Р±С‹С‚СЊ СЂРµР°Р»РёР·РѕРІР°РЅР° РїСЂРѕРµРєС‚РѕРј, РєРѕС‚РѕСЂС‹Р№ РёСЃРїРѕР»СЊР·СѓРµС‚ ZenGL.
+  // EN: This function should be implemented by project which is use ZenGL.
   Java_zengl_android_ZenGL_Main,
 
-  // RU: Функции реализуемые ZenGL, которые должны быть экспортированы
-  // EN: Functions which are implemented by ZenGL and should be exported
+  // RU: Р¤СѓРЅРєС†РёРё СЂРµР°Р»РёР·СѓРµРјС‹Рµ ZenGL, РєРѕС‚РѕСЂС‹Рµ РґРѕР»Р¶РЅС‹ Р±С‹С‚СЊ СЌРєСЃРїРѕСЂС‚РёСЂРѕРІР°РЅС‹.
+  // EN: Functions which are implemented by ZenGL and should be exported.
   {$I android_export.inc}
 End.
