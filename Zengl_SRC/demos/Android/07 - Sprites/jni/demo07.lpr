@@ -1,6 +1,7 @@
 library demo07;
 
 {$I zglCustomConfig.cfg}
+{$I zgl_config.cfg}
 uses
   zgl_application,
   zgl_file,
@@ -19,6 +20,7 @@ uses
   zgl_text,
   zgl_types,
   zgl_log,
+  gegl_color,
   zgl_utils
   ;
 type
@@ -30,7 +32,7 @@ end;
 
 var
   dirRes      : UTF8String = 'assets/';
-  fntMain     : Byte;
+  fntMain     : LongWord;
   texLogo     : zglPTexture;
   texBack     : zglPTexture;
   texGround   : zglPTexture;
@@ -40,7 +42,10 @@ var
   time        : Integer;
   camMain     : zglTCamera2D;
 
-  TimeStart: Byte;
+  newColor    : LongWord;
+  correctColor: LongWord;
+
+  TimeStart: LongWord = 0;
 
 procedure Init;
   var
@@ -100,7 +105,13 @@ begin
 
   file_CloseArchive();
 
-  setTextScale(20, fntMain);
+  setFontTextScale(20, fntMain);
+  // Rus: задаём новый цвет. Это чёрный и немного прозрачный.
+  // Eng: set a new color. It is black and slightly transparent.
+  newColor := Color_FindOrAdd(200);
+  // Rus: задаём новый цвет без проверки на существование. Это чёрный не прозрачный.
+  // Eng: we set a new color, without checking for existence. It's black and not transparent.
+  correctColor := Color_UAdd(255);
 end;
 
 procedure Draw;
@@ -136,8 +147,8 @@ begin
             // RU: Рисуем надпись в "рамочке" над пингвином.
             // EN: Render the text in frame over penguins.
             t := text_GetWidth( fntMain, 'I''m so red...' ) * 0.75;
-            pr2d_Rect( tux[ i ].Pos.X - 2, tux[ i ].Pos.Y - ScaleF + 4, t, ScaleF, $000000, 200, PR2D_FILL );
-            pr2d_Rect( tux[ i ].Pos.X - 2, tux[ i ].Pos.Y - ScaleF + 3, t + 2, ScaleF + 2, $FFFFFF );
+            pr2d_Rect( tux[ i ].Pos.X - 2, tux[ i ].Pos.Y - ScaleF + 4, t, ScaleF, {$IfDef OLD_METHODS}$000000, 200,{$Else}newColor,{$EndIf} PR2D_FILL );
+            pr2d_Rect( tux[ i ].Pos.X - 2, tux[ i ].Pos.Y - ScaleF + 3, t + 2, ScaleF + 2, {$IfDef OLD_METHODS}$FFFFFF,{$Else}cl_White{$EndIf});
             text_DrawEx( fntMain, tux[ i ].Pos.X, tux[ i ].Pos.Y - ScaleF + 5, 1, 0, 'I''m so red...' );
             // RU: Рисуем красного пингвина используя fx2d-функцию и флаг FX_COLOR.
             // EN: Render red penguin using fx2d-function and flag FX_COLOR.
@@ -147,9 +158,9 @@ begin
             if i = 7 Then
               begin
                 t := text_GetWidth( fntMain, '???' )+ 4;
-                pr2d_Rect( tux[ i ].Pos.X + 32 - t / 2, tux[ i ].Pos.Y - ScaleF + 4, t, ScaleF, $000000, 200, PR2D_FILL );
-                pr2d_Rect( tux[ i ].Pos.X + 32 - t / 2 - 1, tux[ i ].Pos.Y - ScaleF + 3, t + 2, ScaleF + 2, $FFFFFF );
-                text_DrawEx( fntMain, tux[ i ].Pos.X + 32, tux[ i ].Pos.Y - ScaleF + 5, 1, 0, '???', 255, $FFFFFF, TEXT_HALIGN_CENTER );
+                pr2d_Rect( tux[ i ].Pos.X + 32 - t / 2, tux[ i ].Pos.Y - ScaleF + 4, t, ScaleF, {$IfDef OLD_METHODS}$000000, 200,{$Else}newColor,{$EndIf} PR2D_FILL );
+                pr2d_Rect( tux[ i ].Pos.X + 32 - t / 2 - 1, tux[ i ].Pos.Y - ScaleF + 3, t + 2, ScaleF + 2, {$IfDef OLD_METHODS}$FFFFFF,{$Else}cl_White{$EndIf});
+                text_DrawEx( fntMain, tux[ i ].Pos.X + 32, tux[ i ].Pos.Y - ScaleF + 5, 1, 0, '???', {$IfDef OLD_METHODS}255, $FFFFFF,{$Else}cl_White,{$EndIf} TEXT_HALIGN_CENTER );
                 // RU: Рисуем пингвина приведение используя флаг FX_COLOR установив режим в FX_COLOR_SET :)
                 // EN: Render penguin ghost using flag FX_COLOR and mode FX_COLOR_SET :)
                 fx_SetColorMode( FX_COLOR_SET );
@@ -167,8 +178,8 @@ begin
         if i = 13 Then
           begin
             t := text_GetWidth( fntMain, 'I''m so big...' ) * 0.75;
-            pr2d_Rect( tux[ i ].Pos.X - 2, tux[ i ].Pos.Y - ScaleF - 10, t, ScaleF, $000000, 200, PR2D_FILL );
-            pr2d_Rect( tux[ i ].Pos.X - 2, tux[ i ].Pos.Y - ScaleF - 11, t + 2, ScaleF + 2, $FFFFFF );
+            pr2d_Rect( tux[ i ].Pos.X - 2, tux[ i ].Pos.Y - ScaleF - 10, t, ScaleF, {$IfDef OLD_METHODS}$000000, 200,{$Else}newColor,{$EndIf} PR2D_FILL );
+            pr2d_Rect( tux[ i ].Pos.X - 2, tux[ i ].Pos.Y - ScaleF - 11, t + 2, ScaleF + 2, {$IfDef OLD_METHODS}$FFFFFF,{$Else}cl_White{$EndIf});
             text_DrawEx( fntMain, tux[ i ].Pos.X, tux[ i ].Pos.Y - ScaleF - 9, 1, 0, 'I''m so big...' );
             // RU: Рисуем "большего" пингвина. Т.к. FX2D_SCALE увеличивает спрайт относительно центра, то пингвина следует немного "поднять".
             // EN: Render "big" penguin. It must be shifted up, because FX2D_SCALE scale sprite relative to the center.
@@ -195,9 +206,9 @@ begin
       asprite2d_Draw( texGround, 13 * 32, 300 - 16, 32, 32, 0, 3 );
 
       t := text_GetWidth( fntMain, 'o_O' ) * 0.75;
-      pr2d_Rect( tux[ 20 ].Pos.X + 32 - t / 2, tux[ 20 ].Pos.Y - ScaleF + 3, t + 2, ScaleF + 2, $000000, 200, PR2D_FILL );
-      pr2d_Rect( tux[ 20 ].Pos.X + 32 - t / 2, tux[ 20 ].Pos.Y - ScaleF + 2, t + 4, ScaleF + 4, $FFFFFF );
-      text_DrawEx( fntMain, tux[ 20 ].Pos.X + 32, tux[ 20 ].Pos.Y - ScaleF + 5, 1, 0, 'o_O', 255, $FFFFFF, TEXT_HALIGN_CENTER );
+      pr2d_Rect( tux[ 20 ].Pos.X + 32 - t / 2, tux[ 20 ].Pos.Y - ScaleF + 3, t + 2, ScaleF + 2, {$IfDef OLD_METHODS}$000000, 200,{$Else}newColor,{$EndIf} PR2D_FILL );
+      pr2d_Rect( tux[ 20 ].Pos.X + 32 - t / 2, tux[ 20 ].Pos.Y - ScaleF + 2, t + 4, ScaleF + 4, {$IfDef OLD_METHODS}$FFFFFF,{$Else}cl_White{$EndIf});
+      text_DrawEx( fntMain, tux[ 20 ].Pos.X + 32, tux[ 20 ].Pos.Y - ScaleF + 5, 1, 0, 'o_O', {$IfDef OLD_METHODS}255, $FFFFFF,{$Else}cl_White,{$EndIf} TEXT_HALIGN_CENTER );
       asprite2d_Draw( tux[ 20 ].Texture, tux[ 20 ].Pos.X, tux[ 20 ].Pos.Y, 64, 64, 0, tux[ 20 ].Frame div 2 );
     end;
 
@@ -206,7 +217,16 @@ begin
   else
     if time < 510 Then
       begin
-        pr2d_Rect( 0, 0, 800, 600, $000000, 510 - time, PR2D_FILL );
+        // Rus: получаем значение цвета.
+        // Eng: Get the color value.
+        i := Get_Color(correctColor);
+        pr2d_Rect( 0, 0, 800, 600, {$IfDef OLD_METHODS}$000000, 510 - time,{$Else} correctColor,{$EndIf} PR2D_FILL );
+        dec(i);
+        if i < 0 then
+          i := 0;
+        // Rus: корректируем значение цвета.
+        // Eng: adjusting the color value.
+        Correct_Color(correctColor, i);
         ssprite2d_Draw( texLogo, 400 - 256, 300 - 128, 512, 256, 0, 510 - time );
       end;
 
@@ -263,7 +283,7 @@ procedure Java_zengl_android_ZenGL_Main( var env; var thiz ); cdecl;
 begin
   randomize();
 
-  TimeStart := timer_Add( @Timer, 16, Start );
+  TimeStart := timer_Add( @Timer, 16, t_Start );
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );
