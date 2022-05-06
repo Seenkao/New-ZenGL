@@ -122,7 +122,7 @@ uses
   zgl_application,
   zgl_screen,
   zgl_window,
-  zgl_gl_const_all,
+  zgl_gltypeconst,
   zgl_log,
   zgl_utils;
 
@@ -186,7 +186,7 @@ begin
   if oglDisplay = EGL_NO_DISPLAY Then
   begin
     log_Add('eglGetDisplay: EGL_DEFAULT_DISPLAY');
-    oglDisplay := eglGetDisplay(EGL_DEFAULT_DISPLAY);    // не работает...
+    oglDisplay := eglGetDisplay(EGL_DEFAULT_DISPLAY);    // пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ...
   end;
 
   if not eglInitialize(oglDisplay, @i, @j) Then
