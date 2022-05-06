@@ -27,13 +27,12 @@ uses
 
 var
   dirRes  : UTF8String = 'assets/';
-  fntMain : Byte;
+  fntMain : LongWord;
   space   : PcpSpace;
   bCount  : Integer;
   Bodies  : array of PcpBody;
   Shapes  : array of PcpShape;
-  balls   : Boolean = false;
-  TimeStart: Byte;
+  TimeStart: LongWord;
 
 // RU: Добавить объект "шар"
 //     x, y - координаты центра
@@ -168,7 +167,7 @@ begin
   ground^.u := u;
   cpSpaceAddStaticShape(space, ground);
 
-  setTextScale(15, fntMain);
+  setFontTextScale(15, fntMain);
 end;
 
 procedure Draw;
@@ -184,22 +183,13 @@ begin
   batch2d_End();
 end;
 
-procedure Timer;
+procedure KeyMouseEvents;
 begin
-  if touch_Tap(0) Then
-  begin
-    if not balls Then
-    begin
-      cpAddBox(touch_X(0) - 10, touch_Y(0) - 10, 48, 32, 1, 0.5, 0.5);
-      balls := not balls;
-    end
-    else begin
-      cpAddBall(touch_X(0), touch_Y(0), 16, 1, 0.5, 0.9);
-      balls := not balls;
-    end;
-  end;
+  if touch_Click(0) Then
+    cpAddBox(touch_X(0) - 10, touch_Y(0) - 10, 48, 32, 1, 0.5, 0.5);
 
-  touch_ClearState();
+  if touch_Click(1) then
+    cpAddBall(touch_X(1), touch_Y(1), 16, 1, 0.5, 0.9);
 end;
 
 procedure Update(dt : Double);
@@ -229,8 +219,7 @@ procedure Java_zengl_android_ZenGL_Main(var env; var thiz); cdecl;
 begin
   randomize();
 
-  TimeStart := timer_Add(@Timer, 16, Start);
-
+  zgl_Reg(SYS_EVENTS, @KeyMouseEvents);
   zgl_Reg(SYS_LOAD, @Init);
   zgl_Reg(SYS_DRAW, @Draw);
   zgl_Reg(SYS_UPDATE, @Update);
