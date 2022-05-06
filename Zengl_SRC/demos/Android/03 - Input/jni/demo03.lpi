@@ -2,7 +2,6 @@
 <CONFIG>
   <ProjectOptions>
     <Version Value="11"/>
-    <PathDelim Value="\"/>
     <General>
       <Flags>
         <MainUnitHasCreateFormStatements Value="False"/>
@@ -35,29 +34,36 @@
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="11"/>
-    <PathDelim Value="\"/>
     <Target>
-      <Filename Value="demo03"/>
+      <Filename Value="../libs/armeabi/demo03"/>
     </Target>
     <SearchPaths>
-      <IncludeFiles Value="..\..\..\..\headers;..\..\..\..\headers\android;$(ProjOutDir);..\..\..\..\src"/>
-      <Libraries Value="..\libs\armeabi;C:\codetyphon\binLibraries\android-4.0-api14-arm\"/>
-      <OtherUnitFiles Value="..\..\..\..\src;..\..\..\..\lib\zlib\arm-linux;..\..\..\..\lib\zip\arm-linux;..\..\..\..\lib\theora\arm-linux;..\..\..\..\lib\ogg\arm-linux;..\..\..\..\extra"/>
-      <UnitOutputDirectory Value="\tmp"/>
+      <IncludeFiles Value="../../../../headers;../../../../headers/android;$(ProjOutDir);../../../../srcGEGL;../../../../src;../../../../srcGL"/>
+      <Libraries Value="../libs/armeabi"/>
+      <OtherUnitFiles Value="../../../../src;../../../../srcGL;../../../../srcGEGL;../../../../lib/zlib/arm-linux;../../../../lib/zip/arm-linux;../../../../lib/theora/arm-linux;../../../../lib/ogg/arm-linux"/>
+      <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <CodeGeneration>
+      <SmartLinkUnit Value="True"/>
       <RelocatableUnit Value="True"/>
       <TargetCPU Value="arm"/>
       <TargetOS Value="android"/>
+      <Optimizations>
+        <OptimizationLevel Value="2"/>
+      </Optimizations>
     </CodeGeneration>
     <Linking>
       <Debugging>
         <GenerateDebugInfo Value="False"/>
       </Debugging>
+      <LinkSmart Value="True"/>
       <Options>
         <ExecutableType Value="Library"/>
       </Options>
     </Linking>
+    <Other>
+      <CustomOptions Value="-al"/>
+    </Other>
   </CompilerOptions>
   <Debugging>
     <Exceptions Count="3">
