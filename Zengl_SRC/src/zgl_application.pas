@@ -21,7 +21,7 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 26.02.2022
+ !!! modification from Serge 02.05.2022
 }
 unit zgl_application;
 
@@ -57,10 +57,9 @@ procedure app_Init;
 {$IfNDef ANDROID}
 procedure app_MainLoop;
 procedure app_ProcessOS;
-{$EndIf}
 {$IfDef USE_VKEYBOARD}
 procedure app_VirtualKeyboard;
-{$EndIf}
+{$EndIf}{$EndIf}
 
 {$IFDEF WINDOWS}
 function app_ProcessMessages(hWnd: HWND; Msg: UINT; wParam: WPARAM; lParam: LPARAM): LRESULT; stdcall;
@@ -134,11 +133,11 @@ procedure Java_zengl_android_ZenGL_zglNativeActivate(env: PJNIEnv; thiz: jobject
 
 procedure Java_zengl_android_ZenGL_zglNativeCloseQuery(env: PJNIEnv; thiz: jobject);
 
-procedure Java_zengl_android_ZenGL_zglNativeTouch(env: PJNIEnv; thiz: jobject; ID: jint; X, Y, Pressure: jfloat); cdecl;
+procedure Java_zengl_android_ZenGL_zglNativeTouch(env: PJNIEnv; thiz: jobject; ID: jint; X, Y: jfloat; Pressure: jint); cdecl;
 procedure Java_zengl_android_ZenGL_zglNativeInputText(env: PJNIEnv; thiz: jobject; text: jstring); cdecl;
 procedure Java_zengl_android_ZenGL_zglNativeBackspace(env: PJNIEnv; thiz: jobject); cdecl;
-function Java_zengl_android_ZenGL_bArrPasToJava(env: PJNIEnv; thiz: jobject): jByteArray; cdecl;         
-procedure Java_zengl_android_ZenGL_bArrJavaToPas(env: PJNIEnv; thiz: jobject; arr: jbyteArray); cdecl;  
+function Java_zengl_android_ZenGL_bArrPasToJava(env: PJNIEnv; thiz: jobject): jByteArray; cdecl;
+procedure Java_zengl_android_ZenGL_bArrJavaToPas(env: PJNIEnv; thiz: jobject; arr: jbyteArray); cdecl;
 {$ENDIF}
 
 var
@@ -187,14 +186,14 @@ var
 
   {$IfDef USE_VKEYBOARD}
   app_TouchMenu: procedure;
-  app_UseMenuDown: procedure;
-  app_UseMenuUp: procedure;
+  app_UseMenuDown: procedure(num: Integer);
+  app_UseMenuUp: procedure(num: Integer);
   app_DrawGui: procedure;
 
-  MenuChange: Byte = 0;
-  VisibleMenuChange: Boolean = true;
+  MenuChange: LongWord = 0;
+  VisibleMenuChange: Boolean = False;
 //  MenuTimerSleep: Byte;
-  MaxNumMenu: Byte = 4;
+  MaxNumMenu: LongWord = 4;
   {$EndIf}
 
   {$IFDEF USE_X11}
@@ -231,10 +230,11 @@ var
   appShowKeyboard: JMethodID;
   appHideKeyboard: JMethodID;
   appLock        : zglTCriticalSection;
-  MyByteArray: array of byte;
-
+  // pas array to java. Or java array to pas.
+  MyByteArray    : array of byte;
   //appIsLibrary   : Byte public name 'TC_SYSTEM_ISLIBRARY'; // workaround for the latest revisions of FreePascal 2.6.x
   {$ENDIF}
+
 
   appShowCursor: Boolean = true;
 
@@ -349,7 +349,9 @@ procedure app_Events;
 var
   i: Word;
 begin
+  {$IfNDef MOBILE}
   // переключение языка, переработать
+  // для мобильных систем нужны визуальные кнопки. Которые ещё не созданы.
   if (appFlags and APP_USE_ENGLISH_INPUT) = 0 then
   begin
     if keysDown[K_F12] then
@@ -361,6 +363,7 @@ begin
       PkeybFlags^ := PkeybFlags^ and ($FFFFFFFF - keyboardLatRusDown) xor keyboardLatinRus;
     end;
   end;
+
   {$IfDef USE_VKEYBOARD}
   if keysDown[K_F2] then
     PkeybFlags^ := PkeybFlags^ or keyboardSymbolDown;
@@ -379,18 +382,19 @@ begin
       PkeybFlags^ := PkeybFlags^ xor keyboardSymbol;
     end;
   end;
-  {$EndIf}
+  {$EndIf}{$EndIf}
 
   if Assigned(app_PEvents) then
     app_PEvents;
 
+  {$IfNDef MOBILE}
   {$IfDef USE_EXIT_ESCAPE}
   if keysDown[K_ESCAPE] = True then
   begin
     winOn := False;
     log_Add('Terminate program');
   end;
-  {$EndIf}
+  {$EndIf}{$EndIf}
 
   {$IfNDef OLD_METHODS}
   if managerSetOfTools.count > 0 then
@@ -425,9 +429,11 @@ begin
   if scrViewPort then
     SetCurrentMode(oglMode);
   scr_Clear();
+
   if Assigned(app_PLoad) Then
     app_PLoad();
   scr_Flush();
+
 
   timer_Reset();
   timeCalcFPS := timer_Add(@app_CalcFPS, 1000, t_Start);
@@ -437,6 +443,30 @@ begin
 end;
 
 {$IfNDef ANDROID}
+{$IfDef USE_VKEYBOARD}
+procedure app_VirtualKeyboard;
+begin
+  if Assigned(app_DrawGui) then
+  begin
+    if keysDown[K_F11] then
+    begin
+      VisibleMenuChange := not VisibleMenuChange;
+      lockVirtualKeyboard := true;
+      startTimeLockVK := timer_GetTicks;
+    end;
+    if VisibleMenuChange then
+    begin
+      mouseToKey := True;
+      if (mouseAction[M_BLEFT].state and is_down) > 0 then
+        app_UseMenuDown(M_BLEFT);
+      if (mouseAction[M_BLEFT].state and is_up) > 0 then
+        app_UseMenuUp(M_BLEFT);
+      mouseToKey := False;
+    end;
+  end;
+end;
+{$EndIf}
+
 procedure app_MainLoop;
 var
   timeLoop: Double;
@@ -595,37 +625,11 @@ begin
   else begin
     if timer_GetTicks - startTimeLockVK > timeLockVK then
     begin
-    //  prevLockVK := False;
       lockVirtualKeyboard := false;
     end;
   end;
   {$EndIf}
 end;
-
-{$IfDef USE_VKEYBOARD}
-procedure app_VirtualKeyboard;
-begin
-  if Assigned(app_DrawGui) then
-  begin
-    if keysDown[K_F11] then
-    begin
-      VisibleMenuChange := not VisibleMenuChange;
-      lockVirtualKeyboard := true;
-      startTimeLockVK := timer_GetTicks;
-    end;
-    if VisibleMenuChange then
-    begin
-      mouseToKey := True;
-      if (mouseAction[M_BLEFT].state and is_down) > 0 then
-        app_UseMenuDown;
-      if (mouseAction[M_BLEFT].state and is_up) > 0 then
-        app_UseMenuUp;
-      mouseToKey := False;
-    end;
-  end;
-end;
-
-{$EndIf}
 
 {$IFNDEF iOS}
 {$IfDef WND_USE}
@@ -1980,7 +1984,6 @@ begin
       app_PRestore();
     timer_Reset();
   end;
-
   thread_CSLeave(appLock);
 end;
 
@@ -2001,8 +2004,59 @@ begin
     zgl_Init();
   end else
     wnd_SetSize(Width, Height);
-
   thread_CSLeave(appLock);
+end;
+
+// обработка клавиатуры, но она нужна будет не только для Android.
+procedure VirtTouchKeyboard;
+var
+  i: Integer;
+begin
+  for i := 0 to MAX_TOUCH - 1 do
+  begin
+    if (Mobile_Touch[i].state and is_Press) > 0 then
+      if (MenuChange and 255) > 0 then
+      begin
+        app_UseMenuDown(i);
+      end;
+    if (Mobile_Touch[i].state and is_up) > 0 then
+      if (MenuChange and 255) > 0 then
+      begin
+        app_UseMenuUp(i);
+      end;
+  end;
+
+  {$IfDef USE_VKEYBOARD}
+  if keysDown[K_F2] then
+    PkeybFlags^ := PkeybFlags^ or keyboardSymbolDown;
+  if ((PkeybFlags^ and keyboardSymbolDown) > 0) and (keysUp[K_F2]) then
+  begin
+    PkeybFlags^ := PkeybFlags^ xor keyboardSymbolDown;
+    if MenuChange = 3 then
+    begin
+      SetMenuProcess(4);
+      MenuChange := 4;
+      PkeybFlags^ := PkeybFlags^ or keyboardSymbol;
+    end
+    else begin
+      SetMenuProcess(3);
+      MenuChange := 3;
+      PkeybFlags^ := PkeybFlags^ xor keyboardSymbol;
+    end;
+  end;
+  {$EndIf}
+
+  if (appFlags and APP_USE_ENGLISH_INPUT) = 0 then
+  begin
+    if keysDown[K_F12] then
+    begin
+      PkeybFlags^ := PkeybFlags^ or keyboardLatRusDown;
+    end;
+    if ((PkeybFlags^ and keyboardLatRusDown) > 0) and (keysUp[K_F12]) then
+    begin
+      PkeybFlags^ := PkeybFlags^ and ($FFFFFFFF - keyboardLatRusDown) xor keyboardLatinRus;
+    end;
+  end;
 end;
 
 procedure Java_zengl_android_ZenGL_zglNativeDrawFrame(env: PJNIEnv; thiz: jobject);
@@ -2020,6 +2074,7 @@ begin
     exit;
   end;
 
+  VirtTouchKeyboard;
   res_Proc();
   {$IFDEF USE_JOYSTICK}
   joy_Proc();
@@ -2059,7 +2114,6 @@ begin
       app_PActivate(TRUE);
     FillChar(keysDown[0], 256, 0);
     key_ClearState();
-    mouseUpDown := 0;
     mouse_ClearState();
     touch_ClearState();
 
@@ -2074,7 +2128,6 @@ begin
     snd_MainLoop();
     {$ENDIF}
   end;
-
   thread_CSLeave(appLock);
 end;
 
@@ -2087,121 +2140,72 @@ begin
   thread_CSLeave(appLock);
 end;
 
-procedure Java_zengl_android_ZenGL_zglNativeTouch(env: PJNIEnv; thiz: jobject; ID: jint; X, Y, Pressure: jfloat);
+procedure Java_zengl_android_ZenGL_zglNativeTouch(env: PJNIEnv; thiz: jobject; ID: jint; X, Y: jfloat; Pressure: jint);
 var
   dX, dY: Integer;
 begin
   thread_CSEnter(appLock);
 
-  dX := Abs(round((X - scrAddCX) / scrResCX) - Andr_Touch[ID].oldX);
-  dY := Abs(round((Y - scrAddCY) / scrResCY) - Andr_Touch[ID].oldY);
+  dX := Abs(round((X - scrAddCX) / scrResCX) - Mobile_Touch[ID].oldX);
+  dY := Abs(round((Y - scrAddCY) / scrResCY) - Mobile_Touch[ID].oldY);
 
   if appFlags and CORRECT_RESOLUTION > 0 Then
   begin
-    Andr_Touch[ID].newX := Round((X - scrAddCX) / scrResCX);
-    Andr_Touch[ID].newY := Round((Y - scrAddCY) / scrResCY);
+    Mobile_Touch[ID].newX := Round((X - scrAddCX) / scrResCX);
+    Mobile_Touch[ID].newY := Round((Y - scrAddCY) / scrResCY);
   end else
   begin
-    Andr_Touch[ID].newX := Round(X);
-    Andr_Touch[ID].newY := Round(Y);
+    Mobile_Touch[ID].newX := Round(X);
+    Mobile_Touch[ID].newY := Round(Y);
   end;
 
-  if Pressure > 0 then
+  // при отпускании кообдинаты обнуляются, но они нам нужны для указания координат, где они были отпущены.
+  Mobile_Touch[ID].oldX := Mobile_Touch[ID].newX;
+  Mobile_Touch[ID].oldY := Mobile_Touch[ID].newY;
+
+  if ((Pressure and 1) > 0) and ((Mobile_Touch[ID].state and is_Press) = 0) then
   begin
-    Andr_Touch[ID].state := Andr_Touch[ID].state or is_Press;
-    if (Andr_Touch[ID].state and is_down) = 0 then
+    Mobile_Touch[ID].state := is_down or is_Press;
+    if (dX <= 10) and (dy <= 10) then
     begin
-      Andr_Touch[ID].state := is_down;
-      if (dX <= 10) and (dy <= 10) then
-        if timer_GetTicks - Andr_Touch[ID].DBLClickTime < mouseDblCInt then
-          if ((Andr_Touch[ID].state and t_DoubleTap) = 0) then
-            Andr_Touch[ID].state := Andr_Touch[ID].state or t_DoubleTap
-          else
-            Andr_Touch[ID].state := Andr_Touch[ID].state or t_TripleTap;
-      Andr_Touch[ID].DBLClickTime := timer_GetTicks;
+      if timer_GetTicks - Mobile_Touch[ID].DBLClickTime < mouseDblCInt then
+      begin
+        if ((Mobile_Touch[ID].state and is_DoubleDown) = 0) then
+          Mobile_Touch[ID].state := Mobile_Touch[ID].state or is_DoubleDown
+        else
+          Mobile_Touch[ID].state := Mobile_Touch[ID].state or is_TripleDown;
+      end;
     end;
+    Mobile_Touch[ID].DBLClickTime := timer_GetTicks;
   end
   else begin
-    Andr_Touch[ID].state := t_canPress;
-    Andr_Touch[ID].oldX := - 1;
-    Andr_Touch[ID].oldY := - 1;
-    Andr_Touch[ID].newX := - 1;
-    Andr_Touch[ID].newY := - 1;
-  end;
-(*  dX := Abs(round((X - scrAddCX) / scrResCX) - touchX[ID]);  // смещение относительно последнего нажатия
-  dY := Abs(round((Y - scrAddCY) / scrResCY) - touchY[ID]);
-
-  if appFlags and CORRECT_RESOLUTION > 0 Then
-  begin
-    touchX[ID]  := Round((X - scrAddCX) / scrResCX);
-    touchY[ID]  := Round((Y - scrAddCY) / scrResCY);
-  end else
-  begin
-    touchX[ID] := Round(X);
-    touchY[ID] := Round(Y);
-  end;
-
-  if (not touchDown[ID]) and (Pressure > 0) Then
-  begin
-    touchDown[ID] := TRUE;
-    touchUp[ID]   := FALSE;
-    if touchCanTap[ID] Then
-      touchTap[ID] := TRUE;
-  end else
-    if (touchDown[ID]) and (Pressure <= 0) Then
+    if ((Pressure and 1) = 0) and ((Mobile_Touch[ID].state and is_canPress) = 0) then
     begin
-      touchDown[ID]   := FALSE;
-      touchUp[ID]     := TRUE;
-      touchTap[ID]    := FALSE;
-      touchCanTap[ID] := TRUE;
+      Mobile_Touch[ID].state := is_canPress or is_up;
+      Mobile_Touch[ID].newX := - 1;
+      Mobile_Touch[ID].newY := - 1;
     end;
+  end;
 
-
-  // mouse emulation
+  // mouse left emulation
   if ID = 0 Then
   begin
-    mouseX := touchX[0];
-    mouseY := touchY[0];
-
-    if (mouseLX <> mouseX) or (mouseLY <> mouseY) Then
+    mouseX := Mobile_Touch[ID].oldX;
+    mouseY := Mobile_Touch[ID].oldY;
+    if ((Pressure and 1) > 0) and ((mouseAction[ID].state and is_Press) = 0) Then
     begin
-      mouseLX := mouseX;
-      mouseLY := mouseY;
-    end;
+      mouseAction[ID].state := is_Press or is_down;
 
-    if (Pressure > 0) and (not ((mouseUpDown and M_BLEFT_DOWN) > 0) ) Then
-    begin
-      mouseUpDown := mouseUpDown or M_BLEFT_DOWN;
-
-      {$IfDef USE_VKEYBOARD}
-      if (MenuChange and 255) > 0 then
-        app_UseMenuDown;
-      {$EndIf}
-
-      if ((mouseClickCanClick and M_BLEFT_CANCLICK) > 0) Then
+      if (dX <= 10) and (dy <= 10) then
       begin
-        mouseClickCanClick := (mouseClickCanClick and (255 - M_BLEFT_CANCLICK)) or M_BLEFT_CLICK;
-        if (dX <= 10) and (dy <= 10) then
-        begin
-          if (timer_GetTicks - mouseDblCTime[M_BLEFT] < mouseDblCInt) Then
-          begin
-            mouseDblClickWheel := mouseDblClickWheel or M_BLEFT_DBLCLICK;
-          end;
-        end;
-        mouseDblCTime[M_BLEFT] := timer_GetTicks();
+        if (timer_GetTicks - mouseAction[ID].DBLClickTime < mouseDblCInt) Then
+          mouseAction[ID].state := mouseAction[ID].state or is_DoubleDown;
       end;
+      mouseAction[ID].DBLClickTime := timer_GetTicks();
     end else
-      if (Pressure <= 0) and ((mouseUpDown and M_BLEFT_DOWN) > 0) Then
-      begin
-        mouseUpDown := (mouseUpDown and (255 - M_BLEFT_DOWN)) or M_BLEFT_UP;
-
-        {$IfDef USE_VKEYBOARD}
-        if (MenuChange and 255) > 0 then            
-          app_UseMenuUp;
-        {$EndIf}
-        mouseClickCanClick := (mouseClickCanClick and (255 - M_BLEFT_CLICK)) or M_BLEFT_CANCLICK;
-      end;
-  end;     *)
+      if ((Pressure and 1) = 0) and ((mouseAction[ID].state and is_canPress) = 0) Then
+        mouseAction[ID].state := is_canPress or is_up;
+  end;
 
   thread_CSLeave(appLock);
 end;
@@ -2216,16 +2220,21 @@ begin
   appObject := thiz;
 
   P := Env^.GetStringUTFChars(Env, text, nil);
+  {$IfDef OLD_METHODS}
   key_InputText(P);
+  {$Else}
+  {$EndIf}
   Env^.ReleaseStringUTFChars(Env, text, P);
-
   thread_CSLeave(appLock);
 end;
 
 procedure Java_zengl_android_ZenGL_zglNativeBackspace(env: PJNIEnv; thiz: jobject);
 begin
   thread_CSEnter(appLock);
+  {$IfDef OLD_METHODS}
   utf8_Backspace(keysText);
+  {$Else}
+  {$EndIf}
   thread_CSLeave(appLock);
 end;
 
