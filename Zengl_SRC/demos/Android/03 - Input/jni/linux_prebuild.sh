@@ -8,3 +8,6 @@ cp ../../../../bin/Android/armv6/libchipmunk.so ../libs/armeabi/
 cp ../../../../bin/Android/armv6/libGLU.so ../libs/armeabi/
 # copy resources
 cp ../../../../bin/data/font* ../assets
+cp ../../../../bin/data/CalibriBold50pt* ../assets
+cp ../../../../bin/data/arrow.png ../assets
+cp ../../../../bin/data/Rus.dat ../assets
