@@ -20,18 +20,21 @@ uses
   zgl_text,
   zgl_types,
   zgl_utils
+  {$IfNDef OLD_METHODS}
+  , gegl_color
+  {$EndIf}
   ;
 
 var
   dirRes         : UTF8String = 'assets/';
-  fntMain        : Byte;
+  fntMain        : LongWord;
   texBack        : zglPTexture;
   debug          : Boolean;
   particles      : zglTPEngine2D;
   emitterFire    : array[ 0..2 ] of zglPEmitter2D;
   emitterDiamond : zglPEmitter2D;
   emitterRain    : zglPEmitter2D;
-  TimeStart      : Byte;
+  TimeStart      : LongWord;
 
 procedure Init;
   var
@@ -75,7 +78,7 @@ begin
   pengine2d_AddEmitter( emitterRain, nil );
 
   file_CloseArchive();
-  setTextScale(15, fntMain);
+  setFontTextScale(15, fntMain);
 end;
 
 procedure Draw;
@@ -93,7 +96,7 @@ begin
   if debug Then
     for i := 0 to particles.Count.Emitters - 1 do
       with particles.List[i]^.BBox do
-        pr2d_Rect( MinX, MinY, MaxX - MinX, MaxY - MinY, $FF0000, 255 );
+        pr2d_Rect( MinX, MinY, MaxX - MinX, MaxY - MinY, {$IfNDef OLD_METHODS}cl_Red{$Else} $FF0000, 255{$EndIf});
 
   text_Draw( fntMain, 0, 0, 'FPS: ' + u_IntToStr( zgl_Get( RENDER_FPS ) ) );
   text_Draw( fntMain, 0, 20, 'Particles: ' + u_IntToStr( particles.Count.Particles ) );
@@ -102,11 +105,9 @@ begin
   batch2d_End();
 end;
 
-procedure Timer;
+procedure KeyMouseEvents;
 begin
-  if touch_Tap( 0 ) Then debug := not debug;
-
-  touch_ClearState();
+  if touch_Click( 0 ) Then debug := not debug;
 end;
 
 procedure Update( dt : Double );
@@ -143,8 +144,7 @@ procedure Java_zengl_android_ZenGL_Main( var env; var thiz ); cdecl;
 begin
   randomize();
 
-  TimeStart := timer_Add( @Timer, 16, Start );
-
+  zgl_Reg(SYS_EVENTS, @KeyMouseEvents);
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );
   zgl_Reg( SYS_UPDATE, @Update );
