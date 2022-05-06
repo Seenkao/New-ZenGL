@@ -37,23 +37,28 @@
     <Version Value="11"/>
     <PathDelim Value="\"/>
     <Target>
-      <Filename Value="demo07"/>
+      <Filename Value="..\libs\armeabi\demo07"/>
     </Target>
     <SearchPaths>
-      <IncludeFiles Value="..\..\..\..\headers;..\..\..\..\headers\android;$(ProjOutDir);..\..\..\..\src"/>
-      <Libraries Value="..\libs\armeabi;..\..\..\..\bin\Android\armv6;E:\SDK_manadger\android-ndk-r9c\platforms\android-14\arch-arm\usr\lib\"/>
-      <OtherUnitFiles Value="..\..\..\..\src;..\..\..\..\extra;..\..\..\..\lib\zlib\arm-linux;..\..\..\..\lib\zip\arm-linux;..\..\..\..\lib\theora\arm-linux;..\..\..\..\lib\ogg\arm-linux"/>
+      <IncludeFiles Value="..\..\..\..\headers;..\..\..\..\headers\android;$(ProjOutDir);..\..\..\..\src;..\..\..\..\srcGL;..\..\..\..\srcGEGL"/>
+      <Libraries Value="..\libs\armeabi"/>
+      <OtherUnitFiles Value="..\..\..\..\src;..\..\..\..\srcGEGL;..\..\..\..\extra;..\..\..\..\lib\zlib\arm-linux;..\..\..\..\lib\zip\arm-linux;..\..\..\..\lib\theora\arm-linux;..\..\..\..\lib\ogg\arm-linux;..\..\..\..\srcGL"/>
       <UnitOutputDirectory Value="\tmp"/>
     </SearchPaths>
     <CodeGeneration>
+      <SmartLinkUnit Value="True"/>
       <RelocatableUnit Value="True"/>
       <TargetCPU Value="arm"/>
       <TargetOS Value="android"/>
+      <Optimizations>
+        <OptimizationLevel Value="2"/>
+      </Optimizations>
     </CodeGeneration>
     <Linking>
       <Debugging>
         <GenerateDebugInfo Value="False"/>
       </Debugging>
+      <LinkSmart Value="True"/>
       <Options>
         <ExecutableType Value="Library"/>
       </Options>
