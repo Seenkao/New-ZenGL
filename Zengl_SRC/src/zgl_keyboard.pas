@@ -21,7 +21,7 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 24.02.2022
+ !!! modification from Serge 30.05.2022
 }
 unit zgl_keyboard;
 
@@ -170,8 +170,10 @@ const
   K_F11        = $57;
   K_F12        = $58;
 
+  // основные события происходящие между интервалами очистки клавиатуры
   KA_DOWN      = 0;
   KA_UP        = 1;
+  // события происходящие только при нажатии/отжатии клавиш
   KT_DOWN      = 2;
   KT_UP        = 3;
 
@@ -192,25 +194,34 @@ const
   keyboardScrollLock     = $00004000;
   keyboardScrollLockDown = $00008000;
 
-// Rus: внутренняя работа с клавиатурой для всех систем, не надо трогать эти процедуры
-procedure keyboardDown(keyCode: Byte);
-procedure keyboardUp(keyCode: Byte);
+// Rus: внутренняя работа с клавиатурой для всех систем, не надо трогать эту процедуру.
+// Eng: internal work with the keyboard for all systems, do not touch this procedure.
+procedure keyboardDown(keyCode: LongWord);
+// Rus: внутренняя работа с клавиатурой для всех систем, не надо трогать эту процедуру.
+// Eng: internal work with the keyboard for all systems, do not touch this procedure.
+procedure keyboardUp(keyCode: LongWord);
 
 {$IfDef LIBRARY_COMPILE}
-// Rus: опрос, нажата клавиша или нет, в данный момент времени
-function  key_Down(KeyCode: Byte): Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
-// Rus: опрос, отжата клавиша или нетб в данный момент времени
-function  key_Up(KeyCode: Byte): Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
-
-function  key_Press(KeyCode: Byte): Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
+// Rus: опрос, нажата клавиша или нет, в данный момент времени.
+// Eng: polling whether a key is pressed or not, at a given time.
+function  key_Down(KeyCode: LongWord): Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
+// Rus: опрос, отжата клавиша или нет в данный момент времени.
+// Eng: polling whether a key is released or not at a given time.
+function  key_Up(KeyCode: LongWord): Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
+// Rus: опрос, удержана ли клавиша.
+// Eng: Polling if a key is held down.
+function  key_Press(KeyCode: LongWord): Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
 
 // Rus: вернёт код последней нажатой/отжатой (НЕ УПРАВЛЯЮЩЕЙ!) клавиши
 //      KeyAction = или KA_DOWN или KA_UP
-function  key_Last(KeyAction: Byte): Byte; {$IfDef USE_INLINE}inline;{$EndIf}
+// Eng: will return the code of the last pressed/released (NOT CONTROL!) key
+//      KeyAction = either KA_DOWN or KA_UP
+function  key_Last(KeyAction: LongWord): LongWord; {$IfDef USE_INLINE}inline;{$EndIf}
 {$EndIf}
 
 {$IfDef OLD_METHODS}
-// Rus: старые способы использования поля ввода 3-я демка
+// Rus: старые способы использования поля ввода 3-я демка.
+// Eng: old ways to use the input field 3rd demo.
 procedure key_BeginReadText(const Text: UTF8String; MaxSymbols: Integer = -1);
 procedure key_UpdateReadText(const Text: UTF8String; MaxSymbols: Integer = -1);
 function  key_GetText: UTF8String; {$IfDef FPC}inline;{$EndIf}
@@ -220,10 +231,16 @@ procedure key_InputText(const Text: UTF8String);
 function _key_GetText: PAnsiChar;
 {$EndIf}
 
-// Rus: очистка состояний клавиатуры. Прописано в рабочем коде. Может быть нужно в крайних случаях.
+// Rus: очистка состояний клавиатуры. Прописано в рабочем коде. Если вы сами не
+//      подменяете инициализацию - zgl_Reg(SYS_APP_INIT, ...), то вам не нужно
+//      её использовать.
+// Eng: clearing keyboard states. Registered in the working code. If you don't
+//      change the initialization yourself - zgl_Reg(SYS_APP_INIT, ...), then
+//      you don't need to use it.
 procedure key_ClearState;
 // Rus: возвращает код символа из кода клавиатуры. Только латиница.
-function scancode_to_utf8(ScanCode: Byte): Byte;
+// Eng: returns the character code from the keyboard code. Only Latin.
+function scancode_to_utf8(ScanCode: LongWord): LongWord;
 
 // Rus: Установка начальной задержки (при начальном нажатии) при зажатии клавиши.
 // Eng: Sets the initial delay (when initially pressed) when the key is pressed.
@@ -234,7 +251,7 @@ procedure setKey_BeginRepeat(delay: Double); {$IfDef USE_INLINE}inline;{$EndIf}
 // Eng: Setting the delay when pressing a key.
 //     This delay cannot be more than half of the initial delay.
 procedure setKey_Repeat(delay: Double);
-
+{$IfNDef MOBILE}
 {$IfDef USE_VKEYBOARD}
 // Rus: Установка задержки отключения виртуальной клавиатуры
 //     (защита от одновременной работы клавиатуры и виртуальной клавиатуры)
@@ -245,19 +262,19 @@ procedure setKey_Repeat(delay: Double);
 //     Works for non-control keys.
 //     (Ctrl, Shif, Alt, Win/Command, CapsLock, ScrollLock, NumLock)
 procedure setTimeLockVK(delay: Double); {$IfDef FPC}inline;{$EndIf}
-{$EndIf}
+{$EndIf}{$EndIf}
 
 {$IFDEF USE_X11}
-function xkey_to_scancode(XKey, KeyCode: Integer): Byte;
+function xkey_to_scancode(XKey, KeyCode: Integer): LongWord;
 {$IfDef OLD_METHODS}
 function Xutf8LookupString(ic: PXIC; event: PXKeyPressedEvent; buffer_return: PAnsiChar; bytes_buffer: Integer; keysym_return: PKeySym; status_return: PStatus): integer; cdecl; external;
 {$EndIf}
 {$ENDIF}
 {$IFDEF WINDOWS}
-function winkey_to_scancode(WinKey: Integer): Byte;
+function winkey_to_scancode(WinKey: Integer): LongWord;
 {$ENDIF}
 {$IFDEF MACOSX}
-function mackey_to_scancode(MacKey: Integer): Byte;
+function mackey_to_scancode(MacKey: Integer): LongWord;
 {$ENDIF}
 {$IFDEF iOS}
 type
@@ -278,7 +295,7 @@ var
   keysCanText : Boolean;
   keysMax     : Integer;
   {$EndIf}
-  keysLast    : array[0..3] of Byte;
+  keysLast    : array[0..3] of LongWord;
 
   mouseToKey: Boolean = false;
 
@@ -291,31 +308,42 @@ var
   keysTextFrame  : CGRect;
   keysTextChanged: Boolean;
   {$ENDIF}
-  // длительность задержки, для повтора ввода клавиши
+  // Rus: длительность задержки, для повтора ввода клавиши.
+  // Eng:
   keyDownRepeat: Double;
-  // зажата клавиша (производится ли повторение?)
+  // Rus: зажата клавиша (производится ли повторение?).
+  // Eng:
   keyBoolRepeat: Boolean;
-  // начальная задержка - удержание кнопки клавиатуры
+  // Rus: начальная задержка - удержание кнопки клавиатуры.
+  // Eng:
   beginKeyDelay: Double = 500;
-  // задержка при постоянном удержании кнопки клавиатуры
+  // Rus: задержка при постоянном удержании кнопки клавиатуры.
+  // Eng:
   repeatKeyDelay: Double = 60;
-  // установленная рабочая задержка, для кнопки клавиатуры
+  // Rus: установленная рабочая задержка, для кнопки клавиатуры.
+  // Eng:
   keyDelayWork: Double = 500;
+  {$IfNDef MOBILE}
   {$IfDef USE_VKEYBOARD}
-  // блокирует виртуальную клавиатуру
+  // Rus: блокирует виртуальную клавиатуру.
+  // Eng:
   lockVirtualKeyboard: Boolean = False;
-  // оповещает, что надо блокировать виртуальную клавиатуру
+  // Rus: оповещает, что надо блокировать виртуальную клавиатуру.
+  // Eng:
 //  prevLockVK: Boolean = False;
-  // общее время блокировки виртуальной клавиатуры
+  // Rus: общее время блокировки виртуальной клавиатуры.
+  // Eng:
   timeLockVK: Double = 400;
-  // установка отсчёта времени отхода блокировки виртуальной клавиатуры
+  // Rus: установка отсчёта времени отхода блокировки виртуальной клавиатуры.
+  // Eng:
   startTimeLockVK: Double;
-  {$EndIf}
-  // флаги для работы с клавиатурой
-  // для понимания, управляющие клавиши не могут быть "последними"-нажатыми
-  // а если управляющие клавиши сработали, то часть их отображается в флагах,
-  // как сработавшие и как произошедшее событие
-  // эти флаги можно включить, при запуске программы и опросе системы.
+  {$EndIf}{$EndIf}
+  //Rus: флаги для работы с клавиатурой.
+  //     для понимания: управляющие клавиши не могут быть "последними"-нажатыми
+  //     а если управляющие клавиши сработали, то часть их отображается в флагах,
+  //     как сработавшие и как произошедшее событие
+  //     эти флаги можно включить, при запуске программы и опросе системы.
+  // Eng:
   keybFlags   : Cardinal;
   PkeybFlags  : PCardinal = @keybFlags;
 
@@ -333,10 +361,9 @@ uses
   {$EndIf}
   zgl_timers;
 
-procedure keyboardDown(keyCode: Byte);
-var
-  Pk: PLongWord;
+procedure keyboardDown(keyCode: LongWord);
 begin
+  {$IfNDef MOBILE}
   {$If not(defined( WINDOWS) or defined(LINUX))}
   // грёбанный ситуэйшн... опять долбанные переводы, при нажатии определённых клавиш
   if (keybFlags and keyboardNumLock) > 0 then
@@ -357,7 +384,7 @@ begin
       end;
     end;
   end;
-  {$IfEnd}
+  {$IfEnd}{$EndIf}
 
   keysDown[KeyCode] := TRUE;
   keysUp[KeyCode] := FALSE;
@@ -370,32 +397,32 @@ begin
     keysPress   [KeyCode] := TRUE;
     keysCanPress[KeyCode] := FALSE;
   end;
-  Pk := @keybFlags;
+//  Pk := @keybFlags;
   case KeyCode of
     K_PAUSE: ;
     K_INSERT:   PkeybFlags^ := PkeybFlags^ or keyboardInsertDown;
     {$IfNDef MAC_COCOA}
     K_CTRL_L, K_CTRL_R:
       begin
-        Pk^ := Pk^ or keyboardCtrl;
+        PkeybFlags^ := PkeybFlags^ or keyboardCtrl;
         keysDown[K_CTRL] := True;
         keysUp  [K_CTRL] := False;
       end;
     K_ALT_L, K_ALT_R:
       begin
-        Pk^ := Pk^ or keyboardAlt;
+        PkeybFlags^ := PkeybFlags^ or keyboardAlt;
         keysDown[K_ALT] := True;
         keysUp  [K_ALT] := False;
       end;
     K_SHIFT_L, K_SHIFT_R:
       begin
-        Pk^ := Pk^ or keyboardShift;
+        PkeybFlags^ := PkeybFlags^ or keyboardShift;
         keysDown[K_SHIFT] := True;
         keysUp  [K_SHIFT] := False;
       end;
     K_SUPER_L, K_SUPER_R:
       begin
-        Pk^ := Pk^ or keyboardCommand;
+        PkeybFlags^ := PkeybFlags^ or keyboardCommand;
         keysDown[K_SUPER] := True;
         keysUp  [K_SUPER] := False;
       end;
@@ -408,6 +435,7 @@ begin
   else
     begin
       keysLast[KA_DOWN] := KeyCode;
+      {$IfNDef MOBILE}
       {$IfDef USE_VKEYBOARD}
       if not mouseToKey then
       begin
@@ -415,15 +443,18 @@ begin
         lockVirtualKeyboard := True;
         startTimeLockVK := timer_GetTicks;
       end;
-      {$EndIf}
+      {$EndIf}{$EndIf}
     end;
   end;
 
   keysLast[KT_UP] := 0;
 end;
 
-procedure keyboardUp(keyCode: Byte);
+procedure keyboardUp(keyCode: LongWord);
+var
+  _flag: Boolean;
 begin
+  {$IfNDef MOBILE}
   {$If not(defined( WINDOWS) or defined(LINUX))}
   // грёбанный ситуэшн... опять долбанные переводы, при нажатии определённых клавиш
   if (keybFlags and keyboardNumLock) > 0 then
@@ -444,10 +475,11 @@ begin
       end;
     end;
   end;
-  {$IfEnd}
+  {$IfEnd}{$EndIf}
 
   if keysLast[KT_UP] = KeyCode then
     exit;
+
   keysDown[KeyCode] := FALSE;
   keysUp  [KeyCode] := TRUE;
 
@@ -467,7 +499,12 @@ begin
                   PkeybFlags^ := PkeybFlags^ xor keyboardCapsDown xor keyboardCaps;
     K_CTRL_R, K_CTRL_L:
       begin
-        if (keysCanPress[K_CTRL_L]) and (keysCanPress[K_CTRL_R]) then
+        if keyCode = K_CTRL_R then
+          _flag := keysCanPress[K_CTRL_L]
+        else
+          _flag := keysCanPress[K_CTRL_R];
+
+        if _flag then
         begin
           PkeybFlags^ := PkeybFlags^ and ($FFFFFFFF - keyboardCtrl);
           keysDown[K_CTRL] := FALSE;
@@ -476,7 +513,11 @@ begin
       end;
     K_ALT_L, K_ALT_R:
       begin
-        if (keysCanPress[K_ALT_L]) and (keysCanPress[K_ALT_R]) then
+        if keyCode = K_ALT_R then
+          _flag := keysCanPress[K_ALT_L]
+        else
+          _flag := keysCanPress[K_ALT_R];
+        if _flag then
         begin
           PkeybFlags^ := PkeybFlags^ and ($FFFFFFFF - keyboardAlt);
           keysDown[K_ALT] := FALSE;
@@ -485,7 +526,11 @@ begin
       end;
     K_SHIFT_L, K_SHIFT_R:
       begin
-        if (keysCanPress[K_SHIFT_L]) and (keysCanPress[K_SHIFT_R]) then
+        if keyCode = K_SHIFT_R then
+          _flag := keysCanPress[K_SHIFT_L]
+        else
+          _flag := keysCanPress[K_SHIFT_R];
+        if _flag then
         begin
           PkeybFlags^ := PkeybFlags^ and ($FFFFFFFF - keyboardShift);
           keysDown[K_SHIFT] := FALSE;
@@ -494,7 +539,11 @@ begin
       end;
     K_SUPER_R, K_SUPER_L:
       begin
-        if (keysCanPress[K_SUPER_L]) and (keysCanPress[K_SUPER_R]) then
+        if keyCode = K_SUPER_R then
+          _flag := keysCanPress[K_SUPER_L]
+        else
+          _flag := keysCanPress[K_SUPER_R];
+        if _flag then
         begin
           PkeybFlags^ := PkeybFlags^ and ($FFFFFFFF - keyboardCommand);
           keysDown[K_SUPER] := FALSE;
@@ -506,6 +555,7 @@ begin
     begin
       keysLast[KA_UP] := KeyCode;
       keysLast[KT_UP] := KeyCode;
+      {$IfNDef MOBILE}
       {$IfDef USE_VKEYBOARD}
       if not mouseToKey then
       begin
@@ -513,7 +563,7 @@ begin
         lockVirtualKeyboard := True;
         startTimeLockVK := timer_GetTicks;
       end;
-      {$EndIf}
+      {$EndIf}{$EndIf}
     end;
   end;
 
@@ -526,22 +576,22 @@ begin
 end;
 
 {$IfDef LIBRARY_COMPILE}
-function key_Down(KeyCode: Byte): Boolean;
+function key_Down(KeyCode: LongWord): Boolean;
 begin
   Result := keysDown[KeyCode];
 end;
 
-function key_Up(KeyCode: Byte): Boolean;
+function key_Up(KeyCode: LongWord): Boolean;
 begin
   Result := keysUp[KeyCode];
 end;
 
-function key_Press(KeyCode: Byte): Boolean;
+function key_Press(KeyCode: LongWord): Boolean;
 begin
   Result := keysPress[KeyCode];
 end;
 
-function key_Last(KeyAction: Byte): Byte;
+function key_Last(KeyAction: LongWord): LongWord;
 begin
   Result := keysLast[KeyAction];
 end;
@@ -649,7 +699,7 @@ begin
   keyBoolRepeat := False;
 end;
 
-function scancode_to_utf8(ScanCode: Byte): Byte;
+function scancode_to_utf8(ScanCode: LongWord): LongWord;
 begin
   Result := 0;
   case ScanCode of
@@ -779,12 +829,13 @@ begin
     repeatKeyDelay := beginKeyDelay / 2;
 end;
 
+{$IfNDef MOBILE}
 {$IfDef USE_VKEYBOARD}
 procedure setTimeLockVK(delay: Double);
 begin
   timeLockVK := delay;
 end;
-{$EndIf}
+{$EndIf}{$EndIf}
 
 {$IfDef OLD_METHODS}
 procedure key_InputText(const Text: UTF8String);
@@ -819,7 +870,7 @@ end;
 
 {$IFDEF USE_X11}
 // Most of scancodes can be get via simple trick.
-function xkey_to_scancode(XKey, KeyCode: Integer): Byte;
+function xkey_to_scancode(XKey, KeyCode: Integer): LongWord;
 begin
   case XKey of
     XK_Pause:        Result := K_PAUSE;
@@ -870,7 +921,7 @@ end;
 {$ENDIF}
 
 {$IFDEF WINDOWS}
-function winkey_to_scancode(WinKey: Integer): Byte;
+function winkey_to_scancode(WinKey: Integer): LongWord;
 begin
   case WinKey of
     $26: Result := K_UP;
@@ -891,7 +942,7 @@ end;
 {$ENDIF}
 
 {$IFDEF MACOSX}
-function mackey_to_scancode(MacKey: Integer): Byte;
+function mackey_to_scancode(MacKey: Integer): LongWord;
 begin
   case MacKey of
     $71: Result := K_PAUSE;
