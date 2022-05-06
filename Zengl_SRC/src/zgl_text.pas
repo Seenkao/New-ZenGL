@@ -21,7 +21,7 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 24.02.2022
+ !!! modification from Serge 23.03.2022
 }
 
 unit zgl_text;
@@ -51,30 +51,35 @@ const
   TEXT_FX_LENGTH      = $000200;
 
 // Rus: процедура вывода текста.
-// Eng:
+// Eng: text output procedure.
 procedure text_Draw(fnt: LongWord; X, Y: Single; const Text: UTF8String; Flags: LongWord = 0);
 // Rus: расширенная процедура вывода текста.
-// Eng:
+// Eng: extended text output procedure.
 procedure text_DrawEx(fnt: LongWord; X, Y, Scale, Step: Single; const Text: UTF8String; {$IfDef OLD_METHODS} Alpha: Byte = 255; Color: LongWord = $FFFFFFFF;{$Else} Color: LongWord = cl_White;{$EndIf} Flags: LongWord = 0);
 // Rus: процедура вывода текста в определённую область (прямоугольник).
-// Eng:
+// Eng: procedure for outputting text to a certain area (rectangle).
 procedure text_DrawInRect(fnt: LongWord; const Rect: zglTRect2D; const Text: UTF8String; Flags: LongWord = 0);
 // Rus: расширенная процедура вывода текста в определённую область (прямоугольник).
-// Eng:
+// Eng: extended procedure for outputting text to a certain area (rectangle).
 procedure text_DrawInRectEx(fnt: LongWord; const Rect: zglTRect2D; Scale, Step: Single; const Text: UTF8String; {$IfDef OLD_METHODS} Alpha: Byte = 0; Color: LongWord = $FFFFFF;{$Else} Color: LongWord = cl_White;{$EndIf} Flags: LongWord = 0);
-// Rus: возвращаем ширину текста.
-// Eng:
+// Rus: возвращаем ширину всего текста.
+// Eng: return the width of the entire text.
 function  text_GetWidth(fnt: LongWord; const Text: UTF8String; Step: Single = 0.0): Single;
 // Rus: возвращаем высоту текста.
-// Eng:
+// Eng: return the height of the text.
 function  text_GetHeight(fnt: LongWord; Width: Single; const Text: UTF8String; Step: Single = 0.0): Single;
 procedure textFx_SetLength(Length: Integer; LastCoord: zglPPoint2D = nil; LastCharDesc: zglPCharDesc = nil);
 // Index - size, fnt - num font
 procedure setFontTextScale(Index: LongWord; fnt: LongWord);
 // Rus: установка флага отключения шкалы размерности. Только для функций,
 //      которые используют свою собственную шкалу.
-// Eng:
-procedure setScallingOnOff(flag: Boolean); {$IfDef FPC}inline;{$EndIf}
+// Eng: setting the flag for disabling the dimension scale. Only for functions
+//      that use their own scale.
+procedure setScallingOff(flag: Boolean); {$IfDef USE_INLINE}inline;{$EndIf}
+// Rus: возвращаем значение флага шкалы размерности.
+// Eng: return the value of the scale flag.
+function getScallingOff: Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
+
 // Rus: устанавливаем размер шкалы, для отключенного флага.
 //      !!!Внимательние!!! Процедура меняет временную переменную - она будет
 //      действовать для любого шрифта, даже если вы выбирали для какого-то
@@ -82,34 +87,48 @@ procedure setScallingOnOff(flag: Boolean); {$IfDef FPC}inline;{$EndIf}
 //      вывода шрифта значение переменной, может меняться, если вы использовали
 //      procedure text_DrawEx или procedure text_DrawInRectEx - это правильное
 //      поведение данной переменной.
-// Eng:
-procedure setTextScaleEx(Scale: Single; fnt:LongWord); {$IfDef FPC}inline;{$EndIf}
+// Eng: set the scale size for the disabled flag.
+//      !!!Attention!!! The procedure changes the temporary variable - it will
+//      work for any font, even if you chose for some specific one, therefore
+//      setting the font size, just before the moment the font is displayed, the
+//      value of the variable can change if you used procedure text_DrawEx or
+//      procedure text_DrawInRectEx - this is the correct behavior given variable.
+procedure setTextFontScaleEx(Scale: Single; fnt:LongWord); {$IfDef USE_INLINE}inline;{$EndIf}
+// Rus: устанавливаем значение размера шкалы для отключенного флага, напрямую,
+//      без учёта к какому шрифту шкала должна относится. Пригодится, когда
+//      надо сохранить конкретное значение и потом его восстановить.
+// Eng: set the value of the scale size for the disabled flag, directly,
+//      regardless of which font the scale should refer to. It is useful when
+//      you need to save a specific value and then restore it.
+procedure setTextScaleEx(Scale: Single); {$IfDef USE_INLINE}inline;{$EndIf}
 // Rus: возвращаем размер шкалы данного шрифта.
-// Eng:
-function getTextScale(fnt: LongWord): LongWord;
+// Eng: return the scale size of the given font.
+function getTextScale(fnt: LongWord): LongWord; {$IfDef USE_INLINE}inline;{$EndIf}
 // Rus: возвращаем размерность шкалы, которая используется вне шрифтов.
-// Eng:
-function getTextScaleEx(): Single;
+// Eng: we return the dimension of the scale, which is used outside of fonts.
+function getTextScaleEx(): Single; {$IfDef USE_INLINE}inline;{$EndIf}
 // Rus: устанавливаем стандартные значения цвета для любого текста.
 //      Color - значение цвета.
-// Eng:
-procedure setTextColor(Color: Cardinal);
+// Eng: set standard color values for any text.
+//      Color - color value.
+procedure setTextColor(Color: Cardinal); {$IfDef USE_INLINE}inline;{$EndIf}
 
 // Rus: загрузка текстового файла в формате UTF-8.
-// Eng:
+// Eng: loading a text file in UTF-8 format.
 function txt_LoadFromFile(const FileName: UTF8String; out Buf: UTF8String): Boolean;
 // Rus: сохранение текстового UTF-8 файла.
-// Eng:
+// Eng: saving text UTF-8 file.
 function txt_SaveFromFile(const FileName: UTF8String; const Buf: UTF8String): Boolean;
 
 var
   TextScaleStandart : Single;
   // Rus: флаг, отвечающий за выключение шкалы размерности.
-  // Eng:
+  // Eng: flag responsible for turning off the dimension scale.
   Off_TextScale: Boolean = false;
   // Rus: шкала для отключённых флагов, будет использоваться данная шкала, а не
   //      шкала заданная в шрифте.
-  // Eng:
+  // Eng: scale for disabled flags, this scale will be used instead of the scale
+  //      specified in the font.
   useScaleEx: Single;
 
 implementation
@@ -171,14 +190,24 @@ begin
   useFont := nil;
 end;
 
-procedure setScallingOnOff(flag: Boolean);
+procedure setScallingOff(flag: Boolean);
 begin
   Off_TextScale := flag;
 end;
 
-procedure setTextScaleEx(Scale: Single; fnt:LongWord);
+function getScallingOff: Boolean;
+begin
+  Result := Off_TextScale;
+end;
+
+procedure setTextFontScaleEx(Scale: Single; fnt:LongWord);
 begin
   useScaleEx := Scale * managerFont.Font[fnt].ScaleNorm;
+end;
+
+procedure setTextScaleEx(Scale: Single);
+begin
+  useScaleEx := Scale;
 end;
 
 function getTextScale(fnt: LongWord): LongWord;
@@ -194,10 +223,10 @@ end;
 procedure setTextColor(Color: Cardinal);
 begin
   {$IfDef OLD_METHODS}
-  textRGBA[0] := Color shr 24;
-  textRGBA[1] := (Color and $FF0000) shr 16;
-  textRGBA[2] := (Color and $FF00) shr 8;
-  textRGBA[3] := Color and $FF;
+  textRGBA[3] := Color shr 24;
+  textRGBA[2] := (Color and $FF0000) shr 16;
+  textRGBA[1] := (Color and $FF00) shr 8;
+  textRGBA[0] := Color and $FF;
   {$else}
   textRGBA := Color;
   {$EndIf}
@@ -729,7 +758,7 @@ var
 begin
   Result := False;
   if not file_Exists(FileName) then
-    exit;                      // file error = file not exist!!!
+    exit;
 
   if file_Open(f, FileName, FOM_OPENR) then
   begin
