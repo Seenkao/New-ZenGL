@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
-    <Version Value="12"/>
+    <Version Value="11"/>
     <PathDelim Value="\"/>
     <General>
       <Flags>
         <MainUnitHasCreateFormStatements Value="False"/>
         <MainUnitHasTitleStatement Value="False"/>
         <MainUnitHasScaledStatement Value="False"/>
-        <CompatibilityMode Value="True"/>
       </Flags>
       <SessionStorage Value="InProjectDir"/>
+      <MainUnit Value="0"/>
       <Title Value="demo05"/>
       <UseAppBundle Value="False"/>
       <ResourceType Value="res"/>
@@ -24,6 +24,7 @@
     </PublishOptions>
     <RunParams>
       <FormatVersion Value="2"/>
+      <Modes Count="0"/>
     </RunParams>
     <Units Count="1">
       <Unit0>
@@ -36,16 +37,17 @@
     <Version Value="11"/>
     <PathDelim Value="\"/>
     <Target>
-      <Filename Value="demo05"/>
+      <Filename Value="..\libs\armeabi\demo05"/>
     </Target>
     <SearchPaths>
-      <IncludeFiles Value="..\..\..\..\headers;..\..\..\..\headers\android;$(ProjOutDir);..\..\..\..\src;..\..\..\..\srcGEGL"/>
+      <IncludeFiles Value="..\..\..\..\headers;..\..\..\..\headers\android;$(ProjOutDir);..\..\..\..\src;..\..\..\..\srcGL;..\..\..\..\srcGEGL"/>
       <Libraries Value="..\libs\armeabi;..\..\..\..\bin\Android\armv6;C:\codetyphon\binLibraries\android-4.0-api14-arm"/>
-      <OtherUnitFiles Value="..\..\..\..\src;..\..\..\..\lib\zip\arm-linux;..\..\..\..\lib\zlib\arm-linux;..\..\..\..\extra"/>
+      <OtherUnitFiles Value="..\..\..\..\src;..\..\..\..\srcGEGL;..\..\..\..\srcGL;..\..\..\..\lib\zip\arm-linux;..\..\..\..\lib\zlib\arm-linux;..\..\..\..\extra"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <CodeGeneration>
       <RelocatableUnit Value="True"/>
+      <TargetProcessor Value="ARMV6"/>
       <TargetCPU Value="arm"/>
       <TargetOS Value="android"/>
     </CodeGeneration>
