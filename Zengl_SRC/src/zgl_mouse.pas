@@ -21,7 +21,7 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 21.09.2021
+ !!! modification from Serge 29.04.2021
 }
 unit zgl_mouse;
 
@@ -43,50 +43,50 @@ uses
   zgl_types;
 
 {$IfDef LIBRARY_COMPILE}
-// Ru: возвращаем координату "X".
-// En: return the "X" coordinate.
+// Rus: возвращаем координату "X".
+// Eng: return the "X" coordinate.
 function mouse_X : Integer; {$IfDef USE_INLINE}inline;{$EndIf}
-// Ru: возвращаем координату "Y".
-// En: return the "Y" coordinate.
+// Rus: возвращаем координату "Y".
+// Eng: return the "Y" coordinate.
 function mouse_Y : Integer; {$IfDef USE_INLINE}inline;{$EndIf}
-// Ru: возвращаем координаты "X", "Y".
-// En: return coordinates "X", "Y".
+// Rus: возвращаем координаты "X", "Y".
+// Eng: return coordinates "X", "Y".
 function mouse_XY : zglTPoint2D; {$IfDef USE_INLINE}inline;{$EndIf}
-// Ru: возвращаем "DX" (дельта X).
-// En: return "DX" (delta X).
+// Rus: возвращаем "DX" (дельта X).
+// Eng: return "DX" (delta X).
 function mouse_DX : Integer; {$IfDef USE_INLINE}inline;{$EndIf}
-// Ru: возвращаем "DY" (дельта Y).
-// En: return "DY" (delta Y).
+// Rus: возвращаем "DY" (дельта Y).
+// Eng: return "DY" (delta Y).
 function mouse_DY : Integer; {$IfDef USE_INLINE}inline;{$EndIf}
 
-//    Ru: состояния: Button = M_BLEFT или M_BMIDDLE или M_BRIGHT.
-//    En: states: Button = M_BLEFT or M_BMIDDLE or M_BRIGHT.
+//    Rus: состояния: Button = M_BLEFT или M_BMIDDLE или M_BRIGHT.
+//    Eng: states: Button = M_BLEFT or M_BMIDDLE or M_BRIGHT.
 
-// Ru: обработка клавиш мыши на нажатие.
-// En: processing of mouse keys on pressing.
+// Rus: обработка клавиш мыши на нажатие.
+// Eng: processing of mouse keys on pressing.
 function mouseBDown(Button: Byte): Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
-// Ru: обработка клавиш мыши на отжатие. (по сути бесполезная функция, если не нажата клавиша, то по умолчанию отпущена).
-// En: processing of mouse keys for releasing.
+// Rus: обработка клавиш мыши на отжатие. (по сути бесполезная функция, если не нажата клавиша, то по умолчанию отпущена).
+// Eng: processing of mouse keys for releasing.
 function mouseBUp(Button: Byte): Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
-// Ru: обработка клавиш мыши на клик.
-// En: handling mouse keys per click.
+// Rus: обработка клавиш мыши на клик.
+// Eng: handling mouse keys per click.
 function mouseBClick(Button: Byte): Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
-// Ru: обработка клавиш мыши на двойной клик.
-// En: processing of mouse keys on a double click.
+// Rus: обработка клавиш мыши на двойной клик.
+// Eng: processing of mouse keys on a double click.
 function mouseBDblClick(Button: Byte): Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
-// Ru: обработка клавишь мыши на отклик.
-// En: processing of mouse keys on the response.
+// Rus: обработка клавишь мыши на отклик.
+// Eng: processing of mouse keys on the response.
 function mouseBCanClick(Button: Byte): Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
-// Ru: обработка работы ролика мыши.
-// En: processing of the operation of the mouse roller.
+// Rus: обработка работы ролика мыши.
+// Eng: processing of the operation of the mouse roller.
 function mouseWheelUp: Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
 function mouseWheelDown: Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
 {$EndIf}
-// Ru: очистка состояний мыши. Вызывать не нужно, производится автоматически.
-// En: clearing mouse states. You do not need to call, it is done automatically.
+// Rus: очистка состояний мыши. Вызывать не нужно, производится автоматически.
+// Eng: clearing mouse states. You do not need to call, it is done automatically.
 procedure mouse_ClearState; {$IfDef USE_INLINE}inline;{$EndIf}
-// Ru: блокирование координат мыши.
-// En: locking mouse coordinates.
+// Rus: блокирование координат мыши.
+// Eng: locking mouse coordinates.
 procedure mouse_Lock(X: Integer = -1; Y: Integer = -1);
 
 var
@@ -95,20 +95,20 @@ var
   mouseDX      : Integer;
   mouseDY      : Integer;
 
-//  mouseUpDown, mouseClickCanClick, mouseDblClickWheel: Byte;
-  // три кнопки, с событиями, и у каждой кнопки споя задержка времени
+  // Rus: три кнопки, с событиями, и у каждой кнопки своя задержка времени.
+  // Eng:
   mouseAction: array[0..2] of km_Button;
 
-//  mouseDblCTime: array[0..2] of Double;
   mouseDblCInt : Integer = 250;
   mouseLock    : Boolean;
   {$IfDef MAC_COCOA}
   gMouseX, gMouseY: Integer;
   {$EndIf}
   {$IfDef USE_VKEYBOARD}
-  // события отвечающее за клавиатуру, если их нет, то виртуальная клавиатура будет "залипать"
-  // это же нужно и для тачпада
-  mouseLastVKey: array[0..3] of Byte;
+  // Rus: События отвечающее за клавиатуру, если их нет, то виртуальная
+  //      клавиатура будет "залипать". Это же нужно и для тачпада.
+  // Eng:
+  mouseLastVKey: array[0..MAX_TOUCH - 1] of LongWord;
   {$EndIf}
 
 implementation
@@ -298,5 +298,12 @@ begin
   CGWarpMouseCursorPosition(Point);
 {$ENDIF}
 end;
+
+{$IfDef USE_VKEYBOARD}
+initialization
+  mouseLastVKey[0] := 0;
+  mouseLastVKey[1] := 0;
+  mouseLastVKey[2] := 0;
+{$EndIf}
 
 end.
