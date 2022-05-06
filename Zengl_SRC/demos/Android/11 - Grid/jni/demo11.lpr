@@ -21,11 +21,11 @@ uses
 
 var
   dirRes  : UTF8String = 'assets/';
-  fntMain : Byte;
+  fntMain : LongWord;
   texBack : zglPTexture;
   grid    : zglTGrid2D;
   wave    : Single;
-  TimeStart: Byte;
+  TimeStart: LongWord;
 
 procedure Init;
   var
@@ -53,7 +53,7 @@ begin
         grid.Grid[ i, j ].X := i * 40;
         grid.Grid[ i, j ].Y := j * 40;
       end;
-  setTextScale(15, fntMain);
+  setFontTextScale(15, fntMain);
 end;
 
 procedure Draw;
@@ -106,7 +106,7 @@ procedure Java_zengl_android_ZenGL_Main( var env; var thiz ); cdecl;
 begin
   randomize();
 
-  TimeStart := timer_Add( @Timer, 16, Start );
+  TimeStart := timer_Add( @Timer, 16, t_Start );
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );
