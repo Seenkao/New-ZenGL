@@ -30,12 +30,15 @@ interface
 var
   // Rus: глобальная строка, для любого использования. Удобно для использования
   //      для загрузки разных ресурсов.
-  // Eng:
+  // Eng: global string, for any use. Convenient to use to load different resources.
   LoadText: UTF8String;
   // Rus: флаг, показывающий, занята глобальная строка или нет. Вы должны его
   //      включать если загрузили ресурс и отключать, когда больше этот ресурс
   //      не нужен. И желательно освобождать строку полностью.
-  // Eng:
+  // Eng: a flag indicating whether the global string is occupied or not. You
+  //      must enable it when you have loaded a resource and disable it when
+  //      the resource is no longer needed. And it is desirable to release the
+  //      line completely.
   fLoadTextClearing: Boolean = True;
 
 {$IfDef DELPHI7_AND_DOWN}
@@ -54,10 +57,11 @@ procedure EngToRus(var symb: LongWord);
 procedure EngToRusUnicode(var symb: LongWord);
 // Rus: установка значения флага для глобальной загружаемой строки. Указываем что
 //      строка занята или свободна. Если освобождаем, то строка очистится.
-// Eng:
+// Eng: setting the flag value for the global load string. Indicate that the line
+//      is busy or free. If we release, the line will be cleared.
 procedure set_FlagForLoadText(flag: Boolean); {$IfDef USE_INLINE}inline;{$EndIf}
 // Rus: возвращаем значение флага для глобальной строки. Занята строка или свободна?
-// Eng:
+// Eng: return the value of the flag for the global string. Is the line busy or free?
 function get_FlagForLoadText: Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
 
 implementation
