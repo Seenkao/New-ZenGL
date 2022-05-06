@@ -22,7 +22,7 @@ uses
 
 var
   dirRes   : UTF8String = 'assets/';
-  fntMain  : Byte;
+  fntMain  : LongWord;
   map      : zglTTiles2D;
   texTiles : zglPTexture;
 
@@ -62,7 +62,7 @@ begin
   file_Close( f );
 
   file_CloseArchive();
-  setTextScale(15, fntMain);
+  setFontTextScale(15, fntMain);
 end;
 
 procedure Draw;
