@@ -1,6 +1,7 @@
 library demo04;
 
 {$I zglCustomConfig.cfg}
+{$I zgl_config.cfg}
 
 uses
   zgl_application,
@@ -12,23 +13,25 @@ uses
   zgl_font,
   zgl_text,
   zgl_primitives_2d,
+  zgl_render_2d,
   zgl_sprite_2d,
   zgl_textures,
   zgl_textures_png,
   zgl_textures_jpg,
   zgl_types,
   zgl_collision_2d,
+  gegl_color,
   zgl_utils
   ;
 
 var
   dirRes  : UTF8String = 'assets/';
 
-  fntMain : Byte;
+  fntMain : LongWord;
   texBack : zglPTexture;
 
   correctAspect : Boolean = TRUE;
-  correctRect   : zglTRect;
+  correctRect   : zglTRect2D;
 
   str : UTF8String;
 
@@ -47,13 +50,12 @@ begin
   file_CloseArchive();
 
   str := 'Tap here to toggle' + #10 + 'Correction of aspect';
-  setTextScale(15, fntMain);
+  setFontTextScale(15, fntMain);
 end;
 
 procedure Draw;
-  var
-    w   : Single;
 begin
+  batch2d_Begin;
   ssprite2d_Draw( texBack, 0, 0, 800, 600, 0 );
 
   correctRect.W := text_GetWidth( fntMain, str ) + 16;
@@ -62,19 +64,22 @@ begin
   correctRect.Y := 100;
   if correctAspect Then
     begin
-      pr2d_Rect( correctRect.X, correctRect.Y, correctRect.W, correctRect.H, $FFFFFF, 25, PR2D_FILL );
-      pr2d_Rect( correctRect.X, correctRect.Y, correctRect.W, correctRect.H, $00FF00, 255 );
+      pr2d_Rect( correctRect.X, correctRect.Y, correctRect.W, correctRect.H, {$IfDef OLD_METHODS}$FFFFFF, 25,{$Else}cl_White05,{$EndIf} PR2D_FILL );
+      pr2d_Rect( correctRect.X, correctRect.Y, correctRect.W, correctRect.H, {$IfDef OLD_METHODS}$00FF00, 255{$Else}cl_Green{$EndIf} );
+      text_Draw(fntMain, 0, 0, 'Correct resolutions ON!');
     end else
       begin
-        pr2d_Rect( correctRect.X, correctRect.Y, correctRect.W, correctRect.H, $000000, 155, PR2D_FILL );
-        pr2d_Rect( correctRect.X, correctRect.Y, correctRect.W, correctRect.H, $FFFFFF, 255 );
+        pr2d_Rect( correctRect.X, correctRect.Y, correctRect.W, correctRect.H, {$IfDef OLD_METHODS}$000000, 155,{$Else}cl_Black05,{$EndIf} PR2D_FILL );
+        pr2d_Rect( correctRect.X, correctRect.Y, correctRect.W, correctRect.H, {$IfDef OLD_METHODS}$FFFFFF, 255{$Else}cl_White{$EndIf} );
+        text_Draw(fntMain, 0, 0, 'Correct resolutions off.');
       end;
   text_DrawInRect( fntMain, correctRect, str, TEXT_HALIGN_CENTER or TEXT_VALIGN_CENTER );
+  batch2d_End;
 end;
 
-procedure Timer;
+procedure KeyMouseEvents;
 begin
-  if touch_Tap( 0 ) Then
+  if touch_Click( 0 ) Then
   begin
     // RU: Android устройства имеют самые разнообразные разрешения экрана и соотношения сторон, поэтому коррекция аспекта просто необходма.
     // EN: Android devices have a lot of different screen resolutions and aspects, and because of this correction of aspect is "must have" for project.
@@ -94,8 +99,6 @@ begin
       end;
     end;
   end;
-
-  touch_ClearState();
 end;
 
 procedure Restore;
@@ -108,8 +111,7 @@ end;
 
 procedure Java_zengl_android_ZenGL_Main( var env; var thiz ); cdecl;
 begin
-  TimeStart := timer_Add( @Timer, 16, Start );
-
+  zgl_Reg(SYS_EVENTS, @KeyMouseEvents);
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );
   zgl_Reg( SYS_ANDROID_RESTORE, @Restore );
