@@ -23,6 +23,7 @@ uses
   zgl_sound_ogg,
   zgl_types,
   zgl_collision_2d,
+  zgl_log,
   zgl_utils
   ;
 
@@ -32,7 +33,7 @@ const
 
 var
   dirRes  : UTF8String = 'assets/';
-  fntMain : Byte;
+  fntMain : LongWord;
   icon    : array[ 0..1 ] of zglPTexture;
   sound   : zglPSound;
   audio   : Integer;
@@ -80,15 +81,16 @@ begin
 
   // RU: Загружаем аудио-файл в память, т.к. читать его напрямую из архива потребует некоторых ухищрений.
   // EN: Load audio-file into memory, because reading it from archive will need some tricks.
-  mem_LoadFromFile( musicMem, dirRes + 'music.ogg' );
+  if mem_LoadFromFile( musicMem, dirRes + 'music.ogg' ) then
+    log_Add('Sound loaded: ' + dirRes +'music.ogg');
 
   file_CloseArchive();
-  setTextScale(15, fntMain);
+  setFontTextScale(15, fntMain);
 end;
 
 procedure Draw;
   var
-    r : zglTRect;
+    r : zglTRect2D;
 begin
   ssprite2d_Draw( icon[ state ], ( SCREEN_WIDTH - 128 ) / 2, ( SCREEN_HEIGHT - 128 ) / 2, 128, 128, 0 );
   text_Draw( fntMain, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 64, 'Skillet - Comatose - Whispers In The Dark', TEXT_HALIGN_CENTER );
@@ -106,9 +108,8 @@ begin
 end;
 
 procedure Timer;
-  var
-    r : zglTRect;
-    p : Integer;
+var
+  p : Integer;
 begin
   // RU: Проверяем играет ли музыка(1 - играет, 0 - не играет). Так же можно проверить и звуки - подставив zglPSound и ID вот так:
   //     snd_Get( Sound, ID...
@@ -121,40 +122,6 @@ begin
   if state = 0 Then
     audio := 0;
 
-  if touch_Tap( 0 ) Then
-    begin
-      // RU: В данном случаи мы начинаем воспроизводить звук сразу в указанных координатах, но их можно менять и в процессе используя процедуру snd_SetPos.
-      //     Важно: Для OpenAL можно позиционировать только mono-звуки
-      //
-      // EN: In this case, we begin to play the sound directly in these coordinates, but they can be changed later using procedure snd_SetPos.
-      //     Important: OpenAL can position only mono-sounds.
-
-// эта часть изменена!!! Теперь можно заново воспроизводить звуки, даже если они не закончили играть.
-      if snd_Get(sound, IDSound, SND_STATE_PLAYING) = IDSound then
-        snd_Stop(sound, IDSound);
-      IDSound := snd_Play( sound, FALSE, CalcX2D( touch_X( 0 ) ), CalcY2D( touch_Y( 0 ) ) );
-
-      // Внимание!!! Проверять не моно звук!!! Отдаление/приближение работает.
-      // Stereo sound checking. Not mono speaker.
-// --------------------------------------------------------------------------------------------
-
-      r.X := ( SCREEN_WIDTH - 128 ) / 2;
-      r.Y := ( SCREEN_HEIGHT - 128 ) / 2;
-      r.W := 128;
-      r.H := 128;
-// добавляем проверку на проигрывание звука, только если много развных звуков/музыки, то номера надо менять (не только 1!!!)
-      if col2d_PointInRect(mouse_X, mouse_Y, r) and (audio = 1) Then
-      begin
-        p := snd_Get(SND_STREAM, audio, SND_STATE_PLAYING);
-        if p = 1 then
-          snd_StopStream(audio);
-      end;
-// ---------------------------------------------------------------------------------------------------------------
-
-      if col2d_PointInRect( touch_X( 0 ), touch_Y( 0 ), r ) and ( audio = 0 ) Then
-        audio := snd_PlayMemory( musicMem, 'OGG' );
-    end;
-
   // RU: Получаем в процентах позицию проигрывания аудиопотока и ставим громкость для плавных переходов.
   // EN: Get position in percent's for audio stream and set volume for smooth playing.
   p := snd_Get( SND_STREAM, audio, SND_STATE_PERCENT );
@@ -162,21 +129,59 @@ begin
     snd_SetVolume( SND_STREAM, audio, ( 1 / 24 ) * p );
   if ( p >= 75 ) and ( p < 100 ) Then
     snd_SetVolume( SND_STREAM, audio, 1 - ( 1 / 24 ) * ( p - 75 ) );
+end;
 
-  touch_ClearState();
+procedure KeyMouseEvents;
+var
+  r : zglTRect2D;
+  p : Integer;
+begin
+  if touch_Click( 0 ) Then
+  begin
+    // RU: В данном случаи мы начинаем воспроизводить звук сразу в указанных координатах, но их можно менять и в процессе используя процедуру snd_SetPos.
+    //     Важно: Для OpenAL можно позиционировать только mono-звуки
+    //
+    // EN: In this case, we begin to play the sound directly in these coordinates, but they can be changed later using procedure snd_SetPos.
+    //     Important: OpenAL can position only mono-sounds.
+
+// эта часть изменена!!! Теперь можно заново воспроизводить звуки, даже если они не закончили играть.
+    if snd_Get(sound, IDSound, SND_STATE_PLAYING) = IDSound then
+      snd_Stop(sound, IDSound);
+    IDSound := snd_Play( sound, FALSE, CalcX2D( touch_X( 0 ) ), CalcY2D( touch_Y( 0 ) ) );
+
+      // Внимание!!! Проверять не моно звук!!! Отдаление/приближение работает.
+      // Stereo sound checking. Not mono speaker.
+// --------------------------------------------------------------------------------------------
+
+    r.X := ( SCREEN_WIDTH - 128 ) / 2;
+    r.Y := ( SCREEN_HEIGHT - 128 ) / 2;
+    r.W := 128;
+    r.H := 128;
+// добавляем проверку на проигрывание звука, только если много развных звуков/музыки, то номера надо менять (не только 1!!!)
+    if col2d_PointInRect(mouse_X, mouse_Y, r) and (audio = 1) Then
+    begin
+      p := snd_Get(SND_STREAM, audio, SND_STATE_PLAYING);
+      if p = 1 then
+        snd_StopStream(audio);
+    end;
+// ---------------------------------------------------------------------------------------------------------------
+
+    if col2d_PointInRect( touch_X( 0 ), touch_Y( 0 ), r ) and ( audio = 0 ) Then
+      audio := snd_PlayMemory( musicMem, 'OGG' );
+  end;
 end;
 
 procedure Activate( active : Boolean );
 begin
   if active Then                           // надо помнить, что при активации на андроиде надо всё заново загружать
-    begin
-      snd_Init();
+  begin
+    snd_Init();
 
-      file_OpenArchive( PAnsiChar( zgl_Get( DIRECTORY_APPLICATION ) ) );
-      sound := snd_LoadFromFile( dirRes + 'click.wav', 2 );
-      file_CloseArchive();
-    end else
-      snd_Free();
+    file_OpenArchive( PAnsiChar( zgl_Get( DIRECTORY_APPLICATION ) ) );
+    sound := snd_LoadFromFile( dirRes + 'click.wav', 2 );
+    file_CloseArchive();
+  end else
+    snd_Free();
 end;
 
 procedure Restore;                         // восстановление и активация? Вы издеваетесь?
@@ -195,8 +200,9 @@ procedure Java_zengl_android_ZenGL_Main( var env; var thiz ); cdecl;
 begin
   randomize();
 
-  TimeStart := timer_Add( @Timer, 16, Start );
+  TimeStart := timer_Add( @Timer, 16, t_Start );
 
+  zgl_Reg(SYS_EVENTS, @KeyMouseEvents);
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );
   zgl_Reg( SYS_ANDROID_RESTORE, @Restore );
