@@ -21,7 +21,7 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 25.02.2022
+ !!! modification from Serge 23.04.2022
 }
 unit zgl_window;
 
@@ -147,7 +147,7 @@ const
   DEPTH_BUFFER          = $000002;
   DEPTH_BUFFER_CLEAR    = $000004;
   DEPTH_MASK            = $000008;
-  STENCIL_BUFFER_CLEAR  = $000010;
+  STENCIL_BUFFER_CLEAR  = $000010;                // не активируется ни где.
   CORRECT_RESOLUTION    = $000020;
   CORRECT_WIDTH         = $000040;
   CORRECT_HEIGHT        = $000080;
@@ -229,48 +229,50 @@ procedure zgl_InitToHandle(Handle: Ptr; FSAA: Byte = 0; StencilBits: Byte = 0);
 {$EndIf}
 {$IfNDef ANDROID}
 // Rus: установка основных путей для запущенного приложения.
-// Eng:
+// Eng: setting the main paths for the running application.
 procedure zgl_GetSysDir;
 {$EndIf}
 // Rus: уничтожение ранее созданных ресурсов. Вызывать не надо.
-// Eng:
+// Eng: destruction of previously created resources. You don't need to call.
 procedure zgl_Destroy;
 // Rus: указываем программе на завершение работы.
-// Eng:
+// Eng: tell the program to end.
 procedure zgl_Exit;
 // Rus: регистрация функций для создания и работы приложения.
-// Eng:
+// Eng: registration of functions for creation and operation of the application.
 procedure zgl_Reg(What: LongWord; UserData: Pointer);
 // нужна эта процедура или нет? Можно просто вызвать через zgl_Reg со значением nil.
 //procedure zgl_UnReg(What: LongWord);
 // Rus: возврат определённых значений для рабочего приложения.
-// Eng:
+// Eng: return specific values for the working application.
 function  zgl_Get(What: LongWord): Ptr;
 
 // Rus: установка параметров окна. Ширина, высота, полноэкранное или нет и
 //      вертикальная синхронизация.
-// Eng:
+// Eng: setting window options. Width, height, full screen or not, and vertical
+//      sync.
 procedure zgl_SetParam(width, height: Integer; FullScreen: Boolean = False; Vsync: Boolean = False);
 
 // Rus: выделение участка памяти.
-// Eng:
+// Eng: allocating a piece of memory.
 procedure zgl_GetMem(out Mem: Pointer; Size: LongWord);
 // Rus: очистка участка памяти.
-// Eng:
+// Eng: clearing a section of memory.
 procedure zgl_FreeMem(var Mem: Pointer);
 // Rus: очистка списка строк.
-// Eng:
+// Eng: clearing the string list.
 procedure zgl_FreeStrList(var List: zglTStringList);
 // Rus: включение флагов ZenGL.
-// Eng:
+// Eng: enabling ZenGL flags.
 procedure zgl_Enable(What: LongWord);
 // Rus: выключение флагов ZenGL.
-// Eng:
+// Eng: turn off ZenGL flags.
 procedure zgl_Disable(What: LongWord);
 {$IfNDef USE_INIT_HANDLE}
 // Rus: установка интервала обработки клавиатуры, мыши и др.
 //      Определять до создания окна!!!
-// Eng:
+// Eng: setting the processing interval for the keyboard, mouse, etc.
+//      Define before window creation!!!
 procedure zgl_SetEventsInterval(Interval: Cardinal);
 {$EndIf}
 
@@ -936,6 +938,7 @@ begin
   appFlags := appFlags and ($FFFFFFFF - WND_USE_AUTOCENTER);
 end;
 
+{$IfNDef ANDROID}
 {$IfNDef USE_INIT_HANDLE}
 procedure wnd_ShowCursor( Show : Boolean );
 {$IFDEF USE_X11}
@@ -967,7 +970,7 @@ begin
   appShowCursor := Show;
 {$IFEND}
 end;
-{$EndIf}
+{$EndIf}{$EndIf}
 
 procedure InitSoundVideo;
 begin
@@ -1030,7 +1033,9 @@ begin
   {$EndIf}
   if not gl_Initialize() Then
   begin
+    {$IfNDef ANDROID}
     wnd_Destroy;
+    {$EndIf}
     exit;
   end;
 
@@ -1123,7 +1128,7 @@ procedure zgl_Destroy;
     i: Integer;
     p: Pointer;
 begin
-  {$IfDef USE_MENUGUI}
+  {$IfDef USE_VKEYBOARD}
   app_TouchMenu := nil;
   app_UseMenuDown := nil;
   app_UseMenuUp := nil;
@@ -1437,7 +1442,7 @@ begin
     GAPI_MAX_TEXTURE_UNITS: Result := oglMaxTexUnits;
     GAPI_MAX_ANISOTROPY: Result := oglMaxAnisotropy;
     GAPI_CAN_BLEND_SEPARATE: Result := Ptr(oglSeparate);
-    GAPI_CAN_AUTOGEN_MIPMAP: Result := Ptr(GL_SGIS_generate_mipmap);
+    GAPI_CAN_AUTOGEN_MIPMAP: Result := Ptr({$IfNDef USE_GLES}GL_SGIS_generate_mipmap{$Else}oglCanAutoMipMap{$EndIf});
 
     RENDER_FPS: Result := appFPS;
     RENDER_BATCHES_2D: Result := b2dBatches + 1;
