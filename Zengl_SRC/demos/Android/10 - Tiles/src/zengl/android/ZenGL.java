@@ -21,7 +21,7 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
  *  
- *  modifing by Serge 08.08.2020
+ *  modifing by Serge 06.05.2020
 */
 package zengl.android;
 
@@ -52,10 +52,14 @@ public class ZenGL extends GLSurfaceView
 	private native void zglNativeDrawFrame();
 	private native void zglNativeActivate( boolean Activate );
 	private native void zglNativeCloseQuery();
-	private native void zglNativeTouch( int ID, float X, float Y, float Pressure );
+	private native void zglNativeTouch( int ID, float X, float Y, int Pressure );
 	private native void zglNativeInputText( String Text );
 	private native void zglNativeBackspace();
 
+	// add function
+	private native byte[] byteArrPasToJava();
+	private native void byteArrJavaToPas(byte[] arr);
+	
 	private zglCRenderer Renderer;
 	private String SourceDir;
 	private String DataDir;
@@ -112,60 +116,50 @@ public class ZenGL extends GLSurfaceView
 
 		switch ( actionType )
 		{
+			// это событие срабатывает один раз
 			case MotionEvent.ACTION_DOWN:
 			{
-/*				int count = event.getPointerCount();
-				for ( int i = 0; i < count; i++ )
-				{
-					int pointerID = event.getPointerId( i );
-					zglNativeTouch( pointerID, event.getX( i ), event.getY( i ), event.getPressure( i ) );
-				}  */
-				zglNativeTouch(0, event.getX(0), event.getY(0), event.getPressure(0));
+				int pointerID = event.getPointerId(0);
+				zglNativeTouch( pointerID, event.getX( 0 ), event.getY( 0 ), 1 );
 				break;
 			}
-
+			// и это событие срабатывает один раз
+			case MotionEvent.ACTION_POINTER_DOWN:
+			{
+				int pointerID = ( action & MotionEvent.ACTION_POINTER_INDEX_MASK ) >> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
+				int pointerIndex = event.getPointerId( pointerID );
+				if ( pointerID >= 0 && pointerID < event.getPointerCount() )
+					zglNativeTouch( pointerIndex, event.getX( pointerID ), event.getY( pointerID ), 3 );
+				break;
+			}
+	
 			case MotionEvent.ACTION_UP:
 			{
-/*				int count = event.getPointerCount();
-				for ( int i = 0; i < count; i++ )
-				{
-					int pointerID = event.getPointerId( i );
-					zglNativeTouch( pointerID, event.getX( i ), event.getY( i ), 0 );
-				}  */
-				zglNativeTouch(0, event.getX(0), event.getY(0), 0);
+				int pointerID = event.getPointerId(0);
+				zglNativeTouch( pointerID, event.getX( 0 ), event.getY( 0 ), 0 );
 				break;
 			}
-
+			
+			case MotionEvent.ACTION_POINTER_UP:
+			{
+				int pointerID = ( action & MotionEvent.ACTION_POINTER_INDEX_MASK ) >> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
+				int pointerIndex = event.getPointerId( pointerID );
+				if ( pointerID >= 0 && pointerID < event.getPointerCount() )
+					zglNativeTouch( pointerIndex, event.getX( pointerID ), event.getY( pointerID ), 2 );
+				break;
+			}
+	
 			case MotionEvent.ACTION_MOVE:
 			{
 				int count = event.getPointerCount();
 				for ( int i = 0; i < count; i++ )
 				{
 					int pointerID = event.getPointerId( i );
-					zglNativeTouch( pointerID, event.getX( i ), event.getY( i ), event.getPressure( i ) );
+					zglNativeTouch( pointerID, event.getX( i ), event.getY( i ), 5 );
 				}
 				break;
 			}
-
-			case MotionEvent.ACTION_POINTER_DOWN:
-			{
-				int pointerID = ( action & MotionEvent.ACTION_POINTER_INDEX_MASK ) >> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
-				int pointerIndex = event.getPointerId( pointerID );
-				if ( pointerID >= 0 && pointerID < event.getPointerCount() )
-					zglNativeTouch( pointerIndex, event.getX( pointerID ), event.getY( pointerID ), event.getPressure( pointerID ) );
-				break;
-			}
-
-			case MotionEvent.ACTION_POINTER_UP:
-			{
-				int pointerID = ( action & MotionEvent.ACTION_POINTER_INDEX_MASK ) >> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
-				int pointerIndex = event.getPointerId( pointerID );
-				if ( pointerID >= 0 && pointerID < event.getPointerCount() )
-					zglNativeTouch( pointerIndex, event.getX( pointerID ), event.getY( pointerID ), 0 );
-				break;
-			}
 		}
-
 		return true;
 	}
 
