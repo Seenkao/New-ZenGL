@@ -5,7 +5,6 @@
 
 Порядок сборки:
 - собрать библиотеку используя файл проекта для Lazarus'а, например "01 - Initialization/jni/demo01_linux.lpi"
-- *.so - библиотеку скопировать в папку "..libs\armeabi\" - папки проекта "01 - Initialization"
 - импортировать в Eclipse (Android Studio) основной каталог проекта - "01 - Initialization"
 - запустить дебаг :)
 
@@ -14,7 +13,6 @@ WARNING!
 
 Build steps:
 - compile library using project file for Lazarus, e.g. "01 - Initialization/jni/demo01_linux.lpi"
-- *.so - library copy to folder "..libs\armeabi\" - project "01 - Initialization"
 - import main directory of project into Eclipse
 - run debug :)
 
