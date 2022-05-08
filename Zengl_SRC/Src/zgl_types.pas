@@ -361,15 +361,18 @@ type
   cuint64 = qword;    pcuint64 = ^cuint64;
   cint64  = int64;    pcint64  = ^cint64;
   cbool   = longbool; pcbool   = ^cbool;
-{$If defined(CPUx86_64) and not defined(WINDOWS)}
-  clong   = int64;    pclong   = ^clong;
-  cslong  = int64;    pcslong  = ^cslong;
-  culong  = qword;    pculong  = ^culong;
+{$If defined(CPU64) and not defined(WINDOWS)}
+  clong   = int64;
+  cslong  = int64;
+  culong  = qword;
 {$Else}
-  clong   = longint;  pclong   = ^clong;
-  cslong  = longint;  pcslong  = ^cslong;
-  culong  = cardinal; pculong  = ^culong;
+  clong   = longint;
+  cslong  = longint;
+  culong  = cardinal;
 {$IfEnd}
+  pclong   = ^clong;
+  pcslong  = ^cslong;
+  pculong  = ^culong;
   cfloat  = single;   pcfloat  = ^cfloat;
   cdouble = double;   pcdouble = ^cdouble;
 
