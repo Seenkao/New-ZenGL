@@ -20,10 +20,13 @@
  *
  *  3. This notice may not be removed or altered from any
  *     source distribution.
+
+ !!! modification from Serge 16.06.2022
 }
 unit zgl_math_2d;
 
 {$I zgl_config.cfg}
+{$I GLdefine.cfg}
 
 interface
 
@@ -45,26 +48,33 @@ const
 function min(a, b: Single): Single; {$IFDEF USE_INLINE} inline; {$ENDIF}
 function max(a, b: Single): Single; {$IFDEF USE_INLINE} inline; {$ENDIF}
 
-// Rus: Вычисление синуса и косинуса по данному углу (в градусах)
-// Eng:
+// Rus: Вычисление синуса и косинуса по данному углу (в градусах).
+// Eng: Вычислить синус и косинус заданного угла (в градусах).
 procedure m_SinCos(Angle: Single; out s, c: Single); {$IFDEF USE_ASM} assembler; {$ELSE} {$IFDEF USE_INLINE} inline; {$ENDIF} {$ENDIF}
 
 // Rus: Заполнение табличных данных, вызывать не надо.
-// Eng:
+// Eng: Filling in tabular data, no need to call.
 procedure InitCosSinTables;
+// Rus: косинус из таблицы.
+// Eng: cosine from the table.
 function  m_Cos(Angle: Integer): Single;
+// Rus: синус из таблицы.
+// Eng: sine from the table.
 function  m_Sin(Angle: Integer): Single;
-// Rus: дистанция между точками
-// Eng:
+// Rus: дистанция между точками.
+// Eng: distance between points.
 function  m_Distance(x1, y1, x2, y2: Single): Single;
 function  m_FDistance(x1, y1, x2, y2: Single): Single;
-// Rus: Направление ветора (угол по дву точкам), результат в градусах
-// Eng:
+// Rus: Направление вектора (угол по дву точкам), результат в градусах.
+// Eng: Vector direction , result in degrees.
 function  m_Angle(x1, y1, x2, y2: Single): Single;
-// ориентация относительно двух точек     вопрос - а вектором не быстрее будет?
+// Rus: ориентация относительно двух точек.          вопрос - а вектором не быстрее будет?
+// Eng: orientation relative to two points.
 function  m_Orientation(x, y, x1, y1, x2, y2: Single): Integer;
-// ориентация относительно двух точек, используя вектора
-// сразу надо определится будет это зависеть от направления вектора или нет!!!
+// Rus: ориентация относительно двух точек, используя вектора.
+//      сразу надо определится будет это зависеть от направления вектора или нет!!!
+// Eng: orientation relative to two points using vectors.
+//      immediately it is necessary to determine whether it depends on the direction of the vector or not!!!
 function m_VectOrientation(aP: zglTPoint2D; bV: zglTVector2D): Integer;
 //function
 
@@ -93,7 +103,7 @@ uses
 
 {$IFDEF USE_TRIANGULATION}
 var
-  tess       : {$IfNDef USE_GLES} PGLUtesselator{$Else}Integer{$EndIf};
+  tess       : PGLUtesselator;
   tessMode   : Integer;
   tessHoles  : Boolean;
   tessFinish : Boolean;
