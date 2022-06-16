@@ -513,26 +513,15 @@ begin
       quad[0].Y := Y + (charDesc.ShiftY + useFont.MaxHeight - charDesc.Height - useFont.Padding[PaddingY1]) * useScaleEx;
 
       quad[1].X := X + (charDesc.ShiftX + charDesc.Width + useFont.Padding[PaddingX2]) * useScaleEx;
-//      quad[1].Y := quad[0].Y;
-
-//      quad[2].X := quad[1].X;
       quad[2].Y := Y + (charDesc.ShiftY + useFont.MaxHeight + useFont.Padding[PaddingY2]) * useScaleEx;
-
-//      quad[3].X := quad[0].X;
-//      quad[3].Y := quad[2].Y;
     end else
     begin
       quad[1].X := X + charDesc.xx2;
-//      quad[2].X := quad[1].X;           // не хотит оптимизировать FPC...
       quad[0].X := X + charDesc.xx1;
-//      quad[3].X := quad[0].X;
 
       quad[0].Y := Y + charDesc.yy1;
-//      quad[1].Y := quad[0].Y;
       quad[2].Y := Y + charDesc.yy2;
-//      quad[3].Y := quad[2].Y;
     end;
-    // ну и фиг с ним, засуну всё сюда.
     quad[1].Y := quad[0].Y;
     quad[2].X := quad[1].X;
     quad[3].X := quad[0].X;
