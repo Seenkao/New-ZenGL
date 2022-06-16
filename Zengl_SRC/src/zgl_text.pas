@@ -21,7 +21,7 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 23.03.2022
+ !!! modification from Serge 16.06.2022
 }
 
 unit zgl_text;
@@ -175,7 +175,6 @@ begin
   useFont.Scale := useFont.ScaleNorm * Index / 10;
   for i := 0 to 65535 do
   begin
-
     if Assigned(useFont.CharDesc[i]) then
       charDesc := useFont.CharDesc[i]
     else
@@ -186,7 +185,7 @@ begin
     charDesc.xx2 := charDesc._x2 * useFont.Scale;
     charDesc.yy2 := charDesc._y2 * useFont.Scale;
   end;
-  useFont._ShiftP63 := useFont.CharDesc[63]^.ShiftP * useFont.Scale;
+//  useFont._ShiftP63 := useFont.CharDesc[63]^.ShiftP * useFont.Scale * 1.5;
   useFont := nil;
 end;
 
@@ -514,27 +513,30 @@ begin
       quad[0].Y := Y + (charDesc.ShiftY + useFont.MaxHeight - charDesc.Height - useFont.Padding[PaddingY1]) * useScaleEx;
 
       quad[1].X := X + (charDesc.ShiftX + charDesc.Width + useFont.Padding[PaddingX2]) * useScaleEx;
-      quad[1].Y := quad[0].Y;
+//      quad[1].Y := quad[0].Y;
 
-      quad[2].X := quad[1].X;
+//      quad[2].X := quad[1].X;
       quad[2].Y := Y + (charDesc.ShiftY + useFont.MaxHeight + useFont.Padding[PaddingY2]) * useScaleEx;
 
-      quad[3].X := quad[0].X;
-      quad[3].Y := quad[2].Y;
+//      quad[3].X := quad[0].X;
+//      quad[3].Y := quad[2].Y;
     end else
     begin
-      quad[0].X := X + charDesc.xx1;
-      quad[0].Y := Y + charDesc.yy1;
-
       quad[1].X := X + charDesc.xx2;
-      quad[1].Y := Y + charDesc.yy1;
+//      quad[2].X := quad[1].X;           // не хотит оптимизировать FPC...
+      quad[0].X := X + charDesc.xx1;
+//      quad[3].X := quad[0].X;
 
-      quad[2].X := X + charDesc.xx2;
+      quad[0].Y := Y + charDesc.yy1;
+//      quad[1].Y := quad[0].Y;
       quad[2].Y := Y + charDesc.yy2;
-
-      quad[3].X := X + charDesc.xx1;
-      quad[3].Y := Y + charDesc.yy2;
+//      quad[3].Y := quad[2].Y;
     end;
+    // ну и фиг с ним, засуну всё сюда.
+    quad[1].Y := quad[0].Y;
+    quad[2].X := quad[1].X;
+    quad[3].X := quad[0].X;
+    quad[3].Y := quad[2].Y;
 
     if Flags and TEXT_FX_VCA > 0 Then
     begin
