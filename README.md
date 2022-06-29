@@ -1,16 +1,24 @@
 # ZenGL version 3.29 + MacOS Cocoa - beta version + Green Engine v1.0
 
-[Eng](#English)  
+[Eng](#English)
+1. [About](#About)
+2. [Features](#Features)  
+
 [Rus](#Russian)
+1. [О ZenGL](#AboutRus)
+2. [Возможности библиотеки](#FeaturesRus)
 
 <a name="English"></a>Eng:
 -------------
 
+<a name= "About"></a>**About:**  
 [zengl](https://zengl.org) - the original site of the library's creator.
 
 [google arhive](https://code.google.com/archive/p/zengl/)
 
 **ZenGL** - it is a library that creates window context for working with OpenGL on different platforms.
+
+**Important to know!** You don't need to know OpenGL to use this library. The __ZenGL__ library provides [many features of this library](#Features).
 
 **Development environment**
 - Lazarus/FreePascal
@@ -38,9 +46,66 @@ Clicking on the image will take you to the video. Where I redo the 3rd demo. At 
 
 [![demo3 remake](https://zengl.org/screens/screen03.jpg)](https://youtu.be/qb8hxilAI_I)
 
+<a name="Features"></a>**Features:**  
+* __Main__  
+   can be used as so/dll/dylib or statically compiled with your application (in this version only static compilation)  
+   rendering to own or any other prepared window  
+   logging  
+   resource loading from files, memory and zip archives  
+   multithreaded resource loading  
+   easy way to add support for new resource format  
+ * __Configuration of__  
+   antialiasing, screen resolution, refresh rate and vertical synchronization  
+   aspect correction  
+   title, position and size of window  
+   cursor visibility in window space  
+ * __Input__  
+   handling of keyboard, mouse and joystick input  
+   handling of Unicode text input  
+   possibility to restrict the input to the Latin alphabet  
+ * __Textures__  
+   supports __tga__, __png__, __jpg__ and __pvr__  
+   correct work with NPOT textures  
+   control the filter parameters  
+   masking  
+   render targets for rendering into texture  
+ * __Text__  
+   textured Unicode font  
+   rendering UTF-8 text  
+   rendering text with alignment and other options like size, color and count of symbols  
+ * __2D subsystem__  
+   batch render for high-speed rendering  
+   rendering different primitives  
+   sprite engine  
+   rendering static and animated sprites and tiles  
+   rendering distortion grid  
+   rendering sprites with new texture coordinates (with the pixel dimension and the usual 0..1)  
+   control the blend mode and color mix mode  
+   control the color and alpha of vertices of sprites and primitives  
+   additional sprite transformations (flipping, zooming, vertices offset)  
+   fast clipping of invisible sprites  
+   2D camera with ability to zoom and rotate the scene  
+ * __Sound__  
+   works through OpenAL or DirectSound; depends on configuration or OS  
+   correct work without soundcard  
+   supports __wav__ and __ogg__ as sound sample formats  
+   playing audio files in separate thread  
+   control volume and playback speed  
+   moving sound sources in 3D space  
+ * __Video__  
+   decoding video frames into texture  
+   supports __theora__ codec in __ogv__ container  
+ * __Math__  
+   basic set of additional math functions  
+   triangulation functions  
+   basic set of collision functions  
+ * __Additional__  
+   reading and writing INI files  
+   functions for working with files and memory  
+
 ***
 Communication: M12Mirrel@yandex.ru
-You can also contact me on the Lazarus forums or [ZenGL](http://zengl.org/forum/) and express your wishes and shortcomings.
+You can also contact me on the Lazarus forums <s>or [ZenGL](http://zengl.org/forum/)</s> (sorry, this forum is not available to me at the moment) and express your wishes and shortcomings.
 
 You can support through Sberbank:
 2202200951985520
@@ -54,11 +119,14 @@ Please write about the errors found in the process of working with ZenGL. )))
 <a name="Russian"></a>Rus:
 -------------
 
+<a name= "AboutRus"></a>**О ZenGL:**  
 [zengl](https://zengl.org) - изначальный сайт создателя библиотеки.
 
 [архив гугла](https://code.google.com/archive/p/zengl/)
 
 **ZenGL** - это бибилотека создающая контекст окна для работы с OpenGL на разных платформах.
+
+**Важно знать!** Для использования данной библиотеки, вам не обязательно знать OpenGL. Библиотека __ZenGL__ предоставляет [много возможностей библиотеки](#FeaturesRus).  
 
 **Среда разработки**
 - Lazarus/FreePascal
@@ -87,9 +155,66 @@ Please write about the errors found in the process of working with ZenGL. )))
 
 [![переделка demo3](https://zengl.org/screens/screen03.jpg)](https://youtu.be/qb8hxilAI_I)
 
+<a name="FeaturesRus"></a>**Возможности библиотеки:**  
+ * __Основные__  
+   библиотека может быть скомпилирована статически к проекту, или использоваться, как динамическая библиотека (в данной версии только статическая компиляция)  
+   рендеринг как в собственное, так и в заранее подготовленное окно (LCL, VCL)  
+   журнал событий  
+   загрузка ресурсов из файлов, памяти и zip архивов  
+   многопоточная загрузка ресурсов  
+   возможность расширить количество поддерживаемых форматов данных  
+ * __Возможности настройки графики__  
+   Сглаживание (antialiasing), разрешение и частоту обновления экрана (screen resolution, refresh rate) а так же контролировать вертикальную синхронизацию (v-sync)  
+   коррекция пропорций выводимого изображения относительно заданных размеров  
+   управление заголовком и размером окна, наличие автоматического центрирования  
+   управление видимостью курсора в пределах окна  
+ * __Устройства ввода__  
+   обработка событий клавиатуры, мыши и джойстика  
+   ввод Unicode символов  
+   возможность ограничить ввод только латинской раскладкой  
+ * __Вывод Текстур__  
+   поддержка форматов __tga__, __png__, __jpg__ и __pvr__  
+   поддержка текстур размером не кратным 2 (Non Power Of Two)  
+   управление параметрами фильтрации  
+   работа с масками  
+   *render targets* отрисовка в текстуры  
+ * __Вывод текста__  
+   реализация Unicode шрифты на основе текстур  
+   вывод UTF-8 текста  
+   управление отступами, размером, цветом вершин и количеством символов в тексте  
+ * __2D подсистема__  
+   *batch render* для повышения производительности рендеринга  
+   рендеринг основных видов примитивов  
+   спрайтовый движок  
+   вывод статических и анимированных спрайтов и тайлов  
+   рендеринг трансформирующейся сетки  
+   рендеринг спрайтов с ручным указанием текстурных координат(с пиксельной размерностью и обычным 0..1)  
+   управление режимом блендинга и смешивания цвета  
+   возможность назначения цвета и альфы отдельным вершинам спрайтов и примитивов  
+   дополнительные трансформации спрайтов(зеркальное отражения, увеличение, смещение вершин)  
+   быстрое отсечение спрайтов выходящих за пределы видимости  
+   наличие 2D камеры с возможностью увеличения и поворота содержимого сцены  
+ * __Звук__  
+   вывод звука с помощью библиотек OpenAL или DirectSound (зависит от настроек проекта и операционной системы)  
+   возможность правильной работы, даже при отсутствии звуковой карты  
+   поддержка форматов __wav__ и __ogg__  
+   потоковое воспроизведение аудио-файлов  
+   контроль за громкостью звука и темпом воспроизведения  
+   трехмерное позиционирование источника звука в пространстве  
+ * __Видео__  
+   декодирование видео заставок в текстуры  
+   поддержка кодека __theora__ в формате __ogv__  
+ * __Математический вычисление__  
+   базовый набор вспомогательных математических функций  
+   необходимый набор функций для триангуляции  
+   простейшие функции проверки столкновений  
+ * __Доплнительно__  
+   чтение и запись INI файлов  
+   дополнительные функции для работы с файлами и памятью  
+
 ***
 Связь: M12Mirrel@yandex.ru
-Так же можно связаться со мной на форумах Lazarus или [ZenGL](http://zengl.org/forum/) и высказать пожелания и недоработки.
+Так же можно связаться со мной на форумах Lazarus <s>или [ZenGL](http://zengl.org/forum/)</s> (извиняюсь, данный форум в настоящее время для меня не доступен) и высказать пожелания и недоработки.
 
 Поддержать можно через сбер:
 2202200951985520
