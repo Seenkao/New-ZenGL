@@ -3,12 +3,12 @@
 [Eng](#English)
 1. [About](#About)
 2. [Features](#Features)  
-3. [Green Engine]($GEEng) 
+3. [Green Engine](#GEEng) 
 
 [Rus](#Russian)
 1. [О ZenGL](#AboutRus)
 2. [Возможности библиотеки](#FeaturesRus)
-3. [Green Engine]($GERus)  
+3. [Green Engine](#GERus)  
 
 <a name="English"></a>Eng:
 -------------
