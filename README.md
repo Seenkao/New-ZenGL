@@ -3,10 +3,12 @@
 [Eng](#English)
 1. [About](#About)
 2. [Features](#Features)  
+3. [Green Engine]($GEEng) 
 
 [Rus](#Russian)
 1. [О ZenGL](#AboutRus)
 2. [Возможности библиотеки](#FeaturesRus)
+3. [Green Engine]($GERus)  
 
 <a name="English"></a>Eng:
 -------------
@@ -102,6 +104,12 @@ Clicking on the image will take you to the video. Where I redo the 3rd demo. At 
  * __Additional__  
    reading and writing INI files  
    functions for working with files and memory  
+
+***
+
+<a name="GEEng"></a>**Green Engine:**
+
+**GE** is a library that works on top of ZenGL features. Currently, it includes an input field with additional functions for it, and a module for working with color, where there are standard colors and you can set your own.
 
 ***
 Communication: M12Mirrel@yandex.ru
@@ -211,6 +219,12 @@ Please write about the errors found in the process of working with ZenGL. )))
  * __Доплнительно__  
    чтение и запись INI файлов  
    дополнительные функции для работы с файлами и памятью  
+
+***
+
+<a name="GERus"></a>**Green Engine:**
+
+**GE** - это библиотека которая работает поверх возможностей ZenGL. В данное время она включает в себя поле ввода с дополнительными функциями для него, и модуль для работы с цветом, где есть стандартные цвета и можно задавать свои.
 
 ***
 Связь: M12Mirrel@yandex.ru
