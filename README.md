@@ -20,7 +20,7 @@
 
 **ZenGL** - it is a library that creates window context for working with OpenGL on different platforms.
 
-**Important to know!** You don't need to know OpenGL to use this library. The __ZenGL__ library provides [many features of this library](#Features).
+**Important to know!** You don't need to know OpenGL to use this library. The __ZenGL__ library provides [many library features](#FeaturesRus) for any programmer who knows Pascal and does not know OpenGL.
 
 **Development environment**
 - Lazarus/FreePascal
@@ -134,7 +134,7 @@ Please write about the errors found in the process of working with ZenGL. )))
 
 **ZenGL** - это бибилотека создающая контекст окна для работы с OpenGL на разных платформах.
 
-**Важно знать!** Для использования данной библиотеки, вам не обязательно знать OpenGL. Библиотека __ZenGL__ предоставляет [много возможностей библиотеки](#FeaturesRus).  
+**Важно знать!** Для использования данной библиотеки, вам не обязательно знать OpenGL. Библиотека __ZenGL__ предоставляет [много возможностей библиотеки](#FeaturesRus) для любого программиста знающего паскаль и не знающего OpenGL.  
 
 **Среда разработки**
 - Lazarus/FreePascal
