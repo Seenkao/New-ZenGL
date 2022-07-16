@@ -34,7 +34,9 @@ uses
   zgl_math_2d,
   zgl_gltypeconst,
   zgl_types,
+  {$IfNDef OLD_METHODS}
   gegl_color
+  {$EndIf}
   ;
 
 const
