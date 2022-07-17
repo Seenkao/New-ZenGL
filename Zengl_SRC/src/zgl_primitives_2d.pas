@@ -114,10 +114,12 @@ uses
   {$ENDIF}
   zgl_render_2d;
 
+{$IFDEF LINUX}
 var
   rv_0_5: Single = 0.5;
   rv_1: Single = 1;
   rv_360: Single = 360;
+{$ENDIF}
 
 procedure pr2d_Pixel(X, Y: Single; {$IfNDef OLD_METHODS}numColor: LongWord{$Else}Color: LongWord; Alpha: Byte = 255{$EndIf});
 begin
@@ -132,7 +134,7 @@ begin
   {$Else}
   Set_numColor(numColor);
   {$EndIf}
-  glVertex2f(X + rv_0_5, Y + rv_0_5);
+  glVertex2f(X + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF}, Y + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF});
 
   if not b2dStarted Then
   begin
@@ -160,9 +162,9 @@ begin
   if FX and FX2D_VCA > 0 Then
   begin
     glColor4f(fx2dVCA[0, 0], fx2dVCA[0, 1], fx2dVCA[0, 2], fx2dVCA[0, 3]);
-    glVertex2f( X1 + rv_0_5, Y1 + rv_0_5 );
+    glVertex2f( X1 + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF}, Y1 + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF} );
     glColor4f(fx2dVCA[1, 0], fx2dVCA[1, 1], fx2dVCA[1, 2], fx2dVCA[1, 3]);
-    glVertex2f( X2 + rv_0_5, Y2 + rv_0_5 );
+    glVertex2f( X2 + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF}, Y2 + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF} );
   end else
   begin
     {$IfDef OLD_METHODS}
@@ -170,8 +172,8 @@ begin
     {$Else}
     Set_numColor(numColor);
     {$EndIf}
-    glVertex2f( X1 + rv_0_5, Y1 + rv_0_5 );
-    glVertex2f( X2 + rv_0_5, Y2 + rv_0_5 );
+    glVertex2f( X1 + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF}, Y1 + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF} );
+    glVertex2f( X2 + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF}, Y2 + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF} );
   end;
 
   if not b2dStarted Then
@@ -220,7 +222,7 @@ begin
     for i := 0 to count - 1 do
     begin
       Set_numColor(PPointColor.Color);
-      glVertex2f(PPointColor^.X + rv_0_5, PPointColor^.Y + rv_0_5);
+      glVertex2f(PPointColor^.X + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF}, PPointColor^.Y + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF});
       inc(PPointColor);
     end;
   end else
@@ -234,7 +236,7 @@ begin
     {$EndIf}
     for i := 0 to count - 1 do
     begin
-      glVertex2f( PPoint^.X + rv_0_5, PPoint^.Y + rv_0_5 );
+      glVertex2f( PPoint^.X + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF}, PPoint^.Y + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF} );
       inc(PPoint);
     end;
   end;
@@ -275,10 +277,10 @@ begin
     glEnable( GL_BLEND );
     if (FX and PR2D_FILL = 0) Then
     begin
-      X := X + rv_0_5;
-      Y := Y + rv_0_5;
-      W := W - rv_1;
-      H := H - rv_1;
+      X := X + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF};
+      Y := Y + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF};
+      W := W - {$IFDEF LINUX}rv_1{$ELSE}1{$ENDIF};
+      H := H - {$IFDEF LINUX}rv_1{$ELSE}1{$ENDIF};
     End;
     glBegin( mode );
   end;
@@ -344,9 +346,9 @@ var
   k : Single;
 begin
   if Quality > 360 Then
-    k := rv_360
+    k := {$IFDEF LINUX}rv_360{$ELSE}360{$ENDIF}
   else
-    k := rv_360 / Quality;
+    k := {$IFDEF LINUX}rv_360{$ELSE}360{$ENDIF} / Quality;
 
   if FX and PR2D_FILL = 0 Then
     begin
@@ -438,9 +440,9 @@ procedure pr2d_Ellipse( X, Y, xRadius, yRadius : Single; {$IfNDef OLD_METHODS}nu
     k : Single;
 begin
   if Quality > 360 Then
-    k := rv_360
+    k := {$IFDEF LINUX}rv_360{$ELSE}360{$ENDIF}
   else
-    k := rv_360 / Quality;
+    k := {$IFDEF LINUX}rv_360{$ELSE}360{$ENDIF} / Quality;
 
   if FX and PR2D_FILL = 0 Then
     begin
@@ -569,8 +571,8 @@ begin
     begin
       if not Assigned( TexCoords ) Then
         begin
-          w := rv_1 / ( Texture.Width / Texture.U );
-          h := rv_1 / ( Texture.Height / Texture.V );
+          w := {$IFDEF LINUX}rv_1{$ELSE}1{$ENDIF} / ( Texture.Width / Texture.U );
+          h := {$IFDEF LINUX}rv_1{$ELSE}1{$ENDIF} / ( Texture.Height / Texture.V );
           for i := iLo to iHi do
             begin
               glTexCoord2f( TriList[ i ].X * w, Texture.V - TriList[ i ].Y * h );
@@ -642,12 +644,12 @@ begin
       {$ENDIF}
     end;
     glEnable( GL_BLEND );
-    X1 := X1 + rv_0_5;
-    Y1 := Y1 + rv_0_5;
-    X2 := X2 + rv_0_5;
-    Y2 := Y2 + rv_0_5;
-    X3 := X3 + rv_0_5;
-    Y3 := Y3 + rv_0_5;
+    X1 := X1 + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF};
+    Y1 := Y1 + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF};
+    X2 := X2 + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF};
+    Y2 := Y2 + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF};
+    X3 := X3 + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF};
+    Y3 := Y3 + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF};
     glBegin( mode );
   end;
 
@@ -714,14 +716,14 @@ begin
       {$ENDIF}
     end;
     glEnable( GL_BLEND );
-    X1 := X1 + rv_0_5;
-    Y1 := Y1 + rv_0_5;
-    X2 := X2 + rv_0_5;
-    Y2 := Y2 + rv_0_5;
-    X3 := X3 + rv_0_5;
-    Y3 := Y3 + rv_0_5;
-    X4 := X4 + rv_0_5;
-    Y4 := Y4 + rv_0_5;
+    X1 := X1 + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF};
+    Y1 := Y1 + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF};
+    X2 := X2 + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF};
+    Y2 := Y2 + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF};
+    X3 := X3 + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF};
+    Y3 := Y3 + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF};
+    X4 := X4 + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF};
+    Y4 := Y4 + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF};
     glBegin( mode );
   end;
 
