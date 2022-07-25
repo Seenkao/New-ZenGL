@@ -21,7 +21,7 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 04.08.2020
+ !!! modification from Serge 25.07.2022
 }
 unit zgl_sprite_2d;
 
@@ -46,7 +46,6 @@ uses
   zgl_application,
   zgl_screen,
   {$IFNDEF USE_GLES}
-  //zgl_opengl,
   zgl_opengl_all,
   {$ELSE}
   zgl_opengles,
@@ -58,25 +57,34 @@ uses
 const
   FLIP_TEXCOORD: array[0..3] of zglTTexCoordIndex = ((0, 1, 2, 3), (1, 0, 3, 2), (3, 2, 1, 0), (2, 3, 0, 1));
 
-procedure texture2d_Draw(Texture: zglPTexture; const TexCoord: array of zglTPoint2D; X, Y, W, H, Angle: Single; Alpha: Byte = 255; FX: LongWord = FX_BLEND);
-  var
-    quad: array[0..3] of zglTPoint2D;
-    tci : zglPTexCoordIndex;
-    mode: Integer;
+  {$IfDef LINUX}
+var
+  rs0: Single = 0;
+  rs2: Single = 2;
+  {$EndIf}
 
-    x1, x2: Single;
-    y1, y2: Single;
-    cX, cY: Single;
-    c, s  : Single;
-    mX, mY: Single;
-    mW, mH: Single;
+procedure texture2d_Draw(Texture: zglPTexture; const TexCoord: array of zglTPoint2D; X, Y, W, H, Angle: Single; Alpha: Byte = 255; FX: LongWord = FX_BLEND);
+var
+  quad: array[0..3] of zglTPoint2D;
+  tci : zglPTexCoordIndex;
+  mode: Integer;
+
+  x1, x2: Single;
+  y1, y2: Single;
+  cX, cY: Single;
+  c, s  : Single;
+  mX, mY: Single;
+  mW, mH: Single;
+  x1c, x2c, _y1c, _y2c: Single;
+  x1s, x2s, _y1s, _y2s: Single;
 begin
-  if not Assigned(Texture) Then exit;
+  if not Assigned(Texture) Then
+    exit;
 
   if FX and FX2D_SCALE > 0 Then
   begin
-    X := X + (W - W * fx2dSX) / 2;
-    Y := Y + (H - H * fx2dSY) / 2;
+    X := X + (W - W * fx2dSX) / {$IfDef LINUX}rs2{$Else}2{$EndIf};
+    Y := Y + (H - H * fx2dSY) / {$IfDef LINUX}rs2{$Else}2{$EndIf};
     W := W * fx2dSX;
     H := H * fx2dSY;
   end;
@@ -84,14 +92,16 @@ begin
   if render2dClip Then
     if FX and FX2D_VCHANGE = 0 Then
     begin
-      if not sprite2d_InScreen(X, Y, W, H, Angle) Then Exit;
+      if not sprite2d_InScreen(X, Y, W, H, Angle) Then
+        Exit;
     end else
     begin
-      mX := min(X + fx2dVX1, min(X + W + fx2dVX2, min(X + W + fx2dVX3, X + fx2dVX4)));
-      mY := min(Y + fx2dVY1, min(Y + fx2dVY2, min(Y + H + fx2dVY3, Y + H + fx2dVY4)));
-      mW := max(X + fx2dVX1, max(X + W + fx2dVX2, max(X + W + fx2dVX3, X + fx2dVX4))) - mx;
-      mH := max(Y + fx2dVY1, max(Y + fx2dVY2, max(Y + H + fx2dVY3, Y + H + fx2dVY4))) - mY;
-      if not sprite2d_InScreen(mX, mY, mW + abs(X - mX) + abs(mW - W), mH + abs(Y - mY) + abs(mH - H), Angle) Then Exit;
+      mX := min(X + fx2dVX1, X + W + fx2dVX2);
+      mY := min(Y + fx2dVY1, Y + H + fx2dVY2);
+      mW := max(X + fx2dVX1, X + W + fx2dVX2) - mx;
+      mH := max(Y + fx2dVY1, Y + H + fx2dVY2) - mY;
+      if not sprite2d_InScreen(mX, mY, mW + abs(X - mX) + abs(mW - W), mH + abs(Y - mY) + abs(mH - H), Angle) Then
+        Exit;
     end;
 
   tci := @FLIP_TEXCOORD[FX and FX2D_FLIPX + FX and FX2D_FLIPY];
@@ -100,8 +110,8 @@ begin
   begin
     if FX and FX2D_RPIVOT = 0 Then
     begin
-      x1 := -W / 2;
-      y1 := -H / 2;
+      x1 := -W / {$IfDef LINUX}rs2{$Else}2{$EndIf};
+      y1 := -H / {$IfDef LINUX}rs2{$Else}2{$EndIf};
       x2 := -x1;
       y2 := -y1;
       cX :=  X + x2;
@@ -116,51 +126,57 @@ begin
       cY := Y + fx2dRPY;
     end;
 
-      m_SinCos(Angle * deg2rad, s, c);
+    m_SinCos(Angle * deg2rad, s, c);
 
-      if FX and FX2D_VCHANGE = 0 Then
-        begin
-          quad[0].X := x1 * c - y1 * s + cX;
-          quad[0].Y := x1 * s + y1 * c + cY;
-          quad[1].X := x2 * c - y1 * s + cX;
-          quad[1].Y := x2 * s + y1 * c + cY;
-          quad[2].X := x2 * c - y2 * s + cX;
-          quad[2].Y := x2 * s + y2 * c + cY;
-          quad[3].X := x1 * c - y2 * s + cX;
-          quad[3].Y := x1 * s + y2 * c + cY;
-        end else
-          begin
-            quad[0].X := (x1 + fx2dVX1) * c - (y1 + fx2dVY1) * s + cX;
-            quad[0].Y := (x1 + fx2dVX1) * s + (y1 + fx2dVY1) * c + cY;
-            quad[1].X := (x2 + fx2dVX2) * c - (y1 + fx2dVY2) * s + cX;
-            quad[1].Y := (x2 + fx2dVX2) * s + (y1 + fx2dVY2) * c + cY;
-            quad[2].X := (x2 + fx2dVX3) * c - (y2 + fx2dVY3) * s + cX;
-            quad[2].Y := (x2 + fx2dVX3) * s + (y2 + fx2dVY3) * c + cY;
-            quad[3].X := (x1 + fx2dVX4) * c - (y2 + fx2dVY4) * s + cX;
-            quad[3].Y := (x1 + fx2dVX4) * s + (y2 + fx2dVY4) * c + cY;
-          end;
+    if FX and FX2D_VCHANGE = 0 Then
+    begin
+      x1c := x1 * c;
+      x1s := x1 * s;
+      x2c := x2 * c;
+      x2s := x2 * s;
+      _y1c := y1 * c + cY;
+      _y2c := y2 * c + cY;
+      _y1s := y1 * s - cX;
+      _y2s := y2 * s - cX;
     end else
-      if FX and FX2D_VCHANGE = 0 Then
-        begin
-          quad[0].X := X;
-          quad[0].Y := Y;
-          quad[1].X := X + W;
-          quad[1].Y := Y;
-          quad[2].X := X + W;
-          quad[2].Y := Y + H;
-          quad[3].X := X;
-          quad[3].Y := Y + H;
-        end else
-          begin
-            quad[0].X := X     + fx2dVX1;
-            quad[0].Y := Y     + fx2dVY1;
-            quad[1].X := X + W + fx2dVX2;
-            quad[1].Y := Y     + fx2dVY2;
-            quad[2].X := X + W + fx2dVX3;
-            quad[2].Y := Y + H + fx2dVY3;
-            quad[3].X := X     + fx2dVX4;
-            quad[3].Y := Y + H + fx2dVY4;
-          end;
+    begin
+      x1c := (x1 + fx2dVX1) * c;
+      x1s := (x1 + fx2dVX1) * s;
+      x2c := (x2 + fx2dVX2) * c;
+      x2s := (x2 + fx2dVX2) * s;
+      _y1c := (y1 + fx2dVY1) * c + cY;
+      _y2c := (y2 + fx2dVY2) * c + cY;
+      _y1s := (y1 + fx2dVY1) * s - cX;
+      _y2s := (y2 + fx2dVY2) * s - cX;
+    end;
+    quad[0].X := x1c - _y1s;
+    quad[0].Y := x1s + _y1c;
+    quad[1].X := x2c - _y1s;
+    quad[1].Y := x2s + _y1c;
+    quad[2].X := x2c - _y2s;
+    quad[2].Y := x2s + _y2c;
+    quad[3].X := x1c - _y2s;
+    quad[3].Y := x1s + _y2c;
+  end else
+  begin
+    if FX and FX2D_VCHANGE = 0 Then
+    begin
+      quad[0].X := X;
+      quad[1].X := X + W;
+      quad[0].Y := Y;
+      quad[2].Y := Y + H;
+    end else
+    begin
+      quad[0].X := X     + fx2dVX1;
+      quad[0].Y := Y     + fx2dVY1;
+      quad[1].X := X + W + fx2dVX2;
+      quad[2].Y := Y + H + fx2dVY2;
+    end;
+    quad[1].Y := quad[0].Y;
+    quad[2].X := quad[1].X;
+    quad[3].X := quad[0].X;
+    quad[3].Y := quad[2].Y;
+  end;
 
   if FX and FX2D_VCA > 0 Then
     mode := GL_TRIANGLES
@@ -183,10 +199,10 @@ begin
       fx2dAlpha^ := Alpha / 255;
       glColor4f(fx2dColor[0], fx2dColor[1], fx2dColor[2], fx2dColor[3]);
     end else
-      begin
-        fx2dAlphaDef^ := Alpha / 255;
-        glColor4f(fx2dColorDef[0], fx2dColorDef[1], fx2dColorDef[2], fx2dColorDef[3]);
-      end;
+    begin
+      fx2dAlphaDef^ := Alpha / 255;
+      glColor4f(fx2dColorDef[0], fx2dColorDef[1], fx2dColorDef[2], fx2dColorDef[3]);
+    end;
 
   if FX and FX2D_VCA > 0 Then
     begin
@@ -239,40 +255,45 @@ begin
 end;
 
 procedure ssprite2d_Draw(Texture: zglPTexture; X, Y, W, H, Angle: Single; Alpha: Byte = 255; FX: LongWord = FX_BLEND);
-  var
-    quad: array[0..3] of zglTPoint2D;
-    tc  : zglPTextureCoord;
-    tci : zglPTexCoordIndex;
-    mode: Integer;
+var
+  quad: array[0..3] of zglTPoint2D;
+  tc  : zglPTextureCoord;
+  tci : zglPTexCoordIndex;
+  mode: Integer;
 
-    x1, x2: Single;
-    y1, y2: Single;
-    cX, cY: Single;
-    c, s  : Single;
-    mX, mY: Single;
-    mW, mH: Single;
+  x1, x2: Single;
+  y1, y2: Single;
+  cX, cY: Single;
+  c, s  : Single;
+  mX, mY: Single;
+  mW, mH: Single;
+  x1c, x2c, _y1c, _y2c: Single;
+  x1s, x2s, _y1s, _y2s: Single;
 begin
-  if not Assigned(Texture) Then exit;
+  if not Assigned(Texture) Then
+    exit;
 
   if FX and FX2D_SCALE > 0 Then
-    begin
-      X := X + (W - W * fx2dSX) / 2;
-      Y := Y + (H - H * fx2dSY) / 2;
-      W := W * fx2dSX;
-      H := H * fx2dSY;
-    end;
+  begin
+    X := X + (W - W * fx2dSX) / {$IfDef LINUX}rs2{$Else}2{$EndIf};
+    Y := Y + (H - H * fx2dSY) / {$IfDef LINUX}rs2{$Else}2{$EndIf};
+    W := W * fx2dSX;
+    H := H * fx2dSY;
+  end;
 
   if render2dClip Then
     if FX and FX2D_VCHANGE = 0 Then
     begin
-      if not sprite2d_InScreen(X, Y, W, H, Angle) Then Exit;
+      if not sprite2d_InScreen(X, Y, W, H, Angle) Then
+        Exit;
     end else
     begin
-      mX := min(X + fx2dVX1, min(X + W + fx2dVX2, min(X + W + fx2dVX3, X + fx2dVX4)));
-      mY := min(Y + fx2dVY1, min(Y + fx2dVY2, min(Y + H + fx2dVY3, Y + H + fx2dVY4)));
-      mW := max(X + fx2dVX1, max(X + W + fx2dVX2, max(X + W + fx2dVX3, X + fx2dVX4))) - mx;
-      mH := max(Y + fx2dVY1, max(Y + fx2dVY2, max(Y + H + fx2dVY3, Y + H + fx2dVY4))) - mY;
-      if not sprite2d_InScreen(mX, mY, mW + abs(X - mX) + abs(mW - W), mH + abs(Y - mY) + abs(mH - H), Angle) Then Exit;
+      mX := min(X + fx2dVX1, X + W + fx2dVX2);
+      mY := min(Y + fx2dVY1, Y + H + fx2dVY2);
+      mW := max(X + fx2dVX1, X + W + fx2dVX2) - mx;
+      mH := max(Y + fx2dVY1, Y + H + fx2dVY2) - mY;
+      if not sprite2d_InScreen(mX, mY, mW + abs(X - mX) + abs(mW - W), mH + abs(Y - mY) + abs(mH - H), Angle) Then
+        Exit;
     end;
 
   tci := @FLIP_TEXCOORD[FX and FX2D_FLIPX + FX and FX2D_FLIPY];
@@ -282,8 +303,8 @@ begin
   begin
     if FX and FX2D_RPIVOT = 0 Then
     begin
-      x1 := -W / 2;
-      y1 := -H / 2;
+      x1 := -W / {$IfDef LINUX}rs2{$Else}2{$EndIf};
+      y1 := -H / {$IfDef LINUX}rs2{$Else}2{$EndIf};
       x2 := -x1;
       y2 := -y1;
       cX :=  X + x2;
@@ -298,51 +319,57 @@ begin
       cY := Y + fx2dRPY;
     end;
 
-      m_SinCos(Angle * deg2rad, s, c);
+    m_SinCos(Angle * deg2rad, s, c);
 
-      if FX and FX2D_VCHANGE = 0 Then
-        begin
-          quad[0].X := x1 * c - y1 * s + cX;
-          quad[0].Y := x1 * s + y1 * c + cY;
-          quad[1].X := x2 * c - y1 * s + cX;
-          quad[1].Y := x2 * s + y1 * c + cY;
-          quad[2].X := x2 * c - y2 * s + cX;
-          quad[2].Y := x2 * s + y2 * c + cY;
-          quad[3].X := x1 * c - y2 * s + cX;
-          quad[3].Y := x1 * s + y2 * c + cY;
-        end else
-          begin
-            quad[0].X := (x1 + fx2dVX1) * c - (y1 + fx2dVY1) * s + cX;
-            quad[0].Y := (x1 + fx2dVX1) * s + (y1 + fx2dVY1) * c + cY;
-            quad[1].X := (x2 + fx2dVX2) * c - (y1 + fx2dVY2) * s + cX;
-            quad[1].Y := (x2 + fx2dVX2) * s + (y1 + fx2dVY2) * c + cY;
-            quad[2].X := (x2 + fx2dVX3) * c - (y2 + fx2dVY3) * s + cX;
-            quad[2].Y := (x2 + fx2dVX3) * s + (y2 + fx2dVY3) * c + cY;
-            quad[3].X := (x1 + fx2dVX4) * c - (y2 + fx2dVY4) * s + cX;
-            quad[3].Y := (x1 + fx2dVX4) * s + (y2 + fx2dVY4) * c + cY;
-          end;
+    if FX and FX2D_VCHANGE = 0 Then
+    begin
+      x1c := x1 * c;
+      x1s := x1 * s;
+      x2c := x2 * c;
+      x2s := x2 * s;
+      _y1c := y1 * c + cY;
+      _y2c := y2 * c + cY;
+      _y1s := y1 * s - cX;
+      _y2s := y2 * s - cX;
     end else
-      if FX and FX2D_VCHANGE = 0 Then
-        begin
-          quad[0].X := X;
-          quad[0].Y := Y;
-          quad[1].X := X + W;
-          quad[1].Y := Y;
-          quad[2].X := X + W;
-          quad[2].Y := Y + H;
-          quad[3].X := X;
-          quad[3].Y := Y + H;
-        end else
-          begin
-            quad[0].X := X     + fx2dVX1;
-            quad[0].Y := Y     + fx2dVY1;
-            quad[1].X := X + W + fx2dVX2;
-            quad[1].Y := Y     + fx2dVY2;
-            quad[2].X := X + W + fx2dVX3;
-            quad[2].Y := Y + H + fx2dVY3;
-            quad[3].X := X     + fx2dVX4;
-            quad[3].Y := Y + H + fx2dVY4;
-          end;
+    begin
+      x1c := (x1 + fx2dVX1) * c;
+      x1s := (x1 + fx2dVX1) * s;
+      x2c := (x2 + fx2dVX2) * c;
+      x2s := (x2 + fx2dVX2) * s;
+      _y1c := (y1 + fx2dVY1) * c + cY;
+      _y2c := (y2 + fx2dVY2) * c + cY;
+      _y1s := (y1 + fx2dVY1) * s - cX;
+      _y2s := (y2 + fx2dVY2) * s - cX;
+    end;
+    quad[0].X := x1c - _y1s;
+    quad[0].Y := x1s + _y1c;
+    quad[1].X := x2c - _y1s;
+    quad[1].Y := x2s + _y1c;
+    quad[2].X := x2c - _y2s;
+    quad[2].Y := x2s + _y2c;
+    quad[3].X := x1c - _y2s;
+    quad[3].Y := x1s + _y2c;
+  end else
+  begin
+    if FX and FX2D_VCHANGE = 0 Then
+    begin
+      quad[0].X := X;
+      quad[1].X := X + W;
+      quad[0].Y := Y;
+      quad[2].Y := Y + H;
+    end else
+    begin
+      quad[0].X := X     + fx2dVX1;
+      quad[0].Y := Y     + fx2dVY1;
+      quad[1].X := X + W + fx2dVX2;
+      quad[2].Y := Y + H + fx2dVY2;
+    end;
+    quad[1].Y := quad[0].Y;
+    quad[2].X := quad[1].X;
+    quad[3].X := quad[0].X;
+    quad[3].Y := quad[2].Y;
+  end;
 
   if FX and FX2D_VCA > 0 Then
     mode := GL_TRIANGLES
@@ -421,26 +448,29 @@ begin
 end;
 
 procedure asprite2d_Draw(Texture: zglPTexture; X, Y, W, H, Angle: Single; Frame: Word; Alpha: Byte = 255; FX: LongWord = FX_BLEND);
-  var
-    quad: array[0..3] of zglTPoint2D;
-    tc  : zglPTextureCoord;
-    tci : zglPTexCoordIndex;
-    fc  : Integer;
-    mode: Integer;
+var
+  quad: array[0..3] of zglTPoint2D;
+  tc  : zglPTextureCoord;
+  tci : zglPTexCoordIndex;
+  fc  : Integer;
+  mode: Integer;
 
-    x1, x2: Single;
-    y1, y2: Single;
-    cX, cY: Single;
-    c, s  : Single;
-    mX, mY: Single;
-    mW, mH: Single;
+  x1, x2: Single;
+  y1, y2: Single;
+  cX, cY: Single;
+  c, s  : Single;
+  mX, mY: Single;
+  mW, mH: Single;
+  x1c, x2c, _y1c, _y2c: Single;
+  x1s, x2s, _y1s, _y2s: Single;
 begin
-  if not Assigned(Texture) Then exit;
+  if not Assigned(Texture) Then
+  exit;
 
   if FX and FX2D_SCALE > 0 Then
   begin
-    X := X + (W - W * fx2dSX) / 2;
-    Y := Y + (H - H * fx2dSY) / 2;
+    X := X + (W - W * fx2dSX) / {$IfDef LINUX}rs2{$Else}2{$EndIf};
+    Y := Y + (H - H * fx2dSY) / {$IfDef LINUX}rs2{$Else}2{$EndIf};
     W := W * fx2dSX;
     H := H * fx2dSY;
   end;
@@ -448,13 +478,14 @@ begin
   if render2dClip Then
     if FX and FX2D_VCHANGE = 0 Then
     begin
-      if not sprite2d_InScreen(X, Y, W, H, Angle) Then Exit;
+      if not sprite2d_InScreen(X, Y, W, H, Angle) Then
+        Exit;
     end else
     begin
-      mX := min(X + fx2dVX1, min(X + W + fx2dVX2, min(X + W + fx2dVX3, X + fx2dVX4)));
-      mY := min(Y + fx2dVY1, min(Y + fx2dVY2, min(Y + H + fx2dVY3, Y + H + fx2dVY4)));
-      mW := max(X + fx2dVX1, max(X + W + fx2dVX2, max(X + W + fx2dVX3, X + fx2dVX4))) - mx;
-      mH := max(Y + fx2dVY1, max(Y + fx2dVY2, max(Y + H + fx2dVY3, Y + H + fx2dVY4))) - mY;
+      mX := min(X + fx2dVX1, X + W + fx2dVX2);
+      mY := min(Y + fx2dVY1, Y + H + fx2dVY2);
+      mW := max(X + fx2dVX1, X + W + fx2dVX2) - mx;
+      mH := max(Y + fx2dVY1, Y + H + fx2dVY2) - mY;
       if not sprite2d_InScreen(mX, mY, mW + abs(X - mX) + abs(mW - W), mH + abs(Y - mY) + abs(mH - H), Angle) Then
         Exit;
     end;
@@ -472,8 +503,8 @@ begin
   begin
     if FX and FX2D_RPIVOT = 0 Then
     begin
-      x1 := -W / 2;
-      y1 := -H / 2;
+      x1 := -W / {$IfDef LINUX}rs2{$Else}2{$EndIf};
+      y1 := -H / {$IfDef LINUX}rs2{$Else}2{$EndIf};
       x2 := -x1;
       y2 := -y1;
       cX :=  X + x2;
@@ -488,51 +519,57 @@ begin
       cY := Y + fx2dRPY;
     end;
 
-      m_SinCos(Angle * deg2rad, s, c);
+    m_SinCos(Angle * deg2rad, s, c);
 
-      if FX and FX2D_VCHANGE = 0 Then
-        begin
-          quad[0].X := x1 * c - y1 * s + cX;
-          quad[0].Y := x1 * s + y1 * c + cY;
-          quad[1].X := x2 * c - y1 * s + cX;
-          quad[1].Y := x2 * s + y1 * c + cY;
-          quad[2].X := x2 * c - y2 * s + cX;
-          quad[2].Y := x2 * s + y2 * c + cY;
-          quad[3].X := x1 * c - y2 * s + cX;
-          quad[3].Y := x1 * s + y2 * c + cY;
-        end else
-          begin
-            quad[0].X := (x1 + fx2dVX1) * c - (y1 + fx2dVY1) * s + cX;
-            quad[0].Y := (x1 + fx2dVX1) * s + (y1 + fx2dVY1) * c + cY;
-            quad[1].X := (x2 + fx2dVX2) * c - (y1 + fx2dVY2) * s + cX;
-            quad[1].Y := (x2 + fx2dVX2) * s + (y1 + fx2dVY2) * c + cY;
-            quad[2].X := (x2 + fx2dVX3) * c - (y2 + fx2dVY3) * s + cX;
-            quad[2].Y := (x2 + fx2dVX3) * s + (y2 + fx2dVY3) * c + cY;
-            quad[3].X := (x1 + fx2dVX4) * c - (y2 + fx2dVY4) * s + cX;
-            quad[3].Y := (x1 + fx2dVX4) * s + (y2 + fx2dVY4) * c + cY;
-          end;
+    if FX and FX2D_VCHANGE = 0 Then
+    begin
+      x1c := x1 * c;
+      x1s := x1 * s;
+      x2c := x2 * c;
+      x2s := x2 * s;
+      _y1c := y1 * c + cY;
+      _y2c := y2 * c + cY;
+      _y1s := y1 * s - cX;
+      _y2s := y2 * s - cX;
     end else
-      if FX and FX2D_VCHANGE = 0 Then
-        begin
-          quad[0].X := X;
-          quad[0].Y := Y;
-          quad[1].X := X + W;
-          quad[1].Y := Y;
-          quad[2].X := X + W;
-          quad[2].Y := Y + H;
-          quad[3].X := X;
-          quad[3].Y := Y + H;
-        end else
-          begin
-            quad[0].X := X     + fx2dVX1;
-            quad[0].Y := Y     + fx2dVY1;
-            quad[1].X := X + W + fx2dVX2;
-            quad[1].Y := Y     + fx2dVY2;
-            quad[2].X := X + W + fx2dVX3;
-            quad[2].Y := Y + H + fx2dVY3;
-            quad[3].X := X     + fx2dVX4;
-            quad[3].Y := Y + H + fx2dVY4;
-          end;
+    begin
+      x1c := (x1 + fx2dVX1) * c;
+      x1s := (x1 + fx2dVX1) * s;
+      x2c := (x2 + fx2dVX2) * c;
+      x2s := (x2 + fx2dVX2) * s;
+      _y1c := (y1 + fx2dVY1) * c + cY;
+      _y2c := (y2 + fx2dVY2) * c + cY;
+      _y1s := (y1 + fx2dVY1) * s - cX;
+      _y2s := (y2 + fx2dVY2) * s - cX;
+    end;
+    quad[0].X := x1c - _y1s;
+    quad[0].Y := x1s + _y1c;
+    quad[1].X := x2c - _y1s;
+    quad[1].Y := x2s + _y1c;
+    quad[2].X := x2c - _y2s;
+    quad[2].Y := x2s + _y2c;
+    quad[3].X := x1c - _y2s;
+    quad[3].Y := x1s + _y2c;
+  end else
+  begin
+    if FX and FX2D_VCHANGE = 0 Then
+    begin
+      quad[0].X := X;
+      quad[1].X := X + W;
+      quad[0].Y := Y;
+      quad[2].Y := Y + H;
+    end else
+    begin
+      quad[0].X := X     + fx2dVX1;
+      quad[0].Y := Y     + fx2dVY1;
+      quad[1].X := X + W + fx2dVX2;
+      quad[2].Y := Y + H + fx2dVY2;
+    end;
+    quad[1].Y := quad[0].Y;
+    quad[2].X := quad[1].X;
+    quad[3].X := quad[0].X;
+    quad[3].Y := quad[2].Y;
+  end;
 
   if FX and FX2D_VCA > 0 Then
     mode := GL_TRIANGLES
@@ -558,6 +595,7 @@ begin
   begin
     fx2dAlphaDef^ := Alpha / 255;
     glColor4f(fx2dColorDef[0], fx2dColorDef[1], fx2dColorDef[2], fx2dColorDef[3]);
+    glColor4f(1, 1, 1, 1);
   end;
 
   if FX and FX2D_VCA > 0 Then
@@ -611,25 +649,27 @@ begin
 end;
 
 procedure csprite2d_Draw(Texture: zglPTexture; X, Y, W, H, Angle: Single; const CutRect: zglTRect2D; Alpha: Byte = 255; FX: LongWord = FX_BLEND);
-  var
-    quad: array[0..3] of zglTPoint2D;
-    mode: Integer;
+var
+  quad: array[0..3] of zglTPoint2D;
+  mode: Integer;
 
-    tU, tV, tX, tY, tW, tH: Single;
+  tU, tV, tX, tY, tW, tH: Single;
 
-    x1, x2: Single;
-    y1, y2: Single;
-    cX, cY: Single;
-    c, s  : Single;
-    mX, mY: Single;
-    mW, mH: Single;
+  x1, x2: Single;
+  y1, y2: Single;
+  cX, cY: Single;
+  c, s  : Single;
+  mX, mY: Single;
+  mW, mH: Single;
+  x1c, x2c, _y1c, _y2c: Single;
+  x1s, x2s, _y1s, _y2s: Single;
 begin
   if not Assigned(Texture) Then exit;
 
   if FX and FX2D_SCALE > 0 Then
   begin
-    X := X + (W - W * fx2dSX) / 2;
-    Y := Y + (H - H * fx2dSY) / 2;
+    X := X + (W - W * fx2dSX) / {$IfDef LINUX}rs2{$Else}2{$EndIf};
+    Y := Y + (H - H * fx2dSY) / {$IfDef LINUX}rs2{$Else}2{$EndIf};
     W := W * fx2dSX;
     H := H * fx2dSY;
   end;
@@ -641,10 +681,10 @@ begin
       Exit;
   end else
   begin
-    mX := min(X + fx2dVX1, min(X + W + fx2dVX2, min(X + W + fx2dVX3, X + fx2dVX4)));
-    mY := min(Y + fx2dVY1, min(Y + fx2dVY2, min(Y + H + fx2dVY3, Y + H + fx2dVY4)));
-    mW := max(X + fx2dVX1, max(X + W + fx2dVX2, max(X + W + fx2dVX3, X + fx2dVX4))) - mx;
-    mH := max(Y + fx2dVY1, max(Y + fx2dVY2, max(Y + H + fx2dVY3, Y + H + fx2dVY4))) - mY;
+    mX := min(X + fx2dVX1, X + W + fx2dVX2);
+    mY := min(Y + fx2dVY1, Y + H + fx2dVY2);
+    mW := max(X + fx2dVX1, X + W + fx2dVX2) - mx;
+    mH := max(Y + fx2dVY1, Y + H + fx2dVY2) - mY;
     if not sprite2d_InScreen(mX, mY, mW + abs(X - mX) + abs(mW - W), mH + abs(Y - mY) + abs(mH - H), Angle) Then
       Exit;
   end;
@@ -669,8 +709,8 @@ begin
   begin
     if FX and FX2D_RPIVOT = 0 Then
     begin
-      x1 := -W / 2;
-      y1 := -H / 2;
+      x1 := -W / {$IfDef LINUX}rs2{$Else}2{$EndIf};
+      y1 := -H / {$IfDef LINUX}rs2{$Else}2{$EndIf};
       x2 := -x1;
       y2 := -y1;
       cX :=  X + x2;
@@ -685,51 +725,57 @@ begin
       cY := Y + fx2dRPY;
     end;
 
-      m_SinCos(Angle * deg2rad, s, c);
+    m_SinCos(Angle * deg2rad, s, c);
 
-      if FX and FX2D_VCHANGE = 0 Then
-        begin
-          quad[0].X := x1 * c - y1 * s + cX;
-          quad[0].Y := x1 * s + y1 * c + cY;
-          quad[1].X := x2 * c - y1 * s + cX;
-          quad[1].Y := x2 * s + y1 * c + cY;
-          quad[2].X := x2 * c - y2 * s + cX;
-          quad[2].Y := x2 * s + y2 * c + cY;
-          quad[3].X := x1 * c - y2 * s + cX;
-          quad[3].Y := x1 * s + y2 * c + cY;
-        end else
-          begin
-            quad[0].X := (x1 + fx2dVX1) * c - (y1 + fx2dVY1) * s + cX;
-            quad[0].Y := (x1 + fx2dVX1) * s + (y1 + fx2dVY1) * c + cY;
-            quad[1].X := (x2 + fx2dVX2) * c - (y1 + fx2dVY2) * s + cX;
-            quad[1].Y := (x2 + fx2dVX2) * s + (y1 + fx2dVY2) * c + cY;
-            quad[2].X := (x2 + fx2dVX3) * c - (y2 + fx2dVY3) * s + cX;
-            quad[2].Y := (x2 + fx2dVX3) * s + (y2 + fx2dVY3) * c + cY;
-            quad[3].X := (x1 + fx2dVX4) * c - (y2 + fx2dVY4) * s + cX;
-            quad[3].Y := (x1 + fx2dVX4) * s + (y2 + fx2dVY4) * c + cY;
-          end;
+    if FX and FX2D_VCHANGE = 0 Then
+    begin
+      x1c := x1 * c;
+      x1s := x1 * s;
+      x2c := x2 * c;
+      x2s := x2 * s;
+      _y1c := y1 * c + cY;
+      _y2c := y2 * c + cY;
+      _y1s := y1 * s - cX;
+      _y2s := y2 * s - cX;
     end else
-      if FX and FX2D_VCHANGE = 0 Then
-        begin
-          quad[0].X := X;
-          quad[0].Y := Y;
-          quad[1].X := X + W;
-          quad[1].Y := Y;
-          quad[2].X := X + W;
-          quad[2].Y := Y + H;
-          quad[3].X := X;
-          quad[3].Y := Y + H;
-        end else
-          begin
-            quad[0].X := X     + fx2dVX1;
-            quad[0].Y := Y     + fx2dVY1;
-            quad[1].X := X + W + fx2dVX2;
-            quad[1].Y := Y     + fx2dVY2;
-            quad[2].X := X + W + fx2dVX3;
-            quad[2].Y := Y + H + fx2dVY3;
-            quad[3].X := X     + fx2dVX4;
-            quad[3].Y := Y + H + fx2dVY4;
-          end;
+    begin
+      x1c := (x1 + fx2dVX1) * c;
+      x1s := (x1 + fx2dVX1) * s;
+      x2c := (x2 + fx2dVX2) * c;
+      x2s := (x2 + fx2dVX2) * s;
+      _y1c := (y1 + fx2dVY1) * c + cY;
+      _y2c := (y2 + fx2dVY2) * c + cY;
+      _y1s := (y1 + fx2dVY1) * s - cX;
+      _y2s := (y2 + fx2dVY2) * s - cX;
+    end;
+    quad[0].X := x1c - _y1s;
+    quad[0].Y := x1s + _y1c;
+    quad[1].X := x2c - _y1s;
+    quad[1].Y := x2s + _y1c;
+    quad[2].X := x2c - _y2s;
+    quad[2].Y := x2s + _y2c;
+    quad[3].X := x1c - _y2s;
+    quad[3].Y := x1s + _y2c;
+  end else
+  begin
+    if FX and FX2D_VCHANGE = 0 Then
+    begin
+      quad[0].X := X;
+      quad[1].X := X + W;
+      quad[0].Y := Y;
+      quad[2].Y := Y + H;
+    end else
+    begin
+      quad[0].X := X     + fx2dVX1;
+      quad[0].Y := Y     + fx2dVY1;
+      quad[1].X := X + W + fx2dVX2;
+      quad[2].Y := Y + H + fx2dVY2;
+    end;
+    quad[1].Y := quad[0].Y;
+    quad[2].X := quad[1].X;
+    quad[3].X := quad[0].X;
+    quad[3].Y := quad[2].Y;
+  end;
 
   if FX and FX2D_VCA > 0 Then
     mode := GL_TRIANGLES
