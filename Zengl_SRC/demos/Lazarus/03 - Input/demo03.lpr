@@ -115,7 +115,7 @@ begin
   // En: set default colors for all API elements. These colors will only be used when creating a specific element.
   //     To change the color in the (already created) element itself, nothing is attached. Further changes to these
   //     color values will not affect the already created elements in any way.
-  SetEditColor(fntEdit, EditColor, 1);
+  SetDefColor(EditColor, cl_Black);;
 
   // RU: создаём само поле ввода с данными указанными выше и передаваемыми данными
   // EN: create the input field itself with the data specified above and the data that needs to be transferred
