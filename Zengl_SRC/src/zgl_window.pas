@@ -1060,6 +1060,10 @@ begin
   key_BeginReadText('');
   key_EndReadText();
   {$ENDIF}
+  {$IF DEFINED(WINDOWS) or DEFINED(LINUX) or DEFINED(MACOSX)}
+  if wndFullScreen Then
+    scr_SetOptions( wndWidth, wndHeight, scrRefresh, wndFullScreen, scrVSync );
+  {$IFEND}
 
   app_PInit();
   {$IFDEF iOS}
