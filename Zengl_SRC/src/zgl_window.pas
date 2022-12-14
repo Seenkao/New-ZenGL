@@ -982,6 +982,10 @@ begin
   wnd_UpdateCaption();
   {$EndIf}
   winOn := TRUE;
+  {$IF DEFINED(WINDOWS) or DEFINED(LINUX) or DEFINED(MACOSX)}
+  if wndFullScreen Then
+    scr_SetOptions;
+  {$IFEND}
 
   {$IFDEF iOS}
   key_BeginReadText('');
