@@ -1062,7 +1062,7 @@ begin
   {$ENDIF}
   {$IF DEFINED(WINDOWS) or DEFINED(LINUX) or DEFINED(MACOSX)}
   if wndFullScreen Then
-    scr_SetOptions( wndWidth, wndHeight, scrRefresh, wndFullScreen, scrVSync );
+    scr_SetOptions;
   {$IFEND}
 
   app_PInit();
