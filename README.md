@@ -113,7 +113,7 @@ Clicking on the image will take you to the video. Where I redo the 3rd demo. At 
 
 ***
 Communication: M12Mirrel@yandex.ru
-You can also contact me on the Lazarus forums <s>or [ZenGL](http://zengl.org/forum/)</s> (sorry, this forum is not available to me at the moment) and express your wishes and shortcomings.
+You can also contact me on the Lazarus forums and express your wishes and shortcomings.
 
 You can support through Sberbank:
 2202200951985520
@@ -228,7 +228,7 @@ Please write about the errors found in the process of working with ZenGL. )))
 
 ***
 Связь: M12Mirrel@yandex.ru
-Так же можно связаться со мной на форумах Lazarus <s>или [ZenGL](http://zengl.org/forum/)</s> (извиняюсь, данный форум в настоящее время для меня не доступен) и высказать пожелания и недоработки.
+Так же можно связаться со мной на форумах Lazarus и высказать пожелания и недоработки.
 
 Поддержать можно через сбер:
 2202200951985520
