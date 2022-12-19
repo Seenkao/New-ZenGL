@@ -112,7 +112,7 @@ Clicking on the image will take you to the video. Where I redo the 3rd demo. At 
 **GE** is a library that works on top of ZenGL features. Currently, it includes an input field with additional functions for it, and a module for working with color, where there are standard colors and you can set your own.
 
 ***
-Communication: M12Mirrel@yandex.ru
+Communication: M12Mirrel@yandex.ru  
 You can also contact me on the Lazarus forums and express your wishes and shortcomings.
 
 You can support through Sberbank:
@@ -227,7 +227,7 @@ Please write about the errors found in the process of working with ZenGL. )))
 **GE** - это библиотека которая работает поверх возможностей ZenGL. В данное время она включает в себя поле ввода с дополнительными функциями для него, и модуль для работы с цветом, где есть стандартные цвета и можно задавать свои.
 
 ***
-Связь: M12Mirrel@yandex.ru
+Связь: M12Mirrel@yandex.ru  
 Так же можно связаться со мной на форумах Lazarus и высказать пожелания и недоработки.
 
 Поддержать можно через сбер:
