@@ -14,7 +14,7 @@
 -------------
 
 <a name= "About"></a>**About:**  
-[zengl](https://zengl.org) - the original site of the library's creator.
+[zengl 3.12](https://github.com/skalogryz/zengl)
 
 [google arhive](https://code.google.com/archive/p/zengl/)
 
@@ -118,7 +118,7 @@ You can also contact me on the Lazarus forums and express your wishes and shortc
 You can support through Sberbank:
 2202200951985520
 
-The original source code is at [GutHub](https://github.com/Seenkao/New-ZenGL) other sites may have a back branch.
+The original source code is at [GitHub](https://github.com/Seenkao/New-ZenGL) other sites may have a back branch.
 
 Please write about the errors found in the process of working with ZenGL. )))
 
@@ -128,7 +128,7 @@ Please write about the errors found in the process of working with ZenGL. )))
 -------------
 
 <a name= "AboutRus"></a>**О ZenGL:**  
-[zengl](https://zengl.org) - изначальный сайт создателя библиотеки.
+[zengl 3.12](https://github.com/skalogryz/zengl)
 
 [архив гугла](https://code.google.com/archive/p/zengl/)
 
@@ -233,6 +233,6 @@ Please write about the errors found in the process of working with ZenGL. )))
 Поддержать можно через сбер:
 2202200951985520
 
-Оригинальный исходный код находится на [GutHub](https://github.com/Seenkao/New-ZenGL) на других сайтах может отстающая ветка.
+Оригинальный исходный код находится на [GitHub](https://github.com/Seenkao/New-ZenGL) на других сайтах может отстающая ветка.
 
 Просьба писать об ошибках выявленных в процессе работы с ZenGL. )))
