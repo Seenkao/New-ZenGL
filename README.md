@@ -14,7 +14,7 @@
 -------------
 
 <a name= "About"></a>**About:**  
-[zengl 3.12](https://github.com/skalogryz/zengl)
+[zengl 3.12](https://github.com/skalogryz/zengl) - version that also supports iOS.
 
 [google arhive](https://code.google.com/archive/p/zengl/)
 
@@ -35,8 +35,6 @@
 
 **Supported Platforms for Delphi:**
 - Windows 32 (some demos will probably work with Windows 64 too, but certainly not all)
-
-[zengl for iOS](https://github.com/skalogryz/zengl) - version that supports iOS (I have not verified).
 
 See the changes in the __Update_ZenGL.txt__ file.  Sorry, the information is only in Russian. :(
 
@@ -128,7 +126,7 @@ Please write about the errors found in the process of working with ZenGL. )))
 -------------
 
 <a name= "AboutRus"></a>**О ZenGL:**  
-[zengl 3.12](https://github.com/skalogryz/zengl)
+[zengl 3.12](https://github.com/skalogryz/zengl) - версия которая так же поддерживает iOS.
 
 [архив гугла](https://code.google.com/archive/p/zengl/)
 
@@ -149,8 +147,6 @@ Please write about the errors found in the process of working with ZenGL. )))
 
 **Поддерживаемые платформы для Delphi:**
 - Windows 32 (вероятно некоторые демо-версии будут работать и с Windows 64, но точно не все)
-
-[zengl for iOS](https://github.com/skalogryz/zengl) - версия которая поддерживает iOS (мною не проверено).
 
 ***
 Изменения смотрите в файле __Update_ZenGL.txt__.
