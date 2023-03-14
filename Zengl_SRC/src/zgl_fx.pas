@@ -197,7 +197,7 @@ procedure fx2d_SetVCA(c1, c2, c3, c4: LongWord; a1, a2, a3, a4: Byte);
 begin
   fx2dVCA[0, 0] := (C1 shr 16) / 255;
   fx2dVCA[0, 1] := ((C1 and $FF00) shr 8) / 255;
-  fx2dVCA[0, 2] := C1 and $FF;
+  fx2dVCA[0, 2] := C1 and $FF / 255;
   fx2dVCA[0, 3] := A1 / 255;
 
   fx2dVCA[1, 0] := (C2 shr 16) / 255;
@@ -212,7 +212,7 @@ begin
 
   fx2dVCA[3, 0] := (C1 shr 16) / 255;
   fx2dVCA[3, 1] := ((C1 and $FF00) shr 8) / 255;
-  fx2dVCA[3, 2] := C1 and $FF;
+  fx2dVCA[3, 2] := C1 and $FF / 255;
   fx2dVCA[3, 3] := A1 / 255;
 
   fx2dVCA[4, 0] := (C3 shr 16) / 255;
