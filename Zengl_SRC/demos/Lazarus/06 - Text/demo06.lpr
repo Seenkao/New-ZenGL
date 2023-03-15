@@ -34,8 +34,7 @@ uses
   ;
 
 var
-//  dirRes  : UTF8String {$IFNDEF MACOSX} = 'data/' {$ENDIF};             // вне демо-версий
-  dirRes  : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};            // в демо-версиях!!!
+  dirRes  : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};  
   fntMain : LongWord;
 
 procedure Init;
@@ -110,7 +109,6 @@ Begin
   {$IFNDEF USE_ZENGL_STATIC}
   if not zglLoad( libZenGL ) Then exit;
   {$ENDIF}
-  randomize();
 
   zgl_Reg( SYS_LOAD, @Init );
   zgl_Reg( SYS_DRAW, @Draw );

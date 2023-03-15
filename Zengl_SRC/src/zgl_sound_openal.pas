@@ -173,6 +173,7 @@ var
 
 implementation
 uses
+  zgl_file,
   zgl_utils;
 
 function InitOpenAL: Boolean;

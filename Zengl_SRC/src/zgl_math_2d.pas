@@ -21,7 +21,7 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 16.06.2022
+ !!! modification from Serge
 }
 unit zgl_math_2d;
 
@@ -57,26 +57,27 @@ procedure m_SinCos(Angle: Single; out s, c: Single); {$IFDEF USE_ASM} assembler;
 procedure InitCosSinTables;
 // Rus: косинус из таблицы.
 // Eng: cosine from the table.
-function  m_Cos(Angle: Integer): Single;
+function m_Cos(Angle: Integer): Single;
 // Rus: синус из таблицы.
 // Eng: sine from the table.
-function  m_Sin(Angle: Integer): Single;
+function m_Sin(Angle: Integer): Single;
 // Rus: дистанция между точками.
 // Eng: distance between points.
-function  m_Distance(x1, y1, x2, y2: Single): Single;
-function  m_FDistance(x1, y1, x2, y2: Single): Single;
+function m_Distance(x1, y1, x2, y2: Single): Single;
+function m_FDistance(x1, y1, x2, y2: Single): Single;
 // Rus: Направление вектора (угол по дву точкам), результат в градусах.
 // Eng: Vector direction , result in degrees.
-function  m_Angle(x1, y1, x2, y2: Single): Single;
-// Rus: ориентация относительно двух точек.          вопрос - а вектором не быстрее будет?
-// Eng: orientation relative to two points.
-function  m_Orientation(x, y, x1, y1, x2, y2: Single): Integer;
-// Rus: ориентация относительно двух точек, используя вектора.
-//      сразу надо определится будет это зависеть от направления вектора или нет!!!
-// Eng: orientation relative to two points using vectors.
-//      immediately it is necessary to determine whether it depends on the direction of the vector or not!!!
+function m_Angle(x1, y1, x2, y2: Single): Single;
+// Rus: ориентация относительно двух точек. Соблюдайте направление от (X1, Y1)
+//      до (X2, Y2). В обратную сторону ориентация будет другой.
+// Eng: orientation relative to two points. Observe direction from (X1, Y1) to
+//      (X2, Y2). In the opposite direction, the orientation will be different.
+function m_Orientation(x, y, x1, y1, x2, y2: Single): Integer;
+// Rus: ориентация относительно двух точек, используя вектора. Соблюдайте
+//      направление вектора! В обратную сторону ориентация будет другой.
+// Eng: orientation relative to two points using vectors. Observe the direction
+//      of the vector! In the opposite direction, the orientation will be different.
 function m_VectOrientation(aP: zglTPoint2D; bV: zglTVector2D): Integer;
-//function
 
 {$IFDEF USE_TRIANGULATION}
 procedure tess_Triangulate(Contour: zglPPoints2D; iLo, iHi: Integer; AddHoles: Boolean = FALSE);
@@ -112,10 +113,18 @@ var
   tessVCount : Integer;
   tessVerts  : array of zglTPoint2D;
 {$ENDIF}
+{$IfDef LINUX}
+var
+  rs0  : Single = 0;
+  rs90 : Single = 90;
+  rs180: Single = 180;
+  rs270: Single = 270;
+  rs360: Single = 360;
+{$EndIf}
 
 function ArcTan2(dx, dy: Single): Single;
 begin
-  Result := abs(ArcTan(dy / dx) * (180 / pi));
+  Result := abs(ArcTan(dy / dx) * ({$IfDef LINUX}rs180{$Else}180{$EndIf} / pi));
 end;
 
 function min(a, b: Single): Single; {$IFDEF USE_INLINE} inline; {$ENDIF}
@@ -152,7 +161,7 @@ var
 begin
   for i := 0 to 360 do
   begin
-    rad_angle := i * (pi / 180);
+    rad_angle := i * (pi / {$IfDef LINUX}rs180{$Else}180{$EndIf});
     cosTable[i] := cos(rad_angle);
     sinTable[i] := sin(rad_angle);
   end;
@@ -198,31 +207,30 @@ begin
   if dx = 0 Then
   begin
     if dy > 0 Then
-      Result := 90
+      Result := {$IfDef LINUX}rs90{$Else}90{$EndIf}
     else
-      Result := 270;
+      Result := {$IfDef LINUX}rs270{$Else}270{$EndIf};
     exit;
   end;
 
   if dy = 0 Then
   begin
     if dx > 0 Then
-      Result := 0
+      Result := {$IfDef LINUX}rs0{$Else}0{$EndIf}
     else
-      Result := 180;
+      Result := {$IfDef LINUX}rs180{$Else}180{$EndIf};
     exit;
   end;
 
+  Result := ArcTan2(dx, dy);
   if (dx < 0) and (dy > 0) Then
-    Result := 180 - ArcTan2(dx, dy)
+    Result := {$IfDef LINUX}rs180{$Else}180{$EndIf} - Result
   else
     if (dx < 0) and (dy < 0) Then
-      Result := 180 + ArcTan2(dx, dy)
+      Result := {$IfDef LINUX}rs180{$Else}180{$EndIf} + Result
     else
       if (dx > 0) and (dy < 0) Then
-        Result := 360 - ArcTan2(dx, dy)
-      else
-        Result := ArcTan2(dx, dy)
+        Result := {$IfDef LINUX}rs360{$Else}360{$EndIf} - Result;
 end;
 
 function m_Orientation(x, y, x1, y1, x2, y2: Single): Integer;

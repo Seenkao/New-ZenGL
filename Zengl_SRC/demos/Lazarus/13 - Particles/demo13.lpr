@@ -27,7 +27,8 @@ uses
   zgl_font,
   zgl_text,
   zgl_math_2d,
-  zgl_utils
+  zgl_utils,
+  zgl_types
   {$IfNDef OLD_METHODS}
   , gegl_color
   {$EndIf}

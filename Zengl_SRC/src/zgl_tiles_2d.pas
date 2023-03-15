@@ -21,7 +21,7 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 04.08.2020
+ !!! modification from Serge 03.09.2022
 }
 unit zgl_tiles_2d;
 
@@ -72,8 +72,9 @@ procedure tiles2d_Draw(Texture: zglPTexture; X, Y: Single; Tiles: zglPTiles2D; A
     tc: zglPTextureCoord;
     tci: zglPTexCoordIndex;
 begin
-  if (not Assigned(Texture)) or (not Assigned(Tiles)) Then exit;
-  if X < 0 Then
+  if (not Assigned(Texture)) or (not Assigned(Tiles)) Then
+    exit;
+(*  if X < 0 Then
     begin
       aI := Round(-X) div Tiles.Width;
       bI := render2dClipW div Tiles.Width + aI;
@@ -157,7 +158,7 @@ begin
   if aJ < 0 Then aJ := 0;
 
   if bI >= Tiles.X Then bI := Tiles.X - 1;
-  if bJ >= Tiles.Y Then bJ := Tiles.Y - 1;
+  if bJ >= Tiles.Y Then bJ := Tiles.Y - 1;  *)
 
   if (not b2dStarted) or batch2d_Check(GL_QUADS, FX, Texture) Then
     begin
@@ -183,10 +184,11 @@ begin
 
   tci := @FLIP_TEXCOORD[FX and FX2D_FLIPX + FX and FX2D_FLIPY];
 
-  for i := aI to bI do
-    for j := aJ to bJ do
+  for i := 0 to Tiles.X - 1 do
+    for j := 0 to Tiles.Y - 1 do
       begin
-        if (Tiles.Tiles[i, j] < 1) or (Tiles.Tiles[i, j] >= Length(Texture.FramesCoord)) Then continue;
+        if (Tiles.Tiles[i, j] < 1) or (Tiles.Tiles[i, j] >= Length(Texture.FramesCoord)) Then
+          continue;
         tc := @Texture.FramesCoord[Tiles.Tiles[i, j]];
 
         glTexCoord2fv(@tc[tci[0]]);

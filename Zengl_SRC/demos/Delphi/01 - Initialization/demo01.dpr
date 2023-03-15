@@ -15,6 +15,7 @@ uses
   zgl_window,
   zgl_timers,
   zgl_utils,
+  zgl_types,
   zgl_application
   ;
 

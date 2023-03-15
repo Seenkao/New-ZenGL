@@ -20,6 +20,7 @@ uses
   zgl_screen,
   zgl_timers,
   zgl_utils,
+  zgl_types,
   zgl_log
   {$ELSE}
   // RU: Используя ZenGL в качестве библиотеки(so, dll или dylib) нужен всего один заголовочный файл.

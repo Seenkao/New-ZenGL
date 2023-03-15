@@ -58,7 +58,7 @@ type
     TexCoords: array[0..3] of zglTPoint2D;
     xx1, xx2, yy1, yy2: Single;
     _x1, _x2, _y1, _y2: Single;
-end;
+  end;
 
 type
   zglPFont = ^zglTFont;
@@ -76,15 +76,14 @@ type
     MaxHeight : Integer;
     MaxShiftY : Integer;
     Padding   : array[0..3] of Byte;
-    _ShiftP63 : Single;
-end;
+  end;
 
 type
   zglPFontManager = ^zglTFontManager;
   zglTFontManager = record
     Count: Cardinal;
     Font: array[1..MAX_USE_FONT] of zglPFont;
-end;
+  end;
 
 // Rus: добавить шрифт.
 // Eng: add a font.

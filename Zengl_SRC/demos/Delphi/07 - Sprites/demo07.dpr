@@ -56,7 +56,7 @@ procedure Init;
 begin
   // RU: “.к. по умолчанию вс€ структура камеры заполн€етс€ нул€ми, следует инициализировать еЄ стандартными значени€ми.
   // EN: Camera must be initialized, because camera structure is zero-filled by default.
-  cam2d_Init(camMain);
+  cam2d_DefInit(camMain);
 
   // RU: «агружаем текстуру.
   //     $FF000000 - указывает на то, что бы использовать альфа-канал из изображени€.

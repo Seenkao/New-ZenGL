@@ -13,6 +13,7 @@ uses
   zgl_keyboard,
   zgl_joystick,
   zgl_primitives_2d,
+  zgl_render_2d,
   zgl_font,
   zgl_text,
   zgl_textures_png,
@@ -29,12 +30,6 @@ uses
 var
   dirRes  : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
 
-  // Ru: номера шрифтов. Вся работа со шрифтами происходит именно от этих номеров.
-  fntMain, fntEdit: LongWord;
-
-  // Ru: номер цвета. Работа с цветом происходит именно от этого номера.
-  EditColor: LongWord;
-
   joyCount   : Integer;
   // RU: строка для получения значения из поля ввода
   // EN: string to get value from input field
@@ -42,39 +37,42 @@ var
   {$IfDef OLD_METHODS}
   trackInput : Boolean;
   inputRect  : zglTRect;
-  lineAlpha  : Byte;
+  lineAlpha  : LongWord;
 
-  TimeStart  : Byte;
+  TimeStart  : LongWord;
   {$Else}
-  // RU: прямоугольник, описывающий поле ввода
+  // Rus: номера шрифтов. Вся работа со шрифтами происходит именно от этих номеров.
+  // Eng: font numbers. All work with fonts comes from these numbers.
+  fntMain, fntEdit: LongWord;
+
+  // Rus: номер цвета. Работа с цветом происходит именно от этого номера.
+  // Eng: color number. Work with color comes from this number.
+  EditColor: LongWord;
+  // RU: прямоугольник описывающий поле ввода
   // EN: rectangle describing the input field
   myRect: zglTRect2D;
 
-  // "перепись" полей ввода для того, чтоб знать с каким полем работаем
-
+  // "перепись" полей ввода для того, чтоб знать с каким полем работаем.
   // RU: объявляем переменную для работы с полем ввода
   // EN: we declare a variable to work with the input field
-  myEdit, myEdit2: Word;
-  {$EndIf}
+  myEdit, myEdit2: LongWord;
 
-
-{$IfNDef OLD_METHODS}
-// RU: прорисовываем основание поля ввода. Всё ограничено лишь вашим воображением. )))
+// RU: прорисовываем основание поля ввода. Всё ограничено только вашим воображением. )))
 // EN: draw the base of the input field. Everything is limited only by your imagination. )))
 procedure EditCont;
 begin
-  // RU: при прорисовке поля ввода, смещение и поворот уже будут сделаны. Я показываю как нарисовать рамку.
-  // Текст будет выведен поверх того, что вы тут нарисуете.
+  // RU: при прорисовке поля ввода, смешение и поворот уже будут сделаны. Я показываю как нарисовать рамку.
+  //     Текст будет выведен поверх того, что вы здесь нарисуете.
   // EN: displacement and rotation will be done prior to performing the procedure. I am showing you how to draw a frame.
-  // The text will be drawn on top of what you draw here.
-  pr2d_Rect(- 2, - 1, myRect.W + 5, myRect.H, cl_white{$IfDef OLD_METHODS}, 128{$EndIf}, PR2D_FILL);
+  //     The text will be drawn on top of what you draw here.
+  pr2d_Rect(- 2, - 1, myRect.W + 5, myRect.H,  {$IfnDef OLD_METHODS}cl_White{$else}, $FFFFFF, 128{$EndIf}, PR2D_FILL);
 end;
-{$EndIf}
+  {$EndIf}
 
 procedure Init;
 {$IfNDef OLD_METHODS}
 var
-  EScale: Word;
+  EScale: LongWord;
 {$EndIf}
 begin
   fntMain := font_LoadFromFile(dirRes + 'font.zfi');
@@ -82,6 +80,28 @@ begin
   // RU: Загружаем данные о шрифте.
   // EN: Load the font.
   fntEdit := font_LoadFromFile( dirRes + 'CalibriBold50pt.zfi');
+
+//------------------------------------------------------------------------------
+// RU: Данные для виртуальной клавиатуры. Раскомментируйте, если будете использовать виртуальную клавиатуру для ПК.
+// EN: Data for the virtual keyboard. Uncomment if you will use the virtual keyboard for PC.
+
+  // обязательный код! Данные для отображения клавиатуры.
+  // RU: Загружаем данные о шрифте.
+  // EN: Load the font.
+//   fontUse := font_LoadFromFile(dirRes + 'CalibriBold50pt.zfi');
+//   JoyArrow := tex_LoadFromFile(dirRes + 'arrow.png');     // загрузили текстуру
+//   tex_SetFrameSize(JoyArrow, 64, 64);                     // и разбили её на части, но в записях не будет указано количество полученных текстур
+  // RU: Данные для виртуальной клавиатуры.
+  // EN: Data for the virtual keyboard.
+//   txt_LoadFromFile(dirRes + 'Rus.txt', LoadText);
+  // RU: Создаём виртуальную клавиатуру. Для мобильных систем это будет обязательным кодом в дальнейшем.
+  // EN: We create a virtual keyboard. For mobile systems, this will be a mandatory code in the future.
+//   CreateTouchKeyboard;
+
+// RU: здесь данные для виртуальной клавиатуры заканчиваются.
+// EN: here the data for the virtual keyboard ends.
+//------------------------------------------------------------------------------
+
   // RU: указываем размеры шрифтов
   // EN: set font sizes
   setFontTextScale(15, fntMain);
@@ -101,6 +121,7 @@ begin
   // RU: указываем точку вращения, в данном случае центр поля ввода(по необходимости) и угол поворота(например 45)
   // EN: specify the point of rotation, in this case the center of the input field (if necessary) and the angle of rotation (for example 45)
   SetOfRotateAngleAndPoint(myRect.x + myRect.W / 2, myRect.y + myRect.H / 2, 30);
+
   // RU: указываем цвет текста (добавляем новый номер цвета, хотя данная функция вам возвратит цвет, если он уже был прописан).
   // EN: specify the color of the text (we add a new color number, although this function will return the color to you if it
   //     has already been assigned).
@@ -111,14 +132,14 @@ begin
   // En: set default colors for all API elements. These colors will only be used when creating a specific element.
   //     To change the color in the (already created) element itself, nothing is attached. Further changes to these
   //     color values will not affect the already created elements in any way.
-  SetEditColor(fntEdit, EditColor, 1);
+  SetDefColor(EditColor, cl_Green, cl_Black);
 
-  // RU: создаём само поле ввода с данными указанными выше
-  // EN: create the input field itself with the data specified above
-  myEdit := CreateEdit(myRect, fntEdit, 20, @EditCont);
+  // RU: создаём само поле ввода с данными указанными выше и передаваемыми данными
+  // EN: create the input field itself with the data specified above and the data that needs to be transferred
+  myEdit := CreateEdit(myRect, fntEdit, EScale, @EditCont);
 
   // RU: корректируем курсор.
-  // EN: adjust the cursor
+  // EN: adjust the cursor.
   CorrectEditCursor(myEdit, 3);
 
   // RU: задаём очистку экрана заданным цветом
@@ -130,6 +151,7 @@ begin
   inputRect.Y := 300 - 100 - 32;
   inputRect.W := 384;
   inputRect.H := 96;
+  setFontTextScale(15, fntMain);
   {$EndIf}
 
   // RU: Инициализируем обработку ввода джойстиков и получаем количество подключенных джойстиков.
@@ -143,12 +165,13 @@ var
   w : Single;
 {$EndIf}
 begin
+  batch2d_Begin;
   // Ru: балуемся цветом шрифта.
   // En: indulge in the color of the font.
   setTextColor(Get_Color(cl_Blue));
-
   text_Draw(fntMain, 0, 0, 'Escape - Exit');
 
+  setTextColor(Get_Color(cl_White));
   // RU: Координаты мыши можно получить при помощи функций mouse_X и mouse_Y.
   // EN: Mouse coordinates can be got using functions mouse_X and mouse_Y.
   text_Draw(fntMain, 0, 16, 'Mouse X, Y: ' + u_IntToStr(mouseX) + '; ' + u_IntToStr(mouseY));
@@ -206,6 +229,7 @@ begin
   text_Draw(fntMain, 550, 500, 'Button14: ' + u_BoolToStr(joy_Down(0, 13)));
   text_Draw(fntMain, 550, 520, 'Button15: ' + u_BoolToStr(joy_Down(0, 14)));
   text_Draw(fntMain, 550, 540, 'Button16: ' + u_BoolToStr(joy_Down(0, 15)));
+  batch2d_End;
 end;
 
 {$IfDef OLD_METHODS}

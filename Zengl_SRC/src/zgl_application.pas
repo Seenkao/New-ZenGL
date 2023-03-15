@@ -133,7 +133,7 @@ procedure Java_zengl_android_ZenGL_zglNativeActivate(env: PJNIEnv; thiz: jobject
 
 procedure Java_zengl_android_ZenGL_zglNativeCloseQuery(env: PJNIEnv; thiz: jobject);
 
-procedure Java_zengl_android_ZenGL_zglNativeTouch(env: PJNIEnv; thiz: jobject; ID: jint; X, Y: jfloat; Pressure: jint); cdecl;
+procedure Java_zengl_android_ZenGL_zglNativeTouch(env: PJNIEnv; thiz: jobject; ID: jint; X, Y: jfloat; Pressure: jfloat); cdecl;
 procedure Java_zengl_android_ZenGL_zglNativeInputText(env: PJNIEnv; thiz: jobject; text: jstring); cdecl;
 procedure Java_zengl_android_ZenGL_zglNativeBackspace(env: PJNIEnv; thiz: jobject); cdecl;
 function Java_zengl_android_ZenGL_bArrPasToJava(env: PJNIEnv; thiz: jobject): jByteArray; cdecl;
@@ -172,6 +172,7 @@ var
   app_PActivate  : procedure(activate: Boolean);
   app_PEvents    : procedure;
   app_PReset     : procedure;
+  app_PKeyEscape : procedure;
 
   // процедура после прорисовки экрана. Для использования буфферов OpenGL
   app_PostPDraw  : procedure;
@@ -249,8 +250,8 @@ var
 
   {$IfNDef USE_INIT_HANDLE}
   oldTimeDraw: Double;
-  useFPS: LongWord = 30;
-  maxFPS: Single = 1000 / 30;
+  useFPS     : LongWord = 30;
+  deltaFPS   : Single = 1000 / 30;
   // номер таймера опроса событий
   timeAppEvents: LongWord;
   // интервал опроса событий
@@ -306,17 +307,21 @@ begin
     app_PDraw();
     {$IfNDef OLD_METHODS}
     if managerSetOfTools.count > 0 then
+    begin
+      propEl := @managerSetOfTools.propElement[0];
       for i := 0 to managerSetOfTools.count - 1 do
       begin
-        if managerSetOfTools.propElement[i].Element = is_Edit then
+        if (propEl^.Element = is_Edit) and (propEl^.FlagsProp and el_Enable > 0) and (propEl^.FlagsProp and el_Visible > 0) then
           EditDraw(i);
-(*        if managerSetOfTools.propElement[i].Element = is_Label then   пока не созданы
+(*        if propEl^.Element = is_Label then   пока не созданы
           ;
-        if managerSetOfTools.propElement[i].Element = is_Memo then
+        if propEl^.Element = is_Memo then
           ;
-        if managerSetOfTools.propElement[i].Element = is_Button then
+        if propEl^.Element = is_Button then
           ;  *)
+        inc(propEl);
       end;
+    end;
     {$EndIf}
     {$IfDef USE_VKEYBOARD}
     if VisibleMenuChange then
@@ -390,20 +395,34 @@ begin
   {$IfNDef MOBILE}
   {$IfDef USE_EXIT_ESCAPE}
   if keysDown[K_ESCAPE] = True then
-  begin
-    winOn := False;
-    log_Add('Terminate program');
-  end;
+    if Assigned(app_PKeyEscape) then
+      app_PKeyEscape
+    else
+    begin
+      winOn := False;
+      log_Add('Terminate program');
+    end;
   {$EndIf}{$EndIf}
+
+  {$IfDef MAC_COCOA}
+  if (keysDown[K_SUPER_L] or keysDown[K_SUPER_R]) then
+    if keysDown[K_Q] then
+    begin
+      winOn := False;
+      log_Add('Terminate program');
+    end;
+  {$EndIf}
 
   {$IfNDef OLD_METHODS}
   if managerSetOfTools.count > 0 then
     for i := 0 to managerSetOfTools.count - 1 do
     begin
-      if managerSetOfTools.propElement[i].Element = is_Edit then
+      propEl := @managerSetOfTools.propElement[0];
+      if (propEl^.Element = is_Edit) and (propEl^.FlagsProp and el_Enable > 0) and (propEl^.FlagsProp and el_Visible > 0) then
         EventsEdit(i);
-      if managerSetOfTools.propElement[i].Element = is_Memo then
+      if propEl^.Element = is_Memo then
         ;
+      inc(propEl);
     end;
   {$EndIf}
 
@@ -412,9 +431,9 @@ begin
   {$IFDEF USE_JOYSTICK}
   joy_ClearState;
   {$EndIf}
-  {$If (defined(ANDROID) or defined(iOS))}
+  {$IfDef MOBILE}
   touch_ClearState;
-  {$IfEnd}
+  {$EndIf}
 end;
 {$EndIf}
 
@@ -475,11 +494,6 @@ begin
   while winOn do
   begin
     app_ProcessOS();
-    {$IfDef MAC_COCOA}
-    if (keysDown[K_SUPER_L] or keysDown[K_SUPER_R]) then
-      if keysDown[K_Q] then
-        winOn := False;
-    {$EndIf}
   {$EndIf}
     res_Proc();
     {$IFDEF USE_JOYSTICK}
@@ -514,10 +528,10 @@ begin
     appdt := timeLoop;
 
     {$IfNDef USE_INIT_HANDLE}
-    if timer_GetTicks >= (oldTimeDraw + maxFPS) then
+    if timer_GetTicks >= (oldTimeDraw + deltaFPS) then
     begin
       app_Draw();
-      oldTimeDraw := oldTimeDraw + maxFPS;
+      oldTimeDraw := oldTimeDraw + deltaFPS;
     end
     else begin
       u_Sleep(1);
@@ -590,8 +604,21 @@ begin
     mouseDY := mouseY - wndHeight div 2;
   end;
 
-  if (mouseX < 0) or (mouseX > wndWidth) or (mouseY < 0) or (mouseY > wndHeight) then
+  if (mouseX <> xmouse) or (mouseY <> ymouse) then
+    mouseMove := True
+  else
+    mouseMove := False;
+
+  if (mouseX < 0) or (mouseX >= wndWidth) or (mouseY < 0) or (mouseY >= wndHeight) then
   begin
+    if mouseX < 0 then
+      xmouse := 0;
+    if mouseX >= wndWidth then
+      xmouse := wndWidth - 1;
+    if mouseY < 0 then
+      ymouse := 0;
+    if mouseY >= wndHeight then
+      ymouse := wndHeight - 1;
     mouseX := xmouse;
     mouseY := ymouse;
   end;
@@ -832,7 +859,7 @@ begin
 
               keyboardUp(key);
             end;
-    end
+    end;
   end;
 {$ENDIF}
 {$IFDEF WINDOWS}
@@ -2036,12 +2063,12 @@ begin
     begin
       SetMenuProcess(4);
       MenuChange := 4;
-      PkeybFlags^ := PkeybFlags^ or keyboardSymbol;
+      PkeybFlags^ := (PkeybFlags^ or keyboardSymbol) and ($FFFFFFFF - keyboardCaps - keyboardCapsDown);
     end
     else begin
       SetMenuProcess(3);
       MenuChange := 3;
-      PkeybFlags^ := PkeybFlags^ xor keyboardSymbol;
+      PkeybFlags^ := (PkeybFlags^ xor keyboardSymbol);
     end;
   end;
   {$EndIf}
@@ -2140,11 +2167,18 @@ begin
   thread_CSLeave(appLock);
 end;
 
-procedure Java_zengl_android_ZenGL_zglNativeTouch(env: PJNIEnv; thiz: jobject; ID: jint; X, Y: jfloat; Pressure: jint);
+procedure Java_zengl_android_ZenGL_zglNativeTouch(env: PJNIEnv; thiz: jobject; ID: jint; X, Y: jfloat; Pressure: jfloat);
 var
   dX, dY: Integer;
+  Press: Boolean = False;
+  NotPress: Boolean = False;
 begin
   thread_CSEnter(appLock);
+
+  if Pressure > 0 then
+    Press := True;
+  if Pressure <= 0 then
+    NotPress := True;
 
   dX := Abs(round((X - scrAddCX) / scrResCX) - Mobile_Touch[ID].oldX);
   dY := Abs(round((Y - scrAddCY) / scrResCY) - Mobile_Touch[ID].oldY);
@@ -2163,7 +2197,7 @@ begin
   Mobile_Touch[ID].oldX := Mobile_Touch[ID].newX;
   Mobile_Touch[ID].oldY := Mobile_Touch[ID].newY;
 
-  if ((Pressure and 1) > 0) and ((Mobile_Touch[ID].state and is_Press) = 0) then
+  if Press and ((Mobile_Touch[ID].state and is_Press) = 0) then
   begin
     Mobile_Touch[ID].state := is_down or is_Press;
     if (dX <= 10) and (dy <= 10) then
@@ -2179,7 +2213,7 @@ begin
     Mobile_Touch[ID].DBLClickTime := timer_GetTicks;
   end
   else begin
-    if ((Pressure and 1) = 0) and ((Mobile_Touch[ID].state and is_canPress) = 0) then
+    if NotPress and ((Mobile_Touch[ID].state and is_canPress) = 0) then
     begin
       Mobile_Touch[ID].state := is_canPress or is_up;
       Mobile_Touch[ID].newX := - 1;
@@ -2192,7 +2226,7 @@ begin
   begin
     mouseX := Mobile_Touch[ID].oldX;
     mouseY := Mobile_Touch[ID].oldY;
-    if ((Pressure and 1) > 0) and ((mouseAction[ID].state and is_Press) = 0) Then
+    if Press and ((mouseAction[ID].state and is_Press) = 0) Then
     begin
       mouseAction[ID].state := is_Press or is_down;
 
@@ -2203,7 +2237,7 @@ begin
       end;
       mouseAction[ID].DBLClickTime := timer_GetTicks();
     end else
-      if ((Pressure and 1) = 0) and ((mouseAction[ID].state and is_canPress) = 0) Then
+      if NotPress and ((mouseAction[ID].state and is_canPress) = 0) Then
         mouseAction[ID].state := is_canPress or is_up;
   end;
 

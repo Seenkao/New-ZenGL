@@ -21,7 +21,7 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 02.05.2022
+ !!! modification from Serge
 }
 unit zgl_types;
 
@@ -29,10 +29,28 @@ unit zgl_types;
 
 interface
 
+//uses
+  //;
+
 const
+// timer
+  MAX_TIMERS   =  50;        // максимальное количество таймеров.
+
+  // биты работы с таймером
+  t_Stop         =   1;        // таймер останавливается незамедлительно
+  t_Start        =   2;        // таймер создаётся и стартует незамедлительно
+  t_Tiks         =   4;        // используется только внутри таймеров!
+  t_SleepToStart =   8;        // таймер создаётся и запускается с установленной задержкой
+  t_SleepToStop  =  16;        // таймер останавливается через определённое время
+  t_Enable       = 128;        // используется или нет данный таймер (существует или нет?)
+  t_Stop_or_SleepToStart = t_Stop or t_SleepToStart;
+  t_Start_or_SleepToStop = t_Start or t_SleepToStop;
+
 // mouse and touch
   is_down       = $001;                     // нажато в данный момент времени
   is_up         = $002;                     // отпущено в данный момент времени
+  is_click      = is_down;
+  is_canclick   = is_up;
   is_Press      = $004;                     // нажато постоянно
   is_canPress   = $008;                     // отпущенно - по умолчанию
   is_DoubleDown = $010;                     // было произведено двойное нажатие
@@ -52,7 +70,7 @@ const
   MAX_TOUCH      = 10;
 
   // OpenGL
-  ModeUser       = 1;                      // MatrixMode
+  ModeUser       = 1;                       // MatrixMode
   Mode2D         = 2;
   Mode3D         = 3;
   {$IfDef MACOSX}
@@ -60,10 +78,16 @@ const
   CORE_3_2 = 2;
   CORE_4_1 = 3;
   {$EndIf}
-  CORE_VERSION = 1;                      // совместимость с текущей версией и выше
-  COMPATIBILITY_VERSION = 2;             // совместимость с ранними версиями. Нельзя использовать для GL 3.2
-  GL_DEBUG = 4;                          // отладка контекста включена
-  GL_FORWARD_COMPATIBLE = 8;             // вперёд совместимый контекст.
+  CORE_VERSION = 1;                         // совместимость с текущей версией и выше
+  COMPATIBILITY_VERSION = 2;                // совместимость с ранними версиями. Нельзя использовать для GL 3.2
+  GL_DEBUG = 4;                             // отладка контекста включена
+  GL_FORWARD_COMPATIBLE = 8;                // вперёд совместимый контекст.
+
+  // primitives
+  PR2D_FILL   = $010000;
+  PR2D_SMOOTH = $020000;
+  LINE_RGBA   = $040000;
+  LINE_LOOP   = $080000;
 
 {$IFNDEF FPC}
 type
@@ -107,6 +131,22 @@ type
   zglTStringList = record
     Count: Integer;
     Items: array of UTF8String;
+  end;
+
+// timer
+  zglPTimer = ^zglTTimer;
+  zglTTimer = record
+    Interval, SInterval: LongWord;
+    Flags: LongWord;
+    LastTick, LastTickForSleep: Double;
+    OnTimer: procedure;
+  end;
+
+  zglPTimerManager = ^zglTTimerManager;
+  zglTTimerManager = record
+    Count: LongWord;
+    maxTimers: LongWord;
+    Timers: array of zglPTimer;
   end;
 
   // Rus: указатель на цвет в "точной" форме - RGBA - single. От 0 до 1.
@@ -343,6 +383,99 @@ type
 *******************************************************************************)
 
 (*******************************************************************************
+*                                begin memory                                  *
+*******************************************************************************)
+type
+  zglPMemory = ^zglTMemory;
+  zglTMemory = record
+    Memory  : Pointer;
+    Size    : LongWord;
+    Position: LongWord;
+  end;
+(*******************************************************************************
+*                                 end memory                                   *
+*******************************************************************************)
+
+(*******************************************************************************
+*                               begin textures                                 *
+*******************************************************************************)
+const
+  // текстуры
+  TEX_FORMAT_RGBA       = $01;
+  TEX_FORMAT_RGBA_4444  = $02;
+  TEX_FORMAT_RGBA_PVR2  = $10;
+  TEX_FORMAT_RGBA_PVR4  = $11;
+  TEX_FORMAT_RGBA_DXT1  = $20;
+  TEX_FORMAT_RGBA_DXT3  = $21;
+  TEX_FORMAT_RGBA_DXT5  = $22;
+
+  TEX_NO_COLORKEY       = $FF000000;
+
+  TEX_MIPMAP            = $000001;
+  TEX_CLAMP             = $000002;
+  TEX_REPEAT            = $000004;
+  TEX_COMPRESS          = $000008;
+
+  TEX_CONVERT_TO_POT    = $000010;
+  TEX_CALCULATE_ALPHA   = $000020;
+
+  TEX_GRAYSCALE         = $000040;
+  TEX_INVERT            = $000080;
+  TEX_CUSTOM_EFFECT     = $000100;
+
+  TEX_FILTER_NEAREST    = $000200;
+  TEX_FILTER_LINEAR     = $000400;
+  TEX_FILTER_BILINEAR   = $000800;
+  TEX_FILTER_TRILINEAR  = $001000;
+  TEX_FILTER_ANISOTROPY = $002000;
+
+  TEXTURE_FILTER_CLEAR = $ffffff - (TEX_FILTER_NEAREST or TEX_FILTER_LINEAR or TEX_FILTER_BILINEAR or TEX_FILTER_TRILINEAR or
+          TEX_FILTER_ANISOTROPY);
+
+  TEX_DEFAULT_2D        = TEX_CLAMP or TEX_FILTER_LINEAR or TEX_CONVERT_TO_POT or TEX_CALCULATE_ALPHA;
+
+type
+  zglPTextureCoord = ^zglTTextureCoord;
+  zglTTextureCoord = array[0..3] of zglTPoint2D;
+
+  zglTTextureFileLoader = procedure(const FileName: UTF8String; out pData: PByteArray; out W, H, Format: Word);
+  zglTTextureMemLoader  = procedure(const Memory: zglTMemory; out pData: PByteArray; out W, H, Format: Word);
+
+  zglPTexture = ^zglTTexture;
+  zglTTexture = record
+    ID           : LongWord;
+    Width, Height: Word;
+    Format       : Word;
+    U, V         : Single;
+    FramesCoord  : array of zglTTextureCoord;
+    Flags        : LongWord;
+
+//    FrameID      : array of array [0..3] of Integer;
+
+    prev, next   : zglPTexture;
+  end;
+
+  zglPTextureFormat = ^zglTTextureFormat;
+  zglTTextureFormat = record
+    Extension : UTF8String;
+    FileLoader: zglTTextureFileLoader;
+    MemLoader : zglTTextureMemLoader;
+  end;
+
+  zglPTextureManager = ^zglTTextureManager;
+  zglTTextureManager = record
+    Count  : record
+      Items  : Integer;
+      Formats: Integer;
+              end;
+    First  : zglTTexture;
+    Formats: array of zglTTextureFormat;
+  end;
+(*******************************************************************************
+*                                end textures                                  *
+*******************************************************************************)
+
+(*******************************************************************************
 *                           POSIX TYPE DEFINITIONS                             *
 *******************************************************************************)
 type
@@ -381,3 +514,4 @@ type
 implementation
 
 end.
+

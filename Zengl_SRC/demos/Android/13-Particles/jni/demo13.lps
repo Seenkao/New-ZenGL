@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectSession>
+    <PathDelim Value="\"/>
+    <Version Value="12"/>
+    <BuildModes Active="Default"/>
+    <Units Count="4">
+      <Unit0>
+        <Filename Value="demo13.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <IsVisibleTab Value="True"/>
+        <TopLine Value="78"/>
+        <CursorPos X="34" Y="104"/>
+        <UsageCount Value="22"/>
+        <Loaded Value="True"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="..\..\..\..\src\zgl_application.pas"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="13" Y="28"/>
+        <UsageCount Value="10"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="..\..\..\..\src\zgl_config.cfg"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="30"/>
+        <CursorPos X="25" Y="137"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="..\..\..\..\src\zgl_particles_2d.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="430"/>
+        <CursorPos X="8" Y="281"/>
+        <UsageCount Value="10"/>
+      </Unit3>
+    </Units>
+    <JumpHistory Count="6" HistoryIndex="5">
+      <Position1>
+        <Filename Value="demo13.lpr"/>
+        <Caret Line="6" Column="10"/>
+      </Position1>
+      <Position2>
+        <Filename Value="demo13.lpr"/>
+        <Caret Line="147" Column="15" TopLine="121"/>
+      </Position2>
+      <Position3>
+        <Filename Value="demo13.lpr"/>
+        <Caret Line="64" Column="16" TopLine="53"/>
+      </Position3>
+      <Position4>
+        <Filename Value="demo13.lpr"/>
+        <Caret Line="58" Column="6" TopLine="53"/>
+      </Position4>
+      <Position5>
+        <Filename Value="demo13.lpr"/>
+        <Caret Line="40" Column="46" TopLine="31"/>
+      </Position5>
+      <Position6>
+        <Filename Value="demo13.lpr"/>
+        <Caret Line="108" Column="27" TopLine="91"/>
+      </Position6>
+    </JumpHistory>
+    <RunParams>
+      <FormatVersion Value="2"/>
+      <Modes ActiveMode=""/>
+    </RunParams>
+  </ProjectSession>
+</CONFIG>

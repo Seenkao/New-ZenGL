@@ -52,12 +52,16 @@ function mouse_Y : Integer; {$IfDef USE_INLINE}inline;{$EndIf}
 // Rus: возвращаем координаты "X", "Y".
 // Eng: return coordinates "X", "Y".
 function mouse_XY : zglTPoint2D; {$IfDef USE_INLINE}inline;{$EndIf}
-// Rus: возвращаем "DX" (дельта X).
-// Eng: return "DX" (delta X).
+// Rus: возвращаем X относительно центра окна.
+// Eng: return X relative to the center of the window.
 function mouse_DX : Integer; {$IfDef USE_INLINE}inline;{$EndIf}
-// Rus: возвращаем "DY" (дельта Y).
-// Eng: return "DY" (delta Y).
+// Rus: возвращаем Y относительно центра окна.
+// Eng: return Y relative to the center of the window.
 function mouse_DY : Integer; {$IfDef USE_INLINE}inline;{$EndIf}
+
+// Rus: мышь движется.
+// Eng: the mouse is moving.
+function mouse_Move: Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
 
 //    Rus: состояния: Button = M_BLEFT или M_BMIDDLE или M_BRIGHT.
 //    Eng: states: Button = M_BLEFT or M_BMIDDLE or M_BRIGHT.
@@ -87,16 +91,18 @@ function mouseWheelDown: Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
 procedure mouse_ClearState; {$IfDef USE_INLINE}inline;{$EndIf}
 // Rus: блокирование координат мыши.
 // Eng: locking mouse coordinates.
-procedure mouse_Lock(X: Integer = -1; Y: Integer = -1);
+procedure mouse_LockInXY(X: Integer = -1; Y: Integer = -1);
 
 var
   mouseX       : Integer;
   mouseY       : Integer;
+  // это не дельта, это положение мыши относительно центра
   mouseDX      : Integer;
   mouseDY      : Integer;
+  mouseMove    : Boolean = False;
 
   // Rus: три кнопки, с событиями, и у каждой кнопки своя задержка времени.
-  // Eng:
+  // Eng: three buttons, with events, and each button has its own time delay.
   mouseAction: array[0..2] of km_Button;
 
   mouseDblCInt : Integer = 250;
@@ -107,7 +113,8 @@ var
   {$IfDef USE_VKEYBOARD}
   // Rus: События отвечающее за клавиатуру, если их нет, то виртуальная
   //      клавиатура будет "залипать". Это же нужно и для тачпада.
-  // Eng:
+  // Eng: Events responsible for the keyboard, if they are not present, then the
+  //      virtual keyboard will "stick". The same is true for the touchpad.
   mouseLastVKey: array[0..MAX_TOUCH - 1] of LongWord;
   {$EndIf}
 
@@ -146,12 +153,17 @@ begin
   Result := mouseDY;
 end;
 
+function mouse_Move: Boolean;
+begin
+  Result := mouseMove;
+end;
+
 function mouseBDown(Button: Byte): Boolean;
 begin
   {$IfDef FULL_LOGGING}
   if Button > 2 then
   begin
-    log_Add('Error! Out of range in mouseBDown!');
+    log_Add('Error! Out of range in mouse button Down!');
     Result := False;
     Exit;
   end;
@@ -167,7 +179,7 @@ begin
   {$IfDef FULL_LOGGING}
   if Button > 2 then
   begin
-    log_Add('Error! Out of range in mouseBUp!');
+    log_Add('Error! Out of range in mouse button Up!');
     Result := False;
     Exit;
   end;
@@ -183,7 +195,7 @@ begin
   {$IfDef FULL_LOGGING}
   if Button > 2 then
   begin
-    log_Add('Error! Out of range in mouseBClick!');
+    log_Add('Error! Out of range in mouse button Click!');
     Result := False;
     Exit;
   end;
@@ -199,7 +211,7 @@ begin
   {$IfDef FULL_LOGGING}
   if Button > 2 then
   begin
-    log_Add('Error! Out of range in mouseBClick!');
+    log_Add('Error! Out of range in mouse button double Click!');
     Result := False;
     Exit;
   end;
@@ -215,7 +227,7 @@ begin
   {$IfDef FULL_LOGGING}
   if Button > 2 then
   begin
-    log_Add('Error! Out of range in mouseBCanClick!');
+    log_Add('Error! Out of range in mouse button CanClick!');
     Result := False;
     Exit;
   end;
@@ -250,7 +262,7 @@ begin
   mouseAction[M_BRIGHT].state := mouseAction[M_BRIGHT].state and (is_canPress or is_Press);
 end;
 
-procedure mouse_Lock(X: Integer = -1; Y: Integer = -1);
+procedure mouse_LockInXY(X: Integer = -1; Y: Integer = -1);
   {$IFDEF MACOSX}
   var
     Point: CGPoint;

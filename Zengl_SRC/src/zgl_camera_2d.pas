@@ -21,7 +21,7 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 04.08.2020
+ !!! modification from Serge 03.09.2022
 }
 unit zgl_camera_2d;
 
@@ -52,7 +52,18 @@ type
     ZoomY : Single;
   end;
 
-procedure cam2d_Init(out Camera: zglTCamera2D);
+// Rus: инициализация камеры по умолчанию.
+// Eng:
+procedure cam2d_DefInit(out Camera: zglTCamera2D);
+// Rus: инициализация камеры с заданными значениями.
+// Eng:
+procedure cam2d_Init(x, y, angle: Single; out Camera: zglTCamera2D; zoom: Single = 1);
+// Rus: задать координаты центра камеры. Вы должны точно определить координаты
+//      центра камеры, перед тем как их задать!!!
+// Eng:
+procedure cam2d_CenterSet(Camera: zglPCamera2D; x, y: Single);
+// Rus: установка используемой камеры (для прорисовки).
+// Eng:
 procedure cam2d_Set(Camera: zglPCamera2D);
 
 var
@@ -72,7 +83,7 @@ uses
   {$ENDIF}
   zgl_render_2d;
 
-procedure cam2d_Init(out Camera: zglTCamera2D);
+procedure cam2d_DefInit(out Camera: zglTCamera2D);
 begin
   Camera.X        := 0;
   Camera.Y        := 0;
@@ -81,6 +92,24 @@ begin
   Camera.Zoom.Y   := 1;
   Camera.Center.X := (oglWidth - scrSubCX) / 2;
   Camera.Center.Y := (oglHeight - scrSubCY) / 2;
+end;
+
+procedure cam2d_Init(x, y, angle: Single; out Camera: zglTCamera2D; zoom: Single = 1);
+begin
+  Camera.X        := x;
+  Camera.Y        := y;
+  Camera.Angle    := angle;
+  Camera.Zoom.X   := zoom;
+  Camera.Zoom.Y   := zoom;
+  // что-то надо делать с центром... но надо понять что...
+  Camera.Center.X := (oglWidth - scrSubCX) / 2;
+  Camera.Center.Y := (oglHeight - scrSubCY) / 2;
+end;
+
+procedure cam2d_CenterSet(Camera: zglPCamera2D; x, y: Single);
+begin
+  Camera^.Center.X := x;
+  Camera^.Center.Y := y;
 end;
 
 procedure cam2d_Set(Camera: zglPCamera2D);
@@ -97,23 +126,23 @@ begin
     cam2d.OnlyXY := (cam2d.Global.Angle = 0) and (cam2d.Global.Zoom.X = 1) and (cam2d.Global.Zoom.Y = 1);
     if (cam2d.ZoomX <> cam2d.Global.Zoom.X) or (cam2d.ZoomY <> cam2d.Global.Zoom.Y) Then
       render2dClipR := Round(sqrt(sqr((oglWidth - scrSubCX) / cam2d.Global.Zoom.X) + sqr((oglHeight - scrSubCY) / cam2d.Global.Zoom.Y)) / 1.5);
-    cam2d.CX     := cam2d.Global.X + Camera.Center.X;
-    cam2d.CY     := cam2d.Global.Y + Camera.Center.Y;
+    cam2d.CX     := cam2d.Global.X + Camera^.Center.X;
+    cam2d.CY     := cam2d.Global.Y + Camera^.Center.Y;
     cam2d.ZoomX  := cam2d.Global.Zoom.X;
     cam2d.ZoomY  := cam2d.Global.Zoom.Y;
 
     glPushMatrix();
     if not cam2d.OnlyXY Then
     begin
-      glTranslatef(Camera.Center.X, Camera.Center.Y, 0);
-      if (Camera.Zoom.X <> 1) or (Camera.Zoom.Y <> 1) Then
-        glScalef(Camera.Zoom.X, Camera.Zoom.Y, 1);
+      glTranslatef(Camera^.Center.X, Camera^.Center.Y, 0);
       if Camera.Angle <> 0 Then
         glRotatef(Camera.Angle, 0, 0, 1);
-      glTranslatef(- Camera.Center.X, - Camera.Center.Y, 0);
+      if (Camera^.Zoom.X <> 1) or (Camera^.Zoom.Y <> 1) Then
+        glScalef(Camera^.Zoom.X, Camera^.Zoom.Y, 1);
+      glTranslatef(- Camera^.Center.X, - Camera^.Center.Y, 0);
     end;
-    if (Camera.X <> 0) or (Camera.Y <> 0) Then
-      glTranslatef(-Camera.X, -Camera.Y, 0);
+    if (Camera^.X <> 0) or (Camera^.Y <> 0) Then
+      glTranslatef(Camera^.X, Camera^.Y, 0);
 
     sprite2d_InScreen := sprite2d_InScreenCamera;
   end else

@@ -52,8 +52,10 @@ procedure log_Init;
     i : Integer;
     es: UTF8String;
 begin
-  if (appFlags and APP_USE_LOG = 0) Then exit;
-  if log <> FILE_ERROR Then exit;
+  if (appFlags and APP_USE_LOG = 0) Then
+    exit;
+  if (log <> FILE_ERROR) or appLog Then
+    exit;
   appLog   := TRUE;
   logStart := Round(timer_GetTicks());
 
@@ -106,7 +108,8 @@ procedure log_Add(const Message: UTF8String; Timings: Boolean = TRUE);
   var
     str: UTF8String;
 begin
-  if not appLog Then exit;
+  if not appLog Then
+    exit;
   {$IF DEFINED(LINUX) or DEFINED(iOS)}
   if (appLog) and (Pos('ERROR: ', Message) = 0) and (Pos('WARNING: ', Message) = 0) Then
     printf(PAnsiChar(Message + #10), [nil]);

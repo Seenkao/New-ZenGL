@@ -21,7 +21,7 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 04.08.2020
+ !!! modification from Serge
 }
 unit zgl_render_2d;
 
@@ -30,7 +30,7 @@ unit zgl_render_2d;
 interface
 uses
   zgl_gltypeconst,
-  zgl_textures;
+  zgl_types;
 
 procedure batch2d_Begin;
 procedure batch2d_End;
@@ -72,8 +72,7 @@ uses
   zgl_opengles_all,
   {$ENDIF}
   zgl_fx,
-  zgl_camera_2d,
-  zgl_primitives_2d;
+  zgl_camera_2d;
 
 procedure batch2d_Begin;
 begin

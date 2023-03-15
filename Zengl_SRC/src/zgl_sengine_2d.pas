@@ -29,26 +29,26 @@ unit zgl_sengine_2d;
 interface
 
 uses
-  zgl_textures;
+  zgl_types;
 
 type
   zglPSprite2D = ^zglTSprite2D;
   zglPSEngine2D = ^zglTSEngine2D;
 
   zglTSEngine2D = record
-    Count: Integer;
-    List : array of zglPSprite2D;
+    Count: Integer;                                // общее количество спрайтов
+    List : array of zglPSprite2D;                  // перепись всех "спрайтов"
   end;
 
   zglTSprite2D = record
     ID     : Integer;
-    Manager: zglPSEngine2D;
+    Manager: zglPSEngine2D;                        // указатель на менеджер спрайтов
     Texture: zglPTexture;
     Destroy: Boolean;
-    Layer  : Integer;
+    Layer  : Integer;                              // что-то вроде глубины спрайта
     X, Y   : Single;
     W, H   : Single;
-    Angle  : Single;
+    Angle  : Single;                               // угол поворота?
     Frame  : Single;
     Alpha  : Integer;
     FxFlags: LongWord;
@@ -78,6 +78,10 @@ uses
 var
   _sengine : zglTSEngine2D;
   sengine2d: zglPSEngine2D;
+  {$IfDef LINUX}
+  rs0: Single = 0;
+  rs1: Single = 1;
+  {$EndIf}
 
 function sengine2d_AddSprite(Texture: zglPTexture; Layer: Integer; OnInit, OnDraw, OnProc, OnFree: Pointer): zglPSprite2D;
 begin
@@ -93,22 +97,23 @@ begin
 
   zgl_GetMem(Pointer(new), Size);
   sengine2d.List[sengine2d.Count] := new;
-  INC(sengine2d.Count);
 
-  new.ID      := sengine2d.Count - 1;
+  new.ID      := sengine2d.Count;
+
+  INC(sengine2d.Count);
 
   new.Manager := sengine2d;
 
   new.Texture := Texture;
   new.Layer   := Layer;
-  new.X       := 0;
-  new.Y       := 0;
+  new.X       := {$IfDef LINUX}rs0{$Else}0{$EndIf};
+  new.Y       := {$IfDef LINUX}rs0{$Else}0{$EndIf};
 
   new.W       := Round((Texture.FramesCoord[1, 1].X - Texture.FramesCoord[1, 0].X) * Texture.Width / Texture.U);
   new.H       := Round((Texture.FramesCoord[1, 0].Y - Texture.FramesCoord[1, 2].Y) * Texture.Height / Texture.V);
 
-  new.Angle   := 0;
-  new.Frame   := 1;
+  new.Angle   := {$IfDef LINUX}rs0{$Else}0{$EndIf};
+  new.Frame   := {$IfDef LINUX}rs1{$Else}1{$EndIf};
   new.Alpha   := 255;
   new.FxFlags := FX_BLEND;
   new.OnInit  := OnInit;
@@ -117,14 +122,16 @@ begin
   new.OnFree  := OnFree;
   Result      := new;
   if Assigned(Result.OnInit) Then
+    // инициализируем объект, если это надо.
     Result.OnInit(Result^);
 end;
 
 procedure sengine2d_DelSprite(ID: Integer);
-  var
-    i: Integer;
+var
+  i: Integer;
 begin
-  if (ID < 0) or (ID > sengine2d.Count - 1) or (sengine2d.Count = 0) Then exit;
+  if (ID < 0) or (ID > sengine2d.Count - 1) or (sengine2d.Count = 0) Then
+    exit;
 
   if Assigned(sengine2d.List[ID].OnFree) Then
     sengine2d.List[ID].OnFree(sengine2d.List[ID]^);
@@ -132,10 +139,10 @@ begin
   FreeMem(sengine2d.List[ID]);
   sengine2d.List[ID] := nil;
   for i := ID to sengine2d.Count - 2 do
-    begin
-      sengine2d.List[i]    := sengine2d.List[i + 1];
-      sengine2d.List[i].ID := i;
-    end;
+  begin
+    sengine2d.List[i]    := sengine2d.List[i + 1];
+    sengine2d.List[i].ID := i;
+  end;
 
   DEC(sengine2d.Count);
 end;
@@ -194,9 +201,9 @@ begin
 end;
 
 procedure sengine2d_Sort(iLo, iHi: Integer);
-  var
-    lo, hi, mid: Integer;
-    t: zglPSprite2D;
+var
+  lo, hi, mid: Integer;
+  t: zglPSprite2D;
 begin
   lo   := iLo;
   hi   := iHi;
@@ -204,8 +211,10 @@ begin
 
   with sengine2d^ do
   repeat
-    while List[lo].Layer < mid do INC(lo);
-    while List[hi].Layer > mid do DEC(hi);
+    while List[lo].Layer < mid do
+      INC(lo);
+    while List[hi].Layer > mid do
+      DEC(hi);
     if lo <= hi then
     begin
       t          := List[lo];
@@ -216,8 +225,10 @@ begin
     end;
   until lo > hi;
 
-  if hi > iLo Then sengine2d_Sort(iLo, hi);
-  if lo < iHi Then sengine2d_Sort(lo, iHi);
+  if hi > iLo Then
+    sengine2d_Sort(iLo, hi);
+  if lo < iHi Then
+    sengine2d_Sort(lo, iHi);
 end;
 
 procedure sengine2d_SortID(iLo, iHi: Integer);
@@ -231,8 +242,10 @@ begin
 
   with sengine2d^ do
   repeat
-    while List[lo].ID < mid do INC(lo);
-    while List[hi].ID > mid do DEC(hi);
+    while List[lo].ID < mid do
+      INC(lo);
+    while List[hi].ID > mid do
+      DEC(hi);
     if lo <= hi then
     begin
       t          := List[lo];
@@ -243,8 +256,10 @@ begin
     end;
   until lo > hi;
 
-  if hi > iLo Then sengine2d_SortID(iLo, hi);
-  if lo < iHi Then sengine2d_SortID(lo, iHi);
+  if hi > iLo Then
+    sengine2d_SortID(iLo, hi);
+  if lo < iHi Then
+    sengine2d_SortID(lo, iHi);
 end;
 
 procedure sengine2d_Proc;
@@ -274,7 +289,8 @@ begin
     for i := 0 to sengine2d.Count - 1 do
     begin
       s := sengine2d.List[i];
-      if s.Layer > l Then l := s.Layer;
+      if s.Layer > l Then
+        l := s.Layer;
       if s.Layer < l Then
       begin
         sengine2d_Sort(0, sengine2d.Count - 1);

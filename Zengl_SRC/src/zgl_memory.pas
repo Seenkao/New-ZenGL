@@ -29,14 +29,6 @@ interface
 uses
   zgl_types;
 
-type
-  zglPMemory = ^zglTMemory;
-  zglTMemory = record
-    Memory  : Pointer;
-    Size    : LongWord;
-    Position: LongWord;
-end;
-
 // Rus: Загружаем файл FileName в память Memory.
 // Eng: Load file FileName into Memory.
 function  mem_LoadFromFile(out Memory: zglTMemory; const FileName: UTF8String): Boolean;
@@ -52,12 +44,22 @@ function  mem_SaveToFile(var Memory: zglTMemory; const FileName: UTF8String): Bo
 //      FSM_CUR - offset from the current cursor
 //      FSM_END - from the end
 function  mem_Seek(var Memory: zglTMemory; Offset, Mode: Integer): LongWord;
-// Rus: Чтение файла из памяти в указанный буфер, указанного размера Bytes.
-// Eng: Reading a file from memory into the specified buffer of the specified Bytes size.
+// Rus: Чтение из памяти в указанный буфер. Указанное количество байт.
+// Eng: Read from memory into the specified buffer. The specified number of bytes.
 function  mem_Read(var Memory: zglTMemory; var Buffer; Bytes: LongWord): LongWord;
-// Rus: Чтение остатка файла (при чём тут Swap?).
-// Eng: Reading the rest of a file.
+// Rus: Копирование из памяти в указанный буфер. Указанное количество байт.
+// Eng: Copy from memory to the specified buffer. The specified number of bytes.
+function  mem_Copy(var Memory: zglTMemory; var Buffer; Bytes: LongWord): LongWord;
+// Rus: Чтение из памяти в указанный буфер. Указанное количество байт. Обратный
+//      порядок байт.
+// Eng: Read from memory into the specified buffer. The specified number of
+//      bytes. Big endian.
 function  mem_ReadSwap(var Memory: zglTMemory; var Buffer; Bytes: LongWord): LongWord;
+// Rus: Копирование из памяти в указанный буфер. Указанное количество байт.
+//      Обратный порядок байт.
+// Eng: Copy from memory to the specified buffer. The specified number of bytes.
+//      Big endian.
+function  mem_CopySwap(var Memory: zglTMemory; var Buffer; Bytes: LongWord): LongWord;
 // Rus: Записываем в память данные из буфера.
 // Eng: We write data from the buffer into memory.
 function  mem_Write(var Memory: zglTMemory; const Buffer; Bytes: LongWord): LongWord;
@@ -143,9 +145,36 @@ begin
   Result := 0;
 end;
 
+function  mem_Copy(var Memory: zglTMemory; var Buffer; Bytes: LongWord): LongWord;
+var
+  pos: LongWord;
+begin
+  {$IFDEF ENDIAN_BIG}
+  if (Bytes <= 4) and (not forceNoSwap) Then
+  begin
+    Result := mem_CopySwap(Memory, Buffer, Bytes);
+    exit;
+  end;
+  {$ENDIF}
+  pos := Memory.Position;
+  if Bytes > 0 Then
+  begin
+    Result := Memory.Size - pos;
+    if Result > 0 Then
+    begin
+      if Result > Bytes Then
+        Result := Bytes;
+      Move(PByteArray(Memory.Memory)[pos], Buffer, Result);
+      INC(pos, Result);
+      exit;
+    end;
+  end;
+  Result := 0;
+end;
+
 function mem_ReadSwap(var Memory: zglTMemory; var Buffer; Bytes: LongWord): LongWord;
-  var
-    i: LongWord;
+var
+  i: LongWord;
 begin
   {$IFDEF ENDIAN_BIG}
   if forceNoSwap Then
@@ -165,6 +194,37 @@ begin
       begin
         PByteArray(@Buffer)[Result - i - 1] := PByteArray(Memory.Memory)[Memory.Position];
         INC(Memory.Position);
+      end;
+      exit;
+    end;
+  end;
+  Result := 0;
+end;
+
+function  mem_CopySwap(var Memory: zglTMemory; var Buffer; Bytes: LongWord): LongWord;
+var
+  i, pos: LongWord;
+begin
+
+  {$IFDEF ENDIAN_BIG}
+  if forceNoSwap Then
+  begin
+    Result := mem_Copy(Memory, Buffer, Bytes);
+    exit;
+  end;
+  {$ENDIF}
+  pos := Memory.Position;
+  if Bytes > 0 Then
+  begin
+    Result := Memory.Size - pos;
+    if Result > 0 Then
+    begin
+      if Result > Bytes Then
+        Result := Bytes;
+      for i := 0 to Result - 1 do
+      begin
+        PByteArray(@Buffer)[Result - i - 1] := PByteArray(Memory.Memory)[pos];
+        INC(pos);
       end;
       exit;
     end;

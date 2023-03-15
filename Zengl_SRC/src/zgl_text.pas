@@ -68,6 +68,9 @@ function  text_GetWidth(fnt: LongWord; const Text: UTF8String; Step: Single = 0.
 // Rus: возвращаем высоту текста.
 // Eng: return the height of the text.
 function  text_GetHeight(fnt: LongWord; Width: Single; const Text: UTF8String; Step: Single = 0.0): Single;
+// Rus: запрос начальных координат для цетрированного текста. Возвращает координаты X и Y.
+// Eng: requesting initial coordinates for centered text. Returns the X and Y coordinates.
+function  text_GetXY(fnt: LongWord; const Rect: zglTRect2D; const Text: UTF8String; Flags: LongWord = TEXT_HALIGN_CENTER or TEXT_VALIGN_CENTER): zglTPoint2D;
 procedure textFx_SetLength(Length: Integer; LastCoord: zglPPoint2D = nil; LastCharDesc: zglPCharDesc = nil);
 // Index - size, fnt - num font
 procedure setFontTextScale(Index: LongWord; fnt: LongWord);
@@ -162,12 +165,12 @@ var
   textWords     : array of zglTTextWord;
   textWordsCount: Integer;
   textLinesCount: Integer;
+  useFont       : zglPFont;
 
 procedure setFontTextScale(Index: LongWord; fnt: LongWord);
 var
   i: Integer;
   charDesc: zglPCharDesc;
-  useFont: zglPFont;
 begin
   if fnt > MAX_USE_FONT then
     exit;
@@ -185,8 +188,6 @@ begin
     charDesc.xx2 := charDesc._x2 * useFont.Scale;
     charDesc.yy2 := charDesc._y2 * useFont.Scale;
   end;
-//  useFont._ShiftP63 := useFont.CharDesc[63]^.ShiftP * useFont.Scale * 1.5;
-  useFont := nil;
 end;
 
 procedure setScallingOff(flag: Boolean);
@@ -243,7 +244,6 @@ var
   newWord   : Boolean;
   lineEnd   : Boolean;
   lineFeed  : Boolean;
-  useFont   : zglPFont;
 begin
   if (Text = '') or ((managerFont.Font[fnt].Flags and UseFnt) = 0) Then exit;
 
@@ -266,7 +266,7 @@ begin
   begin
     lc   := c;
     j    := i;
-    c    := utf8_toUnicode(Text, i, @i);
+    c    := utf8_GetID(Text, i, @i);
     imax := Integer(i > Length(Text));
 
     if (not startWord) and ((c = 32) or (c <> 10)) Then
@@ -322,7 +322,7 @@ begin
 
     if lineFeed or lineEnd Then
     begin
-      y := y + Round(useFont.MaxHeight * useFont.Scale);
+      y := y + Round(useFont.MaxHeight * useFont.Scale) + 1;
       textWords[newLine].X := x;
       textWords[newLine].Y := y;
       for j := newLine + 1 to curWord - 1 do
@@ -375,7 +375,6 @@ begin
       for i := 0 to textWordsCount - 1 do
         textWords[i].Y := textWords[i].Y + y;
     end;
-  useFont := nil;
 end;
 
 procedure text_Draw(fnt: LongWord; X, Y: Single; const Text: UTF8String; Flags: LongWord = 0);
@@ -386,7 +385,6 @@ procedure text_Draw(fnt: LongWord; X, Y: Single; const Text: UTF8String; Flags: 
     sx      : Single;
     lastPage: Integer;
     mode    : Integer;
-    useFont : zglPFont;
 begin
   if fnt > MAX_USE_FONT then
     exit;
@@ -419,7 +417,7 @@ begin
   FillChar(quad[0], SizeOf(zglTPoint2D) * 4, 0);
   charDesc := nil;
   lastPage := -1;
-  c := utf8_toUnicode(Text, 1, @i);
+  c := utf8_GetID(Text, 1, @i);
   s := 1;
   i := 1;
   if Flags and TEXT_FX_VCA > 0 Then
@@ -454,7 +452,7 @@ begin
       else
         Y := Y + useFont.MaxHeight * useFont.Scale;
     end;
-    c := utf8_toUnicode(Text, i, @i);
+    c := utf8_GetID(Text, i, @i);
 
     if (Flags and TEXT_FX_LENGTH > 0) and (s > textLength) Then
     begin
@@ -516,12 +514,13 @@ begin
       quad[2].Y := Y + (charDesc.ShiftY + useFont.MaxHeight + useFont.Padding[PaddingY2]) * useScaleEx;
     end else
     begin
-      quad[1].X := X + charDesc.xx2;
       quad[0].X := X + charDesc.xx1;
-
       quad[0].Y := Y + charDesc.yy1;
+
+      quad[1].X := X + charDesc.xx2;
       quad[2].Y := Y + charDesc.yy2;
     end;
+    // ну и фиг с ним, засуну всё сюда.
     quad[1].Y := quad[0].Y;
     quad[2].X := quad[1].X;
     quad[3].X := quad[0].X;
@@ -529,27 +528,27 @@ begin
 
     if Flags and TEXT_FX_VCA > 0 Then
     begin
-      glColor4f(fx2dVCA[0, 0], fx2dVCA[0, 1], fx2dVCA[0, 2], fx2dVCA[0, 3]);
+      {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[0, 0], fx2dVCA[0, 1], fx2dVCA[0, 2], fx2dVCA[0, 3]);
       glTexCoord2fv(@charDesc.TexCoords[0]);
       glVertex2fv(@quad[0]);
 
-      glColor4f(fx2dVCA[1, 0], fx2dVCA[1, 1], fx2dVCA[1, 2], fx2dVCA[1, 3]);
+      {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[1, 0], fx2dVCA[1, 1], fx2dVCA[1, 2], fx2dVCA[1, 3]);
       glTexCoord2fv(@charDesc.TexCoords[1]);
       glVertex2fv(@quad[1]);
 
-      glColor4f(fx2dVCA[2, 0], fx2dVCA[2, 1], fx2dVCA[2, 2], fx2dVCA[2, 3]);
+      {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[2, 0], fx2dVCA[2, 1], fx2dVCA[2, 2], fx2dVCA[2, 3]);
       glTexCoord2fv(@charDesc.TexCoords[2]);
       glVertex2fv(@quad[2]);
 
-      glColor4f(fx2dVCA[4, 0], fx2dVCA[4, 1], fx2dVCA[4, 2], fx2dVCA[4, 3]);
+      {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[2, 0], fx2dVCA[2, 1], fx2dVCA[2, 2], fx2dVCA[2, 3]);
       glTexCoord2fv(@charDesc.TexCoords[2]);
       glVertex2fv(@quad[2]);
 
-      glColor4f(fx2dVCA[5, 0], fx2dVCA[5, 1], fx2dVCA[5, 2], fx2dVCA[5, 3]);
+      {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[3, 0], fx2dVCA[3, 1], fx2dVCA[3, 2], fx2dVCA[3, 3]);
       glTexCoord2fv(@charDesc.TexCoords[3]);
       glVertex2fv(@quad[3]);
 
-      glColor4f(fx2dVCA[3, 0], fx2dVCA[3, 1], fx2dVCA[3, 2], fx2dVCA[3, 3]);
+      {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[1, 0], fx2dVCA[1, 1], fx2dVCA[1, 2], fx2dVCA[1, 3]);
       glTexCoord2fv(@charDesc.TexCoords[0]);
       glVertex2fv(@quad[0]);
     end else
@@ -580,7 +579,6 @@ begin
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_BLEND);
   end;
-  useFont := nil;
 end;
 
 procedure text_DrawEx(fnt: LongWord; X, Y, Scale, Step: Single; const Text: UTF8String; {$IfDef OLD_METHODS} Alpha: Byte = 255; Color: LongWord = $FFFFFFFF;{$Else} Color: LongWord = cl_White;{$EndIf} Flags: LongWord = 0);
@@ -623,7 +621,8 @@ procedure text_DrawInRect(fnt: LongWord; const Rect: zglTRect2D; const Text: UTF
     i, j, b : Integer;
     NewFlags: Integer;
 begin
-  if (Text = '') or ((managerFont.Font[fnt].Flags and UseFnt) = 0) Then exit;
+  if (Text = '') or ((managerFont.Font[fnt].Flags and UseFnt) = 0) Then
+    exit;
 
   text_CalcRect(fnt, Rect, Text, Flags);
 
@@ -687,7 +686,6 @@ var
   i: Integer;
   c: LongWord;
   lResult: Single;
-  useFont: zglPFont;
 begin
   lResult := 0;
   Result  := 0;
@@ -696,7 +694,7 @@ begin
   useFont := managerFont.Font[fnt];
   while i <= Length(Text) do
   begin
-    c := utf8_toUnicode(Text, i, @i);
+    c := utf8_GetID(Text, i, @i);
     if c = 10 Then
     begin
       lResult := Result;
@@ -713,8 +711,8 @@ begin
 end;
 
 function text_GetHeight(fnt: LongWord; Width: Single; const Text: UTF8String; Step: Single = 0.0): Single;
-  var
-    Rect: zglTRect2D;
+var
+  Rect: zglTRect2D;
 begin
   if (Text = '') or ((managerFont.Font[fnt].Flags and UseFnt) = 0) Then
   begin
@@ -727,12 +725,23 @@ begin
   Rect.W    := Width;
   Rect.H    := 0;
   textStep  := Step;
+  useFont := managerFont.Font[fnt];
   text_CalcRect(fnt, Rect, Text, TEXT_HALIGN_LEFT);
   if Off_TextScale Then
-    Result := textWords[textWordsCount - 1].Y - textWords[0].Y + managerFont.Font[fnt].MaxHeight * useScaleEx
+    Result := textWords[textWordsCount - 1].Y - textWords[0].Y + useFont.MaxHeight * useScaleEx
   else
-    Result := textWords[textWordsCount - 1].Y - textWords[0].Y + managerFont.Font[fnt].MaxHeight * managerFont.Font[fnt].Scale;
+    Result := textWords[textWordsCount - 1].Y - textWords[0].Y + useFont.MaxHeight * useFont.Scale;
   textStep  := 0;
+end;
+
+function text_GetXY(fnt: LongWord; const Rect: zglTRect2D;
+  const Text: UTF8String; Flags: LongWord): zglTPoint2D;
+begin
+  if (Text = '') or ((managerFont.Font[fnt].Flags and UseFnt) = 0) Then exit;
+
+  text_CalcRect(fnt, Rect, Text, Flags);
+  Result.X := textWords[0].X;
+  Result.Y := textWords[0].Y;
 end;
 
 procedure textFx_SetLength(Length: Integer; LastCoord: zglPPoint2D = nil; LastCharDesc: zglPCharDesc = nil);
@@ -772,6 +781,7 @@ begin
     begin
       file_Write(f, Buf[1], Length(Buf));
       file_Close(f);
+      log_Add('File ' + FileName + ' saved.');
       Result := True;
     end;
 end;
@@ -779,4 +789,8 @@ end;
 initialization
   SetLength(textWords, 1024);
 
+finalization
+  SetLength(textWords, 0);
+
 end.
+

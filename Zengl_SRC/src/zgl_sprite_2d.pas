@@ -59,7 +59,6 @@ const
 
   {$IfDef LINUX}
 var
-  rs0: Single = 0;
   rs2: Single = 2;
   {$EndIf}
 
@@ -197,36 +196,36 @@ begin
   if FX and FX_COLOR > 0 Then
     begin
       fx2dAlpha^ := Alpha / 255;
-      glColor4f(fx2dColor[0], fx2dColor[1], fx2dColor[2], fx2dColor[3]);
+      {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dColor[0], fx2dColor[1], fx2dColor[2], fx2dColor[3]);
     end else
     begin
       fx2dAlphaDef^ := Alpha / 255;
-      glColor4f(fx2dColorDef[0], fx2dColorDef[1], fx2dColorDef[2], fx2dColorDef[3]);
+      {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dColorDef[0], fx2dColorDef[1], fx2dColorDef[2], fx2dColorDef[3]);
     end;
 
   if FX and FX2D_VCA > 0 Then
     begin
-      glColor4f(fx2dVCA[0, 0], fx2dVCA[0, 1], fx2dVCA[0, 2], fx2dVCA[0, 3]);
+      {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[0, 0], fx2dVCA[0, 1], fx2dVCA[0, 2], fx2dVCA[0, 3]);
       glTexCoord2fv(@TexCoord[tci[0]]);
       glVertex2fv(@quad[0]);
 
-      glColor4f(fx2dVCA[1, 0], fx2dVCA[1, 1], fx2dVCA[1, 2], fx2dVCA[1, 3]);
+      {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[1, 0], fx2dVCA[1, 1], fx2dVCA[1, 2], fx2dVCA[1, 3]);
       glTexCoord2fv(@TexCoord[tci[1]]);
       glVertex2fv(@quad[1]);
 
-      glColor4f(fx2dVCA[2, 0], fx2dVCA[2, 1], fx2dVCA[2, 2], fx2dVCA[2, 3]);
+      {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[2, 0], fx2dVCA[2, 1], fx2dVCA[2, 2], fx2dVCA[2, 3]);
       glTexCoord2fv(@TexCoord[tci[2]]);
       glVertex2fv(@quad[2]);
 
-      glColor4f(fx2dVCA[3, 0], fx2dVCA[3, 1], fx2dVCA[3, 2], fx2dVCA[3, 3]);
+      {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[2, 0], fx2dVCA[2, 1], fx2dVCA[2, 2], fx2dVCA[2, 3]);
       glTexCoord2fv(@TexCoord[tci[2]]);
       glVertex2fv(@quad[2]);
 
-      glColor4f(fx2dVCA[4, 0], fx2dVCA[4, 1], fx2dVCA[4, 2], fx2dVCA[4, 3]);
+      {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[3, 0], fx2dVCA[3, 1], fx2dVCA[3, 2], fx2dVCA[3, 3]);
       glTexCoord2fv(@TexCoord[tci[3]]);
       glVertex2fv(@quad[3]);
 
-      glColor4f(fx2dVCA[5, 0], fx2dVCA[5, 1], fx2dVCA[5, 2], fx2dVCA[5, 3]);
+      {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[0, 0], fx2dVCA[0, 1], fx2dVCA[0, 2], fx2dVCA[0, 3]);
       glTexCoord2fv(@TexCoord[tci[0]]);
       glVertex2fv(@quad[0]);
     end else
@@ -390,36 +389,36 @@ begin
   if FX and FX_COLOR > 0 Then
     begin
       fx2dAlpha^ := Alpha / 255;
-      glColor4f(fx2dColor[0], fx2dColor[1], fx2dColor[2], fx2dColor[3]);
+      {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dColor[0], fx2dColor[1], fx2dColor[2], fx2dColor[3]);
     end else
       begin
         fx2dAlphaDef^ := Alpha / 255;
-        glColor4f(fx2dColorDef[0], fx2dColorDef[1], fx2dColorDef[2], fx2dColorDef[3]);
+        {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dColorDef[0], fx2dColorDef[1], fx2dColorDef[2], fx2dColorDef[3]);
       end;
 
   if FX and FX2D_VCA > 0 Then
     begin
-      glColor4f(fx2dVCA[0, 0], fx2dVCA[0, 1], fx2dVCA[0, 2], fx2dVCA[0, 3]);
+      {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[0, 0], fx2dVCA[0, 1], fx2dVCA[0, 2], fx2dVCA[0, 3]);
       glTexCoord2fv(@tc[tci[0]]);
       glVertex2fv(@quad[0]);
 
-      glColor4f(fx2dVCA[1, 0], fx2dVCA[1, 1], fx2dVCA[1, 2], fx2dVCA[1, 3]);
+      {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[1, 0], fx2dVCA[1, 1], fx2dVCA[1, 2], fx2dVCA[1, 3]);
       glTexCoord2fv(@tc[tci[1]]);
       glVertex2fv(@quad[1]);
 
-      glColor4f(fx2dVCA[2, 0], fx2dVCA[2, 1], fx2dVCA[2, 2], fx2dVCA[2, 3]);
+      {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[2, 0], fx2dVCA[2, 1], fx2dVCA[2, 2], fx2dVCA[2, 3]);
       glTexCoord2fv(@tc[tci[2]]);
       glVertex2fv(@quad[2]);
 
-      glColor4f(fx2dVCA[3, 0], fx2dVCA[3, 1], fx2dVCA[3, 2], fx2dVCA[3, 3]);
+      {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[2, 0], fx2dVCA[2, 1], fx2dVCA[2, 2], fx2dVCA[2, 3]);
       glTexCoord2fv(@tc[tci[2]]);
       glVertex2fv(@quad[2]);
 
-      glColor4f(fx2dVCA[4, 0], fx2dVCA[4, 1], fx2dVCA[4, 2], fx2dVCA[4, 3]);
+      {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[3, 0], fx2dVCA[3, 1], fx2dVCA[3, 2], fx2dVCA[3, 3]);
       glTexCoord2fv(@tc[tci[3]]);
       glVertex2fv(@quad[3]);
 
-      glColor4f(fx2dVCA[5, 0], fx2dVCA[5, 1], fx2dVCA[5, 2], fx2dVCA[5, 3]);
+      {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[0, 0], fx2dVCA[0, 1], fx2dVCA[0, 2], fx2dVCA[0, 3]);
       glTexCoord2fv(@tc[tci[0]]);
       glVertex2fv(@quad[0]);
     end else
@@ -465,7 +464,7 @@ var
   x1s, x2s, _y1s, _y2s: Single;
 begin
   if not Assigned(Texture) Then
-  exit;
+    exit;
 
   if FX and FX2D_SCALE > 0 Then
   begin
@@ -579,7 +578,7 @@ begin
   begin
     if FX and FX_BLEND > 0 Then
       glEnable(GL_BLEND)
-     else
+    else
       glEnable(GL_ALPHA_TEST);
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, Texture^.ID);
@@ -590,37 +589,36 @@ begin
   if FX and FX_COLOR > 0 Then
   begin
     fx2dAlpha^ := Alpha / 255;
-    glColor4f(fx2dColor[0], fx2dColor[1], fx2dColor[2], fx2dColor[3]);
+    {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dColor[0], fx2dColor[1], fx2dColor[2], fx2dColor[3]);
   end else
   begin
     fx2dAlphaDef^ := Alpha / 255;
-    glColor4f(fx2dColorDef[0], fx2dColorDef[1], fx2dColorDef[2], fx2dColorDef[3]);
-    glColor4f(1, 1, 1, 1);
+    {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dColorDef[0], fx2dColorDef[1], fx2dColorDef[2], fx2dColorDef[3]);
   end;
 
   if FX and FX2D_VCA > 0 Then
   begin
-    glColor4f(fx2dVCA[0, 0], fx2dVCA[0, 1], fx2dVCA[0, 2], fx2dVCA[0, 3]);
+    {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[0, 0], fx2dVCA[0, 1], fx2dVCA[0, 2], fx2dVCA[0, 3]);
     glTexCoord2fv(@tc[tci[0]]);
     glVertex2fv(@quad[0]);
 
-    glColor4f(fx2dVCA[1, 0], fx2dVCA[1, 1], fx2dVCA[1, 2], fx2dVCA[1, 3]);
+    {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[1, 0], fx2dVCA[1, 1], fx2dVCA[1, 2], fx2dVCA[1, 3]);
     glTexCoord2fv(@tc[tci[1]]);
     glVertex2fv(@quad[1]);
 
-    glColor4f(fx2dVCA[2, 0], fx2dVCA[2, 1], fx2dVCA[2, 2], fx2dVCA[2, 3]);
+    {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[2, 0], fx2dVCA[2, 1], fx2dVCA[2, 2], fx2dVCA[2, 3]);
     glTexCoord2fv(@tc[tci[2]]);
     glVertex2fv(@quad[2]);
 
-    glColor4f(fx2dVCA[3, 0], fx2dVCA[3, 1], fx2dVCA[3, 2], fx2dVCA[3, 3]);
+    {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[2, 0], fx2dVCA[2, 1], fx2dVCA[2, 2], fx2dVCA[2, 3]);
     glTexCoord2fv(@tc[tci[2]]);
     glVertex2fv(@quad[2]);
 
-    glColor4f(fx2dVCA[4, 0], fx2dVCA[4, 1], fx2dVCA[4, 2], fx2dVCA[4, 3]);
+    {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[3, 0], fx2dVCA[3, 1], fx2dVCA[3, 2], fx2dVCA[3, 3]);
     glTexCoord2fv(@tc[tci[3]]);
     glVertex2fv(@quad[3]);
 
-    glColor4f(fx2dVCA[5, 0], fx2dVCA[5, 1], fx2dVCA[5, 2], fx2dVCA[5, 3]);
+    {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[0, 0], fx2dVCA[0, 1], fx2dVCA[0, 2], fx2dVCA[0, 3]);
     glTexCoord2fv(@tc[tci[0]]);
     glVertex2fv(@quad[0]);
   end else
@@ -796,36 +794,36 @@ begin
   if FX and FX_COLOR > 0 Then
   begin
     fx2dAlpha^ := Alpha / 255;
-    glColor4f(fx2dColor[0], fx2dColor[1], fx2dColor[2], fx2dColor[3]);
+    {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dColor[0], fx2dColor[1], fx2dColor[2], fx2dColor[3]);
   end else
   begin
     fx2dAlphaDef^ := Alpha / 255;
-    glColor4f(fx2dColorDef[0], fx2dColorDef[1], fx2dColorDef[2], fx2dColorDef[3]);
+    {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dColorDef[0], fx2dColorDef[1], fx2dColorDef[2], fx2dColorDef[3]);
   end;
 
   if FX and FX2D_VCA > 0 Then
   begin
-    glColor4f(fx2dVCA[0, 0], fx2dVCA[0, 1], fx2dVCA[0, 2], fx2dVCA[0, 3]);
+    {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[0, 0], fx2dVCA[0, 1], fx2dVCA[0, 2], fx2dVCA[0, 3]);
     glTexCoord2f(tX + tU, tY + tV);
     glVertex2fv(@quad[0]);
 
-    glColor4f(fx2dVCA[1, 0], fx2dVCA[1, 1], fx2dVCA[1, 2], fx2dVCA[1, 3]);
+    {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[1, 0], fx2dVCA[1, 1], fx2dVCA[1, 2], fx2dVCA[1, 3]);
     glTexCoord2f(tW - tU, tY + tV);
     glVertex2fv(@quad[1]);
 
-    glColor4f(fx2dVCA[2, 0], fx2dVCA[2, 1], fx2dVCA[2, 2], fx2dVCA[2, 3]);
+    {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[2, 0], fx2dVCA[2, 1], fx2dVCA[2, 2], fx2dVCA[2, 3]);
     glTexCoord2f(tW - tU, tH - tV);
     glVertex2fv(@quad[2]);
 
-    glColor4f(fx2dVCA[3, 0], fx2dVCA[3, 1], fx2dVCA[3, 2], fx2dVCA[3, 3]);
+    {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[2, 0], fx2dVCA[2, 1], fx2dVCA[2, 2], fx2dVCA[2, 3]);
     glTexCoord2f(tW - tU, tH - tV);
     glVertex2fv(@quad[2]);
 
-    glColor4f(fx2dVCA[4, 0], fx2dVCA[4, 1], fx2dVCA[4, 2], fx2dVCA[4, 3]);
+    {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[3, 0], fx2dVCA[3, 1], fx2dVCA[3, 2], fx2dVCA[3, 3]);
     glTexCoord2f(tX + tU, tH - tV);
     glVertex2fv(@quad[3]);
 
-    glColor4f(fx2dVCA[5, 0], fx2dVCA[5, 1], fx2dVCA[5, 2], fx2dVCA[5, 3]);
+    {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[0, 0], fx2dVCA[0, 1], fx2dVCA[0, 2], fx2dVCA[0, 3]);
     glTexCoord2f(tX + tU, tY + tV);
     glVertex2fv(@quad[0]);
   end else

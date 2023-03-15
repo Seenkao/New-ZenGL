@@ -84,12 +84,11 @@ const
     libGLES_CM = 'libGLESv1_CM.so';
     libGLESv1  = 'libGLESv1_CM.so';
     libGLESv2  = 'libGLESv2.so';
-    libGLU     = 'libGLU';
     {$ENDIF}
   {$ELSE}
     // нужен этот дальнейший код или нет? Может для 32-х битных систем?
     {$IFDEF LINUX}
-      {$IFNDEF USE_AMD_DRIVER}
+      {$IFNDEF USE_AMD_DRIVERS}
       libEGL     = 'libEGL.so';
       libGLES_CM = 'libGLES_CM.so';
       libGLESv1  = 'libGLESv1.so';
@@ -874,7 +873,7 @@ const
   GL_MULTISAMPLE_BUFFER_BIT6_QCOM            = $40000000;
   GL_MULTISAMPLE_BUFFER_BIT7_QCOM            = $80000000;
   GL_WRITEONLY_RENDERING_QCOM                = $8823;        *)
-
+  {$IfNDef MOBILE}
   // Triangulation
   GLU_TESS_BEGIN                    = $18704;
   GLU_TESS_VERTEX                   = $18705;
@@ -888,6 +887,7 @@ const
   GLU_TESS_ERROR_DATA               = $1870D;
   GLU_TESS_EDGE_FLAG_DATA           = $1870E;
   GLU_TESS_COMBINE_DATA             = $1870F;
+  {$EndIf}
 
 type
   GLenum     = Cardinal;      PGLenum     = ^GLenum;
@@ -915,7 +915,7 @@ var
   glShadeModel          : procedure(mode: GLenum); stdcall;
   glReadPixels          : procedure(x, y: GLint; width, height: GLsizei; format, atype: GLenum; pixels: Pointer); stdcall;
   // Color
-  _glColor4f            : procedure(red, green, blue, alpha: GLfloat); stdcall;
+  glColor4f             : procedure(red, green, blue, alpha: GLfloat); stdcall;
   // Clear
   glClear               : procedure(mask: GLbitfield); stdcall;
   glClearColor          : procedure(red, green, blue, alpha: GLclampf); stdcall;
@@ -1249,7 +1249,7 @@ var
 // Color
   procedure glColor4ub(red, green, blue, alpha: GLubyte); {$IFDEF USE_INLINE} inline; {$ENDIF}    // ovveride
   procedure glColor4ubv(v: PGLubyte); {$IFDEF USE_INLINE} inline; {$ENDIF}                        // nothing
-  procedure glColor4f(red, green, blue, alpha: GLfloat); {$IFDEF USE_INLINE} inline; {$ENDIF}     // ovveride
+  procedure _glColor4f(red, green, blue, alpha: GLfloat); {$IFDEF USE_INLINE} inline; {$ENDIF}     // ovveride
   // Matrix
   procedure gluPerspective(fovy, aspect, zNear, zFar: GLdouble);
   // Vertex
@@ -1279,6 +1279,11 @@ type
   EGLNativeDisplayType = Integer;
   EGLNativeWindowType  = Pointer;
   {$ENDIF}
+  {$IfDef MACOSX}
+  EGLNativeDisplayType = longint;
+  EGLNativePixmapType = pointer;
+  EGLNativeWindowType = pointer;
+  {$EndIf}
   EGLBoolean      = LongBool;
   EGLint          = LongInt;
   PEGLint         = ^EGLint;
@@ -1543,7 +1548,7 @@ begin
   glReadPixels            := dlsym( glesLibrary, 'glReadPixels' );
   glClear                 := dlsym( glesLibrary, 'glClear' );
   glClearColor            := dlsym( glesLibrary, 'glClearColor' );
-  _glColor4f               := dlsym( glesLibrary, 'glColor4f' );
+  glColor4f               := dlsym( glesLibrary, 'glColor4f' );
   {$IF DEFINED(USE_GLES_ON_DESKTOP) and DEFINED(USE_AMD_DRIVERS)}
   glClearDepthf           := dlsym( glesLibrary, 'glClearDepth' );
   {$ELSE}
@@ -1756,10 +1761,10 @@ end;
 
 procedure glColor4ub(red, green, blue, alpha: GLubyte);
 begin
-  PByteArray( @bColor )[ 0 ] := red;
-  PByteArray( @bColor )[ 1 ] := green;
-  PByteArray( @bColor )[ 2 ] := blue;
-  PByteArray( @bColor )[ 3 ] := alpha;
+  PByteArray(@bColor)[0] := red;
+  PByteArray(@bColor)[1] := green;
+  PByteArray(@bColor)[2] := blue;
+  PByteArray(@bColor)[3] := alpha;
 end;
 
 procedure glColor4ubv(v: PGLubyte);
@@ -1767,12 +1772,12 @@ begin
   bColor := PLongWord( v )^;
 end;
 
-procedure glColor4f(red, green, blue, alpha: GLfloat);
+procedure _glColor4f(red, green, blue, alpha: GLfloat);
 begin
-  PByteArray( @bColor )[ 0 ] := Round( red * 255 );
-  PByteArray( @bColor )[ 1 ] := Round( green * 255 );
-  PByteArray( @bColor )[ 2 ] := Round( blue * 255 );
-  PByteArray( @bColor )[ 3 ] := Round( alpha * 255 );
+  PByteArray(@bColor)[0] := Round(red * 255);
+  PByteArray(@bColor)[1] := Round(green * 255);
+  PByteArray(@bColor)[2] := Round(blue * 255);
+  PByteArray(@bColor)[3] := Round(alpha * 255);
 end;
 
 {$IFDEF ANDROID}

@@ -21,7 +21,7 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 24.02.2022
+ !!! modification from Serge
 }
 unit zgl_primitives_2d;
 
@@ -38,12 +38,6 @@ uses
   gegl_color
   {$EndIf}
   ;
-
-const
-  PR2D_FILL   = $010000;
-  PR2D_SMOOTH = $020000;
-  LINE_RGBA   = $040000;
-  LINE_LOOP   = $080000;
 
 // Rus: Точка с определёнными координатами и цветом.
 // Eng: A point with specified coordinates and color.
@@ -114,12 +108,12 @@ uses
   {$ENDIF}
   zgl_render_2d;
 
-{$IFDEF LINUX}
+{$IfDef LINUX}
 var
   rv_0_5: Single = 0.5;
   rv_1: Single = 1;
   rv_360: Single = 360;
-{$ENDIF}
+{$EndIf}
 
 procedure pr2d_Pixel(X, Y: Single; {$IfNDef OLD_METHODS}numColor: LongWord{$Else}Color: LongWord; Alpha: Byte = 255{$EndIf});
 begin
@@ -132,9 +126,9 @@ begin
   {$IfDef OLD_METHODS}
   glColor4ub( ( Color and $FF0000 ) shr 16, ( Color and $FF00 ) shr 8, Color and $FF, Alpha );
   {$Else}
-  Set_numColor(numColor);
+  Set_ToNumColor(numColor);
   {$EndIf}
-  glVertex2f(X + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF}, Y + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF});
+  glVertex2f(X + {$IfDef LINUX}rv_0_5{$Else}0.5{$EndIf}, Y + {$IfDef LINUX}rv_0_5{$Else}0.5{$EndIf});
 
   if not b2dStarted Then
   begin
@@ -159,21 +153,26 @@ begin
     glBegin( GL_LINES );
   end;
 
+  X1 := X1 + {$IfDef LINUX}rv_0_5{$Else}0.5{$EndIf};
+  Y1 := Y1 + {$IfDef LINUX}rv_0_5{$Else}0.5{$EndIf};
+  X2 := X2 + {$IfDef LINUX}rv_0_5{$Else}0.5{$EndIf};
+  Y2 := Y2 + {$IfDef LINUX}rv_0_5{$Else}0.5{$EndIf};
+
   if FX and FX2D_VCA > 0 Then
   begin
-    glColor4f(fx2dVCA[0, 0], fx2dVCA[0, 1], fx2dVCA[0, 2], fx2dVCA[0, 3]);
-    glVertex2f( X1 + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF}, Y1 + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF} );
-    glColor4f(fx2dVCA[1, 0], fx2dVCA[1, 1], fx2dVCA[1, 2], fx2dVCA[1, 3]);
-    glVertex2f( X2 + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF}, Y2 + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF} );
+    {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[0, 0], fx2dVCA[0, 1], fx2dVCA[0, 2], fx2dVCA[0, 3]);
+    glVertex2f(X1, Y1);
+    {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[1, 0], fx2dVCA[1, 1], fx2dVCA[1, 2], fx2dVCA[1, 3]);
+    glVertex2f(X2, Y2);
   end else
   begin
     {$IfDef OLD_METHODS}
     glColor4f(((Color and $FF0000 ) shr 16) / 255, (( Color and $FF00 ) shr 8) / 255, (Color and $FF) / 255, Alpha / 255);
     {$Else}
-    Set_numColor(numColor);
+    Set_ToNumColor(numColor);
     {$EndIf}
-    glVertex2f( X1 + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF}, Y1 + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF} );
-    glVertex2f( X2 + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF}, Y2 + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF} );
+    glVertex2f(X1, Y1);
+    glVertex2f(X2, Y2);
   end;
 
   if not b2dStarted Then
@@ -221,8 +220,8 @@ begin
     PPointColor := Points;
     for i := 0 to count - 1 do
     begin
-      Set_numColor(PPointColor.Color);
-      glVertex2f(PPointColor^.X + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF}, PPointColor^.Y + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF});
+      Set_ToNumColor(PPointColor.Color);
+      glVertex2f(PPointColor^.X + {$IfDef LINUX}rv_0_5{$Else}0.5{$EndIf}, PPointColor^.Y + {$IfDef LINUX}rv_0_5{$Else}0.5{$EndIf});
       inc(PPointColor);
     end;
   end else
@@ -232,11 +231,11 @@ begin
     {$IfDef OLD_METHODS}
     glColor4f(((Color and $FF0000 ) shr 16) / 255, (( Color and $FF00 ) shr 8) / 255, (Color and $FF) / 255, Alpha / 255);
     {$Else}
-    Set_numColor(numColor);
+    Set_ToNumColor(numColor);
     {$EndIf}
     for i := 0 to count - 1 do
     begin
-      glVertex2f( PPoint^.X + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF}, PPoint^.Y + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF} );
+      glVertex2f( PPoint^.X + {$IfDef LINUX}rv_0_5{$Else}0.5{$EndIf}, PPoint^.Y + {$IfDef LINUX}rv_0_5{$Else}0.5{$EndIf} );
       inc(PPoint);
     end;
   end;
@@ -277,10 +276,10 @@ begin
     glEnable( GL_BLEND );
     if (FX and PR2D_FILL = 0) Then
     begin
-      X := X + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF};
-      Y := Y + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF};
-      W := W - {$IFDEF LINUX}rv_1{$ELSE}1{$ENDIF};
-      H := H - {$IFDEF LINUX}rv_1{$ELSE}1{$ENDIF};
+      X := X + {$IfDef LINUX}rv_0_5{$Else}0.5{$EndIf};
+      Y := Y + {$IfDef LINUX}rv_0_5{$Else}0.5{$EndIf};
+      W := W - {$IfDef LINUX}rv_1{$Else}1{$EndIf};
+      H := H - {$IfDef LINUX}rv_1{$Else}1{$EndIf};
     End;
     glBegin( mode );
   end;
@@ -290,22 +289,22 @@ begin
 
   if FX and FX2D_VCA > 0 Then
   begin
-    glColor4f(fx2dVCA[0, 0], fx2dVCA[0, 1], fx2dVCA[0, 2], fx2dVCA[0, 3]);
+    {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[0, 0], fx2dVCA[0, 1], fx2dVCA[0, 2], fx2dVCA[0, 3]);
     glVertex2f(X, Y);
-    glColor4f(fx2dVCA[1, 0], fx2dVCA[1, 1], fx2dVCA[1, 2], fx2dVCA[1, 3]);
+    {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[1, 0], fx2dVCA[1, 1], fx2dVCA[1, 2], fx2dVCA[1, 3]);
     glVertex2f(XW, Y);
-    glColor4f(fx2dVCA[2, 0], fx2dVCA[2, 1], fx2dVCA[2, 2], fx2dVCA[2, 3]);
+    {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[2, 0], fx2dVCA[2, 1], fx2dVCA[2, 2], fx2dVCA[2, 3]);
     glVertex2f(XW, YH);
     if (FX and PR2D_FILL > 0) then
     begin
-      glColor4f(fx2dVCA[2, 0], fx2dVCA[2, 1], fx2dVCA[2, 2], fx2dVCA[2, 3]);
+      {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[2, 0], fx2dVCA[2, 1], fx2dVCA[2, 2], fx2dVCA[2, 3]);
       glVertex2f(XW, YH);
     end;
-    glColor4f(fx2dVCA[3, 0], fx2dVCA[3, 1], fx2dVCA[3, 2], fx2dVCA[3, 3]);
+    {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[3, 0], fx2dVCA[3, 1], fx2dVCA[3, 2], fx2dVCA[3, 3]);
     glVertex2f(X, YH);
     if (FX and PR2D_FILL > 0) then
     begin
-      glColor4f(fx2dVCA[3, 0], fx2dVCA[3, 1], fx2dVCA[3, 2], fx2dVCA[3, 3]);
+      {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[0, 0], fx2dVCA[0, 1], fx2dVCA[0, 2], fx2dVCA[0, 3]);
       glVertex2f(X, Y);
     end;
   end else
@@ -313,7 +312,7 @@ begin
     {$IfDef OLD_METHODS}
     glColor4f(((Color and $FF0000 ) shr 16) / 255, (( Color and $FF00 ) shr 8) / 255, (Color and $FF) / 255, Alpha / 255);
     {$Else}
-    Set_numColor(numColor);
+    Set_ToNumColor(numColor);
     {$EndIf}
     glVertex2f(X, Y);
     glVertex2f(XW, Y);
@@ -346,9 +345,9 @@ var
   k : Single;
 begin
   if Quality > 360 Then
-    k := {$IFDEF LINUX}rv_360{$ELSE}360{$ENDIF}
+    k := {$IfDef LINUX}rv_360{$Else}360{$EndIf}
   else
-    k := {$IFDEF LINUX}rv_360{$ELSE}360{$ENDIF} / Quality;
+    k := {$IfDef LINUX}rv_360{$Else}360{$EndIf} / Quality;
 
   if FX and PR2D_FILL = 0 Then
     begin
@@ -369,7 +368,7 @@ begin
       {$IfDef OLD_METHODS}
       glColor4f(((Color and $FF0000 ) shr 16) / 255, (( Color and $FF00 ) shr 8) / 255, (Color and $FF) / 255, Alpha / 255);
       {$Else}
-      Set_numColor(numColor);
+      Set_ToNumColor(numColor);
       {$EndIf}
       for i := 0 to Quality - 1 do
         begin
@@ -409,7 +408,7 @@ begin
         {$IfDef OLD_METHODS}
         glColor4f(((Color and $FF0000 ) shr 16) / 255, (( Color and $FF00 ) shr 8) / 255, (Color and $FF) / 255, Alpha / 255);
         {$Else}
-        Set_numColor(numColor);
+        Set_ToNumColor(numColor);
         {$EndIf}
         for i := 0 to Quality - 1 do
           begin
@@ -440,9 +439,9 @@ procedure pr2d_Ellipse( X, Y, xRadius, yRadius : Single; {$IfNDef OLD_METHODS}nu
     k : Single;
 begin
   if Quality > 360 Then
-    k := {$IFDEF LINUX}rv_360{$ELSE}360{$ENDIF}
+    k := {$IfDef LINUX}rv_360{$Else}360{$EndIf}
   else
-    k := {$IFDEF LINUX}rv_360{$ELSE}360{$ENDIF} / Quality;
+    k := {$IfDef LINUX}rv_360{$Else}360{$EndIf} / Quality;
 
   if FX and PR2D_FILL = 0 Then
     begin
@@ -463,7 +462,7 @@ begin
       {$IfDef OLD_METHODS}
       glColor4f(((Color and $FF0000) shr 16) / 255, (( Color and $FF00) shr 8) / 255, (Color and $FF) / 255, Alpha / 255);
       {$Else}
-      Set_numColor(numColor);
+      Set_ToNumColor(numColor);
       {$EndIf}
       for i := 0 to Quality - 1 do
       begin
@@ -503,7 +502,7 @@ begin
         {$IfDef OLD_METHODS}
         glColor4f(((Color and $FF0000 ) shr 16) / 255, (( Color and $FF00 ) shr 8) / 255, (Color and $FF) / 255, Alpha / 255);
         {$Else}
-        Set_numColor(numColor);
+        Set_ToNumColor(numColor);
         {$EndIf}
         glVertex2f( X, Y );
         for i := 0 to Quality - 1 do
@@ -564,15 +563,15 @@ begin
   {$IfDef OLD_METHODS}
   glColor4f(((Color and $FF0000 ) shr 16) / 255, (( Color and $FF00 ) shr 8) / 255, (Color and $FF) / 255, Alpha / 255);
   {$Else}
-  Set_numColor(numColor);
+  Set_ToNumColor(numColor);
   {$EndIf}
 
   if Assigned( Texture ) and ( mode = GL_TRIANGLES ) Then
     begin
       if not Assigned( TexCoords ) Then
         begin
-          w := {$IFDEF LINUX}rv_1{$ELSE}1{$ENDIF} / ( Texture.Width / Texture.U );
-          h := {$IFDEF LINUX}rv_1{$ELSE}1{$ENDIF} / ( Texture.Height / Texture.V );
+          w := {$IfDef LINUX}rv_1{$Else}1{$EndIf} / ( Texture.Width / Texture.U );
+          h := {$IfDef LINUX}rv_1{$Else}1{$EndIf} / ( Texture.Height / Texture.V );
           for i := iLo to iHi do
             begin
               glTexCoord2f( TriList[ i ].X * w, Texture.V - TriList[ i ].Y * h );
@@ -644,29 +643,29 @@ begin
       {$ENDIF}
     end;
     glEnable( GL_BLEND );
-    X1 := X1 + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF};
-    Y1 := Y1 + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF};
-    X2 := X2 + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF};
-    Y2 := Y2 + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF};
-    X3 := X3 + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF};
-    Y3 := Y3 + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF};
+    X1 := X1 + {$IfDef LINUX}rv_0_5{$Else}0.5{$EndIf};
+    Y1 := Y1 + {$IfDef LINUX}rv_0_5{$Else}0.5{$EndIf};
+    X2 := X2 + {$IfDef LINUX}rv_0_5{$Else}0.5{$EndIf};
+    Y2 := Y2 + {$IfDef LINUX}rv_0_5{$Else}0.5{$EndIf};
+    X3 := X3 + {$IfDef LINUX}rv_0_5{$Else}0.5{$EndIf};
+    Y3 := Y3 + {$IfDef LINUX}rv_0_5{$Else}0.5{$EndIf};
     glBegin( mode );
   end;
 
   if FX and FX2D_VCA > 0 Then
   begin
-    glColor4f(fx2dVCA[0, 0], fx2dVCA[0, 1], fx2dVCA[0, 2], fx2dVCA[0, 3]);
+    {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[0, 0], fx2dVCA[0, 1], fx2dVCA[0, 2], fx2dVCA[0, 3]);
     glVertex2f(X1, Y1);
 
-    glColor4f(fx2dVCA[1, 0], fx2dVCA[1, 1], fx2dVCA[1, 2], fx2dVCA[1, 3]);
+    {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[1, 0], fx2dVCA[1, 1], fx2dVCA[1, 2], fx2dVCA[1, 3]);
     glVertex2f(X2, Y2);
 
-    glColor4f(fx2dVCA[2, 0], fx2dVCA[2, 1], fx2dVCA[2, 2], fx2dVCA[2, 3]);
+    {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[2, 0], fx2dVCA[2, 1], fx2dVCA[2, 2], fx2dVCA[2, 3]);
     glVertex2f(X3, Y3);
 
     if (FX and PR2D_FILL = 0) then
     begin
-      glColor4f(fx2dVCA[0, 0], fx2dVCA[0, 1], fx2dVCA[0, 2], fx2dVCA[0, 3]);
+      {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[0, 0], fx2dVCA[0, 1], fx2dVCA[0, 2], fx2dVCA[0, 3]);
       glVertex2f(X1, Y1);
     end;
   end else
@@ -674,7 +673,7 @@ begin
     {$IfDef OLD_METHODS}
     glColor4f(((Color and $FF0000 ) shr 16) / 255, (( Color and $FF00 ) shr 8) / 255, (Color and $FF) / 255, Alpha / 255);
     {$Else}
-    Set_numColor(numColor);
+    Set_ToNumColor(numColor);
     {$EndIf}
     glVertex2f(X1, Y1);
     glVertex2f(X2, Y2);
@@ -716,39 +715,39 @@ begin
       {$ENDIF}
     end;
     glEnable( GL_BLEND );
-    X1 := X1 + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF};
-    Y1 := Y1 + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF};
-    X2 := X2 + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF};
-    Y2 := Y2 + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF};
-    X3 := X3 + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF};
-    Y3 := Y3 + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF};
-    X4 := X4 + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF};
-    Y4 := Y4 + {$IFDEF LINUX}rv_0_5{$ELSE}0.5{$ENDIF};
+    X1 := X1 + {$IfDef LINUX}rv_0_5{$Else}0.5{$EndIf};
+    Y1 := Y1 + {$IfDef LINUX}rv_0_5{$Else}0.5{$EndIf};
+    X2 := X2 + {$IfDef LINUX}rv_0_5{$Else}0.5{$EndIf};
+    Y2 := Y2 + {$IfDef LINUX}rv_0_5{$Else}0.5{$EndIf};
+    X3 := X3 + {$IfDef LINUX}rv_0_5{$Else}0.5{$EndIf};
+    Y3 := Y3 + {$IfDef LINUX}rv_0_5{$Else}0.5{$EndIf};
+    X4 := X4 + {$IfDef LINUX}rv_0_5{$Else}0.5{$EndIf};
+    Y4 := Y4 + {$IfDef LINUX}rv_0_5{$Else}0.5{$EndIf};
     glBegin( mode );
   end;
 
   if FX and FX2D_VCA > 0 Then
   begin
-    glColor4f(fx2dVCA[0, 0], fx2dVCA[0, 1], fx2dVCA[0, 2], fx2dVCA[0, 3]);
+    {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[0, 0], fx2dVCA[0, 1], fx2dVCA[0, 2], fx2dVCA[0, 3]);
     glVertex2f(X1, Y1);
 
-    glColor4f(fx2dVCA[1, 0], fx2dVCA[1, 1], fx2dVCA[1, 2], fx2dVCA[1, 3]);
+    {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[1, 0], fx2dVCA[1, 1], fx2dVCA[1, 2], fx2dVCA[1, 3]);
     glVertex2f(X2, Y2);
 
-    glColor4f(fx2dVCA[2, 0], fx2dVCA[2, 1], fx2dVCA[2, 2], fx2dVCA[2, 3]);
+    {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[2, 0], fx2dVCA[2, 1], fx2dVCA[2, 2], fx2dVCA[2, 3]);
     glVertex2f(X3, Y3);
 
     if (FX and PR2D_FILL > 0) then
     begin
-      glColor4f(fx2dVCA[2, 0], fx2dVCA[2, 1], fx2dVCA[2, 2], fx2dVCA[2, 3]);
+      {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[2, 0], fx2dVCA[2, 1], fx2dVCA[2, 2], fx2dVCA[2, 3]);
       glVertex2f(X3, Y3);
     end;
 
-    glColor4f(fx2dVCA[3, 0], fx2dVCA[3, 1], fx2dVCA[3, 2], fx2dVCA[3, 3]);
+    {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[3, 0], fx2dVCA[3, 1], fx2dVCA[3, 2], fx2dVCA[3, 3]);
     glVertex2f(X4, Y4);
     if (FX and PR2D_FILL > 0) then
     begin
-      glColor4f(fx2dVCA[0, 0], fx2dVCA[0, 1], fx2dVCA[0, 2], fx2dVCA[0, 3]);
+      {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dVCA[0, 0], fx2dVCA[0, 1], fx2dVCA[0, 2], fx2dVCA[0, 3]);
       glVertex2f(X1, Y1);
     end;
   end else
@@ -756,7 +755,7 @@ begin
     {$IfDef OLD_METHODS}
     glColor4f(((Color and $FF0000 ) shr 16) / 255, (( Color and $FF00 ) shr 8) / 255, (Color and $FF) / 255, Alpha / 255);
     {$Else}
-    Set_numColor(numColor);
+    Set_ToNumColor(numColor);
     {$EndIf}
     glVertex2f(X1, Y1);
     glVertex2f(X2, Y2);

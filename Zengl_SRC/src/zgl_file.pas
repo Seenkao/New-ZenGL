@@ -66,60 +66,62 @@ const
   FSM_END    = $03;
 
 // Rus: открыть файл.
-// Eng:
+// Eng: open file.
 function  file_Open(out FileHandle: zglTFile; const FileName: UTF8String; Mode: Byte{$IfDef MAC_COCOA}; log: Boolean = false{$EndIf}): Boolean;
 // Rus: создать дирректорию.
-// Eng:
+// Eng: create a directory.
 function  file_MakeDir(const Directory: UTF8String): Boolean;
-// Rus: переименование файла/дирректории.
-// Eng:
+// Rus: переименовать файл/дирректорию.
+// Eng: rename file/directory.
 function  file_Remove(const Name: UTF8String): Boolean;
 // Rus: существует файл или нет?
-// Eng:
+// Eng: does the file exist or not?
 function  file_Exists(const Name: UTF8String): Boolean;
-// Rus: установка позиции чтения/записи.
-// Eng:
+// Rus: установить позицию чтения/записи.
+// Eng: set read/write position.
 function  file_Seek(FileHandle: zglTFile; Offset, Mode: Integer): LongWord;
-// Rus: возвращение позиции чтения/записи.
-// Eng:
+// Rus: вернуть позицию чтения/записи.
+// Eng: return read/write position.
 function  file_GetPos(FileHandle: zglTFile): LongWord;
 // Rus: чтение файла.
-// Eng:
+// Eng: reading a file.
 function  file_Read(FileHandle: zglTFile; var Buffer; Bytes: LongWord): LongWord;
 // Rus: сохранение файла.
-// Eng:
+// Eng: saving the file.
 function  file_Write(FileHandle: zglTFile; const Buffer; Bytes: LongWord): LongWord;
-// Rus: возвращаем размер файла.
-// Eng:
+// Rus: вернуть размер файла.
+// Eng: return file size.
 function  file_GetSize(FileHandle: zglTFile): LongWord;
 // Rus:
 // Eng:
 procedure file_Flush(FileHandle: zglTFile);
-// Rus: закрытие файла.
-// Eng:
+// Rus: закрыть файл.
+// Eng: close the file.
 procedure file_Close(var FileHandle: zglTFile);
 // Rus: поиск файла.
-// Eng:
+// Eng: file search.
 procedure file_Find(const Directory: UTF8String; out List: zglTFileList; FindDir: Boolean);
-// Rus: возвращаем имя файла.
-// Eng:
+// Rus: вернуть имя файла.
+// Eng: return filename.
 function  file_GetName(const FileName: UTF8String): UTF8String;
-// Rus: возвращаем расширение файла.
-// Eng:
+// Rus: вернуть расширение файла.
+// Eng: return file extension.
 function  file_GetExtension(const FileName: UTF8String): UTF8String;
-// Rus: возвращаем имя дирректории
-// Eng:
+// Rus: вернуть имя дирректории.
+// Eng: return directory name.
 function  file_GetDirectory(const FileName: UTF8String): UTF8String;
-// Rus: устанавливаем путь (глобально)
-// Eng:
-procedure file_SetPath(const Path: UTF8String);
+// Rus: установить путь (глобально).
+// Eng: set path (globally).
+procedure file_SetPath(const Path: UTF8String); {$IfDef USE_INLINE}inline;{$EndIf}
+
+function __GetDir(const Path: UTF8String): UTF8String;
 
 {$IFDEF USE_ZIP}
 // Rus: открыть архив.
-// Eng:
+// Eng: open archive.
 function  file_OpenArchive(const FileName: UTF8String; const Password: UTF8String = ''): Boolean;
 // Rus: закрыть архив.
-// Eng:
+// Eng: close archive.
 procedure file_CloseArchive;
 {$ENDIF}
 
@@ -162,9 +164,9 @@ threadvar
   wideStr: PWideChar;
 {$ENDIF}
 
-function GetDir(const Path: UTF8String): UTF8String;
-  var
-    len: Integer;
+function __GetDir(const Path: UTF8String): UTF8String;
+var
+  len: Integer;
 begin
   len := Length(Path);
   if (len > 0) and (Path[len] <> '/') {$IFDEF WINDOWS} and (Path[len] <> '\') {$ENDIF} Then
@@ -310,7 +312,7 @@ begin
 
   if dir Then
     begin
-      path := GetDir(Name);
+      path := __GetDir(Name);
 
       file_Find(path, list, FALSE);
       for i := 0 to list.Count - 1 do
@@ -365,13 +367,14 @@ function file_Exists(const Name: UTF8String): Boolean;
 begin
   {$IFDEF USE_ZIP}
   if Assigned(zipCurrent) Then
-    begin
-      Result := zip_stat( zipCurrent, PAnsiChar( Name ), 0, zipStat ) = 0;
-      exit;
+  begin
+    Result := zip_stat( zipCurrent, PAnsiChar( Name ), 0, zipStat ) = 0;
+    exit;
     end;
   {$ENDIF}
 
 {$IfDef UNIX}{$IfNDef DARWIN}
+//  log_Add(filePath + Name);
   Result := FpStat(filePath + Name, status) = 0;
 {$ENDIF}{$EndIf}
 {$IFDEF WINDOWS}
@@ -744,9 +747,9 @@ begin
   {$EndIf}
 end;
 
-procedure file_SetPath(const Path: UTF8String);
+procedure file_SetPath(const Path: UTF8String); {$IfDef USE_INLINE}inline;{$EndIf}
 begin
-  filePath := GetDir(Path);
+  filePath := __GetDir(Path);
 end;
 
 {$IFDEF MACOSX}

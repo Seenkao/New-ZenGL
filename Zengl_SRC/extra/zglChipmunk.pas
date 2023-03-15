@@ -1383,7 +1383,7 @@ procedure cpDrawSpace( space : PcpSpace; DrawCollisions : Boolean );
 var
   cpColorStatic    : LongWord = {$IfDef OLD_METHODS}$00FF00{$Else}cl_Green{$EndIf};
   cpColorActive    : LongWord = {$IfDef OLD_METHODS}$0000FF{$Else}cl_Blue{$EndIf};
-  cpColorCollision : LongWord = {$IfDef OLD_METHODS}$FF0000{$Else}cl_Red{$EndIf};
+  cpColorCollision : LongWord = {$IfDef OLD_METHODS}$FF0000{$Else}cl_Yellow05{$EndIf};
 
 implementation
 

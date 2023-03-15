@@ -816,7 +816,8 @@ begin
       break;
     end;
   end;
-  if Result = -1 Then exit;
+  if Result = -1 Then
+    exit;
 
   Sound.Channel[Result].Position.X := X;
   Sound.Channel[Result].Position.Y := Y;

@@ -57,22 +57,6 @@ function gl_IsSupported(const Extension, SearchIn: UTF8String): Boolean;
 // Eng:
 procedure gl_LoadEx;
 
-const
-  {$IFDEF LINUX}
-  libGL  = 'libGL.so.1';
-  libGLU = 'libGLU.so.1';
-  {$ENDIF}
-  {$IFDEF WINDOWS}
-  libGL  = 'opengl32.dll';
-  libGLU = 'glu32.dll';
-  {$ENDIF}
-  {$IFDEF MACOSX}
-  libGL  = '/System/Library/Frameworks/OpenGL.framework/Libraries/libGL.dylib';
-  libGLU = '/System/Library/Frameworks/OpenGL.framework/Libraries/libGLU.dylib';
-  {$IfNDef MAC_COCOA}
-  libAGL = '/System/Library/Frameworks/AGL.framework/AGL';
-  {$ENDIF}{$EndIf}
-
 type
   TVector2d = array[0..1] of double;
   TVector2f = array[0..1] of single;
@@ -198,15 +182,6 @@ type
   //---------------------------------------------------------------------
 
   procedure glPointSize(size: GLfloat); stdcall; external libGL;                                      // GL_VERSION_1_0
-  // дисплейные списки
-  procedure glNewList(list: GLuint; mode: GLenum); stdcall; external libGL;                           // USE_DEPRECATED
-  procedure glEndList; stdcall; external libGL;                                                       // USE_DEPRECATED
-  procedure glCallList(list: GLuint); stdcall; external libGL;                                        // USE_DEPRECATED
-  procedure glCallLists(n: GLsizei; atype: GLenum; const lists: Pointer); stdcall; external libGL;    // USE_DEPRECATED
-  procedure glDeleteLists(list: GLuint; range: GLsizei); stdcall; external libGL;                     // USE_DEPRECATED
-  function glGenLists(range: GLsizei): GLuint; stdcall; external libGL;                               // USE_DEPRECATED
-  function glIsList(list: GLuint): GLboolean; stdcall; external libGL;                                // USE_DEPRECATED
-  procedure glListBase(base: GLuint); stdcall; external libGL;                                        // USE_DEPRECATED
 
   procedure glArrayElement(i: GLint); stdcall; external libGL;                                        // USE_DEPRECATED
   procedure glDrawRangeElements(mode: GLenum; start: GLuint; _end: GLuint; count: GLsizei; _type: GLenum; const indices: PGLvoid); stdcall; external libGL; // GL_VERSION_1_2
@@ -337,18 +312,6 @@ uses
 
 function InitGL: Boolean;
 begin
-  // Scary, yeah :)
-  {$IFDEF FPC}
-    { according to bug 7570, this is necessary on all x86 platforms,
-      maybe we've to fix the sse control word as well }
-    { Yes, at least for darwin/x86_64 (JM) }
-    {$IF DEFINED(cpui386) or DEFINED(cpux86_64)}
-    SetExceptionMask([exInvalidOp, exDenormalized, exZeroDivide, exOverflow, exUnderflow, exPrecision]);
-    {$IFEND}
-  {$ELSE}
-    Set8087CW($133F);
-  {$ENDIF}
-
   oglLibrary := dlopen(libGL {$IFDEF UNIX}, $001 {$ENDIF});
 
   Result := oglLibrary <> LIB_ERROR;
@@ -542,6 +505,19 @@ begin
     scr_VSync;
   log_Add('Support WaitVSync: ' + u_BoolToStr(oglCanVSync));
 end;
+
+initialization
+  // Scary, yeah :)
+  {$IFDEF FPC}
+    { according to bug 7570, this is necessary on all x86 platforms,
+      maybe we've to fix the sse control word as well }
+    { Yes, at least for darwin/x86_64 (JM) }
+    {$IF DEFINED(cpui386) or DEFINED(cpux86_64)}
+    SetExceptionMask([exInvalidOp, exDenormalized, exZeroDivide, exOverflow, exUnderflow, exPrecision]);
+    {$IFEND}
+  {$ELSE}
+    Set8087CW($133F);
+  {$ENDIF}
 
 end.
 

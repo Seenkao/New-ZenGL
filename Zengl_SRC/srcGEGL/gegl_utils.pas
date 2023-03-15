@@ -30,7 +30,8 @@ interface
 var
   // Rus: глобальная строка, для любого использования. Удобно для использования
   //      для загрузки разных ресурсов.
-  // Eng: global string, for any use. Convenient to use to load different resources.
+  // Eng: global string, for any use. Convenient to use to load different
+  //      resources.
   LoadText: UTF8String;
   // Rus: флаг, показывающий, занята глобальная строка или нет. Вы должны его
   //      включать если загрузили ресурс и отключать, когда больше этот ресурс
@@ -48,20 +49,22 @@ function ByteToUtf8Rus(myByte: Byte): UTF8String;
 {$EndIf}
 // Rus: переводим клавиатурные коды в русскую символику. Для других языков, надо
 //      свою функцию делать. И знать клавиатурную раскладку.
-// Eng: we translate keyboard codes into Russian symbols. For other languages, you
-//      need to do your own function. It is imperative to know the keyboard layout
-//      for this language.
+// Eng: we translate keyboard codes into Russian symbols. For other languages,
+//      you need to do your own function. It is imperative to know the keyboard
+//      layout for this language.
 procedure EngToRus(var symb: LongWord);
-// Rus: то же самое, но только переводим в Unicode.
-// Eng: the same, but only translating to Unicode.
+// Rus: то же самое что и EngToRus, но только переводим в Unicode.
+// Eng: the same as EngToRus, but only translated into Unicode.
 procedure EngToRusUnicode(var symb: LongWord);
-// Rus: установка значения флага для глобальной загружаемой строки. Указываем что
-//      строка занята или свободна. Если освобождаем, то строка очистится.
-// Eng: setting the flag value for the global load string. Indicate that the line
-//      is busy or free. If we release, the line will be cleared.
+// Rus: установка значения флага для глобальной загружаемой строки. Указываем
+//      что строка занята или свободна. Если освобождаем, то строка очистится.
+// Eng: setting the flag value for the global load string. Indicate that the
+//      line is busy or free. If we release, the line will be cleared.
 procedure set_FlagForLoadText(flag: Boolean); {$IfDef USE_INLINE}inline;{$EndIf}
-// Rus: возвращаем значение флага для глобальной строки. Занята строка или свободна?
-// Eng: return the value of the flag for the global string. Is the line busy or free?
+// Rus: возвращаем значение флага для глобальной строки. Занята строка или
+//      свободна?
+// Eng: return the value of the flag for the global string. Is the line busy or
+//      free?
 function get_FlagForLoadText: Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
 
 implementation

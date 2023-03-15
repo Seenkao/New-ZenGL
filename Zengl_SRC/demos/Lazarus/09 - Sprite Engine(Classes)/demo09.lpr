@@ -57,9 +57,10 @@ var
 
   TimeStart : LongWord = 0;
   TimeMiku  : LongWord = 0;
-
+  {$IfNDef OLD_METHODS}
   newColor  : LongWord;
   correctColor: array[0..1] of LongWord;
+  {$ENDIF}
 
 // Miku
 procedure CMiku.OnInit( _Texture : zglPTexture; _Layer : Integer );
@@ -155,9 +156,11 @@ begin
   fntMain := font_LoadFromFile( dirRes + 'font.zfi' );
   setFontTextScale(15, fntMain);
 
+  {$IfNDef OLD_METHODS}
   newColor := Color_FindOrAdd($80A080FF - 55);
   correctColor[1] := Color_FindOrAdd($7FAF7FFF);
   correctColor[0] := Color_FindOrAdd($AFAFAFFF);
+  {$EndIf}
 end;
 
 procedure Draw;

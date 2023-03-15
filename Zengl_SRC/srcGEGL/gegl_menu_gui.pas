@@ -27,6 +27,7 @@
    возможностей??? Будет ли возможность записать все данные тачскрина, лишь бы не делать 10 проходов для
    каждого нажатия???
 *)
+
 unit gegl_menu_gui;
 
 {$I zgl_config.cfg}
@@ -174,13 +175,18 @@ var
   TouchJoyRolling: _keyTouchJoyRolling;
   TouchKey: _keyTouch;                                
   TouchKeySymb: _keyTouchSymb;
-//  VKey_down: Boolean = false;
   _wndWidth, _wndHeight: Single;
 
 procedure SetMenuProcess(NumMenu: Byte);
 
-procedure CreateGameJoy01;                     // джойстик с роликом
-procedure CreateGameJoy02;                     // джойстик только с клавишами
+// ни где не создаются ни джойстики, ни клавиатура!!!
+// на данный момент создаю в 3-й демке для android.
+
+// джойстик с роликом
+procedure CreateGameJoy01;
+// джойстик только с клавишами
+procedure CreateGameJoy02;
+// создание клавиатуры
 procedure CreateTouchKeyboard;
 procedure CreateTouchSymbol;
 
@@ -209,14 +215,15 @@ uses
   zgl_text,
   zgl_utils,
   zgl_log,
+  zgl_file,
   zgl_types,
   zgl_mouse,
   zgl_touch;
 
+{$IfDef LINUX}
 var
   rs0:    Single = 0;
   rs045:  Single = 0.45;
-//  rs1:    Single = 1;
   rs1_5:  Single = 1.5;
   rs2:    Single = 2;
   rs3:    Single = 3;
@@ -240,9 +247,10 @@ var
   rs251:  Single = 251;
   rs270:  Single = 270;
   rs315:  Single = 315;
-//  rs500:  Single = 500;
   rs1200: Single = 1200;
+{$EndIf}
   {$IfDef MOBILE}
+var
   lockTouchKeyboard: Boolean = False;
   {$EndIf}
 
@@ -291,25 +299,25 @@ begin
   _wndHeight := wndHeight;
   TouchJoyRolling.count := 4;               
   TouchJoyRolling.textScale := 22;          
-  TouchJoyRolling.Rolling.X := rs55;
-  TouchJoyRolling.Rolling.Y := _wndHeight - rs55;
-  TouchJoyRolling.Rolling.R := rs50;
+  TouchJoyRolling.Rolling.X := {$IfDef LINUX}rs55{$Else}55{$EndIf};
+  TouchJoyRolling.Rolling.Y := _wndHeight - {$IfDef LINUX}rs55{$Else}55{$EndIf};
+  TouchJoyRolling.Rolling.R := {$IfDef LINUX}rs50{$Else}50{$EndIf};
   TouchJoyRolling.Rolling.bPush := 0;       
 
-  TouchJoyRolling.Width := rs45;
-  TouchJoyRolling.Height := rs45;
+  TouchJoyRolling.Width := {$IfDef LINUX}rs45{$Else}45{$EndIf};
+  TouchJoyRolling.Height := {$IfDef LINUX}rs45{$Else}45{$EndIf};
 
-  TouchJoyRolling.OneButton[1].X := _wndWidth - rs100;
-  TouchJoyRolling.OneButton[1].Y := _wndHeight - rs100;
+  TouchJoyRolling.OneButton[1].X := _wndWidth - {$IfDef LINUX}rs100{$Else}100{$EndIf};
+  TouchJoyRolling.OneButton[1].Y := _wndHeight - {$IfDef LINUX}rs100{$Else}100{$EndIf};
   TouchJoyRolling.OneButton[1].bPush := 0;
-  TouchJoyRolling.OneButton[2].X := TouchJoyRolling.OneButton[1].X + rs50;
+  TouchJoyRolling.OneButton[2].X := TouchJoyRolling.OneButton[1].X + {$IfDef LINUX}rs50{$Else}50{$EndIf};
   TouchJoyRolling.OneButton[2].Y := TouchJoyRolling.OneButton[1].Y;
   TouchJoyRolling.OneButton[2].bPush := 0;
   TouchJoyRolling.OneButton[3].X := TouchJoyRolling.OneButton[1].X;
-  TouchJoyRolling.OneButton[3].Y := TouchJoyRolling.OneButton[1].Y + rs50;
+  TouchJoyRolling.OneButton[3].Y := TouchJoyRolling.OneButton[1].Y + {$IfDef LINUX}rs50{$Else}50{$EndIf};
   TouchJoyRolling.OneButton[3].bPush := 0;
-  TouchJoyRolling.OneButton[4].X := TouchJoyRolling.OneButton[1].X + rs50;
-  TouchJoyRolling.OneButton[4].Y := TouchJoyRolling.OneButton[1].Y + rs50;
+  TouchJoyRolling.OneButton[4].X := TouchJoyRolling.OneButton[1].X + {$IfDef LINUX}rs50{$Else}50{$EndIf};
+  TouchJoyRolling.OneButton[4].Y := TouchJoyRolling.OneButton[1].Y + {$IfDef LINUX}rs50{$Else}50{$EndIf};
   TouchJoyRolling.OneButton[4].bPush := 0;
   TouchJoyRolling.OneButton[1]._key := K_A;
   TouchJoyRolling.OneButton[2]._key := K_B;
@@ -331,50 +339,50 @@ begin
   _wndHeight := wndHeight;
   TouchJoy.count := 5;
   TouchJoy.textScale := 22;
-  TouchJoy.Width := rs45;
-  TouchJoy.Height := rs45;
+  TouchJoy.Width := {$IfDef LINUX}rs45{$Else}45{$EndIf};
+  TouchJoy.Height := {$IfDef LINUX}rs45{$Else}45{$EndIf};
 
-  TouchJoy.BArrow[7].X := rs5;
-  TouchJoy.BArrow[7].Y := _wndHeight - rs150;
-  TouchJoy.BArrow[7].Angle := rs315;
+  TouchJoy.BArrow[7].X := {$IfDef LINUX}rs5{$Else}5{$EndIf};
+  TouchJoy.BArrow[7].Y := _wndHeight - {$IfDef LINUX}rs150{$Else}150{$EndIf};
+  TouchJoy.BArrow[7].Angle := {$IfDef LINUX}rs315{$Else}315{$EndIf};
   TouchJoy.BArrow[7].bPush := 0;
 
-  TouchJoy.BArrow[8].X := TouchJoy.BArrow[7].X + rs50;
+  TouchJoy.BArrow[8].X := TouchJoy.BArrow[7].X + {$IfDef LINUX}rs50{$Else}50{$EndIf};
   TouchJoy.BArrow[8].Y := TouchJoy.BArrow[7].Y;
-  TouchJoy.BArrow[8].Angle := rs0;
+  TouchJoy.BArrow[8].Angle := {$IfDef LINUX}rs0{$Else}0{$EndIf};
   TouchJoy.BArrow[8].bPush := 0;
 
-  TouchJoy.BArrow[9].X := TouchJoy.BArrow[7].X + rs100;
+  TouchJoy.BArrow[9].X := TouchJoy.BArrow[7].X + {$IfDef LINUX}rs100{$Else}100{$EndIf};
   TouchJoy.BArrow[9].Y := TouchJoy.BArrow[7].Y;
-  TouchJoy.BArrow[9].Angle := rs45;
+  TouchJoy.BArrow[9].Angle := {$IfDef LINUX}rs45{$Else}45{$EndIf};
   TouchJoy.BArrow[9].bPush := 0;
 
   TouchJoy.BArrow[4].X := TouchJoy.BArrow[7].X;
-  TouchJoy.BArrow[4].Y := TouchJoy.BArrow[7].Y + rs50;
-  TouchJoy.BArrow[4].Angle := rs270;
+  TouchJoy.BArrow[4].Y := TouchJoy.BArrow[7].Y + {$IfDef LINUX}rs50{$Else}50{$EndIf};
+  TouchJoy.BArrow[4].Angle := {$IfDef LINUX}rs270{$Else}270{$EndIf};
   TouchJoy.BArrow[4].bPush := 0;
 
-  TouchJoy.OneButton[1].X := TouchJoy.BArrow[7].X + rs50;            
-  TouchJoy.OneButton[1].Y := TouchJoy.BArrow[7].Y + rs50;
+  TouchJoy.OneButton[1].X := TouchJoy.BArrow[7].X + {$IfDef LINUX}rs50{$Else}50{$EndIf};
+  TouchJoy.OneButton[1].Y := TouchJoy.BArrow[7].Y + {$IfDef LINUX}rs50{$Else}50{$EndIf};
   TouchJoy.OneButton[1].bPush := 0;
-  TouchJoy.BArrow[6].X := TouchJoy.BArrow[7].X + rs100;
-  TouchJoy.BArrow[6].Y := TouchJoy.BArrow[7].Y + rs50;
-  TouchJoy.BArrow[6].Angle := rs90;
+  TouchJoy.BArrow[6].X := TouchJoy.BArrow[7].X + {$IfDef LINUX}rs100{$Else}100{$EndIf};
+  TouchJoy.BArrow[6].Y := TouchJoy.BArrow[7].Y + {$IfDef LINUX}rs50{$Else}50{$EndIf};
+  TouchJoy.BArrow[6].Angle := {$IfDef LINUX}rs90{$Else}90{$EndIf};
   TouchJoy.BArrow[6].bPush := 0;
 
   TouchJoy.BArrow[1].X := TouchJoy.BArrow[7].X;
-  TouchJoy.BArrow[1].Y := TouchJoy.BArrow[7].Y + rs100;
-  TouchJoy.BArrow[1].Angle := rs225;
+  TouchJoy.BArrow[1].Y := TouchJoy.BArrow[7].Y + {$IfDef LINUX}rs100{$Else}100{$EndIf};
+  TouchJoy.BArrow[1].Angle := {$IfDef LINUX}rs225{$Else}225{$EndIf};
   TouchJoy.BArrow[1].bPush := 0;
 
-  TouchJoy.BArrow[2].X := TouchJoy.BArrow[7].X + rs50;
-  TouchJoy.BArrow[2].Y := TouchJoy.BArrow[7].Y + rs100;
-  TouchJoy.BArrow[2].Angle := rs180;
+  TouchJoy.BArrow[2].X := TouchJoy.BArrow[7].X + {$IfDef LINUX}rs50{$Else}50{$EndIf};
+  TouchJoy.BArrow[2].Y := TouchJoy.BArrow[7].Y + {$IfDef LINUX}rs100{$Else}100{$EndIf};
+  TouchJoy.BArrow[2].Angle := {$IfDef LINUX}rs180{$Else}180{$EndIf};
   TouchJoy.BArrow[2].bPush := 0;
 
-  TouchJoy.BArrow[3].X := TouchJoy.BArrow[7].X + rs100;
-  TouchJoy.BArrow[3].Y := TouchJoy.BArrow[7].Y + rs100;
-  TouchJoy.BArrow[3].Angle := rs135;
+  TouchJoy.BArrow[3].X := TouchJoy.BArrow[7].X + {$IfDef LINUX}rs100{$Else}100{$EndIf};
+  TouchJoy.BArrow[3].Y := TouchJoy.BArrow[7].Y + {$IfDef LINUX}rs100{$Else}100{$EndIf};
+  TouchJoy.BArrow[3].Angle := {$IfDef LINUX}rs135{$Else}135{$EndIf};
   TouchJoy.BArrow[3].bPush := 0;
 
   TouchJoy.BArrow[1]._key := K_KP_1;
@@ -389,17 +397,17 @@ begin
   TouchJoy.TextureUp := 1;        
   TouchJoy.TextureDown := 2;
 
-  TouchJoy.OneButton[2].X := _wndWidth - rs100;
-  TouchJoy.OneButton[2].Y := _wndHeight - rs100;
+  TouchJoy.OneButton[2].X := _wndWidth - {$IfDef LINUX}rs100{$Else}100{$EndIf};
+  TouchJoy.OneButton[2].Y := _wndHeight - {$IfDef LINUX}rs100{$Else}100{$EndIf};
   TouchJoy.OneButton[2].bPush := 0;
-  TouchJoy.OneButton[3].X := TouchJoy.OneButton[2].X + rs50;
+  TouchJoy.OneButton[3].X := TouchJoy.OneButton[2].X + {$IfDef LINUX}rs50{$Else}50{$EndIf};
   TouchJoy.OneButton[3].Y := TouchJoy.OneButton[2].Y;
   TouchJoy.OneButton[3].bPush := 0;
   TouchJoy.OneButton[4].X := TouchJoy.OneButton[2].X;
-  TouchJoy.OneButton[4].Y := TouchJoy.OneButton[2].Y + rs50;
+  TouchJoy.OneButton[4].Y := TouchJoy.OneButton[2].Y + {$IfDef LINUX}rs50{$Else}50{$EndIf};
   TouchJoy.OneButton[4].bPush := 0;
-  TouchJoy.OneButton[5].X := TouchJoy.OneButton[2].X + rs50;
-  TouchJoy.OneButton[5].Y := TouchJoy.OneButton[2].Y + rs50;
+  TouchJoy.OneButton[5].X := TouchJoy.OneButton[2].X + {$IfDef LINUX}rs50{$Else}50{$EndIf};
+  TouchJoy.OneButton[5].Y := TouchJoy.OneButton[2].Y + {$IfDef LINUX}rs50{$Else}50{$EndIf};
   TouchJoy.OneButton[5].bPush := 0;
 
   TouchJoy.OneButton[1]._key := K_SPACE;
@@ -420,7 +428,7 @@ end;
 
 procedure CreateTouchKeyboard;
 var
-  dw, dh, x0, y0: Single;
+  dw, dh, x0, y0, _xx0: Single;
   i, n: integer;
   m: Integer;
 
@@ -430,47 +438,37 @@ var
 
   procedure CreateOneButton(key: LongWord);
   begin
-    TouchKey.OneButton[n].symb[1] := utf8_toUnicode(LoadText, m, @m);
-    TouchKey.OneButton[n].symb[2] := utf8_toUnicode(LoadText, m, @m);
-    TouchKey.OneButton[n].symb[3] := utf8_toUnicode(LoadText, m, @m);
-    TouchKey.OneButton[n].symb[4] := utf8_toUnicode(LoadText, m, @m);
+    TouchKey.OneButton[n].symb[1] := utf8_GetID(LoadText, m, @m);
+    TouchKey.OneButton[n].symb[2] := utf8_GetID(LoadText, m, @m);
+    TouchKey.OneButton[n].symb[3] := utf8_GetID(LoadText, m, @m);
+    TouchKey.OneButton[n].symb[4] := utf8_GetID(LoadText, m, @m);
     TouchKey.OneButton[n]._key := key;
   end;
 
 begin
-  {$IfNDef MOBILE}
-  if fLoadTextClearing then
-  begin
-    txt_LoadFromFile({$IfNDef MACOSX} '../data/' + {$EndIf} 'Rus.dat', LoadText);
-    fLoadTextClearing := False;
-  end
-  else
-    log_Add('Rus.dat not loading. Global string false.');
-
-  {$EndIf}
   TouchKey.count := 34;
   if wndWidth < 1200 then
     dw := _wndWidth
   else
-    dw := rs1200;
+    dw := {$IfDef LINUX}rs1200{$Else}1200{$EndIf};
   if wndHeight < 500 then
-    dh := (_wndHeight / rs2)
+    dh := (_wndHeight / {$IfDef LINUX}rs2{$Else}2{$EndIf})
   else
-    dh := rs251;
+    dh := {$IfDef LINUX}rs251{$Else}251{$EndIf};
 
-  TouchKey.OWidth := ((dw - rs41) / rs13); //((dw - 5 - 36) / 13);
+  TouchKey.OWidth := ((dw - {$IfDef LINUX}rs41{$Else}41{$EndIf}) / {$IfDef LINUX}rs13{$Else}13{$EndIf}); //((dw - 5 - 36) / 13);
 
-  x0 := rs2; 
-  dw := rs3 + TouchKey.OWidth;
+  x0 := {$IfDef LINUX}rs2{$Else}2{$EndIf};
+  dw := {$IfDef LINUX}rs3{$Else}3{$EndIf} + TouchKey.OWidth;
   y0 := _wndHeight - dh;
-  dh := rs3 + ((dh - rs11) / rs4);
+  dh := {$IfDef LINUX}rs3{$Else}3{$EndIf} + ((dh - {$IfDef LINUX}rs11{$Else}11{$EndIf}) / {$IfDef LINUX}rs4{$Else}4{$EndIf});
 
-  TouchKey.Height := dh - rs3;                    
+  TouchKey.Height := dh - {$IfDef LINUX}rs3{$Else}3{$EndIf};
 
   if dw >= dh then                              
-    TouchKey.textScale := round(dh * rs045)
+    TouchKey.textScale := round(dh * {$IfDef LINUX}rs045{$Else}0.45{$EndIf})
   else
-    TouchKey.textScale := round(dw * rs045);
+    TouchKey.textScale := round(dw * {$IfDef LINUX}rs045{$Else}0.45{$EndIf});
 
   for i := 1 to 13 do
   begin
@@ -481,79 +479,94 @@ begin
   y0 := y0 + dh;
   TouchKey.StringButton[_Tab].X := x0;
   TouchKey.StringButton[_Tab].Y := y0;
-  TouchKey.StringButton[_Tab].Width := (TouchKey.OWidth * rs1_5) + rs3;
+  // каждая ширина на 3 пикселя больше...
+  TouchKey.StringButton[_Tab].Width := (TouchKey.OWidth * {$IfDef LINUX}rs1_5{$Else}1.5{$EndIf}) + {$IfDef LINUX}rs3{$Else}3{$EndIf};
   TouchKey.StringButton[_Tab].bString := NameTab;
   TouchKey.StringButton[_Tab]._key := K_TAB;
+  _xx0 := x0 + TouchKey.StringButton[_Tab].Width + {$IfDef LINUX}rs3{$Else}3{$EndIf};
   for i := 14 to 24 do
   begin
-    TouchKey.OneButton[i].X := x0 + TouchKey.StringButton[_Tab].Width + rs3 + dw * (i - 14);
+    TouchKey.OneButton[i].X := _xx0 + dw * (i - 14);
     TouchKey.OneButton[i].Y := y0;
   end;
 
   y0 := y0 + dh;
   TouchKey.StringButton[_CapsLock].X := x0;
   TouchKey.StringButton[_CapsLock].Y := y0;
-  TouchKey.StringButton[_CapsLock].Width := TouchKey.OWidth * rs2 + rs3;
+  TouchKey.StringButton[_CapsLock].Width := TouchKey.OWidth * {$IfDef LINUX}rs2{$Else}2{$EndIf} + {$IfDef LINUX}rs3{$Else}3{$EndIf};
   TouchKey.StringButton[_CapsLock].bString := NameCapsLock;
   TouchKey.StringButton[_CapsLock]._key := K_CAPSLOCK;
+  _xx0 := x0 + TouchKey.StringButton[_CapsLock].Width + {$IfDef LINUX}rs3{$Else}3{$EndIf};
   for i := 25 to 33 do
   begin
-    TouchKey.OneButton[i].X := x0 + TouchKey.StringButton[_CapsLock].Width + rs3 + dw * (i - 25);
+    TouchKey.OneButton[i].X := _xx0 + dw * (i - 25);
     TouchKey.OneButton[i].Y := y0;
   end;
   TouchKey.StringButton[_Enter].X := TouchKey.OneButton[33].X + dw;      
   TouchKey.StringButton[_Enter].Y := y0;                                 
-  TouchKey.StringButton[_Enter].Width := TouchKey.OWidth * rs2 + rs3; 
+  TouchKey.StringButton[_Enter].Width := TouchKey.OWidth * {$IfDef LINUX}rs2{$Else}2{$EndIf} + {$IfDef LINUX}rs3{$Else}3{$EndIf};
   TouchKey.StringButton[_Enter].bString := NameEnter;
   TouchKey.StringButton[_Enter]._key := K_ENTER;
 
   y0 := y0 + dh;
   TouchKey.StringButton[_Shift].X := x0;
   TouchKey.StringButton[_Shift].Y := y0;
-  TouchKey.StringButton[_Shift].Width := TouchKey.OWidth * rs2 + rs3; 
+  TouchKey.StringButton[_Shift].Width := TouchKey.OWidth * {$IfDef LINUX}rs2{$Else}2{$EndIf} + {$IfDef LINUX}rs3{$Else}3{$EndIf};
   TouchKey.StringButton[_Shift].bString := NameShift;
   TouchKey.StringButton[_Shift]._key := K_SHIFT_L;
 
-  TouchKey.StringButton[_Space].X := x0 + TouchKey.StringButton[_Shift].Width + rs3;
+  TouchKey.StringButton[_Space].X := x0 + TouchKey.StringButton[_Shift].Width + {$IfDef LINUX}rs3{$Else}3{$EndIf};
   TouchKey.StringButton[_Space].Y := y0;
-  TouchKey.StringButton[_Space].Width := (TouchKey.OWidth * rs2 + rs3);          
+  TouchKey.StringButton[_Space].Width := (TouchKey.OWidth * {$IfDef LINUX}rs2{$Else}2{$EndIf} + {$IfDef LINUX}rs3{$Else}3{$EndIf});
   TouchKey.StringButton[_Space].bString := ' ';
   TouchKey.StringButton[_Space]._key := K_SPACE;
 
-  TouchKey.StringButton[_Latin].X := TouchKey.StringButton[_Space].X + TouchKey.StringButton[_Space].Width + rs3;
+  TouchKey.StringButton[_Latin].X := TouchKey.StringButton[_Space].X + TouchKey.StringButton[_Space].Width + {$IfDef LINUX}rs3{$Else}3{$EndIf};
   TouchKey.StringButton[_Latin].Y := y0;
-  TouchKey.StringButton[_Latin].Width := TouchKey.OWidth * rs2 + rs3; 
+  TouchKey.StringButton[_Latin].Width := TouchKey.OWidth * {$IfDef LINUX}rs2{$Else}2{$EndIf} + {$IfDef LINUX}rs3{$Else}3{$EndIf};
   TouchKey.StringButton[_Latin].bString := NameLatin;
   TouchKey.StringButton[_Latin]._key := K_F12;
 
-  TouchKey.StringButton[_Rus].X := TouchKey.StringButton[_Space].X + TouchKey.StringButton[_Space].Width + rs3;
+  TouchKey.StringButton[_Rus].X := TouchKey.StringButton[_Space].X + TouchKey.StringButton[_Space].Width + {$IfDef LINUX}rs3{$Else}3{$EndIf};
   TouchKey.StringButton[_Rus].Y := y0;
-  TouchKey.StringButton[_Rus].Width := TouchKey.OWidth * rs2 + rs3; 
+  TouchKey.StringButton[_Rus].Width := TouchKey.OWidth * {$IfDef LINUX}rs2{$Else}2{$EndIf} + {$IfDef LINUX}rs3{$Else}3{$EndIf};
   TouchKey.StringButton[_Rus].bString := NameRus;
   TouchKey.StringButton[_Rus]._key := K_F12;
 
-  TouchKey.StringButton[_symb].X := TouchKey.StringButton[_Latin].X + TouchKey.StringButton[_Latin].Width + rs3;
+  TouchKey.StringButton[_symb].X := TouchKey.StringButton[_Latin].X + TouchKey.StringButton[_Latin].Width + {$IfDef LINUX}rs3{$Else}3{$EndIf};
   TouchKey.StringButton[_symb].Y := y0;
-  TouchKey.StringButton[_symb].Width := (TouchKey.OWidth * rs3 + rs6); 
+  TouchKey.StringButton[_symb].Width := (TouchKey.OWidth * {$IfDef LINUX}rs3{$Else}3{$EndIf} + {$IfDef LINUX}rs6{$Else}6{$EndIf});
   TouchKey.StringButton[_symb].bString := NameSymb;
   TouchKey.StringButton[_symb]._key := K_F2;
-  TouchKey.OneButton[34].X := TouchKey.StringButton[_symb].X + TouchKey.StringButton[_symb].Width + rs3;      
+  TouchKey.OneButton[34].X := TouchKey.StringButton[_symb].X + TouchKey.StringButton[_symb].Width + {$IfDef LINUX}rs3{$Else}3{$EndIf};
   TouchKey.OneButton[34].Y := y0;
 
-  TouchKey.StringButton[_Insert].X := TouchKey.OneButton[34].X + TouchKey.OWidth + rs3;
+  TouchKey.StringButton[_Insert].X := TouchKey.OneButton[34].X + TouchKey.OWidth + {$IfDef LINUX}rs3{$Else}3{$EndIf};
   TouchKey.StringButton[_Insert].Y := y0;
-  TouchKey.StringButton[_Insert].Width := (TouchKey.OWidth * rs1_5 + rs3);
+  TouchKey.StringButton[_Insert].Width := (TouchKey.OWidth * {$IfDef LINUX}rs1_5{$Else}1.5{$EndIf} + {$IfDef LINUX}rs3{$Else}3{$EndIf});
   TouchKey.StringButton[_Insert].bString := NameInsert;
   TouchKey.StringButton[_Insert]._key := K_INSERT;
 
-  TouchKey.StringButton[_Del].X := TouchKey.StringButton[_Insert].X + TouchKey.StringButton[_Insert].Width + rs3;
+  TouchKey.StringButton[_Del].X := TouchKey.StringButton[_Insert].X + TouchKey.StringButton[_Insert].Width + {$IfDef LINUX}rs3{$Else}3{$EndIf};
   TouchKey.StringButton[_Del].Y := y0;
-  TouchKey.StringButton[_Del].Width := (TouchKey.OWidth * rs1_5);
+  TouchKey.StringButton[_Del].Width := (TouchKey.OWidth * {$IfDef LINUX}rs1_5{$Else}1.5{$EndIf});
   TouchKey.StringButton[_Del].bString := NameBackSpace;
   TouchKey.StringButton[_Del]._key := K_BACKSPACE;
 
-  m := 4;
+(*  kodeSymb[1] := K_TILDE;       kodeSymb[2] := K_Q;   kodeSymb[3] := K_W;
+    kodeSymb[4] := K_E;           kodeSymb[5] := K_R;   kodeSymb[6] := K_T;
+    kodeSymb[7] := K_Y;           kodeSymb[8] := K_U;   kodeSymb[9] := K_I;
+    kodeSymb[10] := K_O;          kodeSymb[11] := K_P;  kodeSymb[12] := K_BRACKET_L;
+    kodeSymb[13] := K_BRACKET_R;  kodeSymb[14] := K_A;  kodeSymb[15] := K_S;
+    kodeSymb[16] := K_D;          kodeSymb[17] := K_F;  kodeSymb[18] := K_G;
+    kodeSymb[19] := K_H;          kodeSymb[20] := K_J;  kodeSymb[21] := K_K;
+    kodeSymb[22] := K_L;          kodeSymb[23] := K_SEMICOLON;
+    kodeSymb[24] := K_APOSTROPHE; kodeSymb[25] := K_Z;  kodeSymb[26] := K_X;
+    kodeSymb[27] := K_C;          kodeSymb[28] := K_V;  kodeSymb[29] := K_B;
+    kodeSymb[30] := K_N;          kodeSymb[31] := K_M;  kodeSymb[32] := K_SEPARATOR;
+    kodeSymb[33] := K_DECIMAL;    kodeSymb[34] := K_SLASH;   *)
 
+  m := 4;
   for n := 1 to 34 do
     CreateOneButton(kodeSymb[n]);
   set_FlagForLoadText(True);
@@ -565,32 +578,32 @@ end;
 
 procedure CreateTouchSymbol;
 var
-  dw, dh, x0, y0: Single;
+  dw, dh, x0, y0, _xx0: Single;
   i: integer;
 begin
   TouchKeySymb.count := 23;                         
   if wndWidth < 1200 then
     dw := _wndWidth
   else
-    dw := rs1200;
+    dw := {$IfDef LINUX}rs1200{$Else}1200{$EndIf};
   if wndHeight < 500 then                       
-    dh := _wndHeight / rs2
+    dh := _wndHeight / {$IfDef LINUX}rs2{$Else}2{$EndIf}
   else
-    dh := rs251;
+    dh := {$IfDef LINUX}rs251{$Else}251{$EndIf};
 
-  TouchKeySymb.OWidth := ((dw - rs40) / rs11);
+  TouchKeySymb.OWidth := ((dw - {$IfDef LINUX}rs40{$Else}40{$EndIf}) / {$IfDef LINUX}rs11{$Else}11{$EndIf});
 
-  x0 := rs2; 
-  dw := rs3 + TouchKeySymb.OWidth;
+  x0 := {$IfDef LINUX}rs2{$Else}2{$EndIf};
+  dw := {$IfDef LINUX}rs3{$Else}3{$EndIf} + TouchKeySymb.OWidth;
   y0 := _wndHeight - dh;
-  dh := rs3 + ((dh - rs11) / rs4);
+  dh := {$IfDef LINUX}rs3{$Else}3{$EndIf} + ((dh - {$IfDef LINUX}rs11{$Else}11{$EndIf}) / {$IfDef LINUX}rs4{$Else}4{$EndIf});
 
-  TouchKeySymb.Height := dh - rs3;                    
+  TouchKeySymb.Height := dh - {$IfDef LINUX}rs3{$Else}3{$EndIf};
 
   if dw >= dh then                              
-    TouchKeySymb.textScale := round(dh * rs045)
+    TouchKeySymb.textScale := round(dh * {$IfDef LINUX}rs045{$Else}0.45{$EndIf})
   else
-    TouchKeySymb.textScale := round(dw * rs045);
+    TouchKeySymb.textScale := round(dw * {$IfDef LINUX}rs045{$Else}0.45{$EndIf});
 
   for i := 1 to 10 do
   begin
@@ -629,7 +642,7 @@ begin
   TouchKeySymb.OneDoubleButton[9].symb[2] := '(';
   TouchKeySymb.OneDoubleButton[10].symb[2] := ')';
 
-  TouchKeySymb.StringButton[_Home].X := TouchKeySymb.OneDoubleButton[10].X + TouchKeySymb.OWidth + rs3;
+  TouchKeySymb.StringButton[_Home].X := TouchKeySymb.OneDoubleButton[10].X + TouchKeySymb.OWidth + {$IfDef LINUX}rs3{$Else}3{$EndIf};
   TouchKeySymb.StringButton[_Home].Y := y0;
   TouchKeySymb.StringButton[_Home].Width := TouchKeySymb.OWidth;
   TouchKeySymb.StringButton[_Home].bString := NameHome;
@@ -673,7 +686,7 @@ begin
   TouchKeySymb.OneDoubleButton[19].symb[2] := '+';
   TouchKeySymb.OneDoubleButton[20].symb[2] := '\';
 
-  TouchKeySymb.StringButton[_End].X := TouchKeySymb.OneDoubleButton[20].X + TouchKeySymb.OWidth + rs3;
+  TouchKeySymb.StringButton[_End].X := TouchKeySymb.OneDoubleButton[20].X + TouchKeySymb.OWidth + {$IfDef LINUX}rs3{$Else}3{$EndIf};
   TouchKeySymb.StringButton[_End].Y := y0;
   TouchKeySymb.StringButton[_End].Width := TouchKeySymb.OWidth;
   TouchKeySymb.StringButton[_End].bString := NameEnd;
@@ -685,17 +698,18 @@ begin
   y0 := y0 + dh;
   TouchKeySymb.StringButton[_Ctrl].X := x0;
   TouchKeySymb.StringButton[_Ctrl].Y := y0;
-  TouchKeySymb.StringButton[_Ctrl].Width := TouchKeySymb.OWidth * rs2 + rs3;
+  TouchKeySymb.StringButton[_Ctrl].Width := TouchKeySymb.OWidth * {$IfDef LINUX}rs2{$Else}2{$EndIf} + {$IfDef LINUX}rs3{$Else}3{$EndIf};
   TouchKeySymb.StringButton[_Ctrl].bString := NameCtrl;
   TouchKeySymb.StringButton[_Ctrl]._key := K_CTRL_L;
 
+  _xx0 := x0 + TouchKeySymb.StringButton[_Ctrl].Width + {$IfDef LINUX}rs3{$Else}3{$EndIf};
   for i := 21 to 23 do
   begin
-    TouchKeySymb.OneDoubleButton[i].X := x0 + TouchKeySymb.StringButton[_Ctrl].Width + rs3 + dw * (i - 21);
+    TouchKeySymb.OneDoubleButton[i].X := _xx0 + dw * (i - 21);
     TouchKeySymb.OneDoubleButton[i].Y := y0;
   end;
   // застрелитесь со всеми этими долбанными кодировками!!!               ('№')
-  TouchKeySymb.OneDoubleButton[21].symb[1] := Unicode_toUTF8(8470);
+  TouchKeySymb.OneDoubleButton[21].symb[1] := ID_toUTF8(8470);
   TouchKeySymb.OneDoubleButton[21].symb[2] := TouchKeySymb.OneDoubleButton[21].symb[1];
   TouchKeySymb.OneDoubleButton[21]._key := K_KP_3;
   TouchKeySymb.OneDoubleButton[22].symb[1] := '?';
@@ -705,12 +719,12 @@ begin
   TouchKeySymb.OneDoubleButton[23].symb[2] := '|';
   TouchKeySymb.OneDoubleButton[23]._key := K_KP_1;
 
-  TouchKeySymb.BArrow[_Up].X := TouchKeySymb.OneDoubleButton[23].X + rs3 * TouchKeySymb.OWidth + rs9;
+  TouchKeySymb.BArrow[_Up].X := TouchKeySymb.OneDoubleButton[23].X + {$IfDef LINUX}rs3{$Else}3{$EndIf} * TouchKeySymb.OWidth + {$IfDef LINUX}rs9{$Else}9{$EndIf};
   TouchKeySymb.BArrow[_Up].Y := y0;
-  TouchKeySymb.BArrow[_Up].Angle := rs0;
+  TouchKeySymb.BArrow[_Up].Angle := {$IfDef LINUX}rs0{$Else}0{$EndIf};
   TouchKeySymb.BArrow[_Up]._key := K_UP;
 
-  TouchKeySymb.StringButton[_Enter].X := TouchKeySymb.BArrow[_Up].X + rs6 + TouchKeySymb.OWidth * rs2;
+  TouchKeySymb.StringButton[_Enter].X := TouchKeySymb.BArrow[_Up].X + {$IfDef LINUX}rs6{$Else}6{$EndIf} + TouchKeySymb.OWidth * {$IfDef LINUX}rs2{$Else}2{$EndIf};
   TouchKeySymb.StringButton[_Enter].Y := y0;
   TouchKeySymb.StringButton[_Enter].Width := TouchKeySymb.StringButton[_Ctrl].Width;
   TouchKeySymb.StringButton[_Enter].bString := NameEnter;
@@ -723,40 +737,40 @@ begin
   TouchKeySymb.StringButton[_Shift].bString := NameShift;
   TouchKeySymb.StringButton[_Shift]._key := K_SHIFT_L;
 
-  TouchKeySymb.StringButton[_Space].X := TouchKeySymb.StringButton[_Shift].X + TouchKeySymb.StringButton[_Shift].Width + rs3;
+  TouchKeySymb.StringButton[_Space].X := TouchKeySymb.StringButton[_Shift].X + TouchKeySymb.StringButton[_Shift].Width + {$IfDef LINUX}rs3{$Else}3{$EndIf};
   TouchKeySymb.StringButton[_Space].Y := y0;
   TouchKeySymb.StringButton[_Space].Width := TouchKeySymb.StringButton[_Shift].Width;
   TouchKeySymb.StringButton[_Space].bString := ' ';
   TouchKeySymb.StringButton[_Space]._key := K_SPACE;
 
-  TouchKeySymb.StringButton[_Keyboard].X := TouchKeySymb.StringButton[_Space].X + TouchKeySymb.StringButton[_Space].Width + rs3;
+  TouchKeySymb.StringButton[_Keyboard].X := TouchKeySymb.StringButton[_Space].X + TouchKeySymb.StringButton[_Space].Width + {$IfDef LINUX}rs3{$Else}3{$EndIf};
   TouchKeySymb.StringButton[_Keyboard].Y := y0;
   TouchKeySymb.StringButton[_Keyboard].Width := TouchKeySymb.StringButton[_Space].Width;
   TouchKeySymb.StringButton[_Keyboard].bString := NameKeyboard;
   TouchKeySymb.StringButton[_Keyboard]._key := K_F2;
 
-  TouchKeySymb.BArrow[_Left].X := TouchKeySymb.StringButton[_Keyboard].X + 3 + TouchKeySymb.StringButton[_Keyboard].Width;
+  TouchKeySymb.BArrow[_Left].X := TouchKeySymb.StringButton[_Keyboard].X + TouchKeySymb.StringButton[_Keyboard].Width + {$IfDef LINUX}rs3{$Else}3{$EndIf};
   TouchKeySymb.BArrow[_Left].Y := y0;
-  TouchKeySymb.BArrow[_Left].Angle := rs270;
+  TouchKeySymb.BArrow[_Left].Angle := {$IfDef LINUX}rs270{$Else}270{$EndIf};
   TouchKeySymb.BArrow[_Left]._key := K_LEFT;
 
-  TouchKeySymb.BArrow[_Down].X := TouchKeySymb.BArrow[_Left].X + rs3 + TouchKeySymb.OWidth;
+  TouchKeySymb.BArrow[_Down].X := TouchKeySymb.BArrow[_Left].X + TouchKeySymb.OWidth + {$IfDef LINUX}rs3{$Else}3{$EndIf};
   TouchKeySymb.BArrow[_Down].Y := y0;
-  TouchKeySymb.BArrow[_Down].Angle := rs180;
+  TouchKeySymb.BArrow[_Down].Angle := {$IfDef LINUX}rs180{$Else}180{$EndIf};
   TouchKeySymb.BArrow[_Down]._key := K_DOWN;
 
-  TouchKeySymb.BArrow[_Right].X := TouchKeySymb.BArrow[_Down].X + rs3 + TouchKeySymb.OWidth;
+  TouchKeySymb.BArrow[_Right].X := TouchKeySymb.BArrow[_Down].X + TouchKeySymb.OWidth + {$IfDef LINUX}rs3{$Else}3{$EndIf};
   TouchKeySymb.BArrow[_Right].Y := y0;
-  TouchKeySymb.BArrow[_Right].Angle := rs90;
+  TouchKeySymb.BArrow[_Right].Angle := {$IfDef LINUX}rs90{$Else}90{$EndIf};
   TouchKeySymb.BArrow[_Right]._key := K_RIGHT;
 
-  TouchKeySymb.StringButton[_Insert].X := TouchKeySymb.BArrow[_Down].X + rs6 + TouchKeySymb.OWidth * rs2;
+  TouchKeySymb.StringButton[_Insert].X := TouchKeySymb.BArrow[_Down].X + {$IfDef LINUX}rs6{$Else}6{$EndIf} + TouchKeySymb.OWidth * {$IfDef LINUX}rs2{$Else}2{$EndIf};
   TouchKeySymb.StringButton[_Insert].Y := y0;
   TouchKeySymb.StringButton[_Insert].Width := TouchKeySymb.OWidth;
   TouchKeySymb.StringButton[_Insert].bString := NameInsert;
   TouchKeySymb.StringButton[_Insert]._key := K_INSERT;
 
-  TouchKeySymb.StringButton[_Del].X := TouchKeySymb.StringButton[_Insert].X + rs3 + TouchKeySymb.OWidth;
+  TouchKeySymb.StringButton[_Del].X := TouchKeySymb.StringButton[_Insert].X + {$IfDef LINUX}rs3{$Else}3{$EndIf} + TouchKeySymb.OWidth;
   TouchKeySymb.StringButton[_Del].Y := y0;
   TouchKeySymb.StringButton[_Del].Width := TouchKeySymb.OWidth;
   TouchKeySymb.StringButton[_Del].bString := NameBackSpace;
@@ -791,11 +805,13 @@ begin
     if ((_X > TouchJoyRolling.OneButton[i].X) and (_X < (TouchJoyRolling.OneButton[i].X + TouchJoyRolling.Width)) and
         (_Y > TouchJoyRolling.OneButton[i].Y) and (_Y < (TouchJoyRolling.OneButton[i].Y + TouchJoyRolling.Height))) then
     begin
+      // если было нажатие, то отмечаем.
       TouchJoyRolling.OneButton[i].bPush := 1;
       keysDown[TouchJoyRolling.OneButton[i]._key] := True;
       exit;
     end
     else begin
+      // в противном случае, "обнуляем", но по сути проще обнулить все? Или возможно множественное нажатие?
       keysDown[TouchJoyRolling.OneButton[i]._key] := False;
       TouchJoyRolling.OneButton[i].bPush := 0;
     end;
@@ -863,9 +879,12 @@ begin
     if ((_X > TouchKey.StringButton[i].X) and (_X < (TouchKey.StringButton[i].X + TouchKey.StringButton[i].Width)) and
           (_Y > TouchKey.StringButton[i].Y) and (_Y < (TouchKey.StringButton[i].Y + TouchKey.Height))) then
     begin
+ {     if (i = _Rus) then
+        Continue;      }
+      // выставляем какой код был на мышке последний. Но с тачпадом надо будет проверять именно номер "клика"
       lastKey := TouchKey.StringButton[i]._key;
       if (firstTapKey = is_notTouch) or ((firstTapKey = num) and (mouseLastVKey[num] = lastKey)) or (lastKey = K_SHIFT_L) or (lastKey = K_CAPSLOCK) then
-          keyboardDown(lastKey)
+        keyboardDown(lastKey)
       else
         lastKey := 0;
       goto toCompareKey;
@@ -877,6 +896,7 @@ begin
     if ((_X > TouchKey.OneButton[i].X) and (_X < (TouchKey.OneButton[i].X + TouchKey.OWidth)) and
           (_Y > TouchKey.OneButton[i].Y) and (_Y < (TouchKey.OneButton[i].Y + TouchKey.Height))) then
     begin
+      // выставляем какой код был на мышке последний. Но с тачпадом надо будет проверять именно номер "клика"
       lastKey := TouchKey.OneButton[i]._key;
       if (firstTapKey = is_notTouch) or ((firstTapKey = num) and (mouseLastVKey[num] = lastKey)) then
         keyboardDown(lastKey)
@@ -894,7 +914,7 @@ toCompareKey:
     mouseLastVKey[num] := 0;
   end;
   case lastKey of
-    K_PAUSE, K_INSERT, K_CTRL_L, K_CTRL_R, K_ALT_L, K_ALT_R, K_SHIFT_L, K_SHIFT_R, K_SUPER_L, K_SUPER_R, K_BACKSPACE,
+      K_PAUSE, K_INSERT, K_CTRL_L, K_CTRL_R, K_ALT_L, K_ALT_R, K_SHIFT_L, K_SHIFT_R, K_SUPER_L, K_SUPER_R, K_BACKSPACE,
         K_APP_MENU, K_CAPSLOCK, K_NUMLOCK, K_SCROLL, K_F1, K_F2, K_F3, K_F4, K_F5, K_F6, K_F7, K_F8, K_F9, K_F10, K_F11, K_F12: ;
     else begin
       if (lastKey > 0) and (firstTapKey = is_notTouch) then
@@ -921,10 +941,16 @@ begin
   {$EndIf}
   for i := 1 to TouchKeySymb.count do
   begin
-    if ((_X > TouchKeySymb.OneDoubleButton[i].X) and (_X < (TouchKeySymb.OneDoubleButton[i].X + TouchKeySymb.OWidth)) and
-          (_Y > TouchKeySymb.OneDoubleButton[i].Y) and (_Y < (TouchKeySymb.OneDoubleButton[i].Y + TouchKeySymb.Height))) then
+{    if ((_X > TouchKeySymb.OneDoubleButton[i].X) and (_X < (TouchKeySymb.OneDoubleButton[i].X + TouchKeySymb.OWidth)) and
+          (_Y > TouchKeySymb.OneDoubleButton[i].Y) and (_Y < (TouchKeySymb.OneDoubleButton[i].Y + TouchKeySymb.Height))) then }
+    if (_X > TouchKeySymb.OneDoubleButton[i].X) then
+      if (_X < (TouchKeySymb.OneDoubleButton[i].X + TouchKeySymb.OWidth)) then
+        if (_Y > TouchKeySymb.OneDoubleButton[i].Y) then
+          if (_Y < (TouchKeySymb.OneDoubleButton[i].Y + TouchKeySymb.Height)) then
     begin
+      // выставляем какой код был на мышке последний. Но с тачпадом надо будет проверять именно номер "клика"
       lastKey := TouchKeySymb.OneDoubleButton[i]._key;
+    //  if (keysLast[KT_DOWN] = 0) or (keysLast[KT_DOWN] = lastKey) then
       if (firstTapKey = is_notTouch) or ((firstTapKey = num) and (mouseLastVKey[num] = lastKey)) then
         keyboardDown(lastKey)
       else
@@ -937,7 +963,9 @@ begin
     if ((_X > TouchKeySymb.BArrow[i].X) and (_X < (TouchKeySymb.BArrow[i].X + TouchKeySymb.OWidth)) and
           (_Y > TouchKeySymb.BArrow[i].Y) and (_Y < (TouchKeySymb.BArrow[i].Y + TouchKeySymb.Height))) then
     begin
+      // выставляем какой код был на мышке последний. Но с тачпадом надо будет проверять именно номер "клика"
       lastKey := TouchKeySymb.BArrow[i]._key;
+//      if (keysLast[KT_DOWN] = 0) or (keysLast[KT_DOWN] = lastKey) then
       if (firstTapKey = is_notTouch) or ((firstTapKey = num) and (mouseLastVKey[num] = lastKey)) then
         keyboardDown(lastKey)
       else
@@ -950,7 +978,9 @@ begin
     if ((_X > TouchKeySymb.StringButton[i].X) and (_X < (TouchKeySymb.StringButton[i].X + TouchKeySymb.StringButton[i].Width)) and
           (_Y > TouchKeySymb.StringButton[i].Y) and (_Y < (TouchKeySymb.StringButton[i].Y + TouchKeySymb.Height))) then
     begin
+      // выставляем какой код был на мышке последний. Но с тачпадом надо будет проверять именно номер "клика"
       lastKey := TouchKeySymb.StringButton[i]._key;
+//      if (keysLast[KT_DOWN] = 0) or (keysLast[KT_DOWN] = lastKey) or ((keysLast[KT_DOWN] <> 0) and ((lastKey = K_SHIFT_L) or (lastKey = K_CTRL_L))) then
       if (firstTapKey = is_notTouch) or ((firstTapKey = num) and (mouseLastVKey[num] = lastKey)) or (lastKey = K_SHIFT_L) or (lastKey = K_CTRL_L) then
         keyboardDown(lastKey)
       else

@@ -40,8 +40,9 @@ var
   fntMain   : LongWord;
   video     : zglPVideoStream;
   videoSeek : Boolean;
-
+  {$IfNDef OLD_METHODS}
   newColor  : LongWord;
+  {$EndIf}
 
 procedure Init;
 begin
@@ -52,8 +53,9 @@ begin
   video := video_OpenFile( dirRes + 'video.ogv' );
 
   setFontTextScale(15, fntMain);
-
+  {$IfNDef OLD_METHODS}
   newColor := Color_FindOrAdd($00FF0090);
+  {$EndIf}
 end;
 
 procedure Draw;

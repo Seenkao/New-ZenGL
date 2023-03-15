@@ -34,63 +34,63 @@ uses
   zgl_math_2d;
 
 // point 2d
-// Rus: точка в квадрате?
-// Eng:
+// Rus: пересечение точки и квадрата. Край учитывается.
+// Eng: intersection of a point and a square. The edge is taken into account.
 function col2d_PointInRect(X, Y: Single; const Rect: zglTRect2D): Boolean;
-// Rus: точка в треугольнике?
-// Eng:
+// Rus: пересечение точки и треугольника. Край учитывается.
+// Eng: intersection of a point and a triangle. The edge is taken into account.
 function col2d_PointInTriangle(X, Y: Single; const P1, P2, P3: zglTPoint2D): Boolean;
-// Rus: точка в круге?
-// Eng:
+// Rus: пересечение точки и круга. Край учитывается.
+// Eng: intersection of a point and a circle. The edge is taken into account.
 function col2d_PointInCircle(X, Y: Single; const Circle: zglTCircle2D): Boolean;
-// Rus: точка в произвольном четырёхугольнике? Проверить работу!!!
-// Eng:
+// Rus: пересечение точки и произвольного четырёхугольника. Проверить работу!!!
+// Eng: intersection of a point and an arbitrary quadrilateral.
 function col2d_PointInQuad(X, Y: Single; Quad: zglTRectPoints2D): Boolean;
 
 // line 2d
-// Rus: пересечение линий
-// Eng:
+// Rus: пересечение линий.
+// Eng: line intersection.
 function col2d_Line(const A, B: zglTLine2D; ColPoint: zglPPoint2D): Boolean;
-// Rus: пересечение линий, без вычисления точки пересечения
-// Eng:
+// Rus: пересечение линий, без вычисления точки пересечения.
+// Eng: line intersection, without calculating the intersection point.
 function col2d_Lines(const A, B: zglTLine2D): Boolean;
-// Rus: пересечение линии с  квадратом
-// Eng:
+// Rus: пересечение линии с  квадратом.
+// Eng: intersection of a line with a square.
 function col2d_LineVsRect(const Line: zglTLine2D; const Rect: zglTRect2D): Boolean;
-// Rus: пересечение линии с кругом
-// Eng:
+// Rus: пересечение линии с кругом.
+// Eng: intersection of a line with a circle.
 function col2d_LineVsCircle(const Line: zglTLine2D; const Circle: zglTCircle2D): Boolean;
 
 // rect
-// Rus: пересечение квадратов
-// Eng:
+// Rus: пересечение квадратов.
+// Eng: intersection of squares.
 function col2d_Rect(const Rect1, Rect2: zglTRect2D): Boolean;
-// Begin point - End point
-// Rus:
-// Eng:
+// Begin point - End point.
+// Rus: пересечение квадратов. У квадратов заданы начальные и конечные координаты.
+// Eng: intersection of squares. The squares have start and end coordinates.
 function col2d_RectBPEP(const Rect1, Rect2: zglTRectBPEP2D): Boolean;
-// Rus: обрезание первого квадрата по второму
-// Eng:
+// Rus: обрезание первого квадрата по второму.
+// Eng: cutting off the first square by the second.
 function col2d_ClipRect(const Rect1, Rect2: zglTRect2D): zglTRect2D;
-// Rus: пересечение квадратов (квадрат внутри квадрата)
-// Eng:
+// Rus: квадрат точно внутри квадрата.
+// Eng: the square is exactly inside the square.
 function col2d_RectInRect(const Rect1, Rect2: zglTRect2D): Boolean;
-// Rus: квадрат в круге
-// Eng:
+// Rus: квадрат точно в круге.
+// Eng: the square is exactly inside the circle.
 function col2d_RectInCircle(const Rect: zglTRect2D; const Circle: zglTCircle2D): Boolean;
-// Rus: пересечение квадрата с кругом
-// Eng:
+// Rus: пересечение квадрата с кругом.
+// Eng: intersection of a square with a circle.
 function col2d_RectVsCircle(const Rect: zglTRect2D; const Circle: zglTCircle2D): Boolean;
 
 // circle
-// Rus:
-// Eng:
+// Rus: пересечение кругов.
+// Eng: circle intersection.
 function col2d_Circle(const Circle1, Circle2: zglTCircle2D): Boolean;
-// Rus:
-// Eng:
+// Rus: круг точно внутри круга.
+// Eng: the circle is exactly inside the circle.
 function col2d_CircleInCircle(const Circle1, Circle2: zglTCircle2D): Boolean;
-// Rus:
-// Eng:
+// Rus: круг точно внутри квадрата.
+// Eng: the circle is exactly inside the square.
 function col2d_CircleInRect(const Circle: zglTCircle2D; const Rect: zglTRect2D): Boolean;
 
 implementation
@@ -379,7 +379,6 @@ end;
 
 function col2d_Circle(const Circle1, Circle2: zglTCircle2D): Boolean;
 begin
-  // не правильный подсчёт. Надо учитывать пересечения кругов
   Result := sqr(Circle1.cX - Circle2.cX) + sqr(Circle1.cY - Circle2.cY) <= sqr(Circle1.Radius + Circle2.Radius);
 end;
 

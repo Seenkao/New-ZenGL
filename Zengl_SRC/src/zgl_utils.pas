@@ -21,7 +21,7 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 16.07.2021
+ !!! modification from
 }
 unit zgl_utils;
 
@@ -49,46 +49,97 @@ uses
 const
   LIB_ERROR  = {$IFDEF UNIX}nil{$ELSE}0{$ENDIF};
 
+// Rus: перевод Integer в String.
+// Eng: convert Integer to String.
 function u_IntToStr(Value: Integer): UTF8String;
+// Rus: перевод String в Integer.
+// Eng: convert String to Integer.
 function u_StrToInt(const Value: UTF8String): Integer;
-function u_FloatToStr(Value: Single; Digits: Integer = 2): UTF8String;
-function u_StrToFloat(const Value: UTF8String): Single;
+// Rus: перевод Single/Double в String.
+// Eng: convert Single/Double to String.
+function u_FloatToStr(Value: Single; Digits: Integer = 2): UTF8String; {$IfNDef DELPHI7_AND_DOWN}overload;
+function u_FloatToStr(Value: Double; Digits: Integer = 2): UTF8String; overload;{$EndIf}
+// Rus: перевод String в Single/Double.
+// Eng: convert String to Single/Double.
+function u_StrToFloat(const Value: UTF8String): Single; {$IfNDef DELPHI7_AND_DOWN} overload;
+function u_StrToFloat(const Value: UTF8String): Double; overload;{$EndIf}
+// Rus: перевод Boolean в String.
+// Eng: convert Boolean to String.
 function u_BoolToStr(Value: Boolean): UTF8String;
+// Rus: перевод String в Boolean.
+// Eng: convert String to Boolean.
 function u_StrToBool(const Value: UTF8String): Boolean;
 
+// Rus: преобразование всей строки в верхинй регистр.
+// Eng: converting the entire string to uppercase.
 // Only for latin symbols in range 0..127
 function u_StrUp(const Str: UTF8String): UTF8String;
+// Rus: преобразование всей строки в нижний регистр.
+// Eng: converting the entire string to lower case.
+// Only for latin symbols in range 0..127
 function u_StrDown(const Str: UTF8String): UTF8String;
 
+// Rus: копирование строки UTF8.
+// Eng: copying a UTF8 string.
 function utf8_Copy(const Str: UTF8String): UTF8String; overload;
+// Rus: копирование строки UTF8 с заданными параметрами.
+// Eng: copying a UTF8 string with the given parameters.
 function utf8_Copy(const Str: UTF8String; FromPosition, Count: Integer): UTF8String; overload;
+// Rus: удаление символа в заданной позиции.
+// Eng: deleting a character at a given position.
 procedure utf8_Delete(var Str: UTF8String; FromPosition, Count: Integer);
+// Rus: удаление предыдущего символа.
+// Eng: delete the previous character.
 procedure utf8_Backspace(var Str: UTF8String);
+// Rus: вычисление длины строки UTF8.
+// Eng: calculating the length of a UTF8 string.
 function  utf8_Length(const Str: UTF8String): Integer;
+// Rus:
+// Eng:
 procedure utf8_GetShift(const Text: UTF8String; Pos: Integer; out NewPos: Integer; Chars: Integer = 1);
-function utf8_toUnicode(const Text: UTF8String; Pos: Integer; Shift: PInteger): LongWord;
+// Rus: перевод UTF8 в Unicode.    ???
+// Eng:
+function utf8_GetID(const Text: UTF8String; Pos: Integer; Shift: PInteger): LongWord;
 
-function Unicode_toUTF8(Symb: LongWord): UTF8String;
+// Rus: перевод Unicode в UTF8.    ???
+// Eng:
+function ID_toUTF8(Symb: LongWord): UTF8String;
 
+// Rus:
+// Eng:
 function utf8_GetPAnsiChar(const Str: UTF8String): PAnsiChar;
 {$IFDEF WINDOWS}
+// Rus:
+// Eng:
 function utf8_GetPWideChar(const Str: UTF8String): PWideChar;
+// Rus:
+// Eng:
 function utf16_GetUTF8String(const Str: PWideChar): UTF8String;
 {$ENDIF}
 {$IFDEF iOS}
+// Rus:
+// Eng:
 function utf8_GetNSString(const Str: UTF8String): NSString;
 {$ENDIF}
-//
+// Rus:
+// Eng:
 procedure u_SortList(var List: zglTStringList; iLo, iHi: Integer);
-//
+// Rus:
+// Eng:
 function u_Hash(const Str: UTF8String): LongWord;
 
+// Rus:
+// Eng:
 procedure u_Error(const ErrStr: UTF8String);
+// Rus:
+// Eng:
 procedure u_Warning(const ErrStr: UTF8String);
 
-(* ���������� �� ���������� �������� 2^ (2, 4, 8, 16, 32 � �. �.) *)
+// Rus: дополнение до ближайшего верхнего 2^n (2, 4, 8, 16, 32 и т. д.)
+// Eng:
 function u_GetPOT(Value: Integer): Integer;
-
+// Rus: задержка в милисекундах.
+// Eng:
 procedure u_Sleep(Milliseconds: LongWord);
 
 {$IFDEF UNIX}
@@ -136,16 +187,30 @@ function u_FloatToStr(Value: Single; Digits: Integer = 2): UTF8String;
 begin
   Str(Value:0:Digits, Result);
 end;
-
+{$IfNDef DELPHI7_AND_DOWN}
+function u_FloatToStr(Value: Double; Digits: Integer): UTF8String;
+begin
+  Str(Value:0:Digits, Result);
+end;
+{$EndIf}
 function u_StrToFloat(const Value: UTF8String): Single;
-  var
-    e: Integer;
+var
+  e: Integer;
 begin
   Val(Value, Result, e);
   if e <> 0 Then
     Result := 0;
 end;
-
+{$IfNDef DELPHI7_AND_DOWN}
+function u_StrToFloat(const Value: UTF8String): Double;
+var
+  e: Integer;
+begin
+  Val(Value, Result, e);
+  if e <> 0 Then
+    Result := 0;
+end;
+{$EndIf}
 function u_BoolToStr(Value: Boolean): UTF8String;
 begin
   if Value Then
@@ -207,13 +272,15 @@ function utf8_Copy(const Str: UTF8String; FromPosition, Count: Integer): UTF8Str
     i, j, len: Integer;
 begin
   len := utf8_Length(Str);
-  if FromPosition < 1 Then FromPosition := 1;
+  if FromPosition < 1 Then
+    FromPosition := 1;
   if (FromPosition > len) or (Count < 1) Then
     begin
       Result := '';
       exit;
     end;
-  if FromPosition + Count > len + 1 Then Count := len - FromPosition + 1;
+  if FromPosition + Count > len + 1 Then
+    Count := len - FromPosition + 1;
 
   i := 1;
   utf8_GetShift(Str, i, i, FromPosition - 1);
@@ -253,23 +320,23 @@ begin
 end;
 
 procedure utf8_Backspace(var Str: UTF8String);
-  var
-    i, last: Integer;
+var
+  i, last: Integer;
 begin
   i := 1;
   last := 1;
   while i <= Length(Str) do
-    begin
-      last := i;
-      utf8_GetShift(Str, last, i);
-    end;
+  begin
+    last := i;
+    utf8_GetShift(Str, last, i);
+  end;
 
   SetLength(Str, last - 1)
 end;
 
 function utf8_Length(const Str: UTF8String): Integer;
-  var
-    i: Integer;
+var
+  i: Integer;
 begin
   Result := 0;
   i := 1;
@@ -299,8 +366,8 @@ begin
     end;
 end;
 
-// ��������� "������" �������
-function utf8_toUnicode(const Text: UTF8String; Pos: Integer; Shift: PInteger): LongWord;
+// получение "номера" символа
+function utf8_GetID(const Text: UTF8String; Pos: Integer; Shift: PInteger): LongWord;
 begin
   case Byte(Text[Pos]) of
     0..$7F:
@@ -361,7 +428,7 @@ begin
   end;
 end;
 
-function Unicode_toUTF8(Symb: LongWord): UTF8String;
+function ID_toUTF8(Symb: LongWord): UTF8String;
 begin
   if Symb <= $7F then
   begin
@@ -577,7 +644,7 @@ begin
   Result := Result + 1;
 end;
 
-// �����
+// пауза
 procedure u_Sleep(Milliseconds: LongWord);
 (*  {$IFDEF UNIX}
   var
@@ -596,7 +663,7 @@ end;
 
 {$IF DEFINED(LINUX) and DEFINED(CPUx86_64)}
 {$S-} // Don't know WTF is going on when stack check is enabled...
-function memcpy(destination, source: Pointer; num: csize_t): Pointer;
+function memcpy(destination, source: Pointer; num: csize_t): Pointer; cdecl;
 begin
   Move(source^, destination^, num);
   Result := destination;

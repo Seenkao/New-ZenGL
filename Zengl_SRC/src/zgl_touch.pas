@@ -61,10 +61,10 @@ function touch_Tap(ID: Byte): Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
 //     использовать константы M_BLEFT и M_BRIGHT.
 // En: return the double-click state. To emulate a mouse, you
 //     can use the constants M_BLEFT and M_BRIGHT.
-function touch_DoubleClick(ID: Byte): Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
+function touch_DoubleTap(ID: Byte): Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
 // Ru: возвращаем состояние тройного клика.
 // En: we return the state of the triple click.
-function touch_TripleClick(ID: Byte): Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
+function touch_TripleTap(ID: Byte): Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
 {$EndIf}
 // Ru: очистка всех нажатий.
 // En: clearing all clicks.
@@ -188,7 +188,7 @@ begin
     Result := False;
 end;
 
-function touch_DoubleClick(ID: Byte): Boolean;
+function touch_DoubleTap(ID: Byte): Boolean;
 begin
   {$IfDef FULL_LOGGING}
   if ID > 9 then
@@ -205,7 +205,7 @@ begin
 end;
 {$EndIf}
 
-function touch_TripleClick(ID: Byte): Boolean;
+function touch_TripleTap(ID: Byte): Boolean;
 begin
   {$IfDef FULL_LOGGING}
   if ID > 9 then

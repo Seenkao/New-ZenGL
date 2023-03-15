@@ -70,13 +70,16 @@ unit zgl_lib_ogg;
 
 interface
 uses
+  {$IFDEF USE_OGG_STATIC}
   {$IFDEF WINDOWS}
   zgl_lib_msvcrt,
   {$ENDIF}
+  {$EndIf}
   zgl_types
   ;
 
 const
+{$IfNDef USE_OGG_STATIC}
 {$IFDEF LINUX}
   libogg        = 'libogg.so.0';
   libvorbis     = 'libvorbis.so.0';
@@ -97,6 +100,7 @@ const
   libvorbis     = 'libvorbis.0.dylib';
   libvorbisfile = 'libvorbisfile.3.dylib';
 {$ENDIF}
+{$EndIf}
 {$IFDEF ENDIAN_BIG}
   BIG_ENDIAN = TRUE;
 {$ELSE}

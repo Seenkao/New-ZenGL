@@ -33,130 +33,113 @@ interface
 uses
   zgl_types,
   zgl_math_2d,
-  zgl_gltypeconst,
-  zgl_memory;
+  zgl_gltypeconst;
 
-const
-  // òåêñòóðû
-  TEX_FORMAT_RGBA       = $01;
-  TEX_FORMAT_RGBA_4444  = $02;
-  TEX_FORMAT_RGBA_PVR2  = $10;
-  TEX_FORMAT_RGBA_PVR4  = $11;
-  TEX_FORMAT_RGBA_DXT1  = $20;
-  TEX_FORMAT_RGBA_DXT3  = $21;
-  TEX_FORMAT_RGBA_DXT5  = $22;
-
-  TEX_NO_COLORKEY       = $FF000000;               // áåç ðàñ÷¸òà ïðîçðà÷íîñòè
-
-  TEX_MIPMAP            = $000001;
-  TEX_CLAMP             = $000002;
-  TEX_REPEAT            = $000004;
-  TEX_COMPRESS          = $000008;
-
-  TEX_CONVERT_TO_POT    = $000010;
-  TEX_CALCULATE_ALPHA   = $000020;
-
-  TEX_GRAYSCALE         = $000040;
-  TEX_INVERT            = $000080;
-  TEX_CUSTOM_EFFECT     = $000100;
-
-  TEX_FILTER_NEAREST    = $000200;
-  TEX_FILTER_LINEAR     = $000400;
-  TEX_FILTER_BILINEAR   = $000800;
-  TEX_FILTER_TRILINEAR  = $001000;
-  TEX_FILTER_ANISOTROPY = $002000;
-
-  TEXTURE_FILTER_CLEAR = $ffffff - (TEX_FILTER_NEAREST or TEX_FILTER_LINEAR or TEX_FILTER_BILINEAR or TEX_FILTER_TRILINEAR or
-          TEX_FILTER_ANISOTROPY);
-
-  TEX_DEFAULT_2D        = TEX_CLAMP or TEX_FILTER_LINEAR or TEX_CONVERT_TO_POT or TEX_CALCULATE_ALPHA;
-
-type
-  zglPTextureCoord = ^zglTTextureCoord;
-  zglTTextureCoord = array[0..3] of zglTPoint2D;
-
-  zglTTextureFileLoader = procedure(const FileName: UTF8String; out pData: PByteArray; out W, H, Format: Word);
-  zglTTextureMemLoader  = procedure(const Memory: zglTMemory; out pData: PByteArray; out W, H, Format: Word);
-
-type
-  zglPTexture = ^zglTTexture;
-  zglTTexture = record
-    ID           : LongWord;              // вынести ID для всех отдельно? И работать от текстуры
-    Width, Height: Word;
-    Format       : Word;
-    U, V         : Single;
-    FramesCoord  : array of zglTTextureCoord;
-    Flags        : LongWord;
-
-//    FrameID      : array of array [0..3] of Integer;
-
-    prev, next   : zglPTexture;
-end;
-
-type
-  zglPTextureFormat = ^zglTTextureFormat;
-  zglTTextureFormat = record
-    Extension : UTF8String;
-    FileLoader: zglTTextureFileLoader;
-    MemLoader : zglTTextureMemLoader;
-end;
-
-type
-  zglPTextureManager = ^zglTTextureManager;
-  zglTTextureManager = record
-    Count  : record
-      Items  : Integer;
-      Formats: Integer;
-              end;
-    First  : zglTTexture;
-    Formats: array of zglTTextureFormat;
-end;
-
+// Rus: добавление текстуры и выделение памяти под неё. Возвращает указатель на
+//      заданную структуру. Текстура не загружается.
+// Eng: adding a texture and allocating memory for it. Returns a pointer to the
+//      given structure. The texture is not loading.
 function  tex_Add: zglPTexture;
+// Rus: удаление текстуры из видеопамяти и из менеджера текстур.
+// Eng: deleting a texture from video memory and from the texture manager.
 procedure tex_Del(var Texture: zglPTexture);
 
-(* ñîçäàíèå GL-òåêñòóðû *)
+// Rus: загрузка текстуры в видеопамять. Вызывать не надо, вызывайте tex_Create.
+// Eng: loading texture into video memory. No need to call, call tex_Create.
 function  tex_CreateGL(var Texture: zglTTexture; pData: PByteArray): Boolean;
-(* çàïóñê ñîçäàíèÿ òåêñòóðû *)
+// Rus: создание текстуры с заданной шириной, высотой, форматом и заданными
+//      флагами. Вы должны передать загруженное изображение массивом данных.
+//      Возвращает указатель на созданную структуру.
+// Eng: creating a texture with the given width, height, format and the given
+//      flags. You must pass the uploaded image as an array of data. Returns a
+//      pointer to the created structure.
 function  tex_Create(var Data: PByteArray; Width, Height: Word; Format: Word = TEX_FORMAT_RGBA;
     Flags: LongWord = TEX_DEFAULT_2D): zglPTexture;
-(* ñîçäàíèå ïóñòîé òåêñòóðû *)
+// Rus: создание текстуры с заданной шириной, высотой, цветом и заданными
+//      флагами. В видеопамяти создаётся изображение с заданным цветом.
+//      Возвращает указатель на созданную структуру.
+// Eng: creating a texture with the given width, height, color and given flags.
+//      An image with the specified color is created in the video memory.
+//      Returns a pointer to the created structure.
 function  tex_CreateZero(Width, Height: Word; Color: LongWord = $000000; Flags: LongWord = TEX_DEFAULT_2D): zglPTexture;
-(* Ñïîñîáû çàãðóçêè íîâîé òåêñòóðû èç ôàéëà è èç ïàìÿòè       *)
+// Rus: загрузка текстуры из заданного файла, с заданой прозрачностью и флагами.
+//      Возвращает указатель на созданную структуру.
+// Eng: loading a texture from a given file, with a given transparency and flags.
+//      Returns a pointer to the created structure.
 function  tex_LoadFromFile(const FileName: UTF8String; TransparentColor: LongWord = TEX_NO_COLORKEY;
     Flags: LongWord = TEX_DEFAULT_2D): zglPTexture;
+// Rus: загрузка текстуры из памяти. С указанием расширения файла (который был
+//      загружен в память), с заданной прозрачностью и флагами. Возвращает
+//      указатель на созданную структуру.
+// Eng: loading texture from memory. Specifying the extension of the file (which
+//      was loaded into memory), with the given transparency and flags. Returns
+//      a pointer to the created structure.
 function  tex_LoadFromMemory(const Memory: zglTMemory; const Extension: UTF8String;
     TransparentColor: LongWord = TEX_NO_COLORKEY; Flags: LongWord = TEX_DEFAULT_2D): zglPTexture;
 {$IFDEF ANDROID}
+// Rus: восстанавливаем данные в текстуре из указанного файла.
+// Eng: restore the data in the texture from the specified file.
 procedure tex_RestoreFromFile(var Texture: zglPTexture; const FileName: UTF8String;
     TransparentColor: LongWord = TEX_NO_COLORKEY; Flags: LongWord = TEX_DEFAULT_2D);
+// Rus: восстанавливаем данные в текстуре из указанной памяти.
+// Eng: Restore the data in the texture from the specified memory.
 procedure tex_RestoreFromMemory(var Texture: zglPTexture; const Memory: zglTMemory;
     const Extension: UTF8String; TransparentColor: LongWord = TEX_NO_COLORKEY; Flags: LongWord = TEX_DEFAULT_2D);
 {$ENDIF}
+// Rus: разбивает текстуру на кадры заданной ширины и высоты. Все текстурные
+//      координаты сохраняются в самой текстуре.
+// Eng: splits the texture into frames of the specified width and height. All
+//      texture coordinates are stored in the texture itself.
 procedure tex_SetFrameSize(var Texture: zglPTexture; FrameWidth, FrameHeight: Word);
+// Rus: накладываем маску на заданную текстуру. Размеры маски и текстуры должны
+//      быть одинаковыми.
+// Eng: apply a mask to the given texture. The dimensions of the mask and texture
+//      must be the same.
 procedure tex_SetMask(var Texture: zglPTexture; Mask: zglPTexture);
+// Rus: сама процедура разбития текстуры на кадры. Используйте tex_SetFrameSize.
+// Eng: the procedure for splitting the texture into frames. Use tex_SetFrameSize.
 procedure tex_CalcTexCoords(var Texture: zglTTexture; FramesX: Integer = 1; FramesY: Integer = 1);
 
+// Rus: фильтрация текстуры по заданным флагам.
+// Eng: texture filtering by given flags.
 procedure _tex_Filter(Texture: zglPTexture; Flags: LongWord);
+// Rus: Устанавливает уровень анизотропной фильтрации для текстур.
+// Eng: Sets the level of anisotropic filtering for textures.
 procedure tex_SetAnisotropy(Level: Byte);
 
+// Rus: вычисление преобразований текстуры согласно флагов.
+// Eng: calculation of texture transformations according to flags.
 procedure tex_CalcFlags(var Texture: zglTTexture; var pData: PByteArray);
+// Rus: расширение текстуры до ближайшей текстуры с размерами 2^n (2, 4, 8, 16,
+//      32 и т. д.).
+// Eng: extending the texture to the nearest 2^n texture (2, 4, 8, 16, 32, etc.).
 procedure tex_CalcPOT(var pData: PByteArray; var Width, Height: Word; var U, V: Single; PixelSize: Integer);
+// Rus: конвертировать текстуру в градиент белый-серый-чёрный.
+// Eng: convert texture to white-gray-black gradient.
 procedure tex_CalcGrayScale(pData: PByteArray; Width, Height: Word);
+// Rus: инвертировать текстуру.
+// Eng: invert texture.
 procedure tex_CalcInvert(pData: PByteArray; Width, Height: Word);
-(* ðàñ÷¸ò ïðîçðà÷íîñòè òåêñòóðû, ïðè ñîâïàäåíèè öâåòà è öâåòà â TransparentColor àëüôà ïåðåâîäèòñÿ â íóëü   *)
+// Rus: вычисление прозрачности, согласно передаваемой TransparentColor.
+// Eng: transparency calculation, according to the transmitted TransparentColor.
 procedure tex_CalcTransparent(pData: PByteArray; TransparentColor: LongWord; Width, Height: Word);
+// Rus: вычислить цвет для прозрачных пикселей для лучшего рендеринга
+//      преобразованной текстуры.
+// Eng: calculate color for transparent pixels for better rendering of
+//      transformed texture.
 procedure tex_CalcAlpha(pData: PByteArray; Width, Height: Word);
 
+// Rus: устанавливает данные из массива в текстуру.
+// Eng: sets the data from the array to the texture.
 procedure tex_SetData(Texture: zglPTexture; pData: PByteArray; X, Y, Width, Height: Word; Stride: Integer = 0);
+// Rus: возвращаем данные из текстуры в массив.
+// Eng: return the data from the texture to the array.
 procedure tex_GetData(Texture: zglPTexture; out pData: PByteArray);
 
 var
   managerTexture      : zglTTextureManager;
   managerZeroTexture  : zglPTexture;
   tex_CalcCustomEffect: procedure(pData: PByteArray; Width, Height: Word);
-
-  _textureWidth, _textureHeight: Word;
 
 implementation
 uses
@@ -179,14 +162,14 @@ uses
   zgl_utils;
 
 function tex_GetVRAM(Texture: zglPTexture): LongWord;
-  var
-    size: LongWord;
+var
+  size: LongWord;
 begin
   if (not Assigned(Texture)) or (Texture.ID = 0) Then
-    begin
-      Result := 0;
-      exit;
-    end;
+  begin
+    Result := 0;
+    exit;
+  end;
 
   size := Round(Texture.Width / Texture.U) * Round(Texture.Height / Texture.V);
   case Texture.Format of
@@ -223,10 +206,10 @@ end;
 procedure tex_Del(var Texture: zglPTexture);
 begin
   if (not Assigned(Texture)) or (Texture = managerZeroTexture) Then
-    begin
-      Texture := nil;
-      exit;
-    end;
+  begin
+    Texture := nil;
+    exit;
+  end;
 
   oglVRAMUsed := oglVRAMUsed - tex_GetVRAM(Texture);
 
@@ -336,11 +319,12 @@ begin
   end;
 end;
 
-function tex_CreateZero(Width, Height: Word; Color, Flags: LongWord): zglPTexture;
+function tex_CreateZero(Width, Height: Word; Color: LongWord = $000000; Flags: LongWord = TEX_DEFAULT_2D): zglPTexture;
   var
     i    : LongWord;
     pData: PLongWordArray;
 begin
+  // нулевая текстура создаётся в zgl_init (zgl_application)
   GetMem(pData, Width * Height * 4);
   for i := 0 to Width * Height - 1 do
     pData[i] := Color;
@@ -349,7 +333,8 @@ begin
   FreeMem(pData);
 end;
 
-function tex_LoadFromFile(const FileName: UTF8String; TransparentColor, Flags: LongWord): zglPTexture;
+function tex_LoadFromFile(const FileName: UTF8String; TransparentColor: LongWord = TEX_NO_COLORKEY;
+    Flags: LongWord = TEX_DEFAULT_2D): zglPTexture;
   var
     i     : Integer;
     ext   : UTF8String;
@@ -388,9 +373,6 @@ begin
     log_Add('Unable to load texture: "' + FileName + '"');
     exit;
   end;
-
-  _textureWidth := w;
-  _textureHeight := h;
 
   if format = TEX_FORMAT_RGBA Then
   begin
@@ -568,28 +550,29 @@ end;
 {$ENDIF}
 
 procedure tex_SetFrameSize(var Texture: zglPTexture; FrameWidth, FrameHeight: Word);
-  var
-    res: zglTTextureFrameSizeResource;
+var
+  res: zglTTextureFrameSizeResource;
 begin
-  if not Assigned(Texture) Then exit;
+  if not Assigned(Texture) Then
+    exit;
 
   if resUseThreaded Then
-    begin
-      res.Texture     := Texture;
-      res.FrameWidth  := FrameWidth;
-      res.FrameHeight := FrameHeight;
-      res_AddToQueue(RES_TEXTURE_FRAMESIZE, TRUE, @res);
-    end else
-      tex_CalcTexCoords(Texture^, Round(Texture.Width) div FrameWidth, Round(Texture.Height) div FrameHeight);
+  begin
+    res.Texture     := Texture;
+    res.FrameWidth  := FrameWidth;
+    res.FrameHeight := FrameHeight;
+    res_AddToQueue(RES_TEXTURE_FRAMESIZE, TRUE, @res);
+  end else
+    tex_CalcTexCoords(Texture^, Texture.Width div FrameWidth, Texture.Height div FrameHeight);
 end;
 
 procedure tex_SetMask(var Texture: zglPTexture; Mask: zglPTexture);
-  var
-    i, j : Integer;
-    tData: PByteArray;
-    mData: PByteArray;
-    rW   : Integer;
-    res  : zglTTextureMaskResource;
+var
+  i, j : Integer;
+  tData: PByteArray;
+  mData: PByteArray;
+  rW   : Integer;
+  res  : zglTTextureMaskResource;
 begin
   if (not Assigned(Texture)) or (not Assigned(Mask)) Then exit;
 
@@ -631,8 +614,10 @@ var
   i, z, n, countVertex: Integer;
   tX, tY, u, v: Single;
 begin
-  if FramesX <= 0 Then FramesX := 1;
-  if FramesY <= 0 Then FramesY := 1;
+  if FramesX <= 0 Then
+    FramesX := 1;
+  if FramesY <= 0 Then
+    FramesY := 1;
 
   SetLength(Texture.FramesCoord, FramesX * FramesY + 1);
   u := Texture.U / FramesX;
@@ -675,8 +660,8 @@ begin
 end;
 
 procedure _tex_Filter(Texture: zglPTexture; Flags: LongWord);
-  var
-    currentFilter: LongWord;
+var
+  currentFilter: LongWord;
 begin
   batch2d_Flush();
 
@@ -759,28 +744,28 @@ end;
 procedure tex_CalcFlags(var Texture: zglTTexture; var pData: PByteArray);
 begin
   if Texture.Format = TEX_FORMAT_RGBA Then
-    begin
-      if Texture.Flags and TEX_GRAYSCALE > 0 Then
-        tex_CalcGrayScale(pData, Texture.Width, Texture.Height);
-      if Texture.Flags and TEX_INVERT > 0 Then
-        tex_CalcInvert(pData, Texture.Width, Texture.Height);
-      if (Texture.Flags and TEX_CUSTOM_EFFECT > 0) and (Assigned(tex_CalcCustomEffect)) Then
-        tex_CalcCustomEffect(pData, Texture.Width, Texture.Height);
-    end;
+  begin
+    if Texture.Flags and TEX_GRAYSCALE > 0 Then
+      tex_CalcGrayScale(pData, Texture.Width, Texture.Height);
+    if Texture.Flags and TEX_INVERT > 0 Then
+      tex_CalcInvert(pData, Texture.Width, Texture.Height);
+    if (Texture.Flags and TEX_CUSTOM_EFFECT > 0) and (Assigned(tex_CalcCustomEffect)) Then
+      tex_CalcCustomEffect(pData, Texture.Width, Texture.Height);
+  end;
 
   if Texture.Flags and TEX_CONVERT_TO_POT > 0 Then
-    begin
-      if Texture.Format = TEX_FORMAT_RGBA Then
-        tex_CalcPOT(pData, Texture.Width, Texture.Height, Texture.U, Texture.V, 4)
+  begin
+    if Texture.Format = TEX_FORMAT_RGBA Then
+      tex_CalcPOT(pData, Texture.Width, Texture.Height, Texture.U, Texture.V, 4)
+    else
+      if Texture.Format = TEX_FORMAT_RGBA_4444 Then
+        tex_CalcPOT(pData, Texture.Width, Texture.Height, Texture.U, Texture.V, 2)
       else
-        if Texture.Format = TEX_FORMAT_RGBA_4444 Then
-          tex_CalcPOT(pData, Texture.Width, Texture.Height, Texture.U, Texture.V, 2)
-        else
-          exit;
+        exit;
 
-      Texture.Width  := Round(Texture.Width * Texture.U);
-      Texture.Height := Round(Texture.Height * Texture.V);
-    end;
+    Texture.Width  := Round(Texture.Width * Texture.U);
+    Texture.Height := Round(Texture.Height * Texture.V);
+  end;
 end;
 
 procedure tex_CalcPOT(var pData: PByteArray; var Width, Height: Word; var U, V: Single; PixelSize: Integer);
@@ -792,11 +777,11 @@ begin
   w := u_GetPOT(Width);
   h := u_GetPOT(Height);
   if (w = Width) and (h = Height) Then
-    begin
-      U := 1;
-      V := 1;
-      exit;
-    end;
+  begin
+    U := 1;
+    V := 1;
+    exit;
+  end;
   U := Width  / w;
   V := Height / h;
 
@@ -840,24 +825,25 @@ begin
 end;
 
 procedure tex_CalcInvert(pData: PByteArray; Width, Height: Word);
-  var
-    i: Integer;
+var
+  i: Integer;
 begin
   for i := 0 to Width * Height - 1 do
-    begin
-      pData[0] := 255 - pData[0];
-      pData[1] := 255 - pData[1];
-      pData[2] := 255 - pData[2];
-      INC(PByte(pData), 4);
-    end;
+  begin
+    pData[0] := 255 - pData[0];
+    pData[1] := 255 - pData[1];
+    pData[2] := 255 - pData[2];
+    INC(PByte(pData), 4);
+  end;
 end;
 
 procedure tex_CalcTransparent(pData: PByteArray; TransparentColor: LongWord; Width, Height: Word);
-  var
-    i      : Integer;
-    r, g, b: Byte;
+var
+  i      : Integer;
+  r, g, b: Byte;
 begin
-  if TransparentColor = $FF000000 Then exit;
+  if TransparentColor = TEX_NO_COLORKEY Then
+    exit;
 
   r := (TransparentColor and $FF0000) shr 16;
   g := (TransparentColor and $FF00  ) shr 8;
@@ -865,7 +851,7 @@ begin
   for i := 0 to Width * Height - 1 do
   begin
     if (pData[0] = r) and (pData[1] = g) and (pData[2] = b) Then
-      pData[3] := 0;
+      pData[3] := 0;    // почему мы сюда записываем нуль? Это указание, что прозрачности нет?
     INC(PByte(pData), 4);
   end;
 end;

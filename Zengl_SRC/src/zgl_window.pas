@@ -21,7 +21,7 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 23.04.2022
+ !!! modification from Serge
 }
 unit zgl_window;
 
@@ -54,11 +54,11 @@ uses
   zgl_types;
 
 const
-  cs_ZenGL    = 'ZenGL - 0.3.29';
-  cs_Date     = '26.02.2022';
+  cs_ZenGL    = 'ZenGL - 0.3.30';
+  cs_Date     = '14.03.2023';
   cv_major    = 0;
   cv_minor    = 3;
-  cv_revision = 29;
+  cv_revision = 30;
 
   // zgl_Reg
   SYS_APP_INIT           = $000001;
@@ -69,6 +69,7 @@ const
   SYS_ACTIVATE           = $000007;
 
   SYS_EVENTS             = $000009;                         // keyboard, mouse, touchpad
+  SYS_KEYESCAPE          = $000008;                         // перехват клавиши Escape
   SYS_POSTDRAW           = $000012;                         // процедура постотрисовки (после того как вывелось всё на экран)
   SYS_RESET              = $000013;                         // процедура обнуления
   {$IfNDef ANDROID}
@@ -90,12 +91,12 @@ const
   TEXTURE_FORMAT_MEM_LOADER  = $000102;                     // процедура загрузки из памяти
   TEXTURE_CURRENT_EFFECT     = $000103;                     // процедура дополнительных эффектов
 
-  SND_FORMAT_EXTENSION   = $000110;
-  SND_FORMAT_FILE_LOADER = $000111;
-  SND_FORMAT_MEM_LOADER  = $000112;
-  SND_FORMAT_DECODER     = $000113;
+  SND_FORMAT_EXTENSION    = $000110;
+  SND_FORMAT_FILE_LOADER  = $000111;
+  SND_FORMAT_MEM_LOADER   = $000112;
+  SND_FORMAT_DECODER      = $000113;
 
-  VIDEO_FORMAT_DECODER   = $000130;
+  VIDEO_FORMAT_DECODER    = $000130;
 
   // zgl_Get
   ZENGL_VERSION           = 1;
@@ -147,7 +148,7 @@ const
   DEPTH_BUFFER          = $000002;
   DEPTH_BUFFER_CLEAR    = $000004;
   DEPTH_MASK            = $000008;
-  STENCIL_BUFFER_CLEAR  = $000010;                // не активируется ни где.
+  STENCIL_BUFFER_CLEAR  = $000010;               // не активируется ни где.
   CORRECT_RESOLUTION    = $000020;
   CORRECT_WIDTH         = $000040;
   CORRECT_HEIGHT        = $000080;
@@ -490,6 +491,9 @@ begin
   end;
 
 {$IFDEF USE_X11}
+  // scrDefault = oglVisualInfo^.screen                              делать проверку на то, что они одинаковы или нет?
+  wndRoot := RootWindow(scrDisplay, oglVisualInfo^.screen);          // а здесь уже для нашего контекста задаём
+                                                                     // я надеюсь я ни чего не пропустил?
   FillChar(wndAttr, SizeOf(wndAttr), 0);
   wndAttr.colormap   := XCreateColormap(scrDisplay, wndRoot, oglVisualInfo.visual, AllocNone);
   wndAttr.event_mask := ExposureMask or FocusChangeMask or ButtonPressMask or ButtonReleaseMask or PointerMotionMask or
@@ -985,7 +989,7 @@ begin
   {$IFDEF USE_THEORA}
   if not InitTheora() Then
     {$IFNDEF USE_THEORA_STATIC}
-    log_Add(('Theora: Error while loading library: ERROR Theora') + libtheoradec)
+    log_Add(('Theora: Error while loading library: ERROR Theora ') + libtheoradec)
     {$ENDIF}
   else
     log_Add('Theora: Initialized');
@@ -1055,15 +1059,15 @@ begin
   wnd_UpdateCaption();
   {$EndIf}
   winOn := TRUE;
+  {$IF DEFINED(WINDOWS) or DEFINED(LINUX) or DEFINED(MACOSX)}
+  if wndFullScreen Then
+    scr_SetOptions;
+  {$IFEND}
 
   {$IFDEF iOS}
   key_BeginReadText('');
   key_EndReadText();
   {$ENDIF}
-  {$IF DEFINED(WINDOWS) or DEFINED(LINUX) or DEFINED(MACOSX)}
-  if wndFullScreen Then
-    scr_SetOptions;
-  {$IFEND}
 
   app_PInit();
   {$IFDEF iOS}
@@ -1305,6 +1309,8 @@ begin
     SYS_EVENTS:
       app_PEvents := UserData;
     {$EndIf}
+    SYS_KEYESCAPE:
+      app_PKeyEscape := UserData;
     SYS_POSTDRAW:
       app_PostPDraw := UserData;
     SYS_RESET:

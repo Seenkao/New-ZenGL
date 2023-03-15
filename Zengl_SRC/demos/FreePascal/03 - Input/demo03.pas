@@ -14,6 +14,7 @@ uses
   zgl_keyboard,
   zgl_joystick,
   zgl_primitives_2d,
+  zgl_render_2d,
   zgl_font,
   zgl_text,
   zgl_textures_png,
@@ -81,6 +82,28 @@ begin
   // RU: Загружаем данные о шрифте.
   // EN: Load the font.
   fntEdit := font_LoadFromFile( dirRes + 'CalibriBold50pt.zfi');
+
+//------------------------------------------------------------------------------
+// RU: Данные для виртуальной клавиатуры. Раскомментируйте, если будете использовать виртуальную клавиатуру для ПК.
+// EN: Data for the virtual keyboard. Uncomment if you will use the virtual keyboard for PC.
+
+  // обязательный код! Данные для отображения клавиатуры.
+  // RU: Загружаем данные о шрифте.
+  // EN: Load the font.
+//   fontUse := font_LoadFromFile(dirRes + 'CalibriBold50pt.zfi');
+//   JoyArrow := tex_LoadFromFile(dirRes + 'arrow.png');     // загрузили текстуру
+//   tex_SetFrameSize(JoyArrow, 64, 64);                     // и разбили её на части, но в записях не будет указано количество полученных текстур
+  // RU: Данные для виртуальной клавиатуры.
+  // EN: Data for the virtual keyboard.
+//   txt_LoadFromFile(dirRes + 'Rus.txt', LoadText);
+  // RU: Создаём виртуальную клавиатуру. Для мобильных систем это будет обязательным кодом в дальнейшем.
+  // EN: We create a virtual keyboard. For mobile systems, this will be a mandatory code in the future.
+//   CreateTouchKeyboard;
+
+// RU: здесь данные для виртуальной клавиатуры заканчиваются.
+// EN: here the data for the virtual keyboard ends.
+//------------------------------------------------------------------------------
+
   // RU: устанавливаем размеры шрифтов
   // EN: set font sizes
   setFontTextScale(15, fntMain);
@@ -111,11 +134,11 @@ begin
   // En: set default colors for all API elements. These colors will only be used when creating a specific element.
   //     To change the color in the (already created) element itself, nothing is attached. Further changes to these
   //     color values will not affect the already created elements in any way.
-  SetDefColor(EditColor, cl_Black); 
-  
-  // RU: создаём само поле ввода с данными указанными выше
-  // EN: create the input field itself with the data specified above
-  myEdit := CreateEdit(myRect, fntEdit, 20, @EditCont);
+  SetDefColor(EditColor, cl_Green, cl_Black);
+
+  // RU: создаём само поле ввода с данными указанными выше и передаваемыми данными
+  // EN: create the input field itself with the data specified above and the data that needs to be transferred
+  myEdit := CreateEdit(myRect, fntEdit, EScale, @EditCont);
 
   // RU: корректируем курсор
   // EN: adjust the cursor
@@ -130,6 +153,7 @@ begin
   inputRect.Y := 300 - 100 - 32;
   inputRect.W := 384;
   inputRect.H := 96;
+  setFontTextScale(15, fntMain);
   {$EndIf}
 
   // RU: Инициализируем обработку ввода джойстиков и получаем количество подключенных джойстиков.
@@ -143,6 +167,7 @@ var
   w : Single;
 {$EndIf}
 begin
+  batch2d_Begin;
   // Ru: балуемся цветом шрифта.
   // En: indulge in the color of the font.
   setTextColor(Get_Color(cl_Blue));
@@ -206,6 +231,7 @@ begin
   text_Draw( fntMain, 550, 500, 'Button14: ' + u_BoolToStr( joy_Down( 0, 13 ) ) );
   text_Draw( fntMain, 550, 520, 'Button15: ' + u_BoolToStr( joy_Down( 0, 14 ) ) );
   text_Draw( fntMain, 550, 540, 'Button16: ' + u_BoolToStr( joy_Down( 0, 15 ) ) );
+  batch2d_End;
 end;
 
 {$IfDef OLD_METHODS}
@@ -223,7 +249,7 @@ begin
   {$IfDef OLD_METHODS}
   // RU: Проверить нажата ли левая кнопка мыши в пределах inputRect и начать отслеживать ввод текста.
   // EN: Check if left mouse button was pressed inside inputRect and start to track text input.
-  if mBClickCanClick( M_BLEFT_CLICK ) and col2d_PointInRect( mouseX, mouseY, inputRect ) Then
+  if mouseBClick( M_BLEFT ) and col2d_PointInRect( mouseX, mouseY, inputRect ) Then
   begin
     trackInput := TRUE;
     key_BeginReadText( userInput, 24 );

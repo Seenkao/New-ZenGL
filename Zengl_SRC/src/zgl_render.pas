@@ -24,6 +24,7 @@
 unit zgl_render;
 
 {$I zgl_config.cfg}
+{$I GLdefine.cfg}
 
 interface
 
@@ -55,7 +56,7 @@ procedure zbuffer_Clear;
 procedure scissor_Begin(X, Y, Width, Height: Integer; ConsiderCamera: Boolean = TRUE);
 // Rus: конец вырезки.
 // Eng: end of cut.
-procedure scissor_End; 
+procedure scissor_End;
 
 var
   SetUserMode: procedure;
@@ -65,7 +66,9 @@ uses
   zgl_application,
   zgl_window,
   zgl_screen,
+  {$IfDef USE_GLU}
   zgl_glu,
+  {$EndIf}
   {$IFNDEF USE_GLES}
   zgl_opengl,
   zgl_opengl_all,
@@ -80,19 +83,21 @@ var
   tSCount : Integer;
   tScissor: array of array[0..3] of Integer;
   rs1: Single = 1;
-  {$IfNDef USE_GLES}
-  rsd0: Double = 0;
-  rsd2: Double = 2;
-  {$Else}
-  rsd0: Single = 0;
-  rsd2: Single = 2;
-  {$IF DEFINED(USE_GLES_ON_DESKTOP) and DEFINED(USE_AMD_DRIVERS)}
-  rs0: Double = 0;
-  rs2: Double = 2;
-  {$Else}
-  rs0: Single = 0;
-  rs2: Single = 2;
-  {$IfEnd}
+  {$IfDef LINUX}
+    {$IfNDef USE_GLES}
+    rsd0: Double = 0;
+    rsd2: Double = 2;
+    {$Else}
+    rsd0: Single = 0;
+    rsd2: Single = 2;
+    {$IF DEFINED(USE_GLES_ON_DESKTOP) and DEFINED(USE_AMD_DRIVERS)}
+    rs0: Double = 0;
+    rs2: Double = 2;
+    {$Else}
+    rs0: Single = 0;
+    rs2: Single = 2;
+    {$IfEnd}
+    {$EndIf}
   {$EndIf}
 
 procedure Set2DMode;
@@ -118,54 +123,54 @@ begin
   glLoadIdentity();
 
   // нулевые координаты в центре окна
-  if appFlags and XY_IN_CENTER_WINDOW > 0 then
+  if (appFlags and XY_IN_CENTER_WINDOW) > 0 then
   begin
     if oglTarget = TARGET_SCREEN Then
     begin
-      if appFlags and CORRECT_RESOLUTION > 0 Then
+      if (appFlags and CORRECT_RESOLUTION) > 0 Then
       begin
-        scrRight := (oglWidth - scrAddCX * rsd2 / scrResCX) / rsd2;
+        scrRight := (oglWidth - scrAddCX * {$IfDef LINUX}rsd2{$Else}2{$EndIf} / scrResCX) / {$IfDef LINUX}rsd2{$Else}2{$EndIf};
         scrLeft := - scrRight;
-        scrBottom := (oglHeight - scrAddCY * rsd2 / scrResCY) / rsd2;
+        scrBottom := (oglHeight - scrAddCY * {$IfDef LINUX}rsd2{$Else}2{$EndIf} / scrResCY) / {$IfDef LINUX}rsd2{$Else}2{$EndIf};
         scrTop := - scrBottom;
       end
       else begin
-        scrRight := wndWidth / rsd2;
+        scrRight := wndWidth / {$IfDef LINUX}rsd2{$Else}2{$EndIf};
         scrLeft := - scrRight;
-        scrBottom := wndHeight / rsd2;
+        scrBottom := wndHeight / {$IfDef LINUX}rsd2{$Else}2{$EndIf};
         scrTop := - scrBottom;
       end;
     end
     else begin
       // вывод в текстуру (в часть окна)
-      scrRight := oglWidth / rsd2;
+      scrRight := oglWidth / {$IfDef LINUX}rsd2{$Else}2{$EndIf};
       scrLeft := - scrRight;
-      scrBottom := oglHeight / rsd2;
+      scrBottom := oglHeight / {$IfDef LINUX}rsd2{$Else}2{$EndIf};
       scrTop := - scrBottom;
     end;
   // нулевые координаты от левого верхнего угла
   end else
     if oglTarget = TARGET_SCREEN Then
     begin
-      if appFlags and CORRECT_RESOLUTION > 0 Then
+      if (appFlags and CORRECT_RESOLUTION) > 0 Then
       begin
-        scrLeft := rsd0;
-        scrRight := (oglWidth - scrAddCX * rsd2 / scrResCX);
-        scrTop := rsd0;
-        scrBottom := (oglHeight - scrAddCY * rsd2 / scrResCY);
+        scrLeft := {$IfDef LINUX}rsd0{$Else}0{$EndIf};
+        scrRight := (oglWidth - scrAddCX * {$IfDef LINUX}rsd2{$Else}2{$EndIf} / scrResCX);
+        scrTop := {$IfDef LINUX}rsd0{$Else}0{$EndIf};
+        scrBottom := (oglHeight - scrAddCY * {$IfDef LINUX}rsd2{$Else}2{$EndIf} / scrResCY);
       end
       else begin
-        scrLeft := rsd0;
+        scrLeft := {$IfDef LINUX}rsd0{$Else}0{$EndIf};
         scrRight := wndWidth;
-        scrTop := rsd0;
+        scrTop := {$IfDef LINUX}rsd0{$Else}0{$EndIf};
         scrBottom := wndHeight;
       end;
     end
     else begin
    //    вывод в текстуру (в часть окна)
-      scrLeft := rsd0;
+      scrLeft := {$IfDef LINUX}rsd0{$Else}0{$EndIf};
       scrRight := oglWidth;
-      scrTop := rsd0;
+      scrTop := {$IfDef LINUX}rsd0{$Else}0{$EndIf};
       scrBottom := oglHeight;
     end;
   {$IfDef USE_GLES} glOrthof{$Else}glOrtho{$EndIf}(scrLeft, scrRight, scrBottom, scrTop, scrNear, scrFar);

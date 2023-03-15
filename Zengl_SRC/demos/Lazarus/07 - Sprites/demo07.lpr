@@ -66,7 +66,7 @@ var
 begin
   // RU: Т.к. по умолчанию вся структура камеры заполняется нулями, следует инициализировать её стандартными значениями.
   // EN: Camera must be initialized, because camera structure is zero-filled by default.
-  cam2d_Init( camMain );
+  cam2d_DefInit( camMain );
 
   // RU: Загружаем текстуру.
   //     $FF000000 - указывает на то, что бы использовать альфа-канал из изображения.
@@ -203,7 +203,7 @@ begin
               begin
                 // RU: Рисуем "высокого" пингвина используя вместо флага FX2D_SCALE флаг FX2D_VCHANGE и функцию fx2d_SetVertexes для смещения координат двух верхних вершин спрайта.
                 // EN: Render "tall" penguin using flag FX2D_VCHANGE instead of FX2D_SCALE, and function fx2d_SetVertexes for shifting upper vertexes of sprite.
-                fx2d_SetVertexes( 0, -16, 0, -16, 0, 0, 0, 0 );
+                fx2d_SetVertexes( 0, -16, 0, 0 );
                 asprite2d_Draw( tux[ i ].Texture, tux[ i ].Pos.X, tux[ i ].Pos.Y, 64, 64, 0, tux[ i ].Frame div 2, 255, FX_BLEND or FX2D_FLIPX or FX2D_VCHANGE );
               end else
                 asprite2d_Draw( tux[ i ].Texture, tux[ i ].Pos.X, tux[ i ].Pos.Y, 64, 64, 0, tux[ i ].Frame div 2, 255, FX_BLEND or FX2D_FLIPX );

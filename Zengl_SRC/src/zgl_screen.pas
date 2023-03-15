@@ -21,7 +21,7 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 23.04.2022
+ !!! modification from Serge
 }
 unit zgl_screen;
 
@@ -36,7 +36,7 @@ interface
 
 uses
 {$IFDEF USE_X11}
-  X, XLib, XRandr, UnixType,
+  X, XLib, XRandr, UnixType,      gdk2, gtk2,   // эти два возможно можно будет в дальнейшем удалить.
   {$IfNDef USE_GLES}
   zgl_glx_wgl,
   {$EndIf}
@@ -135,19 +135,23 @@ procedure Set2DNearFar(newNear, newFar: {$IfNDef USE_GLES}Double{$Else}{$IF DEFI
 // Rus: установка версии OpenGL, маски и флагов. Вызывать обязательно до
 //      создания окна (до zgl_Init)!!! Совместимые версии только до OpenGL 3.1,
 //      далее они не совместимы со старым контекстом.
-// Eng:
+// Eng: setting the OpenGL version, mask and flags. It must be called before the
+//      window is created (before zgl_Init)!!! Compatible versions are only up
+//      to OpenGL 3.1, after that they are not compatible with the old context.
 procedure SetGLVersionAndFlags({$IfNDef MAC_COCOA}major, minor: Integer; flag: LongWord = COMPATIBILITY_VERSION{$Else}mode: LongWord{$EndIf});
 {$EndIf}
 
 type
+  zglTPrevResolution = record
+    Width : Integer;
+    Height: Integer;
+    frequency: array[0..9] of Integer;
+  end;
+
   zglPResolutionList = ^zglTResolutionList;
   zglTResolutionList = record
     Count : Integer;
-    Width : array of Integer;
-    Height: array of Integer;
-  {$ifdef Windows}
-    frequency: array of Integer;
-  {$endif}
+    List: array of zglTPrevResolution;
   end;
 
 {$IFDEF WINDOWS}
@@ -202,6 +206,7 @@ var
   scrEventBase: cint;
   scrErrorBase: cint;
   scrRotation : Word;
+ // src
   {$ENDIF}
   {$IFDEF WINDOWS}
   scrSettings: DEVMODEW;
@@ -264,8 +269,7 @@ uses
   {$IfDef USE_VKEYBOARD}
   gegl_menu_gui,
   {$EndIf}
-  zgl_utils
-  ;
+  zgl_utils;
 
 {$IFDEF USE_X11}
 function XOpenIM(para1:PDisplay; para2:PXrmHashBucketRec; para3:PAnsiChar; para4:Pchar):PXIM;cdecl;external;
@@ -286,6 +290,11 @@ var
   i: Integer;
   {$IFDEF USE_X11}
   tmpSettings: PXRRScreenSize;
+  num_rates, j: Integer;
+  rates: PSmallInt;
+  _sss1: PGdkScreen;
+  num_monitors: integer;
+  _rect: TGdkRectangle;
   {$ENDIF}
   {$IFDEF WINDOWS}
   tmpSettings: DEVMODEW;
@@ -295,29 +304,59 @@ var
   width, height: Integer;
 
   {$ENDIF}
+  {$IfNDef LINUX}
   function Already(Width, Height: Integer): Boolean;
   var
     j: Integer;
   begin
     Result := FALSE;
     for j := 0 to scrResList.Count - 1 do
-      if (scrResList.Width[j] = Width) and (scrResList.Height[j] = Height) Then Result := TRUE;
+      if (scrResList.Width[j] = Width) and (scrResList.Height[j] = Height) Then
+        Result := TRUE;
   end;
+  {$EndIf}
+
 begin
 {$IFDEF USE_X11}
+
+  // эторешение для GDK, меня интересует решение через Xrandr
+  gtk_init(@argc, @argv);
+ // log_Add('_0_');
+  _sss1 := gdk_screen_get_default;
+ // log_Add('_1_');
+  num_monitors := gdk_screen_get_n_monitors(_sss1);
+ // log_Add('_2_');
+  for i := 0 to num_monitors - 1 do
+  begin
+    gdk_screen_get_monitor_geometry(_sss1, i, @_rect);
+  //  log_Add('r.x = ' + u_IntToStr(_rect.x) + '   r.y = ' + u_IntToStr(_rect.y));
+  //  log_Add('r.w = ' + u_IntToStr(_rect.width) + '   r.h = ' + u_IntToStr(_rect.height));
+  end;
+
+  scrModeList := XRRSizes(scrDisplay, 0, @scrModeCount);
   tmpSettings := scrModeList;
+  scrResList.Count := scrModeCount;
+  SetLength(scrResList.List, scrModeCount);
   for i := 0 to scrModeCount - 1 do
   begin
-    if not Already(tmpSettings.Width, tmpSettings.Height) Then
+    for j := 0 to 9 do
+      scrResList.List[i].frequency[j] := 0;              // "очищаем"
+    scrResList.List[i].Width := tmpSettings.width;       // ширина
+    scrResList.List[i].Height := tmpSettings.height;     // высота
+    rates := XRRRates(scrDisplay, 0, i, @num_rates);
+    for j := 0 to num_rates - 1 do
     begin
-      INC(scrResList.Count);
-      SetLength(scrResList.Width, scrResList.Count);
-      SetLength(scrResList.Height, scrResList.Count);
-      scrResList.Width[scrResList.Count - 1]  := tmpSettings.Width;
-      scrResList.Height[scrResList.Count - 1] := tmpSettings.Height;
+      scrResList.List[i].frequency[j] := rates^;         // частота
+    //  log_Add('width = ' + u_IntToStr(tmpSettings.width) + ', height = ' + u_IntToStr(tmpSettings.height) + ', frequency = ' + u_IntToStr(rates^));
+    //  log_Add('mwidth = ' + u_IntToStr(tmpSettings.mwidth) + ', mheight = ' + u_IntToStr(tmpSettings.mheight));
+      inc(rates);
     end;
-    INC(tmpSettings);
+    inc(tmpSettings);
   end;
+  scrSettings := XRRGetScreenInfo(scrDisplay, wndRoot);
+  // XRRConfigCurrentRate - этим можно вернуть оригинальные настройки.
+  // https://www.khronos.org/opengl/wiki/Programming_OpenGL_in_Linux:_Changing_the_Screen_Resolution
+  scrDesktop  := XRRConfigCurrentConfiguration(scrSettings, @scrRotation);
 {$ENDIF}
 {$IFDEF WINDOWS}
   i := 0;
@@ -366,6 +405,8 @@ begin
 end;
 
 procedure scr_Init;
+var
+  _res: PXRRScreenConfiguration;
   {$IFDEF iOS}
   var
     i           : Integer;
@@ -379,30 +420,32 @@ procedure scr_Init;
   {$endif}
 begin
 {$IFDEF USE_X11}
-  if not appInitialized Then
+
+  if appInitialized or scrInitialized Then
+    exit;
+  log_Init();
+
+  if Assigned(scrDisplay) Then
+    XCloseDisplay(scrDisplay);
+
+  scrDisplay := XOpenDisplay(nil);
+  if not Assigned(scrDisplay) Then
   begin
-    log_Init();
-
-    if Assigned(scrDisplay) Then
-      XCloseDisplay(scrDisplay);
-
-    scrDisplay := XOpenDisplay(nil);
-    if not Assigned(scrDisplay) Then
-    begin
-      u_Error('Cannot connect to X server.');
-      exit;
-    end;
-
-    scrDefault := DefaultScreen(scrDisplay);
-    wndRoot    := DefaultRootWindow(scrDisplay);
-
-    XRRSelectInput(scrDisplay, wndRoot, RRScreenChangeNotifyMask);
-    XRRQueryExtension(scrDisplay, @scrEventBase, @scrErrorBase) ;
+    u_Error('Cannot connect to X server.');
+    exit;
   end;
 
-  scrModeList := XRRSizes(scrDisplay, XRRRootToScreen(scrDisplay, wndRoot), @scrModeCount);
-  scrSettings := XRRGetScreenInfo(scrDisplay, wndRoot);
-  scrDesktop  := XRRConfigCurrentConfiguration(scrSettings, @scrRotation);
+  scrDefault := DefaultScreen(scrDisplay);
+  wndRoot    := {Default}RootWindow(scrDisplay, 0);          // это первичный запрос окна     а вообще, ему пофиг дефолтный рут или нет.
+
+  XRRSelectInput(scrDisplay, wndRoot, RRScreenChangeNotifyMask); // остаётся вопрос, а нужно ли отправлять сообщение? Если мы его отправляем только при создании.
+//  XRRGetScreenInfo();
+  if not (XRRQueryExtension(scrDisplay, @scrEventBase, @scrErrorBase)) then
+  begin
+    u_Error('Error: GLX extension not supported.');
+    exit;
+  end;
+
 {$ENDIF}
 {$IFDEF WINDOWS}
   i := SizeOf(MONITORINFOEX);
@@ -623,11 +666,7 @@ begin
   {$ENDIF}
 
   scrResList.Count := 0;
-  SetLength(scrResList.Width, 0);
-  SetLength(scrResList.Height, 0);
-  {$ifdef windows}
-  SetLength(scrResList.frequency, 0);
-  {$endif}
+  SetLength(scrResList.List, 0);
 
   scrInitialized := FALSE;
 end;
@@ -980,17 +1019,17 @@ end;
 {$IfNDef USE_INIT_HANDLE}
 procedure scr_SetFPS(FPS: LongWord);
 begin
-  if FPS < 30 then
+{  if FPS < 30 then
     FPS := 30;
   if (FPS <> 60) and (FPS <> 75) and (FPS <> 85) and (FPS <> 90) and (FPS <> 100) and (FPS <> 120) and (FPS <> 144) then
-    FPS := 60;
+    FPS := 60;     }
   useFPS := FPS;
-  if useFPS > 60 then
+{  if useFPS > 60 then
   begin
     scrVSync := True;
     scr_VSync;
-  end;
-  maxFPS := 1000 / FPS;
+  end;}
+  deltaFPS := 1000 / FPS;
 end;
 {$EndIf}
 

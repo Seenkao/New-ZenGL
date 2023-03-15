@@ -34,8 +34,8 @@ uses
   zgl_window,
   zgl_fx,
   zgl_sprite_2d,
-  zgl_textures
-  ;
+  zgl_textures,
+  zgl_types;
 
 type
   zglCSprite2D  = class;

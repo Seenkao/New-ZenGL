@@ -21,7 +21,7 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 08.02.2022
+ !!! modification from Serge
 }
 unit zgl_fx;
 
@@ -43,7 +43,11 @@ const
   FX_COLOR_MIX    = $00;
   FX_COLOR_SET    = $01;
 
+  // Rus: отражение по X.
+  // Eng: reflection on X.
   FX2D_FLIPX      = $000001;
+  // Rus: отражение по Y.
+  // Eng: reflection on Y.
   FX2D_FLIPY      = $000002;
   FX2D_VCA        = $000004;
   FX2D_VCHANGE    = $000008;
@@ -53,14 +57,32 @@ const
   FX_BLEND        = $100000;
   FX_COLOR        = $200000;
 
+// Rus:
+// Eng:
 procedure fx_SetBlendMode(Mode: Byte; SeparateAlpha: Boolean = TRUE);
+// Rus:
+// Eng:
 procedure fx_SetColorMode(Mode: Byte);
+// Rus:
+// Eng:
 procedure fx_SetColorMask(R, G, B, Alpha: Boolean);
 
+// Rus:
+// Eng:
 procedure fx2d_SetColor(Color: LongWord);
+// Rus:
+// Eng:
 procedure fx2d_SetVCA(c1, c2, c3, c4: LongWord; a1, a2, a3, a4: Byte);
-procedure fx2d_SetVertexes(x1, y1, x2, y2, x3, y3, x4, y4: Single);
+// Rus: установка смещений. Для флага FX2D_VCHANGE.
+//      Работает только для заданных параллелограммов.
+// Eng: offset setting. For the FX2D_VCHANGE flag.
+//      Only works for given parallelograms.
+procedure fx2d_SetVertexes(xLeft, yUp, xRight, yDown: Single);
+// Rus: установка шкалы размерности. Для флага FX2D_SCALE.
+// Eng: setting the scale. For the FX2D_SCALE flag.
 procedure fx2d_SetScale(scaleX, scaleY: Single);
+// Rus: установка точки вращения. Для флага FX2D_RPIVOT.
+// Eng: setting the pivot point. For the FX2D_RPIVOT flag.
 procedure fx2d_SetRotatingPivot(X, Y: Single);
 
 var
@@ -71,16 +93,14 @@ var
   fx2dAlphaDef: PSingle;
 
   // FX2D_VCA
-  fx2dVCA: array[0..5, 0..3] of Single = ((1, 1, 1, 1),
-                                          (1, 1, 1, 1),
-                                          (1, 1, 1, 1),
+  fx2dVCA: array[0..3, 0..3] of Single = ((1, 1, 1, 1),
                                           (1, 1, 1, 1),
                                           (1, 1, 1, 1),
                                           (1, 1, 1, 1));
 
   // FX2D_VCHANGE
-  fx2dVX1, fx2dVX2, fx2dVX3, fx2dVX4: Single;
-  fx2dVY1, fx2dVY2, fx2dVY3, fx2dVY4: Single;
+  fx2dVX1, fx2dVX2: Single;
+  fx2dVY1, fx2dVY2: Single;
 
   // FX2D_SCALE
   fx2dSX, fx2dSY: Single;
@@ -93,7 +113,6 @@ uses
   {$IFNDEF USE_GLES}
   zgl_opengl,
   zgl_opengl_all,
-  zgl_pasOpenGL,
   {$ELSE}
   zgl_opengles,
   zgl_opengles_all,
@@ -197,7 +216,7 @@ procedure fx2d_SetVCA(c1, c2, c3, c4: LongWord; a1, a2, a3, a4: Byte);
 begin
   fx2dVCA[0, 0] := (C1 shr 16) / 255;
   fx2dVCA[0, 1] := ((C1 and $FF00) shr 8) / 255;
-  fx2dVCA[0, 2] := C1 and $FF / 255;
+  fx2dVCA[0, 2] := C1 and $FF;
   fx2dVCA[0, 3] := A1 / 255;
 
   fx2dVCA[1, 0] := (C2 shr 16) / 255;
@@ -210,32 +229,18 @@ begin
   fx2dVCA[2, 2] := (C3 and $FF) / 255;
   fx2dVCA[2, 3] := A3 / 255;
 
-  fx2dVCA[3, 0] := (C1 shr 16) / 255;
-  fx2dVCA[3, 1] := ((C1 and $FF00) shr 8) / 255;
-  fx2dVCA[3, 2] := C1 and $FF / 255;
-  fx2dVCA[3, 3] := A1 / 255;
-
-  fx2dVCA[4, 0] := (C3 shr 16) / 255;
-  fx2dVCA[4, 1] := ((C3 and $FF00) shr 8) / 255;
-  fx2dVCA[4, 2] := (C3 and $FF) / 255;
-  fx2dVCA[4, 3] := A3 / 255;
-
-  fx2dVCA[5, 0] := (C4 shr 16) / 255;
-  fx2dVCA[5, 1] := ((C4 and $FF00) shr 8) / 255;
-  fx2dVCA[5, 2] := (C4 and $FF) / 255;
-  fx2dVCA[5, 3] := A4 / 255;
+  fx2dVCA[3, 0] := (C4 shr 16) / 255;
+  fx2dVCA[3, 1] := ((C4 and $FF00) shr 8) / 255;
+  fx2dVCA[3, 2] := C4 and $FF / 255;
+  fx2dVCA[3, 3] := A4 / 255;
 end;
 
-procedure fx2d_SetVertexes(x1, y1, x2, y2, x3, y3, x4, y4: Single);
+procedure fx2d_SetVertexes(xLeft, yUp, xRight, yDown: Single);
 begin
-  fx2dVX1 := x1;
-  fx2dVY1 := y1;
-  fx2dVX2 := x2;
-  fx2dVY2 := y2;
-  fx2dVX3 := x3;
-  fx2dVY3 := y3;
-  fx2dVX4 := x4;
-  fx2dVY4 := y4;
+  fx2dVX1 := xLeft;
+  fx2dVY1 := yUp;
+  fx2dVX2 := xRight;
+  fx2dVY2 := yDown;
 end;
 
 procedure fx2d_SetScale(scaleX, scaleY: Single);

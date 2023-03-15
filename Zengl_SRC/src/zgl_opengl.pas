@@ -28,6 +28,7 @@ unit zgl_opengl;
 {$EndIf}
 {$I zgl_config.cfg}
 {$I GLdefine.cfg}
+
 {$IfDef MAC_COCOA}
   {$modeswitch objectivec1}
 {$EndIf}
@@ -55,6 +56,17 @@ uses
 const
   TARGET_SCREEN  = 1;                    // цель - экран
   TARGET_TEXTURE = 2;                    // цель - часть экрана
+  {$IfDef MAC_COCOA}
+    {$IF DEFINED(USE_GL_21) or DEFINED(USE_MIN_OPENGL) or DEFINED(USE_DEPRECATED)}
+    _NSOpenGLVersion = NSOpenGLProfileVersionLegacy;
+    {$IfEnd}
+    {$IfDef USE_GL_32}
+    _NSOpenGLVersion = NSOpenGLProfileVersion3_2Core;
+    {$EndIf}
+    {$IfDef USE_GL_41}
+    _NSOpenGLVersion = NSOpenGLProfileVersion4_1Core;
+    {$EndIf}
+  {$EndIf}
 
 // Rus: инициализация OpenGL и подготовка формата пиксела.
 // Eng: initializing OpenGL and preparing the pixel format.
@@ -149,7 +161,10 @@ var
   oglContext : NSOpenGLContext;
   oglCoreGL  : Integer;
   oglAttr    : array[0..9] of NSOpenGLPixelFormatAttribute = (NSOpenGLPFADoubleBuffer, NSOpenGLPFAColorSize, 32, NSOpenGLPFADepthSize, 32,
-                        NSOpenGLPFAStencilSize, 8, NSOpenGLPFAOpenGLProfile, NSOpenGLProfileVersionLegacy, 0);
+                        NSOpenGLPFAStencilSize, 8, NSOpenGLPFAOpenGLProfile, {NSOpenGLProfileVersionLegacy}_NSOpenGLVersion, 0);
+             // NSOpenGLProfileVersionLegacy  - OpenGL 2.1
+             // NSOpenGLProfileVersion3_2Core - OpenGL 3.2
+             // NSOpenGLProfileVersion4_1Core - OpenGL 4.1
   {$Else}
   oglDevice  : GDHandle;
   oglContext : TAGLContext;
@@ -663,6 +678,7 @@ begin
   oglRenderer := glGetString(GL_RENDERER);
   log_Add('GL_VERSION: ' + glGetString(GL_VERSION));
   log_Add('GL_RENDERER: ' + oglRenderer);
+  log_Add('GL_VENDOR: ' + glGetString(GL_VENDOR));
 
 {$IFDEF LINUX}
   ogl3DAccelerator := oglRenderer <> 'Software Rasterizer';

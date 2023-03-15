@@ -48,7 +48,7 @@ uses
   zgl_opengles_all,
   {$ENDIF}
   zgl_gltypeconst,
-  zgl_textures;
+  zgl_types;
 
 const
   RT_TYPE_PBUFFER = 0;
@@ -105,7 +105,7 @@ uses
   zgl_render_2d,
   zgl_sprite_2d,
   zgl_log,
-  zgl_types,
+  zgl_textures,
   zgl_utils;
 
 {$IFNDEF USE_GLES}

@@ -30,9 +30,12 @@ interface
 uses
   zgl_textures_png,
   zgl_utils,
-  zgl_textures;
+  zgl_render_2d,
+  zgl_types;
 
 var
+  // Rus: шрифт по умолчанию для клавиатуры.
+  // Eng; the default font for the keyboard.
   fontUse: LongWord;
   JoyArrow: zglPTexture;
 
@@ -48,7 +51,7 @@ var
   MenuColorText: Cardinal = $000000B0;
 
 procedure DrawCircle(x, y, R: Single);
-procedure DrawButton(x, y, w, h: Single; nColor: LongWord);
+procedure DrawButton(x, y, w, h: Single; numColor: LongWord);
 procedure DrawGameJoy01;
 procedure DrawGameJoy02;
 procedure DrawTouchKeyboard;
@@ -60,10 +63,10 @@ uses
   zgl_text,
   zgl_font,
   gegl_menu_gui,
-  zgl_types,
   zgl_sprite_2d,
   zgl_keyboard,
   zgl_fx,
+  zgl_log,
   zgl_gltypeconst,
   {$IFNDEF USE_GLES}
   zgl_opengl_all
@@ -72,6 +75,7 @@ uses
   {$ENDIF}
   ;
 
+{$IfDef LINUX}
 var
   rs0:   Single = 0;
   rs05:  Single = 0.5;
@@ -84,24 +88,25 @@ var
   rs16:  Single = 16;
   rs90:  Single = 90;
   rs270: Single = 270;
+{$EndIf}
 
 procedure DrawCircle(x, y, R: Single);
 var
-  dx, dy, dx_05, dy_05: single;
+  dx, dy, dx_05add, dx_05sub, dy_05add, dy_05sub: single;
   n: LongWord;
 begin
-  dx := rs0;
+  dx := {$IfDef LINUX}rs0{$Else}0{$EndIf};
   dy := R;
   n := 0;
   while dy >= 0 do
   begin
     if (n and 1) > 0 then
     begin
-      dy := dy - rs1;
+      dy := dy - {$IfDef LINUX}rs1{$Else}1{$EndIf};
       dx := sqrt(sqr(R) - sqr(dy));
     end
     else begin
-      dx := dx + rs1;
+      dx := dx + {$IfDef LINUX}rs1{$Else}1{$EndIf};
       dy := sqrt(sqr(R) - sqr(dx));
       if dy < dx then
       begin
@@ -109,28 +114,28 @@ begin
         dy := round(dy);
       end;
     end;
-    dx_05 := dx - rs05;
-    dy_05 := dy - rs05;
+    dx_05add := x + dx - {$IfDef LINUX}rs05{$Else}0.5{$EndIf};
+    dx_05sub := x - dx - {$IfDef LINUX}rs05{$Else}0.5{$EndIf};
+    dy_05add := y + dy - {$IfDef LINUX}rs05{$Else}0.5{$EndIf};
+    dy_05sub := y - dy - {$IfDef LINUX}rs05{$Else}0.5{$EndIf};
     glBegin(GL_LINES);
-      glVertex3f(x + dx_05, y + dy_05, rs0);
-      glVertex3f(x - (dx_05), y + dy_05, rs0);
-      glVertex3f(x + dx_05, y - (dy_05), rs0);
-      glVertex3f(x - (dx_05), y - (dy_05), rs0);
+      glVertex3f(dx_05add, dy_05add, {$IfDef LINUX}rs0{$Else}0{$EndIf});
+      glVertex3f(dx_05sub, dy_05add, {$IfDef LINUX}rs0{$Else}0{$EndIf});
+      glVertex3f(dx_05add, dy_05sub, {$IfDef LINUX}rs0{$Else}0{$EndIf});
+      glVertex3f(dx_05sub, dy_05sub, {$IfDef LINUX}rs0{$Else}0{$EndIf});
     glEnd;
   end;
 end;
 
-procedure DrawButton(x, y, w, h: Single; nColor: LongWord);
+procedure DrawButton(x, y, w, h: Single; numColor: LongWord);
 var
   Box: array[0..3, 0..2] of Single;
-  rrs0: Single;
 begin
   glEnable(GL_BLEND);
-  rrs0 := rs0;
-  Box[0, 2] := rrs0;
-  Box[1, 2] := rrs0;
-  Box[2, 2] := rrs0;
-  Box[3, 2] := rrs0;
+  Box[0, 2] := {$IfDef LINUX}rs0{$Else}0{$EndIf};
+  Box[1, 2] := {$IfDef LINUX}rs0{$Else}0{$EndIf};
+  Box[2, 2] := {$IfDef LINUX}rs0{$Else}0{$EndIf};
+  Box[3, 2] := {$IfDef LINUX}rs0{$Else}0{$EndIf};
   Box[0, 0] := x + w;
   Box[0, 1] := y;
   Box[1, 0] := x + w;
@@ -139,19 +144,19 @@ begin
   Box[2, 1] := y;
   Box[3, 0] := x;
   Box[3, 1] := y + h;
-  {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(MenuRed[nColor], MenuGreen[nColor], MenuBlue[nColor], MenuAlpha[nColor]);
+  glColor4f(MenuRed[numColor], MenuGreen[numColor], MenuBlue[numColor], MenuAlpha[numColor]);
   glVertexPointer(3, GL_FLOAT, 0, @Box);
   glEnableClientState(GL_VERTEX_ARRAY);
   glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-  Box[0, 0] := x + rs1_5;
-  Box[0, 1] := y + rs1_5;
-  Box[1, 0] := x + w - rs1_5;
-  Box[1, 1] := y + rs1_5;
-  Box[2, 0] := x + w - rs1_5;
-  Box[2, 1] := y + h - rs1_5;
-  Box[3, 0] := x + rs1_5;
-  Box[3, 1] := y + h - rs1_5;
-  {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(MenuRed[1], MenuGreen[1], MenuBlue[1], MenuAlpha[1]);
+  Box[0, 0] := x + {$IfDef LINUX}rs1_5{$Else}1.5{$EndIf};
+  Box[0, 1] := y + {$IfDef LINUX}rs1_5{$Else}1.5{$EndIf};
+  Box[1, 0] := x + w - {$IfDef LINUX}rs1_5{$Else}1.5{$EndIf};
+  Box[1, 1] := y + {$IfDef LINUX}rs1_5{$Else}1.5{$EndIf};
+  Box[2, 0] := x + w - {$IfDef LINUX}rs1_5{$Else}1.5{$EndIf};
+  Box[2, 1] := y + h - {$IfDef LINUX}rs1_5{$Else}1.5{$EndIf};
+  Box[3, 0] := x + {$IfDef LINUX}rs1_5{$Else}1.5{$EndIf};
+  Box[3, 1] := y + h - {$IfDef LINUX}rs1_5{$Else}1.5{$EndIf};
+  glColor4f(MenuRed[1], MenuGreen[1], MenuBlue[1], MenuAlpha[1]);
   glDrawArrays(GL_LINE_LOOP, 0, 4);
   glDisableClientState(GL_VERTEX_ARRAY);
   glDisable(GL_BLEND);
@@ -162,29 +167,32 @@ var
   r: zglTRect2D;
   i: Integer;
 begin
-  {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(CircleRed[0], CircleGreen[0], CircleBlue[0], CircleAlpha[0]);
+//  setTextScale(22, fontUse);
+//  setTextColor(MenuColorText);
+  glColor4f(CircleRed[0], CircleGreen[0], CircleBlue[0], CircleAlpha[0]);
   DrawCircle(TouchJoyRolling.Rolling.X, TouchJoyRolling.Rolling.Y, TouchJoyRolling.Rolling.R);
 
   if (TouchJoyRolling.Rolling.bPush and 1) > 0 then                             
   begin
-    {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(CircleRed[1], CircleGreen[1], CircleBlue[1], CircleAlpha[1]);
-    DrawCircle(TouchJoyRolling.Rolling._x, TouchJoyRolling.Rolling._y, rs5);
+    glColor4f(CircleRed[1], CircleGreen[1], CircleBlue[1], CircleAlpha[1]);
+    DrawCircle(TouchJoyRolling.Rolling._x, TouchJoyRolling.Rolling._y, {$IfDef LINUX}rs5{$Else}5{$EndIf});
   end;
 
-  {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(CircleRed[2], CircleGreen[2], CircleBlue[2], CircleAlpha[2]);
-  DrawCircle(TouchJoyRolling.Rolling.X, TouchJoyRolling.Rolling.Y, rs10);
+  glColor4f(CircleRed[2], CircleGreen[2], CircleBlue[2], CircleAlpha[2]);
+  DrawCircle(TouchJoyRolling.Rolling.X, TouchJoyRolling.Rolling.Y, {$IfDef LINUX}rs10{$Else}10{$EndIf});
 
   r.W := TouchJoyRolling.Width;
   r.H := TouchJoyRolling.Height;
   for i := 1 to TouchJoyRolling.count do
   Begin
     r.X := TouchJoyRolling.OneButton[i].X;
-    r.Y := TouchJoyRolling.OneButton[i].Y + rs3;
+    r.Y := TouchJoyRolling.OneButton[i].Y + {$IfDef LINUX}rs3{$Else}3{$EndIf};
 
     if ((TouchJoyRolling.OneButton[i].bPush and 1) > 0) then
     begin
       setFontTextScale(21, fontUse);
-      DrawButton(TouchJoyRolling.OneButton[i].X + rs1, TouchJoyRolling.OneButton[i].Y + rs1, TouchJoyRolling.Width - rs2, TouchJoyRolling.Height - rs2, 2);
+      DrawButton(TouchJoyRolling.OneButton[i].X + {$IfDef LINUX}rs1{$Else}1{$EndIf}, TouchJoyRolling.OneButton[i].Y + {$IfDef LINUX}rs1{$Else}1{$EndIf},
+                        TouchJoyRolling.Width - {$IfDef LINUX}rs2{$Else}2{$EndIf}, TouchJoyRolling.Height - {$IfDef LINUX}rs2{$Else}2{$EndIf}, 2);
       text_DrawInRect(fontUse, r, TouchJoyRolling.OneButton[i].symb, TEXT_HALIGN_CENTER or TEXT_VALIGN_CENTER);
       setFontTextScale(22, fontUse);
     end
@@ -200,6 +208,8 @@ var
   i: Integer;
   r: zglTRect2D;
 begin
+//  setTextScale(22, fontUse);
+//  setTextColor(MenuColorText);
   for i := 1 to 9 do
   begin
     if i <> 5 then
@@ -214,11 +224,12 @@ begin
   for i := 1 to TouchJoy.count do
   Begin
     r.X := TouchJoy.OneButton[i].X;
-    r.Y := TouchJoy.OneButton[i].Y + rs3;
+    r.Y := TouchJoy.OneButton[i].Y + {$IfDef LINUX}rs3{$Else}3{$EndIf};
     if (TouchJoy.OneButton[i].bPush and 1) > 0 then
     begin
       setFontTextScale(21, fontUse);
-      DrawButton(TouchJoy.OneButton[i].X + rs1, TouchJoy.OneButton[i].Y + rs1, TouchJoy.Width - rs2, TouchJoy.Height - rs2, 2);
+      DrawButton(TouchJoy.OneButton[i].X + {$IfDef LINUX}rs1{$Else}1{$EndIf}, TouchJoy.OneButton[i].Y + {$IfDef LINUX}rs1{$Else}1{$EndIf},
+                          TouchJoy.Width - {$IfDef LINUX}rs2{$Else}2{$EndIf}, TouchJoy.Height - {$IfDef LINUX}rs2{$Else}2{$EndIf}, 2);
       text_DrawInRect(fontUse, r, TouchJoy.OneButton[i].symb,  TEXT_HALIGN_CENTER or TEXT_VALIGN_CENTER);
       setFontTextScale(22, fontUse);
     end
@@ -237,8 +248,11 @@ var
   oldTextScaleEx: Single;
 begin
   oldTextScaleEx := getTextScaleEx();
-  setTextFontScaleEx(TouchKey.textScale / rs10, fontUse);
+  setTextFontScaleEx(TouchKey.textScale / {$IfDef LINUX}rs10{$Else}10{$EndIf}, fontUse);
   setScallingOff(True);                 // отключаем шкалу
+//  Off_TextScale := True;
+//  useScaleEx := TouchKey.textScale * managerFont.Font[fontUse].ScaleNorm;
+//  setTextColor(MenuColorText);
   if (keybFlags and keyboardLatinRus) > 0 then
     if ((keybFlags and keyboardCaps) > 0) or ((keybFlags and keyboardShift) > 0) then
       n := 3
@@ -254,18 +268,19 @@ begin
   for i := 1 to TouchKey.count do
   Begin
     r.X := TouchKey.OneButton[i].X;
-    r.Y := TouchKey.OneButton[i].Y + rs2;
+    r.Y := TouchKey.OneButton[i].Y + {$IfDef LINUX}rs2{$Else}2{$EndIf};
     if keysDown[TouchKey.OneButton[i]._key] then
     begin
       r.X := r.X + 1;
       r.Y := r.Y + 1;
-      DrawButton(TouchKey.OneButton[i].X + rs1, TouchKey.OneButton[i].Y + rs1, TouchKey.OWidth, TouchKey.Height, 2);
-      text_DrawInRect(fontUse, r, Unicode_toUTF8( TouchKey.OneButton[i].symb[n]), TEXT_HALIGN_CENTER or TEXT_VALIGN_CENTER);
+      DrawButton(TouchKey.OneButton[i].X + {$IfDef LINUX}rs1{$Else}1{$EndIf}, TouchKey.OneButton[i].Y + {$IfDef LINUX}rs1{$Else}1{$EndIf}, TouchKey.OWidth, TouchKey.Height, 2);
+      text_DrawInRect(fontUse, r, ID_toUTF8( TouchKey.OneButton[i].symb[n]), TEXT_HALIGN_CENTER or TEXT_VALIGN_CENTER);
+      log_Add(ID_toUTF8(TouchKey.OneButton[i].symb[n]));
       Continue;                 
     end;
 
     DrawButton(TouchKey.OneButton[i].X, TouchKey.OneButton[i].Y, TouchKey.OWidth, TouchKey.Height, 0);
-    text_DrawInRect(fontUse, r, Unicode_toUTF8(TouchKey.OneButton[i].symb[n]), TEXT_HALIGN_CENTER or TEXT_VALIGN_CENTER);
+    text_DrawInRect(fontUse, r, ID_toUTF8(TouchKey.OneButton[i].symb[n]), TEXT_HALIGN_CENTER or TEXT_VALIGN_CENTER);
   end;
   for i := 35 to 44 do
   Begin
@@ -274,15 +289,15 @@ begin
     if (i = _Latin) and ((keybFlags and keyboardLatinRus) = 0) then
       Continue;
     r.X := TouchKey.StringButton[i].X;
-    r.Y := TouchKey.StringButton[i].Y + rs2;
+    r.Y := TouchKey.StringButton[i].Y + {$IfDef LINUX}rs2{$Else}2{$EndIf};
     r.W := TouchKey.StringButton[i].Width;
     if (keysDown[TouchKey.StringButton[i]._key]) or (((keybFlags and keyboardCaps) > 0) and (i = _CapsLock)) or
-          (((keybFlags and keyboardInsert) > 0) and (i = _Insert)) or ((i = _Shift) and
-          ((keybFlags and keyboardShift) > 0)) then
+          (((keybFlags and keyboardInsert) > 0) and (i = _Insert)) or
+          ((i = _Shift) and ((keybFlags and keyboardShift) > 0)) then
     begin
-      r.X := r.X + rs1;
-      r.Y := r.Y + rs1;
-      DrawButton(TouchKey.StringButton[i].X + rs1, TouchKey.StringButton[i].Y + rs1, TouchKey.StringButton[i].Width, TouchKey.Height, 2);
+      r.X := r.X + {$IfDef LINUX}rs1{$Else}1{$EndIf};
+      r.Y := r.Y + {$IfDef LINUX}rs1{$Else}1{$EndIf};
+      DrawButton(TouchKey.StringButton[i].X + {$IfDef LINUX}rs1{$Else}1{$EndIf}, TouchKey.StringButton[i].Y + {$IfDef LINUX}rs1{$Else}1{$EndIf}, TouchKey.StringButton[i].Width, TouchKey.Height, 2);
       text_DrawInRect(fontUse, r, TouchKey.StringButton[i].bString, TEXT_HALIGN_CENTER or TEXT_VALIGN_CENTER);
       Continue;                
     end;
@@ -300,6 +315,10 @@ var
   i: Integer;
   r: zglTRect2D;
 begin
+//  setTextScale(TouchKeySymb.textScale, fontUse);
+//  Off_TextScale := True;
+//  useScaleEx := TouchKey.textScale * managerFont.Font[fontUse].ScaleNorm;
+//  setTextColor(MenuColorText);
   if (keybFlags and keyboardShift) > 0 then
     n := 2
   else
@@ -309,13 +328,13 @@ begin
   for i := 1 to TouchKeySymb.count do
   Begin
     r.X := TouchKeySymb.OneDoubleButton[i].X;
-    r.Y := TouchKeySymb.OneDoubleButton[i].Y + rs2;
+    r.Y := TouchKeySymb.OneDoubleButton[i].Y + {$IfDef LINUX}rs2{$Else}2{$EndIf};
 
     if keysDown[TouchKeySymb.OneDoubleButton[i]._key] then
     begin
-      r.X := r.X + rs1;
-      r.Y := r.Y + rs1;
-      DrawButton(TouchKeySymb.OneDoubleButton[i].X + rs1, TouchKeySymb.OneDoubleButton[i].Y + rs1, TouchKeySymb.OWidth, TouchKeySymb.Height, 2);
+      r.X := r.X + {$IfDef LINUX}rs1{$Else}1{$EndIf};
+      r.Y := r.Y + {$IfDef LINUX}rs1{$Else}1{$EndIf};
+      DrawButton(TouchKeySymb.OneDoubleButton[i].X + {$IfDef LINUX}rs1{$Else}1{$EndIf}, TouchKeySymb.OneDoubleButton[i].Y + {$IfDef LINUX}rs1{$Else}1{$EndIf}, TouchKeySymb.OWidth, TouchKeySymb.Height, 2);
       text_DrawInRect(fontUse, r, TouchKeySymb.OneDoubleButton[i].symb[n], TEXT_HALIGN_CENTER or TEXT_VALIGN_CENTER);
       Continue;                 
     end;
@@ -326,17 +345,16 @@ begin
   for i := 36 to 44 do
   Begin
     r.X := TouchKeySymb.StringButton[i].X;
-    r.Y := TouchKeySymb.StringButton[i].Y + rs2;
+    r.Y := TouchKeySymb.StringButton[i].Y + {$IfDef LINUX}rs2{$Else}2{$EndIf};
     r.W := TouchKeySymb.StringButton[i].Width;
     if (i = _home) or (i = _end) then
       setFontTextScale(Round(TouchKeySymb.textScale / 2), fontUse);
     if ((keysDown[TouchKeySymb.StringButton[i]._key]) or (((keybFlags and keyboardInsert) > 0) and (i = _Insert))) or
-           ((i = _Shift) and (keysDown[TouchKeySymb.StringButton[i]._key])) or (((keybFlags and keyboardCtrl) > 0) and (i = _Ctrl)) or
-           (keysDown[TouchKeySymb.StringButton[i]._key]) then
+           (*((i = _Shift) and (keysDown[TouchKeySymb.StringButton[i]._key])) or*) (((keybFlags and keyboardCtrl) > 0) and (i = _Ctrl)) then
     begin
       r.X := r.X + 1;
       r.Y := r.Y + 1;
-      DrawButton(TouchKeySymb.StringButton[i].X + rs1, TouchKeySymb.StringButton[i].Y + rs1, TouchKeySymb.StringButton[i].Width, TouchKeySymb.Height, 2);
+      DrawButton(TouchKeySymb.StringButton[i].X + {$IfDef LINUX}rs1{$Else}1{$EndIf}, TouchKeySymb.StringButton[i].Y + {$IfDef LINUX}rs1{$Else}1{$EndIf}, TouchKeySymb.StringButton[i].Width, TouchKeySymb.Height, 2);
       text_DrawInRect(fontUse, r, TouchKeySymb.StringButton[i].bString, TEXT_HALIGN_CENTER or TEXT_VALIGN_CENTER);
     end
     else begin
@@ -349,25 +367,28 @@ begin
   for i := 24 to 27 do
   begin
     fx2d_SetColor(0);
-    if (TouchKeySymb.BArrow[i].Angle = rs90) or (TouchKeySymb.BArrow[i].Angle = rs270) then
+    if (TouchKeySymb.BArrow[i].Angle = {$IfDef LINUX}rs90{$Else}90{$EndIf}) or (TouchKeySymb.BArrow[i].Angle = {$IfDef LINUX}rs270{$Else}270{$EndIf}) then
     begin
-      r.W := rs16;
-      r.H := rs0;
+      r.W := {$IfDef LINUX}rs16{$Else}16{$EndIf};
+      r.H := {$IfDef LINUX}rs0{$Else}0{$EndIf};
     end
     else begin
-      r.W := rs0;
-      r.H := rs16;
+      r.W := {$IfDef LINUX}rs0{$Else}0{$EndIf};
+      r.H := {$IfDef LINUX}rs16{$Else}16{$EndIf};
     end;
     if keysDown[TouchKeySymb.BArrow[i]._key] then
     begin
-      DrawButton(TouchKeySymb.BArrow[i].X + rs1, TouchKeySymb.BArrow[i].Y + rs1, TouchKeySymb.OWidth, TouchKeySymb.Height, 2);
-      asprite2d_Draw(JoyArrow, TouchKeySymb.BArrow[i].X + rs1 + r.W / rs2, TouchKeySymb.BArrow[i].Y + rs1 + r.H / rs2, TouchKeySymb.OWidth - rs1 - r.W, TouchKeySymb.Height - rs1 - r.H,
-            TouchKeySymb.BArrow[i].Angle, TouchKeySymb.TextureDown, 192, FX_COLOR or FX_BLEND);
+      DrawButton(TouchKeySymb.BArrow[i].X + {$IfDef LINUX}rs1{$Else}1{$EndIf}, TouchKeySymb.BArrow[i].Y + {$IfDef LINUX}rs1{$Else}1{$EndIf}, TouchKeySymb.OWidth, TouchKeySymb.Height, 2);
+      asprite2d_Draw(JoyArrow, TouchKeySymb.BArrow[i].X + {$IfDef LINUX}rs1{$Else}1{$EndIf} + r.W / {$IfDef LINUX}rs2{$Else}2{$EndIf},
+                     TouchKeySymb.BArrow[i].Y + {$IfDef LINUX}rs1{$Else}1{$EndIf} + r.H / {$IfDef LINUX}rs2{$Else}2{$EndIf},
+                     TouchKeySymb.OWidth - {$IfDef LINUX}rs1{$Else}1{$EndIf} - r.W, TouchKeySymb.Height - {$IfDef LINUX}rs1{$Else}1{$EndIf} - r.H,
+                     TouchKeySymb.BArrow[i].Angle, TouchKeySymb.TextureDown, 192, FX_COLOR or FX_BLEND);
     end
     else begin
       DrawButton(TouchKeySymb.BArrow[i].X, TouchKeySymb.BArrow[i].Y, TouchKeySymb.OWidth, TouchKeySymb.Height, 0);
-      asprite2d_Draw(JoyArrow, TouchKeySymb.BArrow[i].X + r.W / rs2, TouchKeySymb.BArrow[i].Y + r.H / rs2, TouchKeySymb.OWidth - r.W, TouchKeySymb.Height - r.H,
-            TouchKeySymb.BArrow[i].Angle, TouchKeySymb.TextureUp, 192, FX_COLOR or FX_BLEND);
+      asprite2d_Draw(JoyArrow, TouchKeySymb.BArrow[i].X + r.W / {$IfDef LINUX}rs2{$Else}2{$EndIf}, TouchKeySymb.BArrow[i].Y + r.H / {$IfDef LINUX}rs2{$Else}2{$EndIf},
+                     TouchKeySymb.OWidth - r.W, TouchKeySymb.Height - r.H,
+                     TouchKeySymb.BArrow[i].Angle, TouchKeySymb.TextureUp, 192, FX_COLOR or FX_BLEND);
     end;
   end;
 //  Off_TextScale := False;

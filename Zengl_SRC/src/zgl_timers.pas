@@ -21,49 +21,22 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 16.07.2021
+ !!! modification from Serge
 }
 unit zgl_timers;
 
 {$I zgl_config.cfg}
 
 interface
+
+uses
 {$IfDef UNIX}
-uses UnixType;
+  UnixType,
 {$ENDIF}
 {$IFDEF WINDOWS}
-uses Windows;
+  Windows,
 {$ENDIF}
-
-const
-  MAX_TIMERS   =  50;        // максимальное количество таймеров.
-
-  // биты работы с таймером
-  t_Stop         =   1;        // таймер останавливается незамедлительно
-  t_Start        =   2;        // таймер создаётся и стартует незамедлительно
-  t_Tiks         =   4;        // используется только внутри таймеров!
-  t_SleepToStart =   8;        // таймер создаётся и запускается с установленной задержкой
-  t_SleepToStop  =  16;        // таймер останавливается через определённое время
-  t_Enable       = 128;        // используется или нет данный таймер (существует или нет?)
-
-  t_Stop_or_SleepToStart = t_Stop or t_SleepToStart;
-  t_Start_or_SleepToStop = t_Start or t_SleepToStop;
-
-type
-  zglPTimer = ^zglTTimer;
-  zglTTimer = record
-    Interval, SInterval: Cardinal;
-    Flags: LongWord;
-    LastTick, LastTickForSleep: Double;
-    OnTimer: procedure;
-  end;
-
-  zglPTimerManager = ^zglTTimerManager;
-  zglTTimerManager = record
-    Count: Byte;
-    maxTimers: Byte;
-    Timers: array of zglPTimer;
-  end;
+  zgl_types;
 
 // Rus: Все таймера работают в милисекундах! (отсчёт в милисекундах).
 // Eng: All timers run in milliseconds! (count in milliseconds).
@@ -207,7 +180,6 @@ begin
   newTimer.SInterval := SleepInterval;
   inc(managerTimer.Count);
   Result := i;
-  newTimer := nil;
 end;
 
 function timer_StartStop(num: Byte; Flags: Byte = 2): Boolean;
@@ -233,7 +205,6 @@ begin
   else
     useTimer.Flags := (useTimer.Flags and (255 - t_Start)) or t_Stop;
   Result := True;
-  useTimer := nil;
 end;
 
 function timer_SleepStartStop(num: Byte; Flags: Byte = 2; IntervalSleep: Cardinal = 3): Boolean;
@@ -262,7 +233,6 @@ begin
   useTimer.LastTickForSleep := t;
 
   Result := True;
-  useTimer := nil;
 end;
 
 procedure timer_Del(var num: Byte);
@@ -295,7 +265,6 @@ begin
     end;
   end;
   SetLength(managerTimer.Timers, 0);
-  delTimer := nil;
 end;
 
 procedure timer_MainLoop;
@@ -371,7 +340,6 @@ begin
     dec(managerTimer.Count);
   end;
   timersToKill := 0;
-  useTimer := nil;
 end;
 
 function timer_GetTicks: Double;
@@ -421,7 +389,6 @@ begin
     end;
     inc(i);
   end;
-  useTimer := nil;
   if Assigned(app_PReset) then
     app_PReset;
 end;

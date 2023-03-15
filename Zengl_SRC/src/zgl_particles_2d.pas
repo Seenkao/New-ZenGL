@@ -233,39 +233,55 @@ type
       Emitters  : Integer;
       Particles : Integer;
             end;
-    List  : array of zglPEmitter2D;
-    ListU : array of zglPPEmitter2D;
+    List  : array of zglPEmitter2D;     // список указателей на эмиттеры
+    ListU : array of zglPPEmitter2D;    // список указателей на указатели на эмиттеры...
   end;
 
+  // для менеджера эмиттеров
   zglTEmitter2DManager = record
     Count : Integer;
     List  : array of zglPEmitter2D;
   end;
 
+// установить движок эмиттеров
 procedure pengine2d_Set( PEngine : zglPPEngine2D );
+// вернуть значение движка эмиттера?
 function  pengine2d_Get : zglPPEngine2D;
+// прорисовка всех эмиттеров
 procedure pengine2d_Draw;
+// обработка всех эмиттеров
 procedure pengine2d_Proc( dt : Double );
+// добавление загруженного эмиттера
 procedure pengine2d_AddEmitter( Emitter : zglPEmitter2D; Result : zglPPEmitter2D = nil; X : Single = 0; Y : Single = 0 );
+// удаление эмиттера по ID (где записан ID?)
 procedure pengine2d_DelEmitter( ID : Integer );
+// очистка всех эмиттеров
 procedure pengine2d_ClearAll;
 
+// добавление эмиттера и его инициализация
 function  emitter2d_Add : zglPEmitter2D;
+// удаление эмиттера
 procedure emitter2d_Del( var Emitter : zglPEmitter2D );
+// загрузка эмиттера
 function  emitter2d_Load( const FileName : UTF8String ) : zglPEmitter2D;
 function  emitter2d_LoadFromFile( const FileName : UTF8String ) : zglPEmitter2D;
 function  emitter2d_LoadFromMemory( const Memory : zglTMemory ) : zglPEmitter2D;
 {$IFDEF ANDROID}
 procedure emitter2d_RestoreAll;
 {$ENDIF}
+// сохранение эмиттера
 procedure emitter2d_SaveToFile( Emitter : zglPEmitter2D; const FileName : UTF8String );
+// инициализация эмиттера
 procedure emitter2d_Init( Emitter : zglPEmitter2D );
+// очистка эмиттера
 procedure emitter2d_Free( var Emitter : zglPEmitter2D );
+// прорисовка эмиттера
 procedure emitter2d_Draw( Emitter : zglPEmitter2D );
+// обработка эмиттера
 procedure emitter2d_Proc( Emitter : zglPEmitter2D; dt : Double );
 
 var
-  managerEmitter2D : zglTEmitter2DManager;
+  managerEmitter2D : zglTEmitter2DManager;     // сам менеджер эмиттеров
 
 implementation
 uses
@@ -441,12 +457,14 @@ procedure pengine2d_AddEmitter( Emitter : zglPEmitter2D; Result : zglPPEmitter2D
 begin
   if not Assigned( Emitter ) Then exit;
 
+  // проверка длины списков эмиттеров
   if pengine2d.Count.Emitters + 1 > Length( pengine2d.List ) Then
-    begin
-      SetLength( pengine2d.List, Length( pengine2d.List ) + 1024 );
-      SetLength( pengine2d.ListU, Length( pengine2d.ListU ) + 1024 );
-    end;
+  begin
+    SetLength( pengine2d.List, Length( pengine2d.List ) + 1024 );
+    SetLength( pengine2d.ListU, Length( pengine2d.ListU ) + 1024 );
+  end;
 
+  // подготовка памяти
   zgl_GetMem( Pointer( new ), SizeOf( zglTEmitter2D ) );
   pengine2d.List[ pengine2d.Count.Emitters ]  := new;
   pengine2d.ListU[ pengine2d.Count.Emitters ] := Result;
@@ -454,7 +472,7 @@ begin
 
   with new^, new._private do
     begin
-      pengine     := pengine2d;
+      pengine     := pengine2d;                        // типо движок...
       parCreated  := Emitter._private.parCreated;
       texFile     := Emitter._private.texFile;
       texHash     := Emitter._private.texHash;
@@ -1133,95 +1151,97 @@ procedure emitter2d_Draw( Emitter : zglPEmitter2D );
 
     iColor: Byte;
 begin
-  if not Assigned( Emitter ) Then exit;
+  if not Assigned( Emitter ) Then
+    exit;
 
   if render2dClip Then
     with Emitter.BBox do
-      if not sprite2d_InScreen( MinX, MinY, MaxX - MinX, MaxY - MinY, 0 ) Then exit;
+      if not sprite2d_InScreen( MinX, MinY, MaxX - MinX, MaxY - MinY, 0 ) Then
+        exit;
 
   with Emitter^, Emitter._private do
+  begin
+    fx_SetBlendMode( ParParams.BlendMode );
+    fx_SetColorMode( ParParams.ColorMode );
+
+    if ( not b2dStarted ) or batch2d_Check( GL_QUADS, FX_BLEND or FX_COLOR, ParParams.Texture ) Then
     begin
-      fx_SetBlendMode( ParParams.BlendMode );
-      fx_SetColorMode( ParParams.ColorMode );
+      glEnable( GL_BLEND );
+      glEnable( GL_TEXTURE_2D );
+      glBindTexture( GL_TEXTURE_2D, ParParams.Texture^.ID );
 
-      if ( not b2dStarted ) or batch2d_Check( GL_QUADS, FX_BLEND or FX_COLOR, ParParams.Texture ) Then
-      begin
-        glEnable( GL_BLEND );
-        glEnable( GL_TEXTURE_2D );
-        glBindTexture( GL_TEXTURE_2D, ParParams.Texture^.ID );
-
-        glBegin( GL_QUADS );
-      end;
-      iColor := Length(ParParams.Color);
-
-      fx2d_SetColor($FFFFFF);
-
-      for i := 0 to Particles - 1 do
-      begin
-        p  := list[ i ];
-        tc := @ParParams.Texture.FramesCoord[ p.Frame ];
-        if iColor <> 0 then
-          fx2d_SetColor(p.Color);
-
-        if p.Angle <> 0 Then
-        begin
-          x1 := -p.Size.X / 2;
-          y1 := -p.Size.Y / 2;
-          x2 := -x1;
-          y2 := -y1;
-          cX :=  p.Position.X;
-          cY :=  p.Position.Y;
-
-          m_SinCos( p.Angle * deg2rad, s, c );
-
-          quad[0].X := x1 * c - y1 * s + cX;
-          quad[0].Y := x1 * s + y1 * c + cY;
-          quad[1].X := x2 * c - y1 * s + cX;
-          quad[1].Y := x2 * s + y1 * c + cY;
-          quad[2].X := x2 * c - y2 * s + cX;
-          quad[2].Y := x2 * s + y2 * c + cY;
-          quad[3].X := x1 * c - y2 * s + cX;
-          quad[3].Y := x1 * s + y2 * c + cY;
-        end else
-        begin
-          x1 := p.Position.X - p.Size.X / 2;
-          y1 := p.Position.Y - p.Size.Y / 2;
-
-          quad[0].X := x1;
-          quad[0].Y := y1;
-          quad[1].X := x1 + p.Size.X;
-          quad[1].Y := y1;
-          quad[2].X := x1 + p.Size.X;
-          quad[2].Y := y1 + p.Size.Y;
-          quad[3].X := x1;
-          quad[3].Y := y1 + p.Size.Y;
-        end;
-
-        fx2dAlpha^ := p.Alpha / 255;        
-        glColor4f(fx2dColor[0], fx2dColor[1], fx2dColor[2], fx2dColor[3]);
-
-        glTexCoord2fv( @tc[ 0 ] );
-        glVertex2fv( @quad[ 0 ] );
-
-        glTexCoord2fv( @tc[ 1 ] );
-        glVertex2fv( @quad[ 1 ] );
-
-        glTexCoord2fv( @tc[ 2 ] );
-        glVertex2fv( @quad[ 2 ] );
-
-        glTexCoord2fv( @tc[ 3 ] );
-        glVertex2fv( @quad[ 3 ] );
-      end;
-
-      if not b2dStarted Then
-      begin
-        glEnd();
-
-        glDisable( GL_TEXTURE_2D );
-        glDisable( GL_BLEND );
-        glDisable( GL_ALPHA_TEST );
-      end;
+      glBegin( GL_QUADS );
     end;
+    iColor := Length(ParParams.Color);
+
+    fx2d_SetColor($FFFFFF);
+
+    for i := 0 to Particles - 1 do
+    begin
+      p  := list[ i ];
+      tc := @ParParams.Texture.FramesCoord[ p.Frame ];
+      if iColor <> 0 then
+        fx2d_SetColor(p.Color);
+
+      if p.Angle <> 0 Then
+      begin
+        x1 := -p.Size.X / 2;
+        y1 := -p.Size.Y / 2;
+        x2 := -x1;
+        y2 := -y1;
+        cX :=  p.Position.X;
+        cY :=  p.Position.Y;
+
+        m_SinCos( p.Angle * deg2rad, s, c );
+
+        quad[0].X := x1 * c - y1 * s + cX;
+        quad[0].Y := x1 * s + y1 * c + cY;
+        quad[1].X := x2 * c - y1 * s + cX;
+        quad[1].Y := x2 * s + y1 * c + cY;
+        quad[2].X := x2 * c - y2 * s + cX;
+        quad[2].Y := x2 * s + y2 * c + cY;
+        quad[3].X := x1 * c - y2 * s + cX;
+        quad[3].Y := x1 * s + y2 * c + cY;
+      end else
+      begin
+        x1 := p.Position.X - p.Size.X / 2;
+        y1 := p.Position.Y - p.Size.Y / 2;
+
+        quad[0].X := x1;
+        quad[0].Y := y1;
+        quad[1].X := x1 + p.Size.X;
+        quad[1].Y := y1;
+        quad[2].X := x1 + p.Size.X;
+        quad[2].Y := y1 + p.Size.Y;
+        quad[3].X := x1;
+        quad[3].Y := y1 + p.Size.Y;
+      end;
+
+      fx2dAlpha^ := p.Alpha / 255;
+      {$IfDef USE_GLES}_glColor4f{$Else}glColor4f{$EndIf}(fx2dColor[0], fx2dColor[1], fx2dColor[2], fx2dColor[3]);
+
+      glTexCoord2fv( @tc[ 0 ] );
+      glVertex2fv( @quad[ 0 ] );
+
+      glTexCoord2fv( @tc[ 1 ] );
+      glVertex2fv( @quad[ 1 ] );
+
+      glTexCoord2fv( @tc[ 2 ] );
+      glVertex2fv( @quad[ 2 ] );
+
+      glTexCoord2fv( @tc[ 3 ] );
+      glVertex2fv( @quad[ 3 ] );
+    end;
+
+    if not b2dStarted Then
+    begin
+      glEnd();
+
+      glDisable( GL_TEXTURE_2D );
+      glDisable( GL_BLEND );
+      glDisable( GL_ALPHA_TEST );
+    end;
+  end;
 end;
 
 procedure emitter2d_Sort( Emitter : zglPEmitter2D; iLo, iHi : Integer );

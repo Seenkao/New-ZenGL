@@ -75,14 +75,14 @@ begin
 
   // функция вывода окантовки, если её задали
   if Assigned(UseText^.procDraw) then
-    UseText^.procDraw;
+    UseText^.procDraw(@UseText^.Rect);
 
   // трансляция для вывода текста
   glTranslatef(- UseText^.translateX, 0, 0);
   //--------------------------------------------------------------
   if UseText^.EditString.UseLen > 0 then
   begin
-    Set_numColor(UseText^.ColorText);
+    Set_ToNumColor(UseText^.ColorText);
     batch2d_Begin;
     DrawTextEdit(UseText);
     batch2d_End;
@@ -118,7 +118,7 @@ end;
 procedure DrawTextEdit(Edit: geglPEdit);
 var
   i: LongWord;
-  charDesc: zglPCharDesc;
+  charDesc: zglPCharDescSmall;
   lastPage: Integer;
   XLoop, YLoop: Single;
 
@@ -126,9 +126,13 @@ var
   xTex1, yTex1, xTex2, yTex2: Single;
   useFont: zglPFont;
   mode: LongWord;
+  Padding: array[0..3] of Single;
+  MaxHeight: Single;
 label
   StartLoop, EndLoop, NextLoop;
 begin
+  // color???         // это должно происходить от менеджера!!! Но пока это только поле ввода, оставлю
+//  glColor4fv(@Edit^.ColorText);
   if managerSetOfTools.count = 0 then
     exit;
 
@@ -136,7 +140,7 @@ begin
   i := 0;
   lastPage := -1;
   XLoop := 0;
-  YLoop :=  - useFont^.MaxShiftY * useFont^.Scale;
+  YLoop :=  - useFont^.MaxShiftY * Edit^.Scale;// useFont^.Scale;
 
            // надо определиться, нужен этот код или нет
 
@@ -161,39 +165,50 @@ begin
     end;
   end;        }
 
+  MaxHeight := useFont^.MaxHeight;
+  Padding[PaddingX1] := useFont^.Padding[PaddingX1];
+  Padding[PaddingX2] := useFont^.Padding[PaddingX2];
+  Padding[PaddingY1] := useFont^.Padding[PaddingY1];
+  Padding[PaddingY2] := useFont^.Padding[PaddingY2];
+
 StartLoop:
   if Edit^.EditString.CharSymb[i] = 0 then
     goto EndLoop;
-  charDesc := useFont^.CharDesc[Edit^.EditString.CharSymb[i]];
+  charDesc := Edit^.CharDesc[Edit^.EditString.CharSymb[i]];
 
   if not Assigned(charDesc) Then
-    charDesc := useFont^.CharDesc[63];
+    charDesc := Edit^.CharDesc[63];
 
   XLoop := Edit^.EditString.posX[i];
 
   xx1 := XLoop + charDesc^.xx1;
   xx2 := XLoop + charDesc^.xx2;
+//  xx1 := XLoop + (charDesc^.ShiftX - Padding[PaddingX1]) * Edit^.Scale;
+//  xx2 := XLoop + (charDesc^.ShiftX + charDesc^.Width + Padding[PaddingX2]) * Edit^.Scale;
 
   xTex1 := charDesc^.TexCoords[0].X;
   xTex2 := charDesc^.TexCoords[1].X;
 
   if xx1 > Edit^.translateX + Edit^.Rect.W then
-    goto EndLoop;
+    goto EndLoop;                    // выходим, если координата за пределами
   if xx2 < Edit^.translateX then
-    goto NextLoop;
+    goto NextLoop;                   // переходим на следующий символ, если ещё не в пределах поля ввода
 
+  // вариант когда начали писать, но текст ещё пока находится
   if xx1 < Edit^.translateX then
-  begin
-    xTex1 := xTex2 - (xx2 - Edit^.translateX) * (xTex2 - xTex1) / (xx2 - xx1);
+  begin                            // за пределами поля ввода
+    xTex1 := xTex2 - (xx2 - Edit^.translateX) * (xTex2 - xTex1) / (xx2 - xx1);                 // или делать пересчёт координат текстуры...
     xx1 := Edit^.translateX;
   end;
 
+  // и вариант, когда уже за пределами поля ввода
   if xx2 > Edit^.translateX + Edit^.Rect.W then
   begin
-    xTex2 := xTex2 - (xx2 - Edit^.translateX - Edit^.Rect.W) * (xTex2 - xTex1) / (xx2 - xx1);
+    xTex2 := xTex2 - (xx2 - Edit^.translateX - Edit^.Rect.W) * (xTex2 - xTex1) / (xx2 - xx1);   // формула не меняется, меняется текстурная координата
     xx2 := Edit^.translateX + Edit^.Rect.W;
   end;
 
+  // ниже код, для смены текстуры, если она разбита на части (смена страницы текстуры)
   if lastPage <> charDesc^.Page Then
   begin
     lastPage := charDesc^.Page;
@@ -222,6 +237,9 @@ StartLoop:
 
   yy1 := YLoop + charDesc^.yy1;
   yy2 := YLoop + charDesc^.yy2;
+
+//  yy1 := YLoop + (charDesc^.ShiftY + MaxHeight - charDesc^.Height - Padding[PaddingY1]) * Edit^.Scale;
+//  yy2 := YLoop + (charDesc^.ShiftY + MaxHeight + Padding[PaddingY2]) * Edit^.Scale;
 
   glTexCoord2f(xTex1, yTex2);
   glVertex2f(xx1, yy1);

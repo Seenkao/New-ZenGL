@@ -25,6 +25,10 @@ unit zgl_glu;
 {$I zgl_config.cfg}
 {$I GLdefine.cfg}
 
+{$IFDEF UNIX}
+  {$DEFINE stdcall := cdecl}
+{$ENDIF}
+
 interface
 
 uses

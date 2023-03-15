@@ -21,7 +21,7 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 30.04.2022
+ !!! modification from Serge
 }
 unit zgl_keyboard;
 
@@ -202,14 +202,15 @@ procedure keyboardDown(keyCode: LongWord);
 procedure keyboardUp(keyCode: LongWord);
 
 {$IfDef LIBRARY_COMPILE}
-// Rus: опрос, нажата клавиша или нет, в данный момент времени.
-// Eng: polling whether a key is pressed or not, at a given time.
+// Rus: опрос, удержана ли клавиша.
+// Eng: Polling if a key is held down.
 function  key_Down(KeyCode: LongWord): Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
 // Rus: опрос, отжата клавиша или нет в данный момент времени.
 // Eng: polling whether a key is released or not at a given time.
 function  key_Up(KeyCode: LongWord): Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
-// Rus: опрос, удержана ли клавиша.
-// Eng: Polling if a key is held down.
+
+// Rus: опрос, нажата клавиша или нет, в данный момент времени.
+// Eng: polling whether a key is pressed or not, at a given time.
 function  key_Press(KeyCode: LongWord): Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
 
 // Rus: вернёт код последней нажатой/отжатой (НЕ УПРАВЛЯЮЩЕЙ!) клавиши
@@ -219,7 +220,7 @@ function  key_Press(KeyCode: LongWord): Boolean; {$IfDef USE_INLINE}inline;{$End
 function  key_Last(KeyAction: LongWord): LongWord; {$IfDef USE_INLINE}inline;{$EndIf}
 {$EndIf}
 
-{$IfDef OLD_METHODS}
+{$IfDef KEYBOARD_OLD_FUNCTION}
 // Rus: старые способы использования поля ввода 3-я демка.
 // Eng: old ways to use the input field 3rd demo.
 procedure key_BeginReadText(const Text: UTF8String; MaxSymbols: Integer = -1);
@@ -290,7 +291,7 @@ var
   keysUp      : array[0..255] of Boolean;
   keysPress   : array[0..255] of Boolean;
   keysCanPress: array[0..255] of Boolean;
-  {$IfDef OLD_METHODS}
+  {$IfDef KEYBOARD_OLD_FUNCTION}
   keysText    : UTF8String = '';
   keysCanText : Boolean;
   keysMax     : Integer;
@@ -328,12 +329,14 @@ var
   // Rus: блокирует виртуальную клавиатуру.
   // Eng:
   lockVirtualKeyboard: Boolean = False;
+
   // Rus: оповещает, что надо блокировать виртуальную клавиатуру.
   // Eng:
 //  prevLockVK: Boolean = False;
+
   // Rus: общее время блокировки виртуальной клавиатуры.
   // Eng:
-  timeLockVK: Double = 400;
+  timeLockVK: Double = 500;
   // Rus: установка отсчёта времени отхода блокировки виртуальной клавиатуры.
   // Eng:
   startTimeLockVK: Double;
@@ -344,12 +347,12 @@ var
   //     как сработавшие и как произошедшее событие
   //     эти флаги можно включить, при запуске программы и опросе системы.
   // Eng:
-  keybFlags   : Cardinal;
+  keybFlags   : LongWord;
   PkeybFlags  : PCardinal = @keybFlags;
 
 implementation
 uses
-  {$IfDef OLD_METHODS}
+  {$IfDef KEYBOARD_OLD_FUNCTION}
   zgl_application,
   zgl_utils,
   zgl_window,
@@ -390,14 +393,12 @@ begin
   keysUp[KeyCode] := FALSE;
 
   {$IFDEF USE_X11}
-  if keysRepeat < 2 Then
+//  if keysRepeat < 2 Then
   {$ENDIF}
-  if keysCanPress[KeyCode] Then
-  begin
-    keysPress   [KeyCode] := TRUE;
-    keysCanPress[KeyCode] := FALSE;
-  end;
-//  Pk := @keybFlags;
+    begin
+      keysPress   [KeyCode] := TRUE;
+      keysCanPress[KeyCode] := FALSE;
+    end;
   case KeyCode of
     K_PAUSE: ;
     K_INSERT:   PkeybFlags^ := PkeybFlags^ or keyboardInsertDown;
@@ -482,6 +483,8 @@ begin
 
   keysDown[KeyCode] := FALSE;
   keysUp  [KeyCode] := TRUE;
+  keysPress   [KeyCode] := False;
+  keysCanPress[KeyCode] := True;
 
   case KeyCode of
     K_PAUSE: ;
@@ -598,7 +601,7 @@ end;
 {$EndIf}
 
 
-{$IfDef OLD_METHODS}
+{$IfDef KEYBOARD_OLD_FUNCTION}
 procedure key_BeginReadText(const Text: UTF8String; MaxSymbols: Integer = -1);
   {$IFDEF ANDROID}
   var
@@ -688,12 +691,12 @@ begin
   {$IFDEF USE_X11}
   if keysRepeat < 2 Then
   {$ENDIF}
-  for i := 0 to 255 do
-  begin
-    keysUp      [i] := FALSE;
-    keysPress   [i] := FALSE;
-    keysCanPress[i] := TRUE;
-  end;
+    for i := 0 to 255 do
+    begin
+      keysUp      [i] := FALSE;
+      keysPress   [i] := FALSE;
+      keysCanPress[i] := TRUE;
+    end;
   keysLast[KA_DOWN] := 0;
   keysLast[KA_UP  ] := 0;
   keyBoolRepeat := False;
@@ -767,6 +770,7 @@ begin
   begin
     if (Result >= 97) and (Result <= 122) then
       Result := Result - 32;
+    // эта часть должна быть другой, если используется не русский язык и не латиница
     if ((PkeybFlags^ and keyboardLatinRus) > 0) then
     begin
       if Result = 96 then
@@ -786,6 +790,7 @@ begin
     end;
   end else
     if keysDown[K_SHIFT] then
+    begin
       case Result of
         96: Result := 126; // ~
         45: Result := 95;  // _
@@ -813,6 +818,7 @@ begin
         59: Result := 58;  // :
         39: Result := 34;  // "
       end;
+    end;
 end;
 
 procedure setKey_BeginRepeat(delay: Double);
@@ -837,7 +843,7 @@ begin
 end;
 {$EndIf}{$EndIf}
 
-{$IfDef OLD_METHODS}
+{$IfDef KEYBOARD_OLD_FUNCTION}
 procedure key_InputText(const Text: UTF8String);
   var
     c: AnsiChar;

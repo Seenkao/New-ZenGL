@@ -28,6 +28,7 @@ interface
 
 uses
   gegl_Types,
+  zgl_application,
   zgl_types,
   zgl_utils,
   zgl_font,
@@ -46,6 +47,7 @@ uses
 
 var
   managerSetOfTools: geglTSetOfToolsManager;
+  propEl: geglPPropertElement;
 
 // Rus: создание поля ввода. Заданный прямоугольник; шрифт; размер шрифта;
 //      заданные процедуры: вывода поля ввода и ограничению вводимых символов;
@@ -55,7 +57,7 @@ var
 //      specified procedures: output of the input field and the limitation of the
 //      entered characters; the length of the string. By default, there are no
 //      specified procedures, line length = 80.
-function CreateEdit(Rect: zglTRect2D; fnt, Scale: LongWord; UserData1: Pointer = nil; UserData2: Pointer = nil; Len: Word = MAX_SYMBOL_LINE): Word;         // функция с запасом на будущее
+function CreateEdit(Rect: zglTRect2D; fnt, Scale: LongWord; UserData1: Pointer = nil; UserData2: Pointer = nil; Len: Word = MAX_SYMBOL_LINE): LongWord;         // функция с запасом на будущее
 // Rus: обработка событий поля ввода, вызывать не надо. Менеджер всё сделает
 //      за вас.
 // Eng: event handling of the input field, no need to call. The manager will do
@@ -71,14 +73,14 @@ procedure DeleteElementSOT(numElement: LongWord);
 //      как после создания поля ввода, так и во время работы программы (в меню
 //      настроек).
 // Eng: Setting a color in an already created input field (or rather, specifying
-//		  the numbers of used colors). You can use this function to configure both
-// 		  after creating the input field and while the program is running (in the
-//		  settings menu).
+//	the numbers of used colors). You can use this function to configure both
+// 	after creating the input field and while the program is running (in the
+//	settings menu).
 procedure SetDefColor(ColorText, ColorBackground: LongWord; ColorCursor: LongWord = cl_Black);
 // Rus: уничтожение всех элементов API. Вызывать не нужно!!! Производится по
 //      закрытию программы!!!
 // Eng: destruction of all API elements. Don't Run !!! It is performed when the
-//     program is closed !!!
+//      program is closed !!!
 procedure DestroyManagerSOT();
 // Rus: Установка точки вращения и угла вращения (если это необходимо).
 //      Обратить внимание! Заданная точка, будет работать для всех элементов!!!
@@ -128,12 +130,17 @@ function EditNumericAndDelimetr: Boolean;
 //      - в общем всё для создания имени.
 // Eng:
 function EditNotSymbolic: Boolean;
+// Rus: установка флага видимости данного элемента.
+// Eng:
+procedure SetVisibleElement(numEl: LongWord; flag: Boolean);
 
 implementation
 
   {$IfDef FULL_LOGGING}
 uses
+  {$IfDef MOBILE}
   zgl_application,
+  {$EndIf}
   zgl_log;
   {$EndIf}
 
@@ -146,15 +153,40 @@ var
   geAngle: Single = 0;
   // цвет по умолчанию.
   geDefColor: geglDefColor;
+  useFont: zglPFont;  // защита от многопроцессорного исполнения
 
-function CreateEdit(Rect: zglTRect2D; fnt, Scale: LongWord; UserData1: Pointer = nil; UserData2: Pointer = nil; Len: Word = MAX_SYMBOL_LINE): Word;
+  rs1_2: Single = 1.2;
+  _cursor: geglPCursor;
+{ эта часть может понадобиться только если мы будем использовать код в многопоточности. Остальное - это заморочки.
+  // момент, когда уничтожаются все элементы (на данное время, все поля ввода).
+  destroyElements: Boolean = False;
+  // момент, когда происходит действие с определённым элементом, а его надо уничтожить. Состояние элемента, True - занят.
+  AllEditElementsSost: Boolean = False; }
+
+function CreateEdit(Rect: zglTRect2D; fnt, Scale: LongWord; UserData1: Pointer = nil; UserData2: Pointer = nil; Len: Word = MAX_SYMBOL_LINE): LongWord;
 var
   {$IFDEF DELPHI7_AND_DOWN}
   z: Pointer;
   {$ENDIF}
   i: LongWord;
   pFlags: PLongWord;
+  charDesc: zglPCharDescSmall;
+  charDesc1: zglPCharDesc;
 begin
+//  AllEditElementsSost := True;
+  Result := 65536;
+{  if destroyElements then
+  begin
+    AllEditElementsSost := False;
+    exit;
+  end;}
+
+  if managerSetOfTools.count = 65535 then
+  begin
+    Result := 65536;
+    log_Add('Too many visuals already created!!');
+    exit;
+  end;
   if managerSetOfTools.count >= managerSetOfTools.maxPossibleEl then
   begin
     managerSetOfTools.maxPossibleEl := managerSetOfTools.maxPossibleEl + 5;
@@ -162,13 +194,13 @@ begin
     SetLength(managerSetOfTools.propElement, managerSetOfTools.maxPossibleEl);
 
     for i := managerSetOfTools.count to managerSetOfTools.maxPossibleEl - 1 do
-      managerSetOfTools.propElement[i].Flags := 0;
+      managerSetOfTools.propElement[i].FlagsProp := 0;
   end;
 
   for i := 0 to managerSetOfTools.maxPossibleEl - 1 do
   begin
     UseText := managerSetOfTools.SetOfTools[i];
-    pFlags := @managerSetOfTools.propElement[i].Flags;
+    pFlags := @managerSetOfTools.propElement[i].FlagsProp;
     if not Assigned(UseText) then
       Break;
     if (pFlags^ and el_Enable) = 0 then
@@ -191,6 +223,8 @@ begin
   pFlags := nil;
   Result := i;
 
+  useFont := managerFont.Font[fnt];
+
   UseText^.Rect.X := Rect.X;
   UseText^.Rect.Y := Rect.Y;
   UseText^.Rect.W := Rect.W;
@@ -198,12 +232,36 @@ begin
   UseText^.ColorText := geDefColor.Text;
   UseText^.ColorGround := geDefColor.Ground;
   UseText^.ColorCursor := geDefColor.Cursor;
-  UseText^.Scale := Scale;
+  UseText^.Scale := useFont^.ScaleNorm * Scale / 10;
+  UseText^._ShiftP63 := useFont^.CharDesc[63]^.ShiftP * useFont^.Scale * 1.5;
   UseText^.Rotate := geAngle;
   UseText^.EditString.Len := Len;
   SetLength(UseText^.EditString.CharSymb, Len + 1);
   SetLength(UseText^.EditString.posX, len + 1);
   UseText^.EditString.UseLen := 0;
+
+  for i := 0 to 65535 do
+  begin
+    if Assigned(useFont.CharDesc[i]) then
+    begin
+      zgl_GetMem(Pointer(UseText.CharDesc[i]), SizeOf(zglTCharDesc));
+      charDesc := UseText^.CharDesc[i];
+      charDesc1 := useFont^.CharDesc[i];
+    end
+    else
+      Continue;
+
+    charDesc^.TexCoords[0] := charDesc1^.TexCoords[0];
+    charDesc^.TexCoords[1] := charDesc1^.TexCoords[1];
+    charDesc^.TexCoords[2] := charDesc1^.TexCoords[2];
+    charDesc^.TexCoords[3] := charDesc1^.TexCoords[3];
+    charDesc^.Page := charDesc1^.Page;
+    charDesc^.xx1 := charDesc1^._x1 * UseText.Scale;
+    charDesc^.yy1 := charDesc1^._y1 * UseText.Scale;
+    charDesc^.xx2 := charDesc1^._x2 * UseText.Scale;
+    charDesc^.yy2 := charDesc1^._y2 * UseText.Scale;
+  end;
+
   i := 0;
   while i <= Len do
   begin
@@ -211,19 +269,28 @@ begin
     inc(i);
   end;
 
-  UseText^.Cursor.curRect.X := 0;
-  UseText^.Cursor.curRect.Y := 1.2 * Scale;
-  UseText^.Cursor.curRect.H := 2;
-  UseText^.Cursor.curRect.W := 6 * Scale / 10;
-  UseText^.Cursor.NSleep := CUR_FLASH;
-  UseText^.Cursor.Flags := False;
-  UseText^.Cursor.position := 1;
+  {$IFDEF DELPHI7_AND_DOWN}
+  zgl_GetMem(z, SizeOf(geglTCursor));
+  UseText^.Cursor := z;
+  {$ELSE}
+  zgl_GetMem(UseText^.Cursor, SizeOf(geglTCursor));
+  {$EndIf}
+  _cursor := UseText^.Cursor;
+  _cursor^.curRect.X := 0;
+  _cursor^.curRect.Y := rs1_2 * Scale;
+  _cursor^.curRect.H := 2;
+  _cursor^.curRect.W := 6 * Scale / 10;
+  _cursor^.NSleep := CUR_FLASH;
+  _cursor^.Flags := False;
+  _cursor^.position := 1;
+
   UseText^.translateX := 0;
   UseText^.RotatePoint := pointManager;
   UseText^.font := fnt;
   UseText^.procDraw := UserData1;
   UseText^.procLimit := UserData2;
   inc(managerSetOfTools.count);
+  UseText := nil;
 end;
 
 procedure EventsEdit(numElement: LongWord);
@@ -234,26 +301,22 @@ var
   _ShiftP: Single;
   mDX, mDY: Single;
 
-  useFont: zglPFont;
-
   sinAngle, cosAngle: Single;
 label
-  smallJmp, jmpEnd, jmpMouse;
+  smallJmp, jmpMouse;
 
+  // определяем позицию курсора и его ширину
   procedure SetCursorPosAndWidth;
   begin
-    UseText^.Cursor.curRect.x := UseText^.EditString.posX[UseText^.Cursor.position - 1];
-    if (UseText^.Cursor.position <= UseText^.EditString.Len) and (UseText^.Cursor.position <= UseText^.EditString.UseLen) then
+    _cursor^.curRect.x := UseText^.EditString.posX[_cursor^.position - 1];
+    if (_Cursor^.position <= UseText^.EditString.Len) and (_Cursor^.position <= UseText^.EditString.UseLen) then
     begin
-      _JcharSymb := useFont^.CharDesc[UseText^.EditString.CharSymb[UseText^.Cursor.position - 1]];
+      _JcharSymb := useFont^.CharDesc[UseText^.EditString.CharSymb[_Cursor^.position - 1]];
       if Assigned(_JcharSymb) then
-        if UseText^.EditString.CharSymb[UseText^.Cursor.position - 1] <> 9 then
-          UseText^.Cursor.curRect.W := _JcharSymb^.ShiftP * useFont^.Scale
-        else
-          UseText^.Cursor.curRect.W := useFont^._ShiftP63;
-      end
-      else
-        UseText^.Cursor.curRect.W := 6 * UseText^.Scale / 10;
+        _Cursor^.curRect.W := _JcharSymb^.ShiftP * UseText^.Scale;
+    end
+    else
+      _Cursor^.curRect.W := UseText^._ShiftP63 * UseText^.Scale;
   end;
 
   procedure RollEditLeft;
@@ -261,8 +324,8 @@ label
     SetCursorPosAndWidth;
 
     if UseText^.translateX > 0 then
-      if (UseText^.Cursor.curRect.X - 40) < UseText^.translateX then
-        UseText^.translateX := UseText^.Cursor.curRect.X - 40;
+      if (_Cursor^.curRect.X - 40) < UseText^.translateX then
+        UseText^.translateX := _Cursor^.curRect.X - 40;
     if UseText^.translateX < 0 then
       UseText^.translateX := 0;
   end;
@@ -271,18 +334,18 @@ label
   begin
     SetCursorPosAndWidth;
 
-    if UseText^.EditString.UseLen < UseText^.Cursor.position then
+    if UseText^.EditString.UseLen < _Cursor^.position then
     begin
-      if (UseText^.Cursor.curRect.x + UseText^.Cursor.curRect.W - UseText^.translateX) > (UseText^.Rect.W) then
+      if (UseText^.Cursor^.curRect.x + _Cursor^.curRect.W - UseText^.translateX) > (UseText^.Rect.W) then
       begin
-        UseText^.translateX := (UseText^.Cursor.curRect.x + UseText^.Cursor.curRect.W) - (UseText^.Rect.W );
+        UseText^.translateX := (_Cursor^.curRect.x + _Cursor^.curRect.W) - (UseText^.Rect.W );
       end;
     end
     else begin
-      if ((UseText^.Cursor.curRect.X - UseText^.translateX) > (UseText^.Rect.W - 60)) and
+      if ((_Cursor^.curRect.X - UseText^.translateX) > (UseText^.Rect.W - 60)) and
             ((UseText^.EditString.posX[UseText^.EditString.UseLen] - UseText^.translateX) > UseText^.Rect.W) then
       begin
-          UseText^.translateX := (UseText^.Cursor.curRect.x + 60) - (UseText^.Rect.W );
+          UseText^.translateX := (_Cursor^.curRect.x + 60) - (UseText^.Rect.W );
           if (UseText^.Rect.W + UseText^.translateX) > UseText^.EditString.posX[UseText^.EditString.UseLen] then
             UseText^.translateX := UseText^.EditString.posX[UseText^.EditString.UseLen] - UseText^.Rect.W;
       end;
@@ -290,6 +353,12 @@ label
   end;
 
 begin
+{  AllEditElementsSost := True;
+  if destroyElements then
+  begin
+    AllEditElementsSost := False;
+    exit;
+  end;            }
   {$IfDef FULL_LOGGING}
   if (managerSetOfTools.count = 0) or (managerSetOfTools.SetOfTools[numElement] = nil) then
   BEGIN
@@ -298,16 +367,20 @@ begin
   end;
   {$EndIf}
 
+  if (managerSetOfTools.propElement[numElement].FlagsProp and el_Enable = 0) or (managerSetOfTools.propElement[numElement].FlagsProp and el_Visible = 0) then
+    Exit;
+
   UseText := managerSetOfTools.SetOfTools[numElement];
   useFont := managerFont.Font[UseText^.font];
+  _cursor := UseText^.Cursor;
   if managerSetOfTools.ActiveElement <> numElement then
     goto jmpMouse;
 
   if keysUp[K_INSERT] then
     if ((PkeybFlags^ and keyboardInsert) > 0) then
-      UseText^.Cursor.curRect.H :=  - UseText^.Scale * 1.2
+      _Cursor^.curRect.H :=  - UseText^.Scale * rs1_2
     else
-      UseText^.Cursor.curRect.H := 2;
+      _Cursor^.curRect.H := 2;
 
   if keysLast[KA_DOWN] > 0 then
   begin
@@ -334,11 +407,11 @@ begin
       K_DOWN: ;
       K_LEFT:
         begin
-          if UseText^.Cursor.position = 1 then
+          if _Cursor^.position = 1 then
             exit;
           if keysDown[K_CTRL] then
           begin
-            i := UseText^.Cursor.position;
+            i := _Cursor^.position;
             j := 0;
             if (UseText^.EditString.CharSymb[i - 2] = 32) or (UseText^.EditString.CharSymb[i - 2] = 9) then
               dec(i, 2);
@@ -348,7 +421,7 @@ begin
               begin
                 if (UseText^.EditString.CharSymb[i] <> 32) and (UseText^.EditString.CharSymb[i] <> 9) then
                 begin
-                  UseText^.Cursor.position := i + 1;
+                  _Cursor^.position := i + 1;
                   RollEditLeft;
                   exit;
                 end;
@@ -358,20 +431,20 @@ begin
 
               dec(i);
             end;
-            UseText^.Cursor.position := 1;
+            _Cursor^.position := 1;
           end
           else begin
-            dec(UseText^.Cursor.position);
+            dec(_Cursor^.position);
           end;
           RollEditLeft;
         end;
       K_RIGHT:
         Begin
-          if UseText^.Cursor.position > UseText^.EditString.UseLen then
+          if _Cursor^.position > UseText^.EditString.UseLen then
             Exit;
           if keysDown[K_CTRL] then
           begin
-            i := UseText^.Cursor.position;
+            i := _Cursor^.position;
             j := 0;
             if (UseText^.EditString.CharSymb[i] = 32) or (UseText^.EditString.CharSymb[i] = 9) then
               inc(i, 2);
@@ -381,7 +454,7 @@ begin
               begin
                 if (UseText^.EditString.CharSymb[i - 2] <> 32) and (UseText^.EditString.CharSymb[i - 2] <> 9) then
                 begin
-                  UseText^.Cursor.position := i - 1;
+                  _Cursor^.position := i - 1;
                   RollEditRight;
                   exit;
                 end;
@@ -391,25 +464,25 @@ begin
 
               inc(i);
             end;
-            UseText^.Cursor.position := UseText^.EditString.UseLen + 1;
+            _Cursor^.position := UseText^.EditString.UseLen + 1;
           end
           else begin
-            inc(UseText^.Cursor.position);
+            inc(_Cursor^.position);
           end;
           RollEditRight;
         end;
       K_BACKSPACE:
         begin
-          if (UseText^.Cursor.position = 1) or (UseText^.EditString.UseLen = 0) then
+          if (_Cursor^.position = 1) or (UseText^.EditString.UseLen = 0) then
             Exit;
 
-          dec(UseText^.Cursor.position);
+          dec(_Cursor^.position);
           dec(UseText^.EditString.UseLen);
-          if UseText^.Cursor.position > UseText^.EditString.UseLen then
+          if _Cursor^.position > UseText^.EditString.UseLen then
             UseText^.EditString.CharSymb[UseText^.EditString.UseLen] := 0
           else begin
-            i :=  UseText^.EditString.UseLen - (UseText^.Cursor.position - 1);
-            j := UseText^.Cursor.position;
+            i :=  UseText^.EditString.UseLen - (_Cursor^.position - 1);
+            j := _Cursor^.position;
             while i > 0 do
             begin
               UseText^.EditString.CharSymb[j - 1] := UseText^.EditString.CharSymb[j];
@@ -424,14 +497,14 @@ begin
         end;
       K_DELETE:
         begin
-          if (UseText^.EditString.UseLen = 0) or (UseText^.EditString.UseLen < UseText^.Cursor.position) then
+          if (UseText^.EditString.UseLen = 0) or (UseText^.EditString.UseLen < _Cursor^.position) then
             Exit;
 
           dec(UseText^.EditString.UseLen);
-          if UseText^.Cursor.position > UseText^.EditString.UseLen then
-            UseText^.EditString.CharSymb[UseText^.Cursor.position - 1] := 0
+          if _Cursor^.position > UseText^.EditString.UseLen then
+            UseText^.EditString.CharSymb[_Cursor^.position - 1] := 0
           else begin
-            j := UseText^.Cursor.position;
+            j := _Cursor^.position;
             while j <= UseText^.EditString.UseLen do
             begin
               UseText^.EditString.CharSymb[j - 1] := UseText^.EditString.CharSymb[j];
@@ -447,20 +520,20 @@ begin
         begin
           if UseText^.EditString.UseLen = 0 then
           begin
-            UseText^.Cursor.position := 1;
+            _Cursor^.position := 1;
             exit;
           end;
-          UseText^.Cursor.position := 1;
+          _Cursor^.position := 1;
           RollEditLeft;
         end;
       K_END:
         begin
           if UseText^.EditString.UseLen = 0 then
           begin
-            UseText^.Cursor.position := 1;
+            _Cursor^.position := 1;
             exit;
           end;
-          UseText^.Cursor.position := UseText^.EditString.UseLen + 1;
+          _Cursor^.position := UseText^.EditString.UseLen + 1;
           RollEditRight;
         end;
       K_PAGEDOWN: ;
@@ -470,7 +543,7 @@ begin
           {$IfDef MOBILE}
           VisibleMenuChange := False;
           {$EndIf}
-          managerSetOfTools.ActiveElement := 65535;
+          managerSetOfTools.ActiveElement := ELEMENT_NOT_ACTIVE;
         end;
     else
       begin
@@ -509,20 +582,22 @@ begin
           goto smallJmp;
         end;
         {$EndIf}
-        if (PkeybFlags^ and keyboardLatinRus) > 0 then
-        begin
-          if symb = 47 then
+        // эта часть должна быть другой, если используется не русский язык и не латиница
+        if not (appFlags and APP_USE_ENGLISH_INPUT > 0) then
+          if (PkeybFlags^ and keyboardLatinRus) > 0 then
           begin
-            symb := 46;
-            goto smallJmp;
+            if symb = 47 then
+            begin
+              symb := 46;
+              goto smallJmp;
+            end;
+            if symb = 63 then
+            begin
+              symb := 44;
+              goto smallJmp;
+            end;
+            EngToRusUnicode(symb);
           end;
-          if symb = 63 then
-          begin
-            symb := 44;
-            goto smallJmp;
-          end;
-          EngToRusUnicode(symb);
-        end;
 
         if Assigned(UseText^.procLimit) then
           if not (UseText^.procLimit) then
@@ -531,37 +606,37 @@ begin
 smallJmp:
         _JcharSymb := useFont^.CharDesc[symb];
         if Assigned(_JcharSymb) then
-          _ShiftP := _JcharSymb^.ShiftP * useFont^.Scale
+          _ShiftP := _JcharSymb^.ShiftP * UseText^.Scale
         else
-          _ShiftP := useFont^._ShiftP63;
+          _ShiftP := UseText^._ShiftP63;
 
-        if UseText^.Cursor.position > UseText^.EditString.UseLen then
+        if _Cursor^.position > UseText^.EditString.UseLen then
         begin
-          UseText^.EditString.CharSymb[UseText^.Cursor.position - 1] := symb;
+          UseText^.EditString.CharSymb[_Cursor^.position - 1] := symb;
 
-          UseText^.EditString.posX[UseText^.Cursor.position] := UseText^.EditString.posX[UseText^.Cursor.position - 1] + _ShiftP;
+          UseText^.EditString.posX[_Cursor^.position] := UseText^.EditString.posX[_Cursor^.position - 1] + _ShiftP;
 
           inc(UseText^.EditString.UseLen);
         end
         else begin
-          j := UseText^.Cursor.position - 1;
+          j := _Cursor^.position - 1;
           if (PkeybFlags^ and keyboardInsert) = 0 then
           begin
             i := UseText^.EditString.UseLen;
-            while i >= (UseText^.Cursor.position) do
+            while i >= (_Cursor^.position) do
             begin
               UseText^.EditString.CharSymb[i] := UseText^.EditString.CharSymb[i - 1];
               dec(i);
             end;
           end;
-          UseText^.EditString.CharSymb[UseText^.Cursor.position - 1] := symb;
+          UseText^.EditString.CharSymb[_Cursor^.position - 1] := symb;
           while j <= UseText^.EditString.UseLen do
           begin
             _JcharSymb := useFont^.CharDesc[UseText^.EditString.CharSymb[j]];
             if Assigned(_JcharSymb) then
-              _ShiftP := _JcharSymb^.ShiftP * useFont^.Scale
+              _ShiftP := _JcharSymb^.ShiftP * UseText^.Scale
             else
-              _ShiftP := useFont^._ShiftP63;
+              _ShiftP := UseText^._ShiftP63;
 
             UseText^.EditString.posX[j + 1] := UseText^.EditString.posX[j] + _ShiftP;
             inc(j);
@@ -569,7 +644,7 @@ smallJmp:
           if (PkeybFlags^ and keyboardInsert) = 0 then
             inc(UseText^.EditString.UseLen);
         end;
-        inc(UseText^.Cursor.position);
+        inc(_Cursor^.position);
         RollEditRight;
       end;
     end;
@@ -577,9 +652,7 @@ smallJmp:
   end;
 
 jmpMouse:
-  if (mouseAction[M_BLEFT].state and is_up) > 0 then
-    UseText^.flags := UseText^.flags and (255 - vc_geMDown);
-  if ((mouseAction[M_BLEFT].state and is_down) > 0) and ((UseText^.flags and vc_geMDown) = 0) then
+  if (mouseAction[M_BLEFT].state and is_down) > 0 then
   begin
     sinAngle := sin(Pi * (360 - UseText^.Rotate) / 180);
     cosAngle := cos(Pi * (360 - UseText^.Rotate) / 180);
@@ -588,8 +661,6 @@ jmpMouse:
 
     if col2d_PointInRect(mDX, mDY, UseText^.Rect) then
     begin
-      UseText^.flags := UseText^.flags or vc_geMDown;
-
       {$IfDef ACTIVATE_MOUSE}
       if managerSetOfTools.ActiveElement <> numElement then
       begin
@@ -598,10 +669,10 @@ jmpMouse:
         VisibleMenuChange := True;
         {$EndIf}
         if ((PkeybFlags^ and keyboardInsert) > 0) then
-          UseText^.Cursor.curRect.H :=  - UseText^.Scale * 1.1
+          _Cursor^.curRect.H :=  - UseText^.Scale * 1.1
         else
-          UseText^.Cursor.curRect.H := 2;
-        goto jmpEnd;
+          _Cursor^.curRect.H := 2;
+        Exit;
       end;
       {$EndIf}
       if UseText^.EditString.UseLen > 0 then
@@ -621,36 +692,40 @@ jmpMouse:
               Break;
             inc(i);
           end;
-          UseText^.Cursor.position := i;
+          _Cursor^.position := i;
           SetCursorPosAndWidth;
           if i >= j then
           begin
-            if (UseText^.Cursor.curRect.X + UseText^.Cursor.curRect.W - UseText^.translateX) > (UseText^.Rect.W) then
-              UseText^.translateX := UseText^.Cursor.curRect.X + UseText^.Cursor.curRect.W - UseText^.Rect.w;
-            goto jmpEnd;
+            if (_Cursor^.curRect.X + _Cursor^.curRect.W - UseText^.translateX) > (UseText^.Rect.W) then
+              UseText^.translateX := _Cursor^.curRect.X + _Cursor^.curRect.W - UseText^.Rect.w;
+            Exit;
           end;
 
           if n = i - 1 then
             if (UseText^.EditString.posX[n] + useFont^.CharDesc[UseText^.EditString.CharSymb[n]]^.xx1) < UseText^.translateX then
             begin
-              UseText^.translateX := UseText^.Cursor.curRect.X;
+              UseText^.translateX := _Cursor^.curRect.X;
               if UseText^.translateX < 0 then
                 UseText^.translateX := 0;
             end;     
         end
         else begin
-          UseText^.Cursor.position := UseText^.EditString.UseLen + 1;
+          _Cursor^.position := UseText^.EditString.UseLen + 1;
           RollEditRight;
         end;
       end;
     end;
   end;
-jmpEnd:
-  useFont := nil;
 end;
 
 procedure DeleteElementSOT(numElement: LongWord);
 begin
+{  AllEditElementsSost := True;
+  if destroyElements then
+  begin
+    AllEditElementsSost := False;
+    exit;
+  end; }
   {$IfDef FULL_LOGGING}
   if (managerSetOfTools.count = 0) or (managerSetOfTools.SetOfTools[numElement] = nil) then
   begin
@@ -658,7 +733,8 @@ begin
     exit;
   end;
   {$EndIf}
-  managerSetOfTools.propElement[numElement].Flags := 0;
+  managerSetOfTools.propElement[numElement].FlagsProp := 0;
+//  useFont[0] := nil;
 end;
 
 procedure SetDefColor(ColorText, ColorBackground: LongWord; ColorCursor: LongWord = cl_Black);
@@ -670,8 +746,11 @@ end;
 
 procedure DestroyManagerSOT();
 var
-  i: LongWord;
+  i, j: LongWord;
 begin
+//  destroyElements := True;
+  // здесь может быть загвоздка. При многопроцессорности, может произойти ситуация, когда определённые процессы не завершены.
+  // надо обязательно, чтоб они завершились!!! И только после этого уничтожать объекты.
   if managerSetOfTools.count = 0 then
     Exit;
   for i := 0 to managerSetOfTools.maxPossibleEl - 1 do
@@ -679,8 +758,14 @@ begin
     if managerSetOfTools.propElement[i].Element = is_Edit then
     begin
       UseText := managerSetOfTools.SetOfTools[i];
+      for j := 0 to 65535 do
+      begin
+        if Assigned(UseText^.CharDesc[j]) then
+          Freemem(UseText^.CharDesc[j]);
+      end;
       SetLength(UseText^.EditString.CharSymb, 0);
       SetLength(UseText^.EditString.posX, 0);
+      Freemem(UseText^.Cursor);
       Freemem(UseText);
       managerSetOfTools.SetOfTools[i] := nil;
 
@@ -695,6 +780,9 @@ begin
   UseText := nil;
   SetLength(managerSetOfTools.SetOfTools, 0);
   SetLength(managerSetOfTools.propElement, 0);
+  _cursor := nil;
+  useFont := nil;
+//  destroyElements := False;
 end;
 
 procedure SetOfRotateAngleAndPoint(x, y: Single; angle: Single = 0);
@@ -708,7 +796,13 @@ function GetEditToText(num: LongWord): UTF8String;
 var
   i, j: Word;
 begin
+//  AllEditElementsSost := True;
   Result := '';
+{  if destroyElements then
+  begin
+    AllEditElementsSost := False;
+    exit;
+  end;          }
   {$IfDef FULL_LOGGING}
   if (managerSetOfTools.count = 0) or (managerSetOfTools.SetOfTools[num] = nil) then
   begin
@@ -721,13 +815,19 @@ begin
   i := 0;
   while i <= j do
   begin
-    Result := Result + Unicode_toUTF8(UseText^.EditString.CharSymb[i]);
+    Result := Result + ID_toUTF8(UseText^.EditString.CharSymb[i]);
     inc(i);
   end;
 end;
 
 procedure CorrectEditCursor(num: LongWord; y: Single);
 begin
+{  AllEditElementsSost := True;
+  if destroyElements then
+  begin
+    AllEditElementsSost := False;
+    exit;
+  end;     }
   {$IfDef FULL_LOGGING}
   if (managerSetOfTools.count = 0) or (managerSetOfTools.SetOfTools[num] = nil) then
   begin
@@ -736,11 +836,17 @@ begin
   end;
   {$EndIf}
   UseText := managerSetOfTools.SetOfTools[num];
-  UseText^.Cursor.curRect.Y := UseText^.Cursor.curRect.Y + y;
+  UseText^.Cursor^.curRect.Y := UseText^.Cursor^.curRect.Y + y;
 end;
 
 procedure ActivateEdit(num: LongWord);
 begin
+{  AllEditElementsSost := True;
+  if destroyElements then
+  begin
+    AllEditElementsSost := False;
+    exit;
+  end;      }
   {$IfDef FULL_LOGGING}
   if (managerSetOfTools.count = 0) or (managerSetOfTools.SetOfTools[num] = nil) then
   begin
@@ -752,31 +858,43 @@ begin
     exit;
   UseText := managerSetOfTools.SetOfTools[num];
   if ((PkeybFlags^ and keyboardInsert) > 0) then
-    UseText^.Cursor.curRect.H :=  - UseText^.Scale * 1.1
+    UseText^.Cursor^.curRect.H :=  - UseText^.Scale * 1.1
   else
-    UseText^.Cursor.curRect.H := 2;
+    UseText^.Cursor^.curRect.H := 2;
   managerSetOfTools.ActiveElement := num;
 end;
 
 procedure SetFlagsEdit(num: LongWord; var newFlags: Byte);
 begin
+{  AllEditElementsSost := True;
+  if destroyElements then
+  begin
+    AllEditElementsSost := False;
+    exit;
+  end;    }
   if ((newFlags and (vc_NumOnly or vc_NumDelimeter)) > 0) and ((newFlags and vc_SymbOnly) > 0) then
   begin
     newFlags := 0;                 // error;
     exit;
   end;
   UseText := managerSetOfTools.SetOfTools[num];
-  UseText^.flags := UseText^.flags and vc_geMDown or (newFlags and (255 - vc_geMDown));
+  UseText^.flags := UseText^.flags or newFlags;
   if (newFlags and (vc_NumOnly or vc_NumDelimeter or vc_SymbOnly)) > 0 then
     UseText^.procLimit := nil;
 end;
 
 function EditNumeric: Boolean;
 var
-  n: Byte;
+  n: LongWord;
 begin
-  n := keysLast[KA_DOWN];
+//  AllEditElementsSost := True;
   Result := false;
+{  if destroyElements then
+  begin
+    AllEditElementsSost := False;
+    exit;
+  end;   }
+  n := keysLast[KA_DOWN];
   UseText := managerSetOfTools.SetOfTools[managerSetOfTools.ActiveElement];
   if (UseText^.EditString.UseLen = 0) and ((n = K_0) or (n = K_KP_0)) then
     exit;
@@ -788,10 +906,16 @@ end;
 
 function EditNumericAndDelimetr: Boolean;
 var
-  n: Byte;
+  n: LongWord;
 begin
-  n := keysLast[KA_DOWN];
+//  AllEditElementsSost := True;
   Result := false;
+{  if destroyElements then
+  begin
+    AllEditElementsSost := False;
+    exit;
+  end;     }
+  n := keysLast[KA_DOWN];
   UseText := managerSetOfTools.SetOfTools[managerSetOfTools.ActiveElement];
   if (UseText^.EditString.UseLen = 0) and ((n = K_0) or (n = K_KP_0)) then
     exit;
@@ -803,9 +927,15 @@ end;
 
 function EditNotSymbolic: Boolean;
 var
-  m: Byte;
+  m: LongWord;
 begin
+//  AllEditElementsSost := True;
   Result := False;
+{  if destroyElements then
+  begin
+    AllEditElementsSost := False;
+    exit;
+  end;     }
   m := keysLast[KA_DOWN];
   // список кодов: $0C $0D $0F $1A $1B $27 $28 $29 $2B $33 $34 $35 $37 $39 $4A $4E $53 $B5 - которые не должны производить действие.
   // исключения есть, знак "-", при шифте - это подчёркивание. Так же, большинство цифровых клавиш.
@@ -828,6 +958,27 @@ begin
   if (m = K_SLASH) or (m = K_EQUALS) or (m = K_BACKSPACE) or (m = K_BACKSLASH) or (m = K_SPACE) or (m = K_TAB) then
     exit;
   Result := True;
+end;
+
+procedure SetVisibleElement(numEl: LongWord; flag: Boolean);
+var
+  prop: geglPPropertElement;
+begin
+{  AllEditElementsSost := True;
+  if destroyElements then
+  begin
+    AllEditElementsSost := False;
+    exit;
+  end;         }
+  prop := @managerSetOfTools.propElement[numEl];
+  if flag then
+    prop^.FlagsProp := prop^.FlagsProp or el_Visible
+  else
+  begin
+    prop^.FlagsProp := prop^.FlagsProp and ($FFFFFFFF - el_Visible);
+    if managerSetOfTools.ActiveElement = numEl then
+      managerSetOfTools.ActiveElement := ELEMENT_NOT_ACTIVE;
+  end;
 end;
 
 initialization

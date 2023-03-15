@@ -20,6 +20,37 @@
  *
  *  3. This notice may not be removed or altered from any
  *     source distribution.
+
+********************************************************************************
+|                          Zlib                                                |
+|                                                                              |
+| Copyright (C) 1995-2010 Jean-loup Gailly and Mark Adler                      |
+|                                                                              |
+| This software is provided 'as-is', without any express or implied            |
+| warranty.  In no event will the authors be held liable for any damages       |
+| arising from the use of this software.                                       |
+|                                                                              |
+| Permission is granted to anyone to use this software for any purpose,        |
+| including commercial applications, and to alter it and redistribute it       |
+| freely, subject to the following restrictions:                               |
+|                                                                              |
+| 1. The origin of this software must not be misrepresented; you must not      |
+|    claim that you wrote the original software. If you use this software      |
+|    in a product, an acknowledgment in the product documentation would be     |
+|    appreciated but is not required.                                          |
+| 2. Altered source versions must be plainly marked as such, and must not be   |
+|    misrepresented as being the original software.                            |
+| 3. This notice may not be removed or altered from any source distribution.   |
+|                                                                              |
+| Jean-loup Gailly        Mark Adler                                           |
+| jloup@gzip.org          madler@alumni.caltech.edu                            |
+|                                                                              |
+|                                                                              |
+| The data format used by the zlib library is described by RFCs (Request for   |
+| Comments) 1950 to 1952 in the files http://www.ietf.org/rfc/rfc1950.txt      |
+| (zlib format), rfc1951.txt (deflate format) and rfc1952.txt (gzip format).   |
+********************************************************************************
+// modification by Serg 12.05.2022
 }
 unit zgl_lib_zip;
 
@@ -30,10 +61,9 @@ unit zgl_lib_zip;
   {$L libzip}
 {$EndIf}
 
-{$L zlib_helper}
 {$ENDIF}
 
-{$IfDef WINDOWS}                
+  {$IfDef WINDOWS}
   {$IFDEF USE_ZLIB_FULL}
     {$L deflate}
     {$L infback}
@@ -54,7 +84,7 @@ unit zgl_lib_zip;
     {$L adler32}
     {$L crc32}
   {$ENDIF}
-{$EndIf}
+  {$EndIf}
   {$IF DEFINED(LINUX) and ( not DEFINED(ANDROID) )}
     {$LINKLIB libz.so.1}
   {$IFEND}
@@ -157,7 +187,7 @@ type
     zfree     : TFree;     // used to free the internal state
     opaque    : Pointer;   // private data object passed to zalloc and zfree
 
-    data_type : Integer;   // best guess about the data type: ascii or binary
+    data_type : cint;      // best guess about the data type: ascii or binary
     adler     : culong;    // adler32 value of the uncompressed data
     reserved  : culong;    // reserved for future use
   end;
@@ -212,10 +242,21 @@ function deflateInit2_ : Integer; cdecl;
 {$EndIf}
 {$ENDIF}
 
-procedure zlib_Init(out strm: z_stream_s ); cdecl;{$IfNDef MAC_COCOA}external;{$EndIf}
-procedure zlib_Free(var strm: z_stream_s ); cdecl;{$IfNDef MAC_COCOA} external;{$EndIf}
+procedure zlib_Init(out strm: z_stream_s ); cdecl;//{$IfNDef MAC_COCOA}external;{$EndIf}
+procedure zlib_Free(var strm: z_stream_s ); cdecl;//{$IfNDef MAC_COCOA} external;{$EndIf}
 function png_DecodeIDAT( var pngMem: zglTMemory; var pngZStream: z_stream_s; out pngIDATEnd: LongWord; Buffer: Pointer;
-     Bytes: Integer): Integer; cdecl;{$IfNDef MAC_COCOA} external;{$EndIf}
+     Bytes: Integer): Integer; cdecl;//{$IfNDef MAC_COCOA} external;{$EndIf}
+{/$IfDef CEGCC}
+function udimodsi4(num, den: LongWord; modwanted: Integer): LongWord; cdecl;
+function __umodsi3(a, b: clong): clong; cdecl;
+{/$EndIf}
+
+function inflateInit_(var strm: z_stream_s; version: pchar; stream_size: cint): cint; cdecl; external
+  {$ifdef DYNAMICZLIB}libz name 'inflateInit_'{$endif};
+function inflateEnd(var strm: z_stream_s): cint; cdecl; external
+  {$ifdef DYNAMICZLIB}libz name 'inflateEnd'{$endif};
+function inflate(var strm: z_stream_s; flush: cint): cint; cdecl; external
+  {$ifdef DYNAMICZLIB}libz name 'inflate'{$endif};
 
 {$IFDEF USE_ZIP}
 threadvar
@@ -256,94 +297,20 @@ begin
 end;
 
 {$IfDef MAC_COCOA}
-procedure zlib_Init( out strm : z_stream_s );
-begin
-  FillChar(strm, sizeof(strm), 0);
-  inflateInit_(strm, '1.2.11', sizeof(strm));
-end;
-
-procedure zlib_Free( var strm : z_stream_s );
-begin
-  inflateEnd(strm);
-end;
-
-function png_DecodeIDAT(var pngMem: zglTMemory; var pngZStream: z_stream_s; out pngIDATEnd: LongWord; Buffer: Pointer;
-     Bytes: Integer): Integer;
-var
-  b: PByte;
-  IDATHeader: PChar;
-begin
-  pngZStream.next_out := Buffer;
-  pngZStream.avail_out := Bytes;
-  while pngZStream.avail_out > 0 do
-  begin
-    if ((pngMem.Position = pngIDATEnd) and (pngZStream.avail_out > 0) and (pngZStream.avail_in = 0)) then
-    begin
-      inc(pngMem.Position, 4);
-      b := PByte(Ptr(pngMem.Memory) + pngMem.Position);
-      pngIDATEnd := b[3] + (b[2] shl 8) + (b[1] shl 16) + (b[0] shl 24);
-      inc(pngMem.Position, 4);
-
-      IDATHeader := PChar(Ptr(pngMem.Memory) + pngMem.Position);
-      if ((IDATHeader[0] <> 'I') and (IDATHeader[1] <> 'D') and (IDATHeader[2] <> 'A') and (IDATHeader[3] <> 'T')) then
-      begin
-        Result := - 1;
-        Exit;
-      end;
-      inc(pngMem.Position, 4);
-      inc(pngIDATEnd, pngMem.Position);
-    end;
-    if (pngZStream.avail_in = 0) then
-    begin
-      if (pngMem.Size - pngMem.Position > 0) then
-      begin
-        if (pngMem.Position + 65535 > pngIDATEnd) then
-        begin
-          if (pngMem.Position + (pngIDATEnd - pngMem.Position) > pngMem.Size) then
-            pngZStream.avail_in := pngMem.Size - pngMem.Position
-          else
-            pngZStream.avail_in := pngIDATEnd - pngMem.Position;
-        end
-        else begin
-          if (pngMem.Position + 65535 > pngMem.Size) then
-            pngZStream.avail_in := pngMem.Size - pngMem.Position
-          else
-            pngZStream.avail_in := 65535;
-        end;
-        inc(pngMem.Position, pngZStream.avail_in);
-      end
-      else
-        pngZStream.avail_in := 0;
-      if (pngZStream.avail_in = 0) then
-      begin
-        Result := Bytes - pngZStream.avail_out;
-        exit;
-      end;
-      pngZStream.next_in := PByte(Ptr(Ptr(pngMem.Memory) + pngMem.Position - pngZStream.avail_in));
-    end;
-    Result := inflate(pngZStream, 0);
-    if Result < 0 then
-      Result := -1
-    else
-      Result := pngZStream.avail_in;
-  end;
-end;
-
 procedure LoadLibZip(const zDLL, zlDLL: String);
 begin
   UnloadLibZip;
 
+  zipDLL := dlopen(PChar(zDLL), 1);
   if zipDLL = nil then
   begin
     log_Add('Could not load Zip');
-    winOn := False;
     exit;
   end;
   @zip_open := dlsym(zipDLL, 'zip_open');
   if not Assigned(zip_open) then
   begin
     log_Add('Could not load zip_open from ' + zDLL);
-    winOn := False;
     Exit;
   end;
   @zip_close := dlsym(zipDLL, 'zip_close');
@@ -361,7 +328,6 @@ begin
   if zipDLL = nil then
   begin
     log_Add('Could not load Zip');
-    winOn := False;
     exit;
   end;
 
@@ -419,6 +385,120 @@ begin
 end;
 {$ENDIF}
 {$ENDIF}
+
+{.$IfDef MAC_COCOA}
+procedure zlib_Init( out strm : z_stream_s );
+begin
+  FillChar(strm, sizeof(strm), 0);
+  inflateInit_(strm, {$IfDef MAC_COCOA}'1.2.11'{$Else}'1.2.5'{$EndIf}, sizeof(strm));      // version??? macos 1.2.11
+end;
+
+procedure zlib_Free( var strm : z_stream_s );
+begin
+  inflateEnd(strm);
+end;
+
+function png_DecodeIDAT(var pngMem: zglTMemory; var pngZStream: z_stream_s; out pngIDATEnd: LongWord; Buffer: Pointer;
+     Bytes: Integer): Integer;
+var
+  b: {$IfDef USE_INLINE}PByte{$Else}array[0..3] of Byte{$EndIf};
+  IDATHeader: PChar;
+begin
+  pngZStream.next_out := Buffer;
+  pngZStream.avail_out := Bytes;
+  while pngZStream.avail_out > 0 do
+  begin
+    if ((pngMem.Position = pngIDATEnd) and (pngZStream.avail_out > 0) and (pngZStream.avail_in = 0)) then
+    begin
+      inc(pngMem.Position, 4);
+      {$IfDef USE_INLINE}
+      b := PByte(Ptr(pngMem.Memory) + pngMem.Position);
+      pngIDATEnd := b[3] + (b[2] shl 8) + (b[1] shl 16) + (b[0] shl 24);
+      inc(pngMem.Position, 4);
+      {$Else}
+      mem_Read(pngMem, b, 4);
+      pngIDATEnd := b[3] + (b[2] shl 8) + (b[1] shl 16) + (b[0] shl 24);
+      {$EndIf}
+
+      IDATHeader := PChar(Ptr(pngMem.Memory) + pngMem.Position);
+      if ((IDATHeader[0] <> 'I') and (IDATHeader[1] <> 'D') and (IDATHeader[2] <> 'A') and (IDATHeader[3] <> 'T')) then
+      begin
+        Result := - 1;
+        Exit;
+      end;
+      inc(pngMem.Position, 4);
+      inc(pngIDATEnd, pngMem.Position);
+    end;
+    if (pngZStream.avail_in = 0) then
+    begin
+      if (pngMem.Size - pngMem.Position > 0) then
+      begin
+        if (pngMem.Position + 65535 > pngIDATEnd) then
+        begin
+          if (pngMem.Position + (pngIDATEnd - pngMem.Position) > pngMem.Size) then
+            pngZStream.avail_in := pngMem.Size - pngMem.Position
+          else
+            pngZStream.avail_in := pngIDATEnd - pngMem.Position;
+        end
+        else begin
+          if (pngMem.Position + 65535 > pngMem.Size) then
+            pngZStream.avail_in := pngMem.Size - pngMem.Position
+          else
+            pngZStream.avail_in := 65535;
+        end;
+        inc(pngMem.Position, pngZStream.avail_in);
+      end
+      else
+        pngZStream.avail_in := 0;
+      if (pngZStream.avail_in = 0) then
+      begin
+        Result := Bytes - pngZStream.avail_out;
+        exit;
+      end;
+      pngZStream.next_in := PByte(Ptr(Ptr(pngMem.Memory) + pngMem.Position - pngZStream.avail_in));
+    end;
+    Result := inflate(pngZStream, 0);
+    if Result < 0 then
+      Result := -1
+    else
+      Result := pngZStream.avail_in;
+  end;
+end;
+
+{/$IfDef CEGCC}
+function udimodsi4(num, den: LongWord; modwanted: Integer): LongWord;
+var
+  bit: LongWord;
+  res: LongWord;
+begin
+  bit := 1;
+  res := 0;
+  while (den < (num and bit and not(den and $80000000))) do
+  begin
+    den := den shl 1;
+    bit := bit shl 1
+  end;
+  while bit > 0 do
+  begin
+    if num >= den then
+    begin
+      num := num - den;
+      res := res or bit;
+    end;
+    bit := bit shr 1;
+    den := den shr 1;
+  end;
+  if modwanted > 0 then
+    Result := num
+  else
+    Result := res;
+end;
+
+function __umodsi3(a, b: clong): clong;
+begin
+  Result := udimodsi4(a, b, 1);
+end;
+{.$EndIf}
 
 {$IfDef USE_ZIP}{$IfDef MAC_COCOA}
 initialization

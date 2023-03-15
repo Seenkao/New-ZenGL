@@ -1,7 +1,7 @@
 object Form1: TForm1
   Left = 255
   Height = 600
-  Top = 81
+  Top = 540
   Width = 800
   BorderStyle = bsSingle
   Caption = 'demo LCL'

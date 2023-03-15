@@ -5,6 +5,9 @@
 
 interface
 
+// RU: Для данной демо-версии надо включить "USE_INIT_HANDLE" в файле конфигурации "zgl_config.cfg".
+// EN: For this demo, "USE_INIT_HANDLE" must be enabled in the configuration file "zgl_config.cfg".
+
 uses
   Classes,
   SysUtils,

@@ -93,6 +93,7 @@ type
     R, G, B, A: Byte;
   end;
 
+// РІРѕР·РІСЂР°С‚ Р·РЅР°С‡РµРЅРёР№ РѕС‚ (С‚РёРїР° С†РІРµС‚Р° - С‚РѕС‡РЅРµРµ РїРѕР»СѓС‡РµРЅРЅС‹РјРё РґР°РЅРЅС‹РјРё С†РІРµС‚Р°).
 procedure png_GetPixelInfo(var pngHeader: zglTPNGHeader; out pngRowSize, pngOffset: LongWord);
 begin
   case pngHeader.ColorType of
@@ -138,9 +139,9 @@ begin
   Color := Pointer(Dest);
   for i := 0 to Width - 1 do
   begin
-    Color.R := Src^; INC(Src);
-    Color.G := Src^; INC(Src);
-    Color.B := Src^; INC(Src);
+    Color.R := Src^;   INC(Src);
+    Color.G := Src^;   INC(Src);
+    Color.B := Src^;   INC(Src);
     Color.A := 255;
     INC(Color);
   end;
@@ -169,9 +170,9 @@ begin
       ByteData := ByteData and ($FF Shr K);
     end;
 
-    Byte(Dest^) := pngPalette[ByteData, 0]; INC(Dest);
-    Byte(Dest^) := pngPalette[ByteData, 1]; INC(Dest);
-    Byte(Dest^) := pngPalette[ByteData, 2]; INC(Dest);
+    Byte(Dest^) := pngPalette[ByteData, 0];   INC(Dest);
+    Byte(Dest^) := pngPalette[ByteData, 1];   INC(Dest);
+    Byte(Dest^) := pngPalette[ByteData, 2];   INC(Dest);
     if (pngPalette[ByteData, 0] = pngPalette[pngPaletteAlpha, 0]) and
          (pngPalette[ByteData, 1] = pngPalette[pngPaletteAlpha, 1]) and
          (pngPalette[ByteData, 2] = pngPalette[pngPaletteAlpha, 2]) and pngHastRNS Then
@@ -192,8 +193,8 @@ begin
   begin
     Color.R := Src^;
     Color.G := Src^;
-    Color.B := Src^; INC(Src);
-    Color.A := Src^; INC(Src);
+    Color.B := Src^;   INC(Src);
+    Color.A := Src^;   INC(Src);
     INC(Color);
   end;
 end;
@@ -262,12 +263,13 @@ begin
           Paeth := pngRowBuffer[i];
           PP    := PaethPredictor(Left, Above, AboveLeft);
 
-           pngRowBuffer[i] := (Paeth + PP) and $FF;
+          pngRowBuffer[i] := (Paeth + PP) and $FF;
         end;
       end;
   end;
 end;
 
+// Р·Р°РіСЂСѓР·РєР° png-С…РµРґРµСЂР°
 function png_ReadIHDR(var pngMem: zglTMemory; out pngHeader: zglTPNGheader; out Data: PByteArray; Size: Integer): Boolean;
 var
   i: Integer;
@@ -345,13 +347,17 @@ begin
 
   case pngHeader.ColorType of
     PNG_COLOR_RGB:
-      if pngHeader.BitDepth = 8 Then CopyP := png_CopyNonInterlacedRGB;
+      if pngHeader.BitDepth = 8 Then
+        CopyP := png_CopyNonInterlacedRGB;
     PNG_COLOR_PALETTE, PNG_COLOR_GRAYSCALE:
-      if (pngHeader.BitDepth = 1) or (pngHeader.BitDepth = 4) or (pngHeader.BitDepth = 8) Then CopyP := png_CopyNonInterlacedPalette;
+      if (pngHeader.BitDepth = 1) or (pngHeader.BitDepth = 4) or (pngHeader.BitDepth = 8) Then
+        CopyP := png_CopyNonInterlacedPalette;
     PNG_COLOR_RGBALPHA:
-      if pngHeader.BitDepth = 8 Then CopyP := png_CopyNonInterlacedRGBAlpha;
+      if pngHeader.BitDepth = 8 Then
+        CopyP := png_CopyNonInterlacedRGBAlpha;
     PNG_COLOR_GRAYSCALEALPHA:
-      if pngHeader.BitDepth = 8 Then CopyP := png_CopyNonInterlacedGrayscaleAlpha;
+      if pngHeader.BitDepth = 8 Then
+        CopyP := png_CopyNonInterlacedGrayscaleAlpha;
   else
     log_Add('PNG - Unsupported ColorType');
     Result := FALSE;
@@ -417,18 +423,17 @@ begin
 
   if pngSignature <> PNG_SIGNATURE Then
   begin
-    log_Add('PNG - Invalid header');
+    //log_Add('PNG - Invalid header');
     goto _exit;
   end;
 
-  // цикл
   repeat
     mem_ReadSwap(pngMem, pngChunk.Size, 4);
     mem_Read(pngMem, pngChunk.Name, 4);
 
     if ( not pngHeaderOk ) and ( pngChunk.Name <> 'IHDR' ) Then
     begin
-      log_Add( 'PNG - Header not found' );
+      //log_Add( 'PNG - Header not found' );
       goto _exit;
     end;
 
@@ -438,53 +443,63 @@ begin
       continue;
     end;
 
-    if pngChunk.Name = 'IDAT' Then
-      pngHasIDAT := TRUE;
+//    if pngChunk.Name = 'IDAT' Then
 
     if pngChunk.Name = 'IHDR' Then
-      pngHeaderOk := png_ReadIHDR( pngMem, pngHeader, Data, pngChunk.Size )
+    begin
+      pngHeaderOk := png_ReadIHDR( pngMem, pngHeader, Data, pngChunk.Size );
+      //log_Add('png_ReadIHDR - used');
+    end
     else
       if pngChunk.Name = 'PLTE' Then
-        png_ReadPLTE( pngMem, pngChunk.Size )
+      begin
+        png_ReadPLTE( pngMem, pngChunk.Size );
+        //log_Add('png_ReadPLTE - used');
+      end
       else
         if pngChunk.Name = 'IDAT' Then
         begin
+          pngHasIDAT := TRUE;
           if not png_ReadIDAT( pngMem, pngHeader, Data, pngChunk.Size ) Then
           begin
             FreeMem( Data );
             Data := nil;
             goto _exit;
           end;
+          //log_Add('png_ReadIDAT - used');
         end else
           if pngChunk.Name = 'tRNS' Then
-            png_ReadtRNS( pngMem, pngChunk.Size )
+          begin
+            png_ReadtRNS( pngMem, pngChunk.Size );
+            //log_Add('png_ReadtRNS - used');
+          end
           else
             mem_Seek( pngMem, pngChunk.Size, FSM_CUR );
 
-    // не было выбора:  bKGD - фоновый цвет
-    //                  cHRM - задание CIE 1931 цветового пространства
-    //                  gAMA - определение гаммы
-    //                  hIST - хранение гистограммы или общего содержания каждого цвета в изображении
-    // и ещё тонна всего...
+    // РЅРµ Р±С‹Р»Рѕ РІС‹Р±РѕСЂР°:  bKGD - С„РѕРЅРѕРІС‹Р№ С†РІРµС‚
+    //                  cHRM - Р·Р°РґР°РЅРёРµ CIE 1931 С†РІРµС‚РѕРІРѕРіРѕ РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІР°
+    //                  gAMA - РѕРїСЂРµРґРµР»РµРЅРёРµ РіР°РјРјС‹
+    //                  hIST - С…СЂР°РЅРµРЅРёРµ РіРёСЃС‚РѕРіСЂР°РјРјС‹ РёР»Рё РѕР±С‰РµРіРѕ СЃРѕРґРµСЂР¶Р°РЅРёСЏ РєР°Р¶РґРѕРіРѕ С†РІРµС‚Р° РІ РёР·РѕР±СЂР°Р¶РµРЅРёРё
+    // Рё РµС‰С‘ С‚РѕРЅРЅР° РІСЃРµРіРѕ...
     {
-      Вспомогательные чанки
-        bKGD — этот чанк задает основной фоновый цвет.
-        cHRM используется для задания CIE 1931 цветового пространства.
-        gAMA — определяет гамму.
-        hIST — в этом чанке может храниться гистограмма или общее содержание каждого цвета в изображении.
-        iCCP — цветовой профиль ICC
-        iTXt — содержит текст в UTF-8, возможно сжатый, с необязательной языковой меткой. iTXt чанк с
-              ключевым словом 'XML:com.adobe.xmp' может содержать Extensible Metadata Platform (XMP).
-        pHYs — содержит предполагаемый размер пикселя и/или отношение сторон изображения.
-        sBIT (significant bits) — определяет «цветовую точность» (color-accuracy) изображения (черно-белое,
-              полный цвет, черно-белое с прозрачностью и т.д.), для более простого декодирования.
-        sPLT — предлагает палитру для использования, если полный спектр цветов недоступен.
-        sRGB — свидетельствует о использовании стандартной sRGB схемы.
-        sTER — индикатор стереоскопических изображений.
-        tEXt — может содержать текст в ISO/IEC 8859-1 формате, с одной name=value парой для каждого чанка.
-        tIME — хранит дату последнего изменения изображения.
-        tRNS — содержит информацию о прозрачности.
-        zTXt — сжатый текст, с теми же ограничениям, что и tEXt.
+      Р’СЃРїРѕРјРѕРіР°С‚РµР»СЊРЅС‹Рµ С‡Р°РЅРєРё
+        bKGD вЂ” СЌС‚РѕС‚ С‡Р°РЅРє Р·Р°РґР°РµС‚ РѕСЃРЅРѕРІРЅРѕР№ С„РѕРЅРѕРІС‹Р№ С†РІРµС‚.
+        cHRM РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РґР»СЏ Р·Р°РґР°РЅРёСЏ CIE 1931 С†РІРµС‚РѕРІРѕРіРѕ РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІР°.
+        gAMA вЂ” РѕРїСЂРµРґРµР»СЏРµС‚ РіР°РјРјСѓ.
+        hIST вЂ” РІ СЌС‚РѕРј С‡Р°РЅРєРµ РјРѕР¶РµС‚ С…СЂР°РЅРёС‚СЊСЃСЏ РіРёСЃС‚РѕРіСЂР°РјРјР° РёР»Рё РѕР±С‰РµРµ СЃРѕРґРµСЂР¶Р°РЅРёРµ РєР°Р¶РґРѕРіРѕ С†РІРµС‚Р° РІ РёР·РѕР±СЂР°Р¶РµРЅРёРё.
+        iCCP вЂ” С†РІРµС‚РѕРІРѕР№ РїСЂРѕС„РёР»СЊ ICC
+        iTXt вЂ” СЃРѕРґРµСЂР¶РёС‚ С‚РµРєСЃС‚ РІ UTF-8, РІРѕР·РјРѕР¶РЅРѕ СЃР¶Р°С‚С‹Р№, СЃ РЅРµРѕР±СЏР·Р°С‚РµР»СЊРЅРѕР№ СЏР·С‹РєРѕРІРѕР№ РјРµС‚РєРѕР№. iTXt С‡Р°РЅРє СЃ
+              РєР»СЋС‡РµРІС‹Рј СЃР»РѕРІРѕРј 'XML:com.adobe.xmp' РјРѕР¶РµС‚ СЃРѕРґРµСЂР¶Р°С‚СЊ Extensible Metadata Platform (XMP).
+        pHYs вЂ” СЃРѕРґРµСЂР¶РёС‚ РїСЂРµРґРїРѕР»Р°РіР°РµРјС‹Р№ СЂР°Р·РјРµСЂ РїРёРєСЃРµР»СЏ Рё/РёР»Рё РѕС‚РЅРѕС€РµРЅРёРµ СЃС‚РѕСЂРѕРЅ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ.
+        sBIT (significant bits) вЂ” РѕРїСЂРµРґРµР»СЏРµС‚ В«С†РІРµС‚РѕРІСѓСЋ С‚РѕС‡РЅРѕСЃС‚СЊВ» (color-accuracy) РёР·РѕР±СЂР°Р¶РµРЅРёСЏ (С‡РµСЂРЅРѕ-Р±РµР»РѕРµ,
+              РїРѕР»РЅС‹Р№ С†РІРµС‚, С‡РµСЂРЅРѕ-Р±РµР»РѕРµ СЃ РїСЂРѕР·СЂР°С‡РЅРѕСЃС‚СЊСЋ Рё С‚.Рґ.), РґР»СЏ Р±РѕР»РµРµ РїСЂРѕСЃС‚РѕРіРѕ РґРµРєРѕРґРёСЂРѕРІР°РЅРёСЏ.
+        sPLT вЂ” РїСЂРµРґР»Р°РіР°РµС‚ РїР°Р»РёС‚СЂСѓ РґР»СЏ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ, РµСЃР»Рё РїРѕР»РЅС‹Р№ СЃРїРµРєС‚СЂ С†РІРµС‚РѕРІ РЅРµРґРѕСЃС‚СѓРїРµРЅ.
+        sRGB вЂ” СЃРІРёРґРµС‚РµР»СЊСЃС‚РІСѓРµС‚ Рѕ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёРё СЃС‚Р°РЅРґР°СЂС‚РЅРѕР№ sRGB СЃС…РµРјС‹.
+        sTER вЂ” РёРЅРґРёРєР°С‚РѕСЂ СЃС‚РµСЂРµРѕСЃРєРѕРїРёС‡РµСЃРєРёС… РёР·РѕР±СЂР°Р¶РµРЅРёР№.
+        tEXt вЂ” РјРѕР¶РµС‚ СЃРѕРґРµСЂР¶Р°С‚СЊ С‚РµРєСЃС‚ РІ ISO/IEC 8859-1 С„РѕСЂРјР°С‚Рµ, СЃ РѕРґРЅРѕР№ name=value РїР°СЂРѕР№ РґР»СЏ РєР°Р¶РґРѕРіРѕ С‡Р°РЅРєР°.
+        tIME вЂ” С…СЂР°РЅРёС‚ РґР°С‚Сѓ РїРѕСЃР»РµРґРЅРµРіРѕ РёР·РјРµРЅРµРЅРёСЏ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ.
+        tRNS вЂ” СЃРѕРґРµСЂР¶РёС‚ РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ РїСЂРѕР·СЂР°С‡РЅРѕСЃС‚Рё.
+        zTXt вЂ” СЃР¶Р°С‚С‹Р№ С‚РµРєСЃС‚, СЃ С‚РµРјРё Р¶Рµ РѕРіСЂР°РЅРёС‡РµРЅРёСЏРј, С‡С‚Рѕ Рё tEXt.
     }
 
     mem_Seek(pngMem, 4, FSM_CUR);
@@ -492,7 +507,7 @@ begin
 
   if not pngHasIDAT Then
   begin
-    log_Add('PNG - Image data not found');
+    //log_Add('PNG - Image data not found');
     goto _exit;
   end;
 

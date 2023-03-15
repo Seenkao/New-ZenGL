@@ -22,6 +22,24 @@ uses
   Windows;
   {$EndIf}
 
+  {$IFDEF LINUX}
+const
+  libGL  = 'libGL.so.1';
+  libGLU = 'libGLU.so.1';
+  {$ENDIF}
+  {$IFDEF WINDOWS}
+const
+  libGL  = 'opengl32.dll';
+  libGLU = 'glu32.dll';
+  {$ENDIF}
+  {$IFDEF MACOSX}
+const
+  libGL  = '/System/Library/Frameworks/OpenGL.framework/Libraries/libGL.dylib';
+  libGLU = '/System/Library/Frameworks/OpenGL.framework/Libraries/libGLU.dylib';
+  {$IfNDef MAC_COCOA}
+  libAGL = '/System/Library/Frameworks/AGL.framework/AGL';
+  {$ENDIF}{$EndIf}
+
 
 Type
   P_cl_context  = ^_cl_context;
