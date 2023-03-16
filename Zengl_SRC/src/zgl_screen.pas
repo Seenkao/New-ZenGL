@@ -142,16 +142,26 @@ procedure SetGLVersionAndFlags({$IfNDef MAC_COCOA}major, minor: Integer; flag: L
 {$EndIf}
 
 type
+  {$IfDef LINUX}
   zglTPrevResolution = record
     Width : Integer;
     Height: Integer;
     frequency: array[0..9] of Integer;
   end;
+  {$EndIf}
 
   zglPResolutionList = ^zglTResolutionList;
   zglTResolutionList = record
     Count : Integer;
+    {$IfNDef Linux}
+    Width: array of Integer;
+    Height: array of Integer;
+    {$Else}
     List: array of zglTPrevResolution;
+    {$EndIf}
+    {$IfDef WINDOWS}
+    frequency: array of Integer;
+    {$EndIf}
   end;
 
 {$IFDEF WINDOWS}
@@ -405,8 +415,8 @@ begin
 end;
 
 procedure scr_Init;
-var
-  _res: PXRRScreenConfiguration;
+//var
+//  _res: PXRRScreenConfiguration;
   {$IFDEF iOS}
   var
     i           : Integer;
