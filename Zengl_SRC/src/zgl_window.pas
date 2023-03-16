@@ -34,7 +34,7 @@ interface
 
 uses
   {$IFDEF UNIX}
-  sysutils,
+  sysutils, BaseUnix,
   {$ENDIF}
   {$IFDEF USE_X11}
   X, XLib, XUtil, xrandr,
