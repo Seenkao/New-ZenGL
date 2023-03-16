@@ -220,8 +220,11 @@ uses
   zgl_mouse,
   zgl_touch;
 
-{$IfDef LINUX}
 var
+  kodeSymb: array[1..34] of byte = (K_TILDE, K_Q, K_W, K_E, K_R, K_T, K_Y, K_U, K_I, K_O, K_P, K_BRACKET_L, K_BRACKET_R, K_A,
+                                        K_S, K_D, K_F, K_G, K_H, K_J, K_K, K_L, K_SEMICOLON, K_APOSTROPHE, K_Z, K_X, K_C, K_V,
+                                        K_B, K_N, K_M, K_SEPARATOR, K_DECIMAL, K_SLASH);
+{$IfDef LINUX}
   rs0:    Single = 0;
   rs045:  Single = 0.45;
   rs1_5:  Single = 1.5;
@@ -250,7 +253,6 @@ var
   rs1200: Single = 1200;
 {$EndIf}
   {$IfDef MOBILE}
-var
   lockTouchKeyboard: Boolean = False;
   {$EndIf}
 
@@ -431,10 +433,6 @@ var
   dw, dh, x0, y0, _xx0: Single;
   i, n: integer;
   m: Integer;
-
-  kodeSymb: array[1..34] of byte = (K_TILDE, K_Q, K_W, K_E, K_R, K_T, K_Y, K_U, K_I, K_O, K_P, K_BRACKET_L, K_BRACKET_R, K_A,
-                                        K_S, K_D, K_F, K_G, K_H, K_J, K_K, K_L, K_SEMICOLON, K_APOSTROPHE, K_Z, K_X, K_C, K_V,
-                                        K_B, K_N, K_M, K_SEPARATOR, K_DECIMAL, K_SLASH);
 
   procedure CreateOneButton(key: LongWord);
   begin
