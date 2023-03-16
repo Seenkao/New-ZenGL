@@ -93,8 +93,8 @@
       <Filename Value="../../../bin/demo10"/>
     </Target>
     <SearchPaths>
-      <IncludeFiles Value="$(ProjOutDir);../../../headers"/>
-      <OtherUnitFiles Value="../../../headers;../../../extra;../../../src;../../../lib/ogg/cocoa-darwin;../../../lib/theora/cocoa-darwin;../../../lib/zlib/cocoa-darwin;../../../lib/zip/cocoa-darwin"/>
+      <IncludeFiles Value="$(ProjOutDir);../../../headers;../../../srcGEGL;../../../src;../../../srcGL"/>
+      <OtherUnitFiles Value="../../../headers;../../../extra;../../../src;../../../srcGEGL;../../../srcGL;../../../lib/ogg/cocoa-darwin;../../../lib/theora/cocoa-darwin;../../../lib/zlib/cocoa-darwin;../../../lib/zip/cocoa-darwin"/>
       <UnitOutputDirectory Value="../tmp/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>
