@@ -1133,7 +1133,7 @@ eventLoop:
     NSScrollWheel:
       begin
         if ev.scrollingDeltaY > 0 then
-          mouseAction[M_BMIDDLE].state := mouseAction[M_BMIDDLE].state or is_mWheelUp;
+          mouseAction[M_BMIDDLE].state := mouseAction[M_BMIDDLE].state or is_mWheelUp
         else
           mouseAction[M_BMIDDLE].state := mouseAction[M_BMIDDLE].state or is_mWheelDown;
       end;
