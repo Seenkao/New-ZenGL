@@ -676,7 +676,9 @@ begin
   {$ENDIF}
 
   scrResList.Count := 0;
+  {$IfDef LINUX}
   SetLength(scrResList.List, 0);
+  {$EndIf}
 
   scrInitialized := FALSE;
 end;
