@@ -251,13 +251,15 @@ function udimodsi4(num, den: LongWord; modwanted: Integer): LongWord; cdecl;
 function __umodsi3(a, b: clong): clong; cdecl;
 {/$EndIf}
 
-(* определится, для чего это было сделано!
+// определится, для чего это было сделано!
+{$IfNDef FPC}
 function inflateInit_(var strm: z_stream_s; version: pchar; stream_size: cint): cint; cdecl; external
   {$ifdef DYNAMICZLIB}libz name 'inflateInit_'{$endif};
 function inflateEnd(var strm: z_stream_s): cint; cdecl; external
   {$ifdef DYNAMICZLIB}libz name 'inflateEnd'{$endif};
 function inflate(var strm: z_stream_s; flush: cint): cint; cdecl; external
-  {$ifdef DYNAMICZLIB}libz name 'inflate'{$endif}; *)
+  {$ifdef DYNAMICZLIB}libz name 'inflate'{$endif};
+  {$EndIf};
 
 {$IFDEF USE_ZIP}
 threadvar
