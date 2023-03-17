@@ -12,6 +12,7 @@ uses
   zgl_keyboard,
   zgl_render_2d,
   zgl_fx,
+  zgl_types,
   zgl_textures,
   zgl_textures_png,
   zgl_textures_jpg,
@@ -21,8 +22,7 @@ uses
   zgl_font,
   zgl_text,
   zgl_math_2d,
-  zgl_utils
-  ;
+  zgl_utils;
 
 var
   dirRes        : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};

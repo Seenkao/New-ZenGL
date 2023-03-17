@@ -30,32 +30,8 @@ unit zgl_fx;
 interface
 
 uses
-  zgl_gltypeconst;
-
-const
-  FX_BLEND_NORMAL = $00;
-  FX_BLEND_ADD    = $01;
-  FX_BLEND_MULT   = $02;
-  FX_BLEND_BLACK  = $03;
-  FX_BLEND_WHITE  = $04;
-  FX_BLEND_MASK   = $05;
-
-  FX_COLOR_MIX    = $00;
-  FX_COLOR_SET    = $01;
-
-  // Rus: отражение по X.
-  // Eng: reflection on X.
-  FX2D_FLIPX      = $000001;
-  // Rus: отражение по Y.
-  // Eng: reflection on Y.
-  FX2D_FLIPY      = $000002;
-  FX2D_VCA        = $000004;
-  FX2D_VCHANGE    = $000008;
-  FX2D_SCALE      = $000010;
-  FX2D_RPIVOT     = $000020;
-
-  FX_BLEND        = $100000;
-  FX_COLOR        = $200000;
+  zgl_gltypeconst,
+  zgl_types;
 
 // Rus:
 // Eng:

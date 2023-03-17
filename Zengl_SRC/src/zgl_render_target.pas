@@ -54,34 +54,7 @@ const
   RT_TYPE_PBUFFER = 0;
   RT_TYPE_FBO     = 1;
 
-  RT_DEFAULT      = $00;
-  RT_FULL_SCREEN  = $01;
-  RT_USE_DEPTH    = $02;
-  RT_CLEAR_COLOR  = $04;
-  RT_CLEAR_DEPTH  = $08;
-
   RT_FORCE_PBUFFER = $100000;
-
-type
-  zglPRenderTarget = ^zglTRenderTarget;
-  zglTRenderTarget = record
-    Type_     : Byte;
-    Handle    : Pointer;
-    Surface   : zglPTexture;
-    Flags     : Byte;
-
-    prev, next: zglPRenderTarget;
-end;
-
-type
-  zglPRenderTargetManager = ^zglTRenderTargetManager;
-  zglTRenderTargetManager = record
-    Count: Integer;
-    First: zglTRenderTarget;
-end;
-
-type
-  zglTRenderCallback = procedure(Data: Pointer);
 
 {$IfNDef MAC_COCOA}
 function  rtarget_Add(Surface: zglPTexture; Flags: Byte): zglPRenderTarget;

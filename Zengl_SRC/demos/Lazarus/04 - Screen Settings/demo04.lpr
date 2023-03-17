@@ -47,8 +47,12 @@ begin
   fntMain := font_LoadFromFile( dirRes + 'font.zfi' );
   texBack := tex_LoadFromFile( dirRes + 'back03.jpg' );
 
+  // RU: цвет шрифта.
+  // EN: font color.
   setTextColor(Get_Color(cl_White));
-  setFontTextScale(15, fntMain);                  // razmery shrifta
+  // RU: размер шрифта.
+  // EN: font size.
+  setFontTextScale(15, fntMain);
 end;
 
 procedure Draw;

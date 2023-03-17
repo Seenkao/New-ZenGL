@@ -35,7 +35,7 @@ end;
 
 var
   dirRes      : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
-  fntMain     : Byte;
+  fntMain     : LongWord;
   texLogo     : zglPTexture;
   texBack     : zglPTexture;
   texGround   : zglPTexture;

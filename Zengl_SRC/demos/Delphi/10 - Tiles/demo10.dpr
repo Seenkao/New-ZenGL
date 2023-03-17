@@ -12,6 +12,7 @@ uses
   zgl_keyboard,
   zgl_fx,
   zgl_file,
+  zgl_types,
   zgl_textures,
   zgl_textures_png,
   zgl_textures_jpg,
@@ -24,7 +25,7 @@ uses
 
 var
   dirRes  : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
-  fntMain : Byte;
+  fntMain : LongWord;
   map     : zglTTiles2D;
   texTiles: zglPTexture;
 

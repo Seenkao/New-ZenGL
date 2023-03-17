@@ -38,6 +38,7 @@ uses
   zgl_opengl_all,
   zgl_pasOpenGL,
   zgl_gltypeconst,
+  zgl_types,
   {$IFDEF LINUX}
   X, XUtil, xlib,
   zgl_glx_wgl
@@ -53,10 +54,8 @@ uses
   {$ENDIF}
   ;
 
-const
-  TARGET_SCREEN  = 1;                    // цель - экран
-  TARGET_TEXTURE = 2;                    // цель - часть экрана
   {$IfDef MAC_COCOA}
+const
     {$IF DEFINED(USE_GL_21) or DEFINED(USE_MIN_OPENGL) or DEFINED(USE_DEPRECATED)}
     _NSOpenGLVersion = NSOpenGLProfileVersionLegacy;
     {$IfEnd}

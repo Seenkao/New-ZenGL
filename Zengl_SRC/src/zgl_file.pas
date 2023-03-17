@@ -46,25 +46,6 @@ uses
   {$ENDIF}
   zgl_types;
 
-type
-  zglTFile     = Ptr;
-  zglTFileList = zglTStringList;
-
-const
-  FILE_ERROR = {$IFNDEF WINDOWS} 0 {$ELSE} Ptr(-1) {$ENDIF};
-
-  // Open Mode
-  FOM_CREATE = $01; // Create
-  FOM_OPENR  = $02; // Read
-  FOM_OPENW  = $03; // Write
-  FOM_OPENRW = $04; // Read&Write
-
-
-  // Seek Mode
-  FSM_SET    = $01;
-  FSM_CUR    = $02;
-  FSM_END    = $03;
-
 // Rus: открыть файл.
 // Eng: open file.
 function  file_Open(out FileHandle: zglTFile; const FileName: UTF8String; Mode: Byte{$IfDef MAC_COCOA}; log: Boolean = false{$EndIf}): Boolean;

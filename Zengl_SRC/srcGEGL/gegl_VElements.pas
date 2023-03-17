@@ -145,15 +145,15 @@ uses
   {$EndIf}
 
 var
-  // RU: поле ввода (пока просто вывода текста)
+  // RU: поле ввода (пока просто вывода текста).
   UseText: geglPEdit;
-  // точка поворота
+  // точка поворота.
   pointManager: zglTPoint2D = (x: 0; y: 0);
-  // угол поворота
+  // угол поворота.
   geAngle: Single = 0;
   // цвет по умолчанию.
   geDefColor: geglDefColor;
-  useFont: zglPFont;  // защита от многопроцессорного исполнения
+  useFont: zglPFont;  // защита от многопроцессорного исполнения?
 
   rs1_2: Single = 1.2;
   _cursor: geglPCursor;

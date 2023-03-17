@@ -32,12 +32,12 @@ uses
   ;
 
 var
-  calc   : Integer;
-  points : array[ 0..359 ] of zglTPoint2D;
-  TimeStart  : LongWord = 0;
+  calc      : Integer;
+  points    : array[ 0..359 ] of zglTPoint2D;
+  TimeStart : LongWord = 0;
   {$IfNDef OLD_METHODS}
-  dirRes : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
-  newColor: array[0..1] of LongWord;
+  dirRes    : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
+  newColor  : array[0..1] of LongWord;
   {$EndIf}
   {$IfNDef OLD_METHODS}
   // RU: это для создания ломанных линий. Можно создать динамический массив и делать

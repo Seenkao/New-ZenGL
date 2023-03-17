@@ -38,6 +38,11 @@ uses
 {$ENDIF}
   zgl_types;
 
+const
+  t_Enable       = 128;                     // используется или нет данный таймер (существует или нет?)
+  t_Stop_or_SleepToStart = t_Stop or t_SleepToStart;
+  t_Start_or_SleepToStop = t_Start or t_SleepToStop;
+
 // Rus: Все таймера работают в милисекундах! (отсчёт в милисекундах).
 // Eng: All timers run in milliseconds! (count in milliseconds).
 
@@ -89,6 +94,9 @@ implementation
 uses
   zgl_application,
   zgl_window;
+
+const
+  MAX_TIMERS     =  50;                     // максимальное количество таймеров.
 
 {$IfDef UNIX}{$IfNDef MAC_COCOA}
 function fpGetTimeOfDay(val: PTimeVal; tzp: Pointer): Integer; cdecl; external 'libc' name 'gettimeofday';
@@ -207,7 +215,7 @@ begin
   Result := True;
 end;
 
-function timer_SleepStartStop(num: Byte; Flags: Byte = 2; IntervalSleep: Cardinal = 3): Boolean;
+function timer_SleepStartStop(num: Byte; Flags: Byte = t_Start; IntervalSleep: Cardinal = 3): Boolean;
 var
   t: Double;
   useTimer: zglPTimer;

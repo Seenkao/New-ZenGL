@@ -49,134 +49,6 @@ uses
   {$ENDIF}
 
 const
-  K_SYSRQ      = $B7;
-  K_PAUSE      = $C5;
-  K_ESCAPE     = $01;
-  K_ENTER      = $1C;
-  K_KP_ENTER   = $9C;
-
-  K_UP         = $C8;
-  K_DOWN       = $D0;
-  K_LEFT       = $CB;
-  K_RIGHT      = $CD;
-
-  K_BACKSPACE  = $0E;
-  K_SPACE      = $39;
-  K_TAB        = $0F;
-  K_TILDE      = $29;
-
-  K_INSERT     = $D2;
-  K_DELETE     = $D3;
-  K_HOME       = $C7;
-  K_END        = $CF;
-  K_PAGEUP     = $C9;
-  K_PAGEDOWN   = $D1;
-
-  K_CTRL       = $FF - $01;
-  K_CTRL_L     = $1D;
-  K_CTRL_R     = $9D;
-  K_ALT        = $FF - $02;
-  K_ALT_L      = $38;
-  K_ALT_R      = $B8;
-  K_SHIFT      = $FF - $03;
-  K_SHIFT_L    = $2A;
-  K_SHIFT_R    = $36;
-  K_SUPER      = $FF - $04;
-  K_SUPER_L    = $DB;
-  K_SUPER_R    = $DC;
-  K_APP_MENU   = $DD;
-
-  K_CAPSLOCK   = $3A;
-  K_NUMLOCK    = $45;
-  K_SCROLL     = $46;
-
-  K_BRACKET_L  = $1A; // [{
-  K_BRACKET_R  = $1B; //] }
-  K_BACKSLASH  = $2B; // \
-  K_SLASH      = $35; // /
-  K_SEPARATOR  = $33; // ,
-  K_DECIMAL    = $34; // .
-  K_SEMICOLON  = $27; //: ;
-  K_APOSTROPHE = $28; // ' "
-
-  K_0          = $0B;
-  K_1          = $02;
-  K_2          = $03;
-  K_3          = $04;
-  K_4          = $05;
-  K_5          = $06;
-  K_6          = $07;
-  K_7          = $08;
-  K_8          = $09;
-  K_9          = $0A;
-
-  K_MINUS      = $0C;
-  K_EQUALS     = $0D;
-
-  K_A          = $1E;
-  K_B          = $30;
-  K_C          = $2E;
-  K_D          = $20;
-  K_E          = $12;
-  K_F          = $21;
-  K_G          = $22;
-  K_H          = $23;
-  K_I          = $17;
-  K_J          = $24;
-  K_K          = $25;
-  K_L          = $26;
-  K_M          = $32;
-  K_N          = $31;
-  K_O          = $18;
-  K_P          = $19;
-  K_Q          = $10;
-  K_R          = $13;
-  K_S          = $1F;
-  K_T          = $14;
-  K_U          = $16;
-  K_V          = $2F;
-  K_W          = $11;
-  K_X          = $2D;
-  K_Y          = $15;
-  K_Z          = $2C;
-
-  K_KP_0       = $52;
-  K_KP_1       = $4F;
-  K_KP_2       = $50;
-  K_KP_3       = $51;
-  K_KP_4       = $4B;
-  K_KP_5       = $4C;
-  K_KP_6       = $4D;
-  K_KP_7       = $47;
-  K_KP_8       = $48;
-  K_KP_9       = $49;
-
-  K_KP_SUB     = $4A;
-  K_KP_ADD     = $4E;
-  K_KP_MUL     = $37;
-  K_KP_DIV     = $B5;
-  K_KP_DECIMAL = $53;
-
-  K_F1         = $3B;
-  K_F2         = $3C;
-  K_F3         = $3D;
-  K_F4         = $3E;
-  K_F5         = $3F;
-  K_F6         = $40;
-  K_F7         = $41;
-  K_F8         = $42;
-  K_F9         = $43;
-  K_F10        = $44;
-  K_F11        = $57;
-  K_F12        = $58;
-
-  // основные события происходящие между интервалами очистки клавиатуры
-  KA_DOWN      = 0;
-  KA_UP        = 1;
-  // события происходящие только при нажатии/отжатии клавиш
-  KT_DOWN      = 2;
-  KT_UP        = 3;
-
   keyboardLatinRus       = $00000001;
   keyboardLatRusDown     = $00000002;
   keyboardCaps           = $00000004;
@@ -310,43 +182,43 @@ var
   keysTextChanged: Boolean;
   {$ENDIF}
   // Rus: длительность задержки, для повтора ввода клавиши.
-  // Eng:
+  // Eng: the length of the delay to repeat key entry.
   keyDownRepeat: Double;
   // Rus: зажата клавиша (производится ли повторение?).
-  // Eng:
+  // Eng: the key is pressed (is it repeating?).
   keyBoolRepeat: Boolean;
   // Rus: начальная задержка - удержание кнопки клавиатуры.
-  // Eng:
+  // Eng: initial delay - holding the keyboard button.
   beginKeyDelay: Double = 500;
   // Rus: задержка при постоянном удержании кнопки клавиатуры.
-  // Eng:
+  // Eng: delay when holding down a keyboard button.
   repeatKeyDelay: Double = 60;
   // Rus: установленная рабочая задержка, для кнопки клавиатуры.
-  // Eng:
+  // Eng: the set working delay, for the keypad button.
   keyDelayWork: Double = 500;
   {$IfNDef MOBILE}
   {$IfDef USE_VKEYBOARD}
-  // Rus: блокирует виртуальную клавиатуру.
-  // Eng:
+  // Rus: блокирует виртуальную клавиатуру, если используется обычная.
+  // Eng: blocks the virtual keyboard if the regular one is used.
   lockVirtualKeyboard: Boolean = False;
 
-  // Rus: оповещает, что надо блокировать виртуальную клавиатуру.
-  // Eng:
-//  prevLockVK: Boolean = False;
-
   // Rus: общее время блокировки виртуальной клавиатуры.
-  // Eng:
+  // Eng: total virtual keyboard lock time.
   timeLockVK: Double = 500;
   // Rus: установка отсчёта времени отхода блокировки виртуальной клавиатуры.
-  // Eng:
+  // Eng: setting the countdown of the virtual keyboard lock release time.
   startTimeLockVK: Double;
   {$EndIf}{$EndIf}
-  //Rus: флаги для работы с клавиатурой.
-  //     для понимания: управляющие клавиши не могут быть "последними"-нажатыми
-  //     а если управляющие клавиши сработали, то часть их отображается в флагах,
-  //     как сработавшие и как произошедшее событие
-  //     эти флаги можно включить, при запуске программы и опросе системы.
-  // Eng:
+  // Rus: флаги для работы с клавиатурой.
+  //      для понимания: управляющие клавиши не могут быть "последними"-нажатыми
+  //      а если управляющие клавиши сработали, то часть их отображается в флагах,
+  //      как сработавшие и как произошедшее событие
+  //      эти флаги можно включить, при запуске программы и опросе системы.
+  // Eng: flags for working with the keyboard.
+  //      for understanding: control keys cannot be "last"-pressed
+  //      and if the control keys worked, then some of them are displayed in the
+  //      flags, as triggered and as an event, these flags can be turned on when
+  //      the program starts and the system is polled.
   keybFlags   : LongWord;
   PkeybFlags  : PCardinal = @keybFlags;
 
@@ -356,6 +228,7 @@ uses
   zgl_application,
   zgl_utils,
   zgl_window,
+  zgl_types,
   {$EndIf}
   {$IfDef USE_VKEYBOARD}
   gegl_menu_gui,
@@ -440,7 +313,6 @@ begin
       {$IfDef USE_VKEYBOARD}
       if not mouseToKey then
       begin
-        //  prevLockVK := true;
         lockVirtualKeyboard := True;
         startTimeLockVK := timer_GetTicks;
       end;
@@ -562,7 +434,6 @@ begin
       {$IfDef USE_VKEYBOARD}
       if not mouseToKey then
       begin
-        //  prevLockVK := true;
         lockVirtualKeyboard := True;
         startTimeLockVK := timer_GetTicks;
       end;

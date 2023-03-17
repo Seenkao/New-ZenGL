@@ -32,6 +32,8 @@ uses
   ;
 
 const
+  // RU: данные константы только для данной демки!!!
+  // EN: These constants are only for this demo!!!
   SCREEN_WIDTH  = 800;
   SCREEN_HEIGHT = 600;
 

@@ -30,7 +30,8 @@ unit zgl_touch;
 interface
 
 uses
-  zgl_types;
+  zgl_types,
+  zgl_mouse;
 
 // Ru: возвращаем координату "X" для данного касания!!!
 // En: return coordinates "X" for this touch !!!

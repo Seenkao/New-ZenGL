@@ -21,7 +21,7 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge 02.05.2022
+ !!! modification from Serge
 }
 unit zgl_application;
 

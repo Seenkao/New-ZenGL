@@ -56,10 +56,6 @@ uses
 
   zgl_types;
 
-const
-  REFRESH_MAXIMUM = 0;
-  REFRESH_DEFAULT = 1;
-
 var
   SetViewPort: procedure;
 
@@ -142,6 +138,8 @@ procedure SetGLVersionAndFlags({$IfNDef MAC_COCOA}major, minor: Integer; flag: L
 {$EndIf}
 
 type
+  // временное решение. Определить подобные решения для всех систем!
+  // позже перенести в zgl_types.
   {$IfDef LINUX}
   zglTPrevResolution = record
     Width : Integer;

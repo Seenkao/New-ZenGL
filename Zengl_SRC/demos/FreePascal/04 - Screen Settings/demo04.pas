@@ -19,6 +19,7 @@ uses
   zgl_keyboard,
   zgl_font,
   zgl_text,
+  zgl_types,
   zgl_sprite_2d,
   zgl_textures,
   zgl_textures_png,

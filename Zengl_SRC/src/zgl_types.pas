@@ -33,32 +33,122 @@ interface
   //;
 
 const
-// timer
-  MAX_TIMERS   =  50;        // максимальное количество таймеров.
+// *** zgl_Reg ***
+  SYS_APP_INIT           = $000001;
+  SYS_LOAD               = $000003;
+  SYS_DRAW               = $000004;
+  SYS_UPDATE             = $000005;
+  SYS_EXIT               = $000006;
+  SYS_ACTIVATE           = $000007;
 
+  SYS_EVENTS             = $000009;         // keyboard, mouse, touchpad
+  SYS_KEYESCAPE          = $000008;         // перехват клавиши Escape
+  SYS_POSTDRAW           = $000012;         // процедура постотрисовки (после того как вывелось всё на экран)
+  SYS_RESET              = $000013;         // процедура обнуления
+  {$IfNDef ANDROID}
+  SYS_CLOSE_QUERY        = $000008;
+  SYS_APP_LOOP           = $000002;
+  {$EndIf}
+  OGL_USER_MODE          = $000014;
+  OGL_VIEW_PORT          = $000016;
+  {$IFDEF iOS}
+  SYS_iOS_MEMORY_WARNING     = $000010;
+  SYS_iOS_CHANGE_ORIENTATION = $000011;
+  {$ENDIF}
+  {$IFDEF ANDROID}
+  SYS_ANDROID_RESTORE = $000015;
+  {$ENDIF}
+
+  TEXTURE_FORMAT_EXTENSION   = $000100;     // расширение файла
+  TEXTURE_FORMAT_FILE_LOADER = $000101;     // процедура загрузки
+  TEXTURE_FORMAT_MEM_LOADER  = $000102;     // процедура загрузки из памяти
+  TEXTURE_CURRENT_EFFECT     = $000103;     // процедура дополнительных эффектов
+
+  SND_FORMAT_EXTENSION    = $000110;
+  SND_FORMAT_FILE_LOADER  = $000111;
+  SND_FORMAT_MEM_LOADER   = $000112;
+  SND_FORMAT_DECODER      = $000113;
+
+  VIDEO_FORMAT_DECODER    = $000130;
+
+// *** zgl_Get ***
+  ZENGL_VERSION           = 1;              // Major shr 16, ( Minor and $FF00 ) shr 8, Revision and $FF
+  ZENGL_VERSION_STRING    = 2;              // PAnsiChar
+  ZENGL_VERSION_DATE      = 3;              // PAnsiChar
+
+  DIRECTORY_APPLICATION   = 101;            // PAnsiChar
+  DIRECTORY_HOME          = 102;            // PAnsiChar
+
+  LOG_FILENAME            = 203;            // PAnsiChar
+
+  DESKTOP_WIDTH           = 300;
+  DESKTOP_HEIGHT          = 301;
+  RESOLUTION_LIST         = 302;            // zglPResolutionList
+
+  WINDOW_HANDLE           = 400;            // TWindow(GNU/Linux), HWND(Windows), WindowRef(MacOS X)
+  WINDOW_X                = 401;
+  WINDOW_Y                = 402;
+  WINDOW_WIDTH            = 403;
+  WINDOW_HEIGHT           = 404;
+
+  GAPI_CONTEXT            = 500;            // GLXContext(GNU/Linux), HGLRC(Windows), TAGLContext(MacOS X)
+  GAPI_MAX_TEXTURE_SIZE   = 501;            // For ZenGL with Direct3D render only
+  GAPI_MAX_TEXTURE_UNITS  = 502;
+  GAPI_MAX_ANISOTROPY     = 503;
+  GAPI_CAN_BLEND_SEPARATE = 504;            // Boolean
+  GAPI_CAN_AUTOGEN_MIPMAP = 505;            // Boolean
+
+  VIEWPORT_WIDTH          = 600;
+  VIEWPORT_HEIGHT         = 601;
+  VIEWPORT_OFFSET_X       = 602;
+  VIEWPORT_OFFSET_Y       = 603;
+
+  RENDER_FPS              = 700;
+  RENDER_BATCHES_2D       = 701;
+  RENDER_CURRENT_MODE     = 702;
+  RENDER_CURRENT_TARGET   = 703;
+  RENDER_VRAM_USED        = 704;
+
+  MANAGER_TIMER           = 800;            // zglPTimerManager
+  MANAGER_TEXTURE         = 801;            // zglPTextureManager
+  MANAGER_FONT            = 802;            // zglPFontManager
+  MANAGER_RTARGET         = 803;            // zglPRenderTargetManager
+  MANAGER_SOUND           = 804;            // zglPSoundManager
+  MANAGER_EMITTER2D       = 805;            // zglPEmitter2DManager
+
+// *** zgl_Enable/zgl_Disable ***
+  COLOR_BUFFER_CLEAR    = $000001;
+  DEPTH_BUFFER          = $000002;
+  DEPTH_BUFFER_CLEAR    = $000004;
+  DEPTH_MASK            = $000008;
+  STENCIL_BUFFER_CLEAR  = $000010;          // не активируется ни где.
+  CORRECT_RESOLUTION    = $000020;
+  CORRECT_WIDTH         = $000040;
+  CORRECT_HEIGHT        = $000080;
+  APP_USE_AUTOPAUSE     = $000100;
+  APP_USE_LOG           = $000200;
+  APP_USE_ENGLISH_INPUT = $000400;
+  APP_USE_DT_CORRECTION = $000800;
+  WND_USE_AUTOCENTER    = $001000;
+  SND_CAN_PLAY          = $002000;
+  SND_CAN_PLAY_FILE     = $004000;
+  CLIP_INVISIBLE        = $008000;
+  {$IFDEF iOS}
+  SND_ALLOW_BACKGROUND_MUSIC = $100000;
+  {$ENDIF}
+  XY_IN_CENTER_WINDOW   = $020000;          // окно выводится от центра экрана когда oglMode = Mode2D
+                                            // при этом надо перерабатывать прорисовку примитивов
+                                            // весь ZenGL сделан от края окна, могут быть не состыковки.
+
+// *** timer ***
   // биты работы с таймером
-  t_Stop         =   1;        // таймер останавливается незамедлительно
-  t_Start        =   2;        // таймер создаётся и стартует незамедлительно
-  t_Tiks         =   4;        // используется только внутри таймеров!
-  t_SleepToStart =   8;        // таймер создаётся и запускается с установленной задержкой
-  t_SleepToStop  =  16;        // таймер останавливается через определённое время
-  t_Enable       = 128;        // используется или нет данный таймер (существует или нет?)
-  t_Stop_or_SleepToStart = t_Stop or t_SleepToStart;
-  t_Start_or_SleepToStop = t_Start or t_SleepToStop;
+  t_Stop         =   1;                     // таймер останавливается незамедлительно
+  t_Start        =   2;                     // таймер создаётся и стартует незамедлительно
+  t_Tiks         =   4;                     // используется только внутри таймеров!
+  t_SleepToStart =   8;                     // таймер создаётся и запускается с установленной задержкой
+  t_SleepToStop  =  16;                     // таймер останавливается через определённое время
 
-// mouse and touch
-  is_down       = $001;                     // нажато в данный момент времени
-  is_up         = $002;                     // отпущено в данный момент времени
-  is_click      = is_down;
-  is_canclick   = is_up;
-  is_Press      = $004;                     // нажато постоянно
-  is_canPress   = $008;                     // отпущенно - по умолчанию
-  is_DoubleDown = $010;                     // было произведено двойное нажатие
-  is_TripleDown = $020;                     // тройное нажатие, нужно или нет?
-  is_mWheelUp   = $040;                     // только для третьей кнопки мыши! - ролик (центральная кнопка)
-  is_mWheelDown = $080;                     // указание ролик движется вверх или вниз.
-  is_notTouch   = $FF;                      // не было ни каких нажатий клавиши на виртуальной клавиатуре.
-
+// *** mouse and touch ***
   M_BLEFT       = 0;
   {$IfNDef MOBILE}
   M_BMIDDLE     = 1;
@@ -69,7 +159,7 @@ const
   {$EndIf}
   MAX_TOUCH      = 10;
 
-  // OpenGL
+// *** OpenGL ***
   ModeUser       = 1;                       // MatrixMode
   Mode2D         = 2;
   Mode3D         = 3;
@@ -83,11 +173,214 @@ const
   GL_DEBUG = 4;                             // отладка контекста включена
   GL_FORWARD_COMPATIBLE = 8;                // вперёд совместимый контекст.
 
-  // primitives
+// *** primitives ***
   PR2D_FILL   = $010000;
   PR2D_SMOOTH = $020000;
   LINE_RGBA   = $040000;
   LINE_LOOP   = $080000;
+
+// *** working with files ***
+  FILE_ERROR = {$IFNDEF WINDOWS} 0 {$ELSE} Ptr(-1) {$ENDIF};
+
+  // Open Mode
+  FOM_CREATE = $01;                         // Create
+  FOM_OPENR  = $02;                         // Read
+  FOM_OPENW  = $03;                         // Write
+  FOM_OPENRW = $04;                         // Read&Write
+
+
+  // Seek Mode
+  FSM_SET    = $01;
+  FSM_CUR    = $02;
+  FSM_END    = $03;
+
+// *** Keyboard ***
+  K_SYSRQ      = $B7;
+  K_PAUSE      = $C5;
+  K_ESCAPE     = $01;
+  K_ENTER      = $1C;
+  K_KP_ENTER   = $9C;
+
+  K_UP         = $C8;
+  K_DOWN       = $D0;
+  K_LEFT       = $CB;
+  K_RIGHT      = $CD;
+
+  K_BACKSPACE  = $0E;
+  K_SPACE      = $39;
+  K_TAB        = $0F;
+  K_TILDE      = $29;
+
+  K_INSERT     = $D2;
+  K_DELETE     = $D3;
+  K_HOME       = $C7;
+  K_END        = $CF;
+  K_PAGEUP     = $C9;
+  K_PAGEDOWN   = $D1;
+
+  K_CTRL       = $FF - $01;
+  K_CTRL_L     = $1D;
+  K_CTRL_R     = $9D;
+  K_ALT        = $FF - $02;
+  K_ALT_L      = $38;
+  K_ALT_R      = $B8;
+  K_SHIFT      = $FF - $03;
+  K_SHIFT_L    = $2A;
+  K_SHIFT_R    = $36;
+  K_SUPER      = $FF - $04;
+  K_SUPER_L    = $DB;
+  K_SUPER_R    = $DC;
+  K_APP_MENU   = $DD;
+
+  K_CAPSLOCK   = $3A;
+  K_NUMLOCK    = $45;
+  K_SCROLL     = $46;
+
+  K_BRACKET_L  = $1A; // [{
+  K_BRACKET_R  = $1B; //] }
+  K_BACKSLASH  = $2B; // \
+  K_SLASH      = $35; // /
+  K_SEPARATOR  = $33; // ,
+  K_DECIMAL    = $34; // .
+  K_SEMICOLON  = $27; //: ;
+  K_APOSTROPHE = $28; // ' "
+
+  K_0          = $0B;
+  K_1          = $02;
+  K_2          = $03;
+  K_3          = $04;
+  K_4          = $05;
+  K_5          = $06;
+  K_6          = $07;
+  K_7          = $08;
+  K_8          = $09;
+  K_9          = $0A;
+
+  K_MINUS      = $0C;
+  K_EQUALS     = $0D;
+
+  K_A          = $1E;
+  K_B          = $30;
+  K_C          = $2E;
+  K_D          = $20;
+  K_E          = $12;
+  K_F          = $21;
+  K_G          = $22;
+  K_H          = $23;
+  K_I          = $17;
+  K_J          = $24;
+  K_K          = $25;
+  K_L          = $26;
+  K_M          = $32;
+  K_N          = $31;
+  K_O          = $18;
+  K_P          = $19;
+  K_Q          = $10;
+  K_R          = $13;
+  K_S          = $1F;
+  K_T          = $14;
+  K_U          = $16;
+  K_V          = $2F;
+  K_W          = $11;
+  K_X          = $2D;
+  K_Y          = $15;
+  K_Z          = $2C;
+
+  K_KP_0       = $52;
+  K_KP_1       = $4F;
+  K_KP_2       = $50;
+  K_KP_3       = $51;
+  K_KP_4       = $4B;
+  K_KP_5       = $4C;
+  K_KP_6       = $4D;
+  K_KP_7       = $47;
+  K_KP_8       = $48;
+  K_KP_9       = $49;
+
+  K_KP_SUB     = $4A;
+  K_KP_ADD     = $4E;
+  K_KP_MUL     = $37;
+  K_KP_DIV     = $B5;
+  K_KP_DECIMAL = $53;
+
+  K_F1         = $3B;
+  K_F2         = $3C;
+  K_F3         = $3D;
+  K_F4         = $3E;
+  K_F5         = $3F;
+  K_F6         = $40;
+  K_F7         = $41;
+  K_F8         = $42;
+  K_F9         = $43;
+  K_F10        = $44;
+  K_F11        = $57;
+  K_F12        = $58;
+
+  // основные события происходящие между интервалами очистки клавиатуры
+  KA_DOWN      = 0;
+  KA_UP        = 1;
+  // события происходящие только при нажатии/отжатии клавиш
+  KT_DOWN      = 2;
+  KT_UP        = 3;
+
+// *** Joystick ***
+  JOY_HAS_Z   = $000001;
+  JOY_HAS_R   = $000002;
+  JOY_HAS_U   = $000004;
+  JOY_HAS_V   = $000008;
+  JOY_HAS_POV = $000010;
+
+  JOY_AXIS_X = 0;
+  JOY_AXIS_Y = 1;
+  JOY_AXIS_Z = 2;
+  JOY_AXIS_R = 3;
+  JOY_AXIS_U = 4;
+  JOY_AXIS_V = 5;
+  JOY_POVX   = 6;
+  JOY_POVY   = 7;
+
+// *** ??? ***
+  REFRESH_MAXIMUM = 0;
+  REFRESH_DEFAULT = 1;
+// *** GL ***
+  TARGET_SCREEN  = 1;                       // цель - экран
+  TARGET_TEXTURE = 2;                       // цель - часть экрана
+
+// *** Render targets ***
+  RT_DEFAULT      = $00;
+  RT_FULL_SCREEN  = $01;
+  RT_USE_DEPTH    = $02;
+  RT_CLEAR_COLOR  = $04;
+  RT_CLEAR_DEPTH  = $08;
+  RT_SAVE_CONTENT = $10;                    // Direct3D only!
+
+// FX
+  FX_BLEND_NORMAL = $00;
+  FX_BLEND_ADD    = $01;
+  FX_BLEND_MULT   = $02;
+  FX_BLEND_BLACK  = $03;
+  FX_BLEND_WHITE  = $04;
+  FX_BLEND_MASK   = $05;
+
+  FX_COLOR_MIX    = $00;
+  FX_COLOR_SET    = $01;
+
+  FX_BLEND        = $100000;
+  FX_COLOR        = $200000;
+
+// FX 2D
+  // Rus: отражение по X.
+  // Eng: reflection on X.
+  FX2D_FLIPX      = $000001;
+  // Rus: отражение по Y.
+  // Eng: reflection on Y.
+  FX2D_FLIPY      = $000002;
+  FX2D_VCA        = $000004;
+  FX2D_VCHANGE    = $000008;
+  FX2D_SCALE      = $000010;
+  FX2D_RPIVOT     = $000020;
+
+
 
 {$IFNDEF FPC}
 type
@@ -133,7 +426,11 @@ type
     Items: array of UTF8String;
   end;
 
-// timer
+// *** files ***
+  zglTFile     = Ptr;
+  zglTFileList = zglTStringList;
+
+// *** timer ***
   zglPTimer = ^zglTTimer;
   zglTTimer = record
     Interval, SInterval: LongWord;
@@ -149,6 +446,18 @@ type
     Timers: array of zglPTimer;
   end;
 
+// *** Joystick ***
+  zglPJoyInfo = ^zglTJoyInfo;
+  zglTJoyInfo = record
+    Name  : UTF8String;
+    Count : record
+      Axes   : Integer;
+      Buttons: Integer;
+    end;
+    Caps  : LongWord;
+  end;
+
+// *** Color ***
   // Rus: указатель на цвет в "точной" форме - RGBA - single. От 0 до 1.
   // Eng: pointer to color in "exact" form - RGBA - single. 0 to 1.
   zglPColor = ^zglTColor;
@@ -474,6 +783,25 @@ type
 (*******************************************************************************
 *                                end textures                                  *
 *******************************************************************************)
+
+// *** Render targets ***
+  zglPRenderTarget = ^zglTRenderTarget;
+  zglTRenderTarget = record
+    Type_     : Byte;
+    Handle    : Pointer;
+    Surface   : zglPTexture;
+    Flags     : Byte;
+
+    prev, next: zglPRenderTarget;
+  end;
+
+  zglPRenderTargetManager = ^zglTRenderTargetManager;
+  zglTRenderTargetManager = record
+    Count: Integer;
+    First: zglTRenderTarget;
+  end;
+
+  zglTRenderCallback = procedure(Data: Pointer);
 
 (*******************************************************************************
 *                           POSIX TYPE DEFINITIONS                             *

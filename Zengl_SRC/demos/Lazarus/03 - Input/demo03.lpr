@@ -33,8 +33,7 @@ uses
   gegl_utils,
   gegl_menu_gui,
   {$EndIf}
-  zgl_utils
-  ;
+  zgl_utils;
 
 var
   dirRes  : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
