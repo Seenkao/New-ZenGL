@@ -1,4 +1,4 @@
-# ZenGL version 3.29 + MacOS Cocoa - beta version + Green Engine v1.0
+# ZenGL version 3.30 + MacOS Cocoa - beta version + Green Engine v1.0
 
 [Eng](#English)
 1. [About](#About)
