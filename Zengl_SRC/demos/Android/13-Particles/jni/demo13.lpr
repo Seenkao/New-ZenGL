@@ -21,7 +21,10 @@ uses
   zgl_text,
   zgl_types,
   zgl_log,
-  zgl_utils;
+  zgl_utils,
+  zgl_types,
+  {$IfNDef OLD_METHODS}
+  , gegl_color{$EndIf};
 
 var
   dirRes         : UTF8String = 'assets/';
@@ -91,7 +94,7 @@ begin
   if debug Then
     for i := 0 to particles.Count.Emitters - 1 do
       with particles.List[i]^.BBox do
-        pr2d_Rect( MinX, MinY, MaxX - MinX, MaxY - MinY, $FF0000, 255 );
+        pr2d_Rect( MinX, MinY, MaxX - MinX, MaxY - MinY, {$IfNDef OLD_METHODS}cl_Red{$Else}$FF0000, 255{$EndIf} );
 
   text_Draw( fntMain, 0, 0, 'FPS: ' + u_IntToStr( zgl_Get( RENDER_FPS ) ) );
   text_Draw( fntMain, 0, 20, 'Particles: ' + u_IntToStr( particles.Count.Particles ) );
