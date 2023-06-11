@@ -54,10 +54,11 @@ var
 
   TimeStart : LongWord;
   TimeMiku  : LongWord;
-  
+  {$IfNDef OLD_METHODS}
   newColor  : LongWord;
-  correctColor: LongWord; 
-
+  correctColor: LongWord;
+  {$EndIf}
+  
 // Miku
 procedure MikuInit( var Miku : zglTMikuSprite );
 begin
@@ -148,9 +149,10 @@ begin
 
   fntMain := font_LoadFromFile( dirRes + 'font.zfi' );
   setFontTextScale(15, fntMain);
-  
+  {$IfNDef OLD_METHODS}
   newColor := Color_FindOrAdd($80A080FF - 55);
   correctColor := Color_FindOrAdd($AFAFAFFF); 
+  {$EndIf}
 end;
 
 procedure Draw;
@@ -168,12 +170,14 @@ begin
   else
     if time < 510 Then
       begin
-        i := Get_Color(correctColor);
         pr2d_Rect( 0, 0, 800, 600, {$IfDef OLD_METHODS}$AFAFAF, 510 - time,{$Else}correctColor,{$EndIf} PR2D_FILL );
+        {$IfNDef OLD_METHODS}
+        i := Get_Color(correctColor);
         dec(i);
         if i < $AFAFAF00 then
           i := $AFAFAF00;
-        Correct_Color(correctColor, i);   
+        Correct_Color(correctColor, i); 
+        {$EndIf}
         ssprite2d_Draw( texLogo, 400 - 256, 300 - 128, 512, 256, 0, 510 - time );
       end;
 
