@@ -175,7 +175,7 @@ begin
     if time < 510 Then
       begin
         pr2d_Rect( 0, 0, 800, 600, {$IfDef OLD_METHODS}$AFAFAF, 510 - time,{$Else}correctColor,{$EndIf} PR2D_FILL );
-        {$IfDef OLD_METHODS}
+        {$IfNDef OLD_METHODS}
         i := Get_Color(correctColor);
         dec(i);
         if i < $AFAFAF00 then
