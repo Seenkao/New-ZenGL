@@ -14,7 +14,8 @@ else ifeq ($(shell uname), Darwin)
 endif
 
 # Variables
-# enter your path to FPC 
+# Rus: введите свой путь к FPC
+# Eng: enter your path to FPC
 FPC     = fpc
 FLAGS   = -O3 -XsX -CX -Sd
 INCLUDE = -Fu../../../headers -Fi../../../headers -Fi../../../srcGEGL -Fi../../../src -Fi../../../srcGL -Fu../../../srcGEGL -Fu../../../extra -Fu../../../src -Fu../../../srcGL

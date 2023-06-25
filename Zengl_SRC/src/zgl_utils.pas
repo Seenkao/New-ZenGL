@@ -39,7 +39,7 @@ uses
   Windows,
   {$ENDIF}
   {$IFDEF MACOSX}
-  MacOSAll,
+//  MacOSAll,   ?????
   {$ENDIF}
   {$IFDEF iOS}
   iPhoneAll, CFString,
@@ -584,10 +584,6 @@ begin
 end;
 
 procedure u_Error(const ErrStr: UTF8String);
-  {$IFDEF MACOSX}
-  var
-    outItemHit: SInt16;
-  {$ENDIF}
   {$IFDEF WINDOWS}
   var
     wideStr: PWideChar;
@@ -601,18 +597,11 @@ begin
   MessageBoxW(0, wideStr, 'ERROR!', MB_OK or MB_ICONERROR);
   FreeMem(wideStr);
 {$ENDIF}
-{$IFDEF MACOSX}{$IfNDef MAC_COCOA}
-  StandardAlert(kAlertNoteAlert, 'ERROR!', ErrStr, nil, outItemHit);
-{$ENDIF}{$EndIf}
 
   log_Add('ERROR: ' + ErrStr);
 end;
 
 procedure u_Warning(const ErrStr: UTF8String);
-  {$IFDEF MACOSX}
-  var
-    outItemHit: SInt16;
-  {$ENDIF}
   {$IFDEF WINDOWS}
   var
     wideStr: PWideChar;
@@ -626,9 +615,6 @@ begin
   MessageBoxW(0, wideStr, 'WARNING!', MB_OK or MB_ICONWARNING);
   FreeMem(wideStr);
 {$ENDIF}
-{$IFDEF MACOSX}{$IfNDef MAC_COCOA}
-  StandardAlert(kAlertNoteAlert, 'WARNING!', ErrStr, nil, outItemHit);
-{$ENDIF}{$EndIf}
 
   log_Add('WARNING: ' + ErrStr);
 end;

@@ -14,7 +14,6 @@ uses
   zgl_keyboard,
   zgl_fx,
   zgl_file,
-  zgl_types,
   zgl_textures,
   zgl_textures_png,
   zgl_textures_jpg,

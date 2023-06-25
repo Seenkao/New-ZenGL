@@ -36,10 +36,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.text.InputType;
-import android.view.KeyEvent;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.WindowManager;
+import android.view.*;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
@@ -67,13 +64,7 @@ public class ZenGL extends GLSurfaceView
 	public ZenGL( Context context, String appName, String appSourceDir )
 	{
 		super( context );
-
-		System.loadLibrary( "zenjpeg" );
-		System.loadLibrary( "openal" );
-		System.loadLibrary( "ogg" );
-		System.loadLibrary( "vorbis" );
-		System.loadLibrary( "theoradec" );
-		System.loadLibrary( "chipmunk" );
+		
 		System.loadLibrary( appName );
 
 		SourceDir = appSourceDir;

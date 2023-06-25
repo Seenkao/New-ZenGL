@@ -26,6 +26,7 @@ uses
   zgl_font,
   zgl_text,
   zgl_math_2d,
+  zgl_types,
   zgl_utils
   {$ELSE}
   zglHeader

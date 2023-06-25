@@ -12,7 +12,6 @@ uses
   zgl_keyboard,
   zgl_render_2d,
   zgl_fx,
-  zgl_types,
   zgl_textures,
   zgl_textures_png,
   zgl_render_target,
@@ -20,6 +19,7 @@ uses
   zgl_font,
   zgl_text,
   zgl_math_2d,
+  zgl_types,
   zgl_utils
   ;
 

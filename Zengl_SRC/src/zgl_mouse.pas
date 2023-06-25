@@ -37,23 +37,10 @@ uses
   Windows,
 {$ENDIF}
 {$IFDEF MACOSX}
-  MacOSAll,
+//  MacOSAll,   ???
 {$ENDIF}
   sysutils,
   zgl_types;
-
-const
-  is_down       = $001;                     // нажато в данный момент времени
-  is_up         = $002;                     // отпущено в данный момент времени
-  is_click      = is_down;
-  is_canclick   = is_up;
-  is_Press      = $004;                     // нажато постоянно
-  is_canPress   = $008;                     // отпущенно - по умолчанию
-  is_DoubleDown = $010;                     // было произведено двойное нажатие
-  is_TripleDown = $020;                     // тройное нажатие, нужно или нет?
-  is_mWheelUp   = $040;                     // только для третьей кнопки мыши! - ролик (центральная кнопка)
-  is_mWheelDown = $080;                     // указание ролик движется вверх или вниз.
-  is_notTouch   = $FF;                      // не было ни каких нажатий клавиши на виртуальной клавиатуре.
 
 {$IfDef LIBRARY_COMPILE}
 // Rus: возвращаем координату "X".
@@ -276,7 +263,7 @@ begin
 end;
 
 procedure mouse_LockInXY(X: Integer = -1; Y: Integer = -1);
-  {$IFDEF MACOSX}
+  {$IFDEF MAC_COCOA}
   var
     Point: CGPoint;
   {$ENDIF}
@@ -310,7 +297,7 @@ begin
 
   SetCursorPos(X, Y);
 {$ENDIF}
-{$IFDEF MACOSX}
+{$IFDEF MAC_COCOA}
   if (X = -1) and (Y = -1) Then
   begin
     Point.X := wndX + wndWidth / 2;

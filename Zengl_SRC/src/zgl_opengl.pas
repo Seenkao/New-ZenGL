@@ -38,7 +38,6 @@ uses
   zgl_opengl_all,
   zgl_pasOpenGL,
   zgl_gltypeconst,
-  zgl_types,
   {$IFDEF LINUX}
   X, XUtil, xlib,
   zgl_glx_wgl
@@ -47,15 +46,15 @@ uses
   Windows,
   zgl_glx_wgl
   {$ENDIF}
-  {$IFDEF MACOSX}{$IfDef MAC_COCOA}
+  {$IfDef MAC_COCOA}
   CocoaAll,
-  {$EndIf}
-  MacOSAll
   {$ENDIF}
   ;
 
-  {$IfDef MAC_COCOA}
 const
+  TARGET_SCREEN  = 1;                    // цель - экран
+  TARGET_TEXTURE = 2;                    // цель - часть экрана
+  {$IfDef MAC_COCOA}
     {$IF DEFINED(USE_GL_21) or DEFINED(USE_MIN_OPENGL) or DEFINED(USE_DEPRECATED)}
     _NSOpenGLVersion = NSOpenGLProfileVersionLegacy;
     {$IfEnd}
@@ -156,7 +155,7 @@ var
   oglFormatDesc: TPixelFormatDescriptor;
   {$ENDIF}
 
-  {$IFDEF MACOSX}{$IfDef MAC_COCOA}
+  {$IfDef MAC_COCOA}
   oglContext : NSOpenGLContext;
   oglCoreGL  : Integer;
   oglAttr    : array[0..9] of NSOpenGLPixelFormatAttribute = (NSOpenGLPFADoubleBuffer, NSOpenGLPFAColorSize, 32, NSOpenGLPFADepthSize, 32,
@@ -164,12 +163,7 @@ var
              // NSOpenGLProfileVersionLegacy  - OpenGL 2.1
              // NSOpenGLProfileVersion3_2Core - OpenGL 3.2
              // NSOpenGLProfileVersion4_1Core - OpenGL 4.1
-  {$Else}
-  oglDevice  : GDHandle;
-  oglContext : TAGLContext;
-  oglFormat  : TAGLPixelFormat;
-  oglAttr    : array[0..31] of LongWord;
-  {$ENDIF}{$EndIf}
+  {$EndIf}
 
 implementation
 uses
@@ -445,70 +439,9 @@ begin
   wnd_Destroy();
 //  wndFirst := FALSE;
 {$ENDIF}
-{$IFDEF MACOSX}{$IfDef MAC_COCOA}
+{$IfDef MAC_COCOA}
 
-{$Else}
-  if not InitAGL() Then
-  begin
-    log_Add('Cannot load AGL library');
-    exit;
-  end;
-
-  oglzDepth := 24;
-  repeat
-    FillChar(oglAttr[0], Length(oglAttr) * 4, AGL_NONE);
-    oglAttr[0] := AGL_RGBA;
-    oglAttr[1] := AGL_RED_SIZE;
-    oglAttr[2] := 8;
-    oglAttr[3] := AGL_GREEN_SIZE;
-    oglAttr[4] := 8;
-    oglAttr[5] := AGL_BLUE_SIZE;
-    oglAttr[6] := 8;
-    oglAttr[7] := AGL_ALPHA_SIZE;
-    oglAttr[8] := 8;
-    oglAttr[9] := AGL_DOUBLEBUFFER;
-    oglAttr[10] := AGL_DEPTH_SIZE;
-    oglAttr[11] := oglzDepth;
-    i := 12;
-    if oglStencil > 0 Then
-    begin
-      oglAttr[i] := AGL_STENCIL_SIZE;
-      oglAttr[i + 1] := oglStencil;
-      inc(i, 2);
-    end;
-    if oglFSAA > 0 Then
-    begin
-      oglAttr[i] := AGL_SAMPLE_BUFFERS_ARB;
-      oglAttr[i + 1] := 1;
-      oglAttr[i + 2] := AGL_SAMPLES_ARB;
-      oglAttr[i + 3] := oglFSAA;
-    end;
-
-    log_Add('aglChoosePixelFormat: zDepth = ' + u_IntToStr(oglzDepth) + '; ' + 'stencil = ' + u_IntToStr(oglStencil) + '; ' + 'fsaa = ' + u_IntToStr(oglFSAA));
-    DMGetGDeviceByDisplayID(DisplayIDType(scrDisplay), oglDevice, FALSE);
-    oglFormat := aglChoosePixelFormat(@oglDevice, 1, @oglAttr[0]);
-    if (not Assigned(oglFormat) and (oglzDepth = 1)) Then
-    begin
-      if oglFSAA = 0 Then
-        break
-      else
-      begin
-        oglzDepth := 24;
-        DEC(oglFSAA, 2);
-      end;
-    end else
-      if not Assigned(oglFormat) Then
-        DEC(oglzDepth, 8);
-    if oglzDepth = 0 Then
-      oglzDepth := 1;
-  until Assigned(oglFormat);
-
-  if not Assigned(oglFormat) Then
-  begin
-    u_Error('Cannot choose pixel format.');
-    exit;
-  end;
-{$ENDIF}{$EndIf}
+{$EndIf}
   Result := TRUE;
 end;
 
@@ -526,14 +459,6 @@ begin
     u_Error('Cannot release current OpenGL context');
 
   wglDeleteContext(oglContext);
-{$ENDIF}
-{$IFDEF MACOSX}
-  aglDestroyPixelFormat(oglFormat);
-  if aglSetCurrentContext(nil) = GL_FALSE Then
-    u_Error('Cannot release current OpenGL context');
-
-  aglDestroyContext(oglContext);
-  FreeAGL();
 {$ENDIF}
 
   FreeGL();
@@ -648,31 +573,14 @@ begin
     exit;
   end;
 {$ENDIF}
-{$IFDEF MACOSX}{$IfDef MAC_COCOA}
+{$IfDef MAC_COCOA}
   pixfmt := NSOpenGLPixelFormat.alloc.initWithAttributes(@oglAttr);
   oglContext := NSOpenGLContext.alloc.initWithFormat_shareContext(pixfmt, nil);
   pixfmt.release;
   oglContext.makeCurrentContext;
 
   oglContext.setView(zglView);
-{$Else}
-  oglContext := aglCreateContext(oglFormat, nil);
-  if not Assigned(oglContext) Then
-    begin
-      u_Error('Cannot create OpenGL context');
-      exit;
-    end;
-  if aglSetDrawable(oglContext, GetWindowPort(wndHandle)) = GL_FALSE Then
-    begin
-      u_Error('Cannot set Drawable');
-      exit;
-    end;
-  if aglSetCurrentContext(oglContext) = GL_FALSE Then
-    begin
-      u_Error('Cannot set current OpenGL context');
-      exit;
-    end;
-{$ENDIF}{$EndIf}
+{$EndIf}
 
   oglRenderer := glGetString(GL_RENDERER);
   log_Add('GL_VERSION: ' + glGetString(GL_VERSION));
@@ -685,7 +593,7 @@ begin
 {$IFDEF WINDOWS}
   ogl3DAccelerator := oglRenderer <> 'GDI Generic';
 {$ENDIF}
-{$IFDEF MACOSX}
+{$IFDEF MAC_COCOA}
   ogl3DAccelerator := oglRenderer <> 'Apple Software Renderer';
 {$ENDIF}
   if not ogl3DAccelerator Then

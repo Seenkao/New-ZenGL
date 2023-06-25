@@ -423,8 +423,14 @@ begin
     charDescC._y1 := charDescC.ShiftY + useFont.MaxHeight - charDescC.Height - useFont.Padding[PaddingY1];
     charDescC._y2 := charDescC.ShiftY + useFont.MaxHeight + useFont.Padding[PaddingY2];
   end;
-  charDesc32 := useFont.CharDesc[32];
-  charDescC := useFont.CharDesc[33];
+  if useFont.CharDesc[32] <> nil then
+    charDesc32 := useFont.CharDesc[32]
+  else
+    charDesc32 := useFont.CharDesc[49];
+  if useFont.CharDesc[32] <> nil then
+    charDescC := useFont.CharDesc[33]
+  else
+    charDescC := useFont.CharDesc[49];
   charDesc32.Width := charDescC.Width;
   charDesc32.Height := charDescC.Height;
   charDesc32.ShiftX := charDescC.ShiftX;

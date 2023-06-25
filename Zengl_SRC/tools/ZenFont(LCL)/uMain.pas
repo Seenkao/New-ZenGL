@@ -23,9 +23,7 @@ uses
   zgl_text,
   zgl_file,
   zgl_types,
-  {$IfNDef OLD_METHODS}
   gegl_color,
-  {$EndIf}
   zgl_font_gen;
 
 type
@@ -131,8 +129,8 @@ procedure Draw;
 var
   r: zglTRect2D;
 begin
-  pr2d_Rect( 0, 0, Form1.Panel1.Width, Form1.Panel1.Height, {$IfNDef OLD_METHODS}newColor,{$Else}$505050, 255,{$EndIf} PR2D_FILL );
-  pr2d_Rect( fontX, fontY, fg_PageSize, fg_PageSize, {$IfNDef OLD_METHODS}cl_Black,{$Else}$000000, 255,{$EndIf} PR2D_FILL );
+  pr2d_Rect( 0, 0, Form1.Panel1.Width, Form1.Panel1.Height, newColor, PR2D_FILL );
+  pr2d_Rect( fontX, fontY, fg_PageSize, fg_PageSize, cl_Black, PR2D_FILL );
 
   if ( fg_Font <> 0) and Assigned(managerFont.Font[fg_Font].Pages) Then
     begin
@@ -142,7 +140,7 @@ begin
       r.X := ( Form1.Panel1.Width - r.W ) / 2;
       r.Y := Form1.Panel1.Height - managerFont.Font[fg_Font].MaxShiftY - managerFont.Font[fg_Font].MaxHeight;
       r.H := managerFont.Font[fg_Font].MaxShiftY + managerFont.Font[fg_Font].MaxHeight;
-      pr2d_Rect( r.X, r.Y, r.W, r.H, {$IfNDef OLD_METHODS}cl_Black,{$Else}$000000, 255,{$EndIf} PR2D_FILL );
+      pr2d_Rect( r.X, r.Y, r.W, r.H, cl_Black, PR2D_FILL );
       text_Draw( fg_Font, Form1.Panel1.Width div 2, Form1.Panel1.Height - managerFont.Font[fg_Font].MaxHeight, Form1.EditTest.Text, TEXT_HALIGN_CENTER );
     end;
 

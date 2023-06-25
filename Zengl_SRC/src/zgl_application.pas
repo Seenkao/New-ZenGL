@@ -21,7 +21,7 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge
+ !!! modification from Serge 02.05.2022
 }
 unit zgl_application;
 
@@ -38,10 +38,8 @@ uses
   {$IFDEF WINDOWS}
   Windows, Messages
   {$ENDIF}
-  {$IFDEF MACOSX}{$IfDef MAC_COCOA}
+  {$IfDef MAC_COCOA}
   CocoaAll,
-  {$EndIf}
-  MacOSAll
   {$ENDIF}
   {$IFDEF iOS}
   iPhoneAll, CFRunLoop, CGGeometry, CFBase, CFString
@@ -68,8 +66,8 @@ function app_ProcessMessages(hWnd: HWND; Msg: UINT; wParam: WPARAM; lParam: LPAR
 {$IFDEF LINUX}
 function app_ProcessMessages: LongWord;
 {$ENDIF}
-{$IFDEF MACOSX}
-function app_ProcessMessages({$IfNDef MAC_COCOA}inHandlerCallRef: EventHandlerCallRef; inEvent: EventRef; inUserData: UnivPtr{$EndIf}): OSStatus; cdecl;
+{$IFDEF MAC_COCOA}
+function app_ProcessMessages(): OSStatus; cdecl;
 {$ENDIF}
 {$Else}
 procedure app_Draw;
@@ -199,7 +197,7 @@ var
 
   {$IFDEF USE_X11}
   appCursor: TCursor = None;
-  {$IfDef OLD_METHODS}
+  {$IfDef KEYBOARD_OLD_FUNCTION}
   appXIM   : PXIM;
   appXIC   : PXIC;
   {$ENDIF}{$EndIf}
@@ -284,7 +282,7 @@ uses
   {$IFDEF USE_SOUND}
   zgl_sound,
   {$ENDIF}
-  {$IfNDef OLD_METHODS}
+  {$IfNDef KEYBOARD_OLD_FUNCTION}
   gegl_VElements,
   gegl_drawElement,
   gegl_Types,
@@ -305,7 +303,7 @@ begin
   if Assigned(app_PDraw) Then
   begin
     app_PDraw();
-    {$IfNDef OLD_METHODS}
+    {$IfNDef KEYBOARD_OLD_FUNCTION}
     if managerSetOfTools.count > 0 then
     begin
       propEl := @managerSetOfTools.propElement[0];
@@ -370,21 +368,24 @@ begin
   end;
 
   {$IfDef USE_VKEYBOARD}
-  if keysDown[K_F2] then
-    PkeybFlags^ := PkeybFlags^ or keyboardSymbolDown;
-  if ((PkeybFlags^ and keyboardSymbolDown) > 0) and (keysUp[K_F2]) then
+  if Assigned(app_DrawGui) then
   begin
-    PkeybFlags^ := PkeybFlags^ xor keyboardSymbolDown;
-    if MenuChange = 3 then
+    if keysDown[K_F2] then
+      PkeybFlags^ := PkeybFlags^ or keyboardSymbolDown;
+    if ((PkeybFlags^ and keyboardSymbolDown) > 0) and (keysUp[K_F2]) then
     begin
-      SetMenuProcess(4);
-      MenuChange := 4;
-      PkeybFlags^ := PkeybFlags^ or keyboardSymbol;
-    end
-    else begin
-      SetMenuProcess(3);
-      MenuChange := 3;
-      PkeybFlags^ := PkeybFlags^ xor keyboardSymbol;
+      PkeybFlags^ := PkeybFlags^ xor keyboardSymbolDown;
+      if MenuChange = 3 then
+      begin
+        SetMenuProcess(4);
+        MenuChange := 4;
+        PkeybFlags^ := PkeybFlags^ or keyboardSymbol;
+      end
+      else begin
+        SetMenuProcess(3);
+        MenuChange := 3;
+        PkeybFlags^ := PkeybFlags^ xor keyboardSymbol;
+      end;
     end;
   end;
   {$EndIf}{$EndIf}
@@ -413,7 +414,7 @@ begin
     end;
   {$EndIf}
 
-  {$IfNDef OLD_METHODS}
+  {$IfNDef KEYBOARD_OLD_FUNCTION}
   if managerSetOfTools.count > 0 then
     for i := 0 to managerSetOfTools.count - 1 do
     begin
@@ -440,7 +441,7 @@ end;
 procedure app_Init;
 begin
   managerZeroTexture := tex_CreateZero(4, 4, $FFFFFFFF, TEX_DEFAULT_2D);
-  {$IfNDef OLD_METHODS}
+  {$IfNDef KEYBOARD_OLD_FUNCTION}
   managerSetOfTools.count := 0;
   managerSetOfTools.maxPossibleEl := 0;
   managerSetOfTools.ActiveElement := 65535;
@@ -561,10 +562,6 @@ var
     m        : tagMsg;
     cursorpos: TPoint;
   {$ENDIF}
-  {$IFDEF MACOSX}{$IfNDef MAC_COCOA}
-    event: EventRecord;
-    mPos : Point;
-  {$ENDIF}{$EndIf}
 begin
   xmouse := mouseX;
   ymouse := mouseY;
@@ -583,14 +580,10 @@ begin
     mouseY := cursorpos.Y - wndY - wndBrdSizeY - wndCpnSize;
   end;
 {$ENDIF}
-{$IFDEF MACOSX}{$IfDef MAC_COCOA}
+{$IfDef MAC_COCOA}
   mouseX := gMouseX;
   mouseY := wndHeight - gMouseY;
-{$Else}
-  GetGlobalMouse(mPos);
-  mouseX := mPos.h - wndX;
-  mouseY := mPos.v - wndY;
-{$ENDIF}{$EndIf}
+{$EndIf}
 
   if appFlags and CORRECT_RESOLUTION > 0 Then
   begin
@@ -635,11 +628,9 @@ begin
     DispatchMessageW(m);
   end;
 {$ENDIF}
-{$IFDEF MACOSX}{$IfDef MAC_COCOA}
+{$IfDef MAC_COCOA}
   app_ProcessMessages;
-{$Else}
-  while GetNextEvent(everyEvent, event) do;
-{$ENDIF}{$EndIf}
+{$EndIf}
 {$EndIf}
 {$IFDEF iOS}
   while CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.01, TRUE) = kCFRunLoopRunHandledSource do;
@@ -660,8 +651,15 @@ end;
 
 {$IFNDEF iOS}
 {$IfDef WND_USE}
-function app_ProcessMessages;
-  {$IFDEF MACOSX}{$IfDef MAC_COCOA}
+{$IFDEF WINDOWS}
+function app_ProcessMessages(hWnd: HWND; Msg: UINT; wParam: WPARAM; lParam: LPARAM): LRESULT; stdcall;
+{$ENDIF}
+{/$IfNDef USE_INIT_HANDLE}
+{$IFDEF LINUX}
+function app_ProcessMessages: LongWord;
+{$ENDIF}
+{$IFDEF MAC_COCOA}
+function app_ProcessMessages(): OSStatus; cdecl;
   const
     MOUSELD      = $00000001;
     MOUSELU      = $00000002;
@@ -671,23 +669,7 @@ function app_ProcessMessages;
     MOUSEMU      = $00000020;
     MOUSEMOVE    = $00000040;
     KEYUPDOWN    = $00000100;
-  {$Else}
-  type
-    zglTModifier = record
-      bit: Integer;
-      key: Integer;
-    end;
-
-  const
-    Modifier: array[0..7] of zglTModifier = ((bit: $010000; key: K_NUMLOCK),
-                                             (bit: $008000; key: K_CTRL_R),
-                                             (bit: $004000; key: K_ALT_R),
-                                             (bit: $002000; key: K_SHIFT_R),
-                                             (bit: $001000; key: K_CTRL_L),
-                                             (bit: $000800; key: K_ALT_L),
-                                             (bit: $000200; key: K_SHIFT_L),
-                                             (bit: $000100; key: K_SUPER));
-  {$ENDIF}{$EndIf}
+{$EndIf}
 
   var
   {$IFDEF USE_X11}
@@ -695,18 +677,7 @@ function app_ProcessMessages;
     keysym: TKeySym;
     status: TStatus;
   {$ENDIF}
-  {$IFDEF MACOSX}
-    eClass : UInt32;
-    eKind  : UInt32;
-    command: HICommand;
-    mButton: EventMouseButton;
-    mWheel : Integer;
-    bounds : HIRect;
-    SCAKey : LongWord;
-    i      : Integer;
-    wndMouseIn: Boolean;
-  {$ENDIF}
-  {$IfDef OLD_METHODS}
+  {$IfDef KEYBOARD_OLD_FUNCTION}
     len: Integer;
     c  : array[0..5] of AnsiChar;
     str: UTF8String;
@@ -825,7 +796,7 @@ begin
 
               keyboardDown(key);
 
-              {$IfDef OLD_METHODS}
+              {$IfDef KEYBOARD_OLD_FUNCTION}
               if keysCanText Then
               case key of
                 K_SYSRQ, K_PAUSE,
@@ -1035,7 +1006,7 @@ begin
         key := winkey_to_scancode(wParam);
         keyboardUp(key);
       end;
-    {$IfDef OLD_METHODS}
+    {$IfDef KEYBOARD_OLD_FUNCTION}
     WM_CHAR:
       begin
         if keysCanText Then
@@ -1064,7 +1035,7 @@ begin
     Result := DefWindowProcW(hWnd, Msg, wParam, lParam);
   end;
 {$ENDIF}
-{$IFDEF MACOSX}{$IfDef MAC_COCOA}
+{$IfDef MAC_COCOA}
   flagTrue := 0;
 //  pool := NSAutoreleasePool.alloc.init;
 eventLoop:
@@ -1133,7 +1104,7 @@ eventLoop:
     NSScrollWheel:
       begin
         if ev.scrollingDeltaY > 0 then
-          mouseAction[M_BMIDDLE].state := mouseAction[M_BMIDDLE].state or is_mWheelUp
+          mouseAction[M_BMIDDLE].state := mouseAction[M_BMIDDLE].state or is_mWheelUp;
         else
           mouseAction[M_BMIDDLE].state := mouseAction[M_BMIDDLE].state or is_mWheelDown;
       end;
@@ -1298,252 +1269,7 @@ eventLoop:
 //    NSApp.updateWindows;
   end;
   goto eventLoop;
-{$Else}
-  eClass := GetEventClass(inEvent);
-  eKind  := GetEventKind(inEvent);
-  Result := CallNextEventHandler(inHandlerCallRef, inEvent);
-
-  if winOn Then
-  case eClass of
-    kEventClassCommand:
-      case eKind of
-        kEventProcessCommand:
-          begin
-            GetEventParameter(inEvent, kEventParamDirectObject, kEventParamHICommand, nil, SizeOf(HICommand), nil, @command);
-            if command.commandID = kHICommandQuit Then
-              winOn := false;
-          end;
-      end;
-
-    kEventClassWindow:
-      case eKind of
-        kEventWindowDrawContent:
-          begin
-            app_Draw();
-          end;
-        kEventWindowActivated:
-          begin
-            appFocus := TRUE;
-            appPause := FALSE;
-            if Assigned(app_PActivate) Then
-              app_PActivate(TRUE);
-            FillChar(keysDown[0], 256, 0);
-            mouseUpDown := 0;
-            if wndFullScreen Then
-              scr_SetOptions();
-          end;
-        kEventWindowDeactivated:
-          begin
-            appFocus := FALSE;
-            if appAutoPause Then appPause := TRUE;
-            if Assigned(app_PActivate) Then
-              app_PActivate(FALSE);
-            if wndFullScreen Then scr_Reset();
-          end;
-        kEventWindowCollapsed:
-          begin
-            appFocus := FALSE;
-            appPause := TRUE;
-          end;
-        kEventWindowClosed:
-          begin
-            wndHandle := nil;
-            winOn := FALSE;
-          end;
-        kEventWindowBoundsChanged:
-          begin
-            if not wndFullScreen Then
-            begin
-              GetEventParameter(inEvent, kEventParamCurrentBounds, typeHIRect, nil, SizeOf(bounds), nil, @bounds);
-              wndX := Round(bounds.origin.x - (bounds.size.width - wndWidth) / 2);
-              wndY := Round(bounds.origin.y - (bounds.size.height - wndHeight) / 2);
-            end else
-            begin
-              wndX := 0;
-              wndY := 0;
-            end;
-          end;
-      end;
-
-    kEventClassKeyboard:
-      begin
-        GetEventParameter(inEvent, kEventParamKeyCode, typeUInt32, nil, 4, nil, @Key);
-
-        case eKind of
-          kEventRawKeyModifiersChanged:
-            begin
-              GetEventParameter(inEvent, kEventParamKeyModifiers, typeUInt32, nil, 4, nil, @SCAKey);
-              for i := 0 to 7 do
-                if SCAKey and Modifier[i].bit > 0 Then
-                begin
-                  if not keysDown[Modifier[i].key] Then
-                    doKeyPress(Modifier[i].key);
-                  keysDown[Modifier[i].key] := TRUE;
-                  keysUp  [Modifier[i].key] := FALSE;
-                  keysLast[KA_DOWN]           := Modifier[i].key;
-
-                  key := SCA(Modifier[i].key);
-                  if not keysDown[key] Then
-                    doKeyPress(key);
-                  keysDown[key] := TRUE;
-                  keysUp  [key] := FALSE;
-                end else
-                begin
-                  if keysDown[Modifier[i].key] Then
-                  begin
-                    keysUp[Modifier[i].key] := TRUE;
-                    keysLast[KA_UP]           := Modifier[i].key;
-                  end;
-                  keysDown[Modifier[i].key] := FALSE;
-
-                  key := SCA(Modifier[i].key);
-                  if keysDown[key] Then
-                    keysUp[key] := TRUE;
-                  keysDown[key] := FALSE;
-                end;
-            end;
-          kEventRawKeyDown, kEventRawKeyRepeat:
-            begin
-              key := mackey_to_scancode(key);
-              keysDown[key]     := TRUE;
-              keysUp  [key]     := FALSE;
-              keysLast[KA_DOWN] := key;
-              if eKind <> kEventRawKeyRepeat Then
-                doKeyPress(key);
-
-              key := SCA(key);
-              keysDown[key] := TRUE;
-              keysUp  [key] := FALSE;
-              if eKind <> kEventRawKeyRepeat Then
-                doKeyPress(key);
-
-              {$IfDef OLD_METHODS}
-              if keysCanText Then
-              case key of
-                K_SYSRQ, K_PAUSE,
-                K_ESCAPE, K_ENTER, K_KP_ENTER,
-                K_UP, K_DOWN, K_LEFT, K_RIGHT,
-                K_INSERT, K_DELETE, K_HOME, K_END,
-                K_PAGEUP, K_PAGEDOWN,
-                K_CTRL_L, K_CTRL_R,
-                K_ALT_L, K_ALT_R,
-                K_SHIFT_L, K_SHIFT_R,
-                K_SUPER_L, K_SUPER_R,
-                K_APP_MENU,
-                K_CAPSLOCK, K_NUMLOCK, K_SCROLL:;
-                K_BACKSPACE: utf8_Backspace(keysText);
-                K_TAB:       key_InputText('  ');
-              else
-                GetEventParameter(inEvent, kEventParamKeyUnicodes, typeUTF8Text, nil, 6, @len, @c[0]);
-                if len > 0 Then
-                begin
-                  SetLength(str, len);
-                  System.Move(c[0], str[1], len);
-                  key_InputText(str);
-                end;
-              end;
-              {$EndIf}
-            end;
-          kEventRawKeyUp:
-            begin
-              key := mackey_to_scancode(key);
-              keysDown[key]   := FALSE;
-              keysUp  [key]   := TRUE;
-              keysLast[KA_UP] := key;
-
-              key := SCA(key);
-              keysDown[key] := FALSE;
-              keysUp  [key] := TRUE;
-            end;
-        end;
-      end;
-
-    kEventClassMouse:
-      case eKind of
-        kEventMouseMoved, kEventMouseDragged:
-          begin
-            wndMouseIn := (mouseX >= 0) and (mouseX <= wndWidth) and (mouseY >= 0) and (mouseY <= wndHeight);
-            if wndMouseIn Then
-            begin
-              if (not appShowCursor) and (CGCursorIsVisible = 1) Then
-                CGDisplayHideCursor(scrDisplay);
-              if (appShowCursor) and (CGCursorIsVisible = 0) Then
-                CGDisplayShowCursor(scrDisplay);
-            end else
-              if CGCursorIsVisible = 0 Then
-                CGDisplayShowCursor(scrDisplay);
-          end;
-        kEventMouseDown:
-          begin
-            GetEventParameter(inEvent, kEventParamMouseButton, typeMouseButton, nil, SizeOf(EventMouseButton), nil, @mButton);
-
-            // Magic Mouse !!! XD
-            if keysDown[K_SUPER] and (mButton = kEventMouseButtonPrimary) Then
-              mButton := kEventMouseButtonSecondary;
-
-            case mButton of
-              kEventMouseButtonPrimary: // Left
-                begin
-                  mouseAction[M_BLEFT].state := is_Press or is_down;
-                  if timer_GetTicks - mouseAction[M_BLEFT].DBLClickTime < mouseDblCInt Then
-                    mouseAction[M_BLEFT].state := is_Press or is_down or is_DoubleDown;
-                  mouseAction[M_BLEFT].DBLClickTime := timer_GetTicks();
-                end;
-              kEventMouseButtonTertiary: // Middle
-                begin
-                  mouseAction[M_BMIDDLE].state := is_Press or is_down;
-                  if timer_GetTicks - mouseAction[M_BMIDDLE].DBLClickTime < mouseDblCInt Then
-                    mouseAction[M_BMIDDLE].state := is_Press or is_down or is_DoubleDown;
-                  mouseAction[M_BMIDDLE].DBLClickTime := timer_GetTicks();
-                end;
-              kEventMouseButtonSecondary: // Right
-                begin
-                  mouseAction[M_BRIGHT].state := is_Press or is_down;
-                  if timer_GetTicks - mouseAction[M_BRIGHT].DBLClickTime < mouseDblCInt Then
-                    mouseAction[M_BRIGHT].state := is_Press or is_down or is_DoubleDown;
-                  mouseAction[M_BRIGHT].DBLClickTime := timer_GetTicks();
-                end;
-            end;
-          end;
-        kEventMouseUp:
-          begin
-            GetEventParameter(inEvent, kEventParamMouseButton, typeMouseButton, nil, SizeOf(EventMouseButton), nil, @mButton);
-
-            // Magic Mouse !!! XD
-            if keysDown[K_SUPER] and (mButton = kEventMouseButtonPrimary) Then
-              mButton := kEventMouseButtonSecondary;
-
-            case mButton of
-              kEventMouseButtonPrimary: // Left
-                begin
-                  mouseAction[M_BLEFT].state := is_canPress or is_up;
-                end;
-              kEventMouseButtonTertiary: // Middle
-                begin
-                  mouseAction[M_BMIDDLE].state := is_canPress or is_up;
-                end;
-              kEventMouseButtonSecondary: // Right
-                begin
-                  mouseAction[M_BRIGHT].state := is_canPress or is_up;
-                end;
-            end;
-          end;
-        kEventMouseWheelMoved:
-          begin
-            GetEventParameter(inEvent, kEventParamMouseWheelDelta, typeSInt32, nil, 4, nil, @mWheel);
-
-            if mWheel > 0 then
-            begin
-              mouseAction[M_BMIDDLE].state := mouseAction[M_BMIDDLE].state or is_mWheelUp;
-            end else
-            begin
-              mouseAction[M_BMIDDLE].state := mouseAction[M_BMIDDLE].state or is_mWheelDown;
-            end;
-          end;
-      end;
-  end;
 {$EndIf}
-{$ENDIF}
 end;
 {$EndIf}
 {$ELSE}
@@ -1664,8 +1390,11 @@ begin
 
   if buffer[0] = #0 Then
     utf8_Backspace(keysText)
+  {$IfDef KEYBOARD_OLD_FUNCTION}
   else
     key_InputText(buffer);
+  {$Else};                  // !!!!
+  {$EndIf}
 end;
 
 function zglCAppDelegate.textFieldShouldReturn(textField: UITextField): Boolean;
@@ -2254,7 +1983,7 @@ begin
   appObject := thiz;
 
   P := Env^.GetStringUTFChars(Env, text, nil);
-  {$IfDef OLD_METHODS}
+  {$IfDef KEYBOARD_OLD_FUNCTION}
   key_InputText(P);
   {$Else}
   {$EndIf}
@@ -2265,7 +1994,7 @@ end;
 procedure Java_zengl_android_ZenGL_zglNativeBackspace(env: PJNIEnv; thiz: jobject);
 begin
   thread_CSEnter(appLock);
-  {$IfDef OLD_METHODS}
+  {$IfDef KEYBOARD_OLD_FUNCTION}
   utf8_Backspace(keysText);
   {$Else}
   {$EndIf}

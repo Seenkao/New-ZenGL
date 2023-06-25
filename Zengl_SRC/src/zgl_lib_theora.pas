@@ -54,7 +54,7 @@ const
 {$IFDEF WINDOWS}
   libtheoradec  = 'libtheoradec-1.dll';
 {$ENDIF}
-{$IFDEF MACOSX}
+{$IFDEF MAC_COCOA}
   libtheoradec  = 'libtheoradec.1.dylib';
 {$ENDIF}
 {$ENDIF}
@@ -157,7 +157,7 @@ var
   theoraInit: Boolean;
 
 implementation
-{$IFDEF MACOSX}
+{$IFDEF MAC_COCOA}
 {$IFNDEF USE_THEORA_STATIC}
 uses
   zgl_application;
@@ -187,13 +187,13 @@ begin
 {$IFDEF USE_THEORA_STATIC}
   Result := TRUE;
 {$ELSE}
-  {$IFDEF UNIX}{$IfNDef MACOSX}
+  {$IFDEF UNIX}{$IfNDef MAC_COCOA}
   theoraLibrary := dlopen(libtheoradec, $001);
   {$ENDIF}{$EndIf}
   {$IFDEF WINDOWS}
   theoraLibrary := dlopen(libtheoradec);
   {$ENDIF}
-  {$IFDEF MACOSX}{$IfDef MAC_COCOA}
+  {$IFDEF MACOSX}{$IfDef MAC_COCOA}           // ?????
   {$IfDef NO_USE_STATIC_LIBRARY}
   theoraLibrary := dlopen(PAnsiChar(libtheoradec), $001);
   {$Else}

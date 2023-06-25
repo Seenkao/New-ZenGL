@@ -1,0 +1,224 @@
+// мобильные платформы
+// mobile
+{$IF DEFINED(ANDROID) OR DEFINED(iOS) OR DEFINED(iPHONESIM)}
+  {$DEFINE MOBILE}
+{$IFEND}
+
+// так как мне надоело делать проверки, но я знаю что их надо делать, я добавляю дополнительную "отладочную"
+// информацию. Для себя я смогу это отключить, но это можно будет использовать для выявления каких-нибудь определённых багов.
+{$DEFINE FULL_LOGGING}
+
+// Rus: обработка старых процедур для клавиатуры. Если не хотим использовать GreenEngine.
+// Eng: processing of old procedures for the keyboard. If we do not want to use GreenEngine.
+{.$DEFINE KEYBOARD_OLD_FUNCTION}
+{$IFNDEF KEYBOARD_OLD_FUNCTION}
+  {$I gegl_config.cfg}
+{$ENDIF}
+
+// inializing in Handle (LCL, VCL)
+{.$DEFINE USE_INIT_HANDLE}
+
+// Delphi 7 and down
+{$IFNDEF FPC}
+  {$IFDEF VER150}                    // Delphi 7
+    {$DEFINE DELPHI7_AND_DOWN}
+  {$ENDIF}
+  {$IFDEF VER140}                    // Delphi 6
+    {$DEFINE DELPHI7_AND_DOWN}
+  {$ENDIF}
+  {$IFDEF VER130}                    // Delphi 5
+    {$DEFINE DELPHI7_AND_DOWN}
+  {$ENDIF}
+  {$IFDEF VER120}                    // Delphi 4
+    {$DEFINE DELPHI7_AND_DOWN}
+  {$ENDIF}
+  {$IFDEF VER110}                    // C++ Builder 3
+    {$DEFINE DELPHI7_AND_DOWN}
+  {$ENDIF}
+  {$IFDEF VER100}                    // Delphi 3
+    {$DEFINE DELPHI7_AND_DOWN}
+  {$ENDIF}
+{$ENDIF}
+
+{$IF DEFINED(DARWIN) AND (NOT DEFINED(iOS) OR NOT DEFINED(iPHONESIM))}
+  {$IFNDEF CPUi386 }
+    {$DEFINE MAC_COCOA}
+  {$ENDIF}
+{$IFEND}
+
+{$IFDEF MAC_COCOA}
+  {$DEFINE NO_USE_STATIC_LIBRARY}
+{$ENDIF}
+
+// Use compile library (dll, so ...)
+{$DEFINE LIBRARY_COMPILE}
+
+{$IFDEF MOBILE}
+  {$UNDEF USE_INIT_HANDLE}
+{$ENDIF}
+
+// Rus: вы можете принудительно включить виртуальную клавиатуру везде, а так же виртуальные джойстики.
+// Eng: you can force enable virtual keyboard everywhere, as well as virtual joysticks.
+{$DEFINE USE_VKEYBOARD}
+
+// Escape = exit
+{$DEFINE USE_EXIT_ESCAPE}
+
+// Defines for GNU/Linux
+{$IFDEF LINUX}
+  // custom -----------------
+  {$DEFINE USE_OGG_STATIC}
+  {.$DEFINE USE_THEORA_STATIC}
+  // ------------------------
+
+  {$DEFINE USE_X11}
+  {$DEFINE USE_LIBJPEG}
+  {$DEFINE USE_OPENAL}
+  {$DEFINE USE_VORBIS}
+
+  {.$DEFINE USE_FULL_GLX}
+{$ENDIF}
+
+{$IFDEF ANDROID}
+// Rus: если вы будете использовать (ARM v5) или (ARM v6) отключите DEFINE CPUARMV7A.
+// Eng: if you will be using (ARM v5) or (ARM v6) disable DEFINE CPUARMV7A.
+  {$IFNDEF CPU64}
+    {$DEFINE CPUARMV7A}
+  {$ENDIF}
+  {$IF DEFINED(CPU64) OR DEFINED(CPUARMV7A) or DEFINED(CPUi386) or DEFINED(CPUx86_64)}
+    {$DEFINE NOT_OLD_ARM}   // старшие версии Anroid.
+  {$IFEND}
+  {$DEFINE ANDROID}
+  {$DEFINE USE_GLES}
+  {$DEFINE NO_EGL}
+  {$DEFINE USE_VORBIS}
+  {$DEFINE USE_LIBJPEG}
+  {$DEFINE USE_OPENAL}
+  {$UNDEF  USE_X11}
+  {$UNDEF  USE_OGG_STATIC}
+  {$UNDEF  USE_THEORA_STATIC}
+  {$DEFINE USE_VKEYBOARD}
+  {$UNDEF USE_INIT_HANDLE}
+{$ENDIF}
+
+// Defines for Windows and Windows Mobile
+{$IFDEF MSWINDOWS}
+  {$DEFINE WINDOWS}
+{$ENDIF}
+{$IFDEF WINDOWS}
+  // custom -----------------
+  {$DEFINE USE_LIBJPEG}
+  {$DEFINE USE_OPENAL}               // disable if use DX Sound
+  {$DEFINE USE_OGG_STATIC}
+  {$DEFINE USE_THEORA_STATIC}
+  // ------------------------
+
+  {$DEFINE USE_VORBIS}
+  {.$DEFINE USE_FULL_WGL}
+{$ENDIF}
+
+// Defines for MacOS X and iOS
+{$IFDEF DARWIN}
+  // custom -----------------
+  {/$DEFINE USE_OGG_STATIC}
+  {/$DEFINE USE_THEORA_STATIC}
+  // ------------------------
+
+  {$DEFINE USE_LIBJPEG}
+  {$DEFINE USE_OPENAL}
+  {$DEFINE USE_VORBIS}
+
+  {$IF DEFINED(iPHONESIM) or (DEFINED(DARWIN) and DEFINED(CPUARM))}
+    {$DEFINE iOS}
+    {$DEFINE USE_GLES}
+    {$DEFINE NO_EGL}
+    {.$UNDEF  USE_LIBJPEG}
+    {$DEFINE USE_OGG_STATIC}
+    {.$DEFINE USE_THEORA_STATIC}
+
+    {$UNDEF USE_INIT_HANDLE}
+
+    {$IFNDEF iPHONESIM}
+      // custom -----------
+      // If you don't need to decode theora, you can uncomment this DEFINE
+      // ------------------
+    {$ENDIF}
+  {$ELSE}
+    {$DEFINE MACOSX}
+  {$IFEND}
+{$ENDIF}
+
+// OpenGL ES render for PC
+{.$DEFINE USE_GLES}
+
+{$IFDEF WINDOWS}
+  {$UNDEF USE_GLES}
+{$ENDIF}
+{$IFDEF USE_GLES}
+  // эта часть на AMD не работает
+  {.$DEFINE USE_GLES_ON_DESKTOP}
+  {$IFDEF USE_GLES_ON_DESKTOP}
+    {.$DEFINE USE_AMD_DRIVERS}
+  {$ENDIF}
+{$ENDIF}
+
+// Functionality
+{$DEFINE USE_LOG_FLUSH}
+{$DEFINE USE_ZIP}
+{$DEFINE USE_JOYSTICK}
+{$DEFINE USE_JPG}
+{$DEFINE USE_PNG}
+{$DEFINE USE_PVR}
+{$DEFINE USE_TGA}
+{$DEFINE USE_SENGINE}
+{$DEFINE USE_PARTICLES}
+{$DEFINE USE_SOUND}
+{$IFDEF USE_SOUND}
+  {$DEFINE USE_OGG}
+  {$DEFINE USE_WAV}
+{$ENDIF}
+{$DEFINE USE_VIDEO}
+{$IFDEF USE_VIDEO}
+  {$DEFINE USE_THEORA}
+{$ENDIF}
+
+// Enable if you want to use zlib compression functions
+// WARNING: ZenGL doesn't provide all needed object files, you should use yours(just have no desire to recompile zlib for every platform)
+
+
+// Disable unsupported features
+{$IFNDEF FPC}
+  {$UNDEF USE_OGG_STATIC}
+  {$UNDEF USE_THEORA_STATIC}
+{$ENDIF}
+
+// Specially for buggy Delphi, which trying to parse everything...
+{$MINENUMSIZE 4}
+{$DEFINE USE_INLINE}
+{$IFDEF FPC}
+  {$I zgl_fpc.cfg}
+
+  {$IFNDEF MACOSX}
+    {$IFDEF cpui386}
+      {$DEFINE USE_ASM}
+    {$ENDIF}
+  {$ENDIF}
+{$ELSE}
+  {$DEFINE USE_ASM}
+  {$WARN COMBINING_SIGNED_UNSIGNED OFF}
+  {$WARN COMPARING_SIGNED_UNSIGNED OFF}
+  {$IFNDEF DELPHI7_AND_DOWN}
+    {$DEFINE CPUx86_64}
+  {$ELSE}
+    {$DEFINE CPUi386}
+    {$UNDEF USE_INLINE}
+  {$ENDIF}
+{$ENDIF}
+
+{$IFNDEF USE_INIT_HANDLE}
+  {$DEFINE WND_USE}
+{$ELSE}
+  {$IFDEF WINDOWS}
+    {$DEFINE WND_USE}
+  {$ENDIF}
+{$ENDIF}

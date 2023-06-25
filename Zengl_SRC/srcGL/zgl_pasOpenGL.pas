@@ -29,7 +29,7 @@ unit zgl_pasOpenGL;
 {$IfDef UNIX}
   {$DEFINE stdcall := cdecl}
 {$EndIf}
-{$IFDEF MACOSX}
+{$IFDEF MAC_COCOA}
   {$LINKFRAMEWORK OpenGL}
 {$ENDIF}
 
@@ -1074,7 +1074,7 @@ var
   procedure glVertex4s(x, y, z, w: GLshort); stdcall; external libGL;
   procedure glVertex4sv(const v: PGLshort); stdcall; external libGL;
 //  glVertexPointer: procedure(size: GLint; atype: GLenum; stride: GLsizei; const pointer: Pointer); stdcall;
-{$EndIf}
+{$IfEnd}
 (*******************************************************************************
 *                            end deprecated                                    *
 *******************************************************************************)

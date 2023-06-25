@@ -50,15 +50,18 @@
 | Comments) 1950 to 1952 in the files http://www.ietf.org/rfc/rfc1950.txt      |
 | (zlib format), rfc1951.txt (deflate format) and rfc1952.txt (gzip format).   |
 ********************************************************************************
-// modification by Serg 12.05.2022
+// modification by Serg
 }
 unit zgl_lib_zip;
-
+{$mode delphi}
 {$I zgl_config.cfg}
 
+// Данный файл требует дальнейшей модификации и исправлений всех ошибок.
 {$IfNDef MAC_COCOA}
 {$IFDEF USE_ZIP}
+  {$IfNDef NOT_OLD_ARM}
   {$L libzip}
+  {$EndIf}
 {$EndIf}
 
 {$ENDIF}
@@ -100,9 +103,19 @@ uses
   {$IFDEF WINDOWS}
   zgl_lib_msvcrt,
   {$ENDIF}
-  zgl_memory,
-  zgl_utils,
+//  zgl_memory,            CPUARMV7A
+//  zgl_utils,
   zgl_types;
+
+// Rus: для процессоров ARMv5 и ARMv6 отключите DEFINE CPUARMV7A в zgl_config.cfg.
+//      Это работает только для новых архитектур ARM и для всех архитектур X86.
+// Eng: for ARMv5 and ARMv6 processors, disable DEFINE CPUARMV7A in zgl_config.cfg.
+//      This only works for newer ARM architectures and for all X86 architectures.
+{$IfDef NOT_OLD_ARM}
+const
+  libz = 'libz.so';
+  libzip = 'libzip.so';
+{$EndIf}
 
 {$IFDEF USE_ZIP}
 const
@@ -193,7 +206,7 @@ type
   end;
 
 {$IFDEF USE_ZIP}
-{$IfDef MAC_COCOA}
+{$If defined(MAC_COCOA) or defined(ANDROID)}
 var
   zip_open: function(path: PAnsiChar; flags: Integer; out error: cint): Pzip; cdecl;
   zip_close: function( archive : Pzip ): cint; cdecl;
@@ -239,7 +252,7 @@ function deflate : Integer; cdecl;
 function deflateEnd : Integer; cdecl;
 function deflateInit2_ : Integer; cdecl;
 {$ENDIF}
-{$EndIf}
+{$IfEnd}
 {$ENDIF}
 
 procedure zlib_Init(out strm: z_stream_s ); cdecl;//{$IfNDef MAC_COCOA}external;{$EndIf}
@@ -251,33 +264,33 @@ function udimodsi4(num, den: LongWord; modwanted: Integer): LongWord; cdecl;
 function __umodsi3(a, b: clong): clong; cdecl;
 {/$EndIf}
 
-// определится, для чего это было сделано!
-{$IfNDef MAC_COCOA}
+{$IfNDef ANDROID}
 function inflateInit_(var strm: z_stream_s; version: pchar; stream_size: cint): cint; cdecl; external
   {$ifdef DYNAMICZLIB}libz name 'inflateInit_'{$endif};
 function inflateEnd(var strm: z_stream_s): cint; cdecl; external
   {$ifdef DYNAMICZLIB}libz name 'inflateEnd'{$endif};
 function inflate(var strm: z_stream_s; flush: cint): cint; cdecl; external
   {$ifdef DYNAMICZLIB}libz name 'inflate'{$endif};
-{$EndIf}
+{$endif}
 
 {$IFDEF USE_ZIP}
 threadvar
   zipCurrent : Pzip;
 
-{$IfDef MAC_COCOA}
+{$If defined(MAC_COCOA) or defined(ANDROID)}
 procedure LoadLibZip(const zDLL, zlDLL: String);
 procedure UnloadLibZip;
-{$EndIf}
+{$IfEnd}
 {$ENDIF}
 
 implementation
 
-{$IfDef MAC_COCOA}
+{$If defined(MAC_COCOA) or defined(ANDROID)}
 uses
   zgl_log,
+  zgl_utils,
   zgl_application;
-{$EndIf}
+{$IfEnd}
 
 var
   zipDLL: Pointer;
@@ -299,7 +312,7 @@ begin
   Result := 0;
 end;
 
-{$IfDef MAC_COCOA}
+{$If defined(MAC_COCOA) or defined(ANDROID)}
 procedure LoadLibZip(const zDLL, zlDLL: String);
 begin
   UnloadLibZip;
@@ -370,7 +383,7 @@ begin
   @inflate := nil;
   @zlibVersion := nil;
 end;
-{$EndIf}
+{$IfEnd}
 {$ELSE}
 function deflate : Integer;
 begin
@@ -389,7 +402,6 @@ end;
 {$ENDIF}
 {$ENDIF}
 
-{.$IfDef MAC_COCOA}
 procedure zlib_Init( out strm : z_stream_s );
 begin
   FillChar(strm, sizeof(strm), 0);
@@ -515,5 +527,12 @@ finalization
 
   UnloadLibZip;
 {$EndIf}{$EndIf}
+{$IfDef ANDROID}
+initialization
+  LoadLibZip(libzip, libz);
+
+finalization
+  UnloadLibZip;
+{$EndIf}
 
 end.

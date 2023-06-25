@@ -34,17 +34,14 @@ uses
   zgl_math_2d,
   zgl_gltypeconst,
   zgl_types,
-  {$IfNDef OLD_METHODS}
-  gegl_color
-  {$EndIf}
-  ;
+  gegl_color;
 
 // Rus: Точка с определёнными координатами и цветом.
 // Eng: A point with specified coordinates and color.
-procedure pr2d_Pixel(X, Y: Single; {$IfNDef OLD_METHODS}numColor: LongWord{$Else}Color: LongWord; Alpha: Byte = 255{$EndIf});
+procedure pr2d_Pixel(X, Y: Single; numColor: LongWord);
 // Rus: Линия с определённым цветом и указанием сглаживания (флаг FX = PR2D_SMOOTH).
 // Eng: A line with a specific color and smoothing indication (FX flag = PR2D_SMOOTH).
-procedure pr2d_Line(X1, Y1, X2, Y2: Single; {$IfNDef OLD_METHODS}numColor: LongWord;{$Else}Color: LongWord; Alpha: Byte = 255;{$EndIf}FX: LongWord = 0);
+procedure pr2d_Line(X1, Y1, X2, Y2: Single; numColor: LongWord; FX: LongWord = 0);
 // Rus: Ломанная линия. Задаётся посредством множества точек. Points - указатель
 //      на массив точек, count - количество точек, Color - цвет, флаг FX -
 //      PR2D_SMOOTH (сглаживание), LINE_RGBA (отдельный цвет для каждой точки),
@@ -53,14 +50,14 @@ procedure pr2d_Line(X1, Y1, X2, Y2: Single; {$IfNDef OLD_METHODS}numColor: LongW
 //      point array, count - number of points, Color - color, FX flag -
 //      PR2D_SMOOTH (smoothing), LINE_RGBA (separate color for each dot),
 //      LINE_LOOP (looped line).
-procedure pr2d_LineSORL(Points: Pointer; count: Cardinal; {$IfNDef OLD_METHODS}numColor: LongWord;{$Else}Color: LongWord; Alpha: Byte = 255;{$EndIf} FX: LongWord = 0);
+procedure pr2d_LineSORL(Points: Pointer; count: Cardinal; numColor: LongWord; FX: LongWord = 0);
 // Rus: квадрат/прямоугольник с определённым цветом. Действующие флаги для FX
 //      PR2D_SMOOTH (сглаживание), PR2D_FILL (заливка),
 //      FX2D_VCA (использование цвета для отдельных точек).
 // Eng: square/rectangle with a specific color. Active flags for FX
 //      PR2D_SMOOTH (smooth), PR2D_FILL (fill),
 //      FX2D_VCA (use color for individual dots).
-procedure pr2d_Rect(X, Y, W, H: Single; {$IfNDef OLD_METHODS}numColor: LongWord;{$Else}Color: LongWord; Alpha: Byte = 255;{$EndIf}FX: LongWord = 0 );
+procedure pr2d_Rect(X, Y, W, H: Single; numColor: LongWord; FX: LongWord = 0 );
 // Rus: Круг, где координата - центр вокруг которого описана окружность с данным
 //      радиусом. Передаётся указанный цвет. Quality - "сглаживание" (количество
 //      углов у окружности). Действующие флаги FX - PR2D_SMOOTH (сглаживание),
@@ -69,7 +66,7 @@ procedure pr2d_Rect(X, Y, W, H: Single; {$IfNDef OLD_METHODS}numColor: LongWord;
 //      a circle with the specified radius. The specified color is transmitted.
 //      Quality - "smoothing" (the number of corners of the circle). Active FX
 //      flags - PR2D_SMOOTH (smoothing), PR2D_FILL (fill).
-procedure pr2d_Circle(X, Y, Radius: Single; {$IfNDef OLD_METHODS}numColor: LongWord;{$Else}Color: LongWord; Alpha: Byte = 255;{$EndIf}Quality: Word = 32; FX: LongWord = 0);
+procedure pr2d_Circle(X, Y, Radius: Single; numColor: LongWord; Quality: Word = 32; FX: LongWord = 0);
 // Rus: Еллипс, где координата - центр. У эллипса два радиуса. Передаётся
 //      указанный цвет. Quality - "сглаживание" (количество углов у окружности).
 //      Действующие флаги FX - PR2D_SMOOTH (сглаживание), PR2D_FILL (заливка).
@@ -77,17 +74,17 @@ procedure pr2d_Circle(X, Y, Radius: Single; {$IfNDef OLD_METHODS}numColor: LongW
 //      The specified color is transmitted. Quality - "smoothing" (the number of
 //      corners of the circle).
 //      Valid FX flags - PR2D_SMOOTH (smooth), PR2D_FILL (fill).
-procedure pr2d_Ellipse(X, Y, xRadius, yRadius: Single; {$IfNDef OLD_METHODS}numColor: LongWord;{$Else}Color: LongWord; Alpha: Byte = 255;{$EndIf}Quality: Word = 32; FX: LongWord = 0);
+procedure pr2d_Ellipse(X, Y, xRadius, yRadius: Single; numColor: LongWord; Quality: Word = 32; FX: LongWord = 0);
 // Rus: Треугольник с текстурой.
 // Eng: Textured triangle.
-procedure pr2d_TriList(Texture: zglPTexture; TriList, TexCoords: zglPPoints2D; iLo, iHi: Integer; {$IfNDef OLD_METHODS}numColor: LongWord;{$Else}Color: LongWord; Alpha: Byte = 255;{$EndIf}FX: LongWord = FX_BLEND);
+procedure pr2d_TriList(Texture: zglPTexture; TriList, TexCoords: zglPPoints2D; iLo, iHi: Integer; numColor: LongWord; FX: LongWord = FX_BLEND);
 // Rus: Произвольный треугольник. Три координаты, цвет. Действующие флаги FX
 //      PR2D_SMOOTH (сглаживание), PR2D_FILL (заливка),
 //      FX2D_VCA (использование цвета для отдельных точек).
 // Eng: Arbitrary triangle. Three coordinates, color. Active FX Flags
 //      PR2D_SMOOTH (smooth), PR2D_FILL (fill),
 //      FX2D_VCA (use color for individual dots).
-procedure pr2d_Triangle(X1, Y1, X2, Y2, X3, Y3: Single; {$IfNDef OLD_METHODS}numColor: LongWord;{$Else}Color: LongWord; Alpha: Byte = 255;{$EndIf}FX : LongWord = 0);
+procedure pr2d_Triangle(X1, Y1, X2, Y2, X3, Y3: Single; numColor: LongWord;FX : LongWord = 0);
 // Rus: произвольный четырёхугольник. Четыре координаты, цвет. Действующие флаги
 //      PR2D_SMOOTH (сглаживание), PR2D_FILL (заливка),
 //      FX2D_VCA (использование цвета для отдельных точек). Проверок на
@@ -97,7 +94,7 @@ procedure pr2d_Triangle(X1, Y1, X2, Y2, X3, Y3: Single; {$IfNDef OLD_METHODS}num
 //      PR2D_SMOOTH (smooth), PR2D_FILL (fill), FX2D_VCA (use color for individual
 //      dots). There are no checks for line crossings (you might end up with an
 //      hourglass). This is the correct behavior. The coordinates are exact.
-procedure pr2d_quad(X1, Y1, X2, Y2, X3, Y3, X4, Y4: Single; {$IfNDef OLD_METHODS}numColor: LongWord;{$Else}Color: LongWord; Alpha: Byte = 255;{$EndIf}FX : LongWord = 0);
+procedure pr2d_quad(X1, Y1, X2, Y2, X3, Y3, X4, Y4: Single; numColor: LongWord; FX : LongWord = 0);
 
 implementation
 uses
@@ -115,7 +112,7 @@ var
   rv_360: Single = 360;
 {$EndIf}
 
-procedure pr2d_Pixel(X, Y: Single; {$IfNDef OLD_METHODS}numColor: LongWord{$Else}Color: LongWord; Alpha: Byte = 255{$EndIf});
+procedure pr2d_Pixel(X, Y: Single; numColor: LongWord);
 begin
   if ( not b2dStarted ) or batch2d_Check( GL_POINTS, FX_BLEND, nil ) Then
   begin
@@ -123,11 +120,7 @@ begin
     glBegin( GL_POINTS );
   end;
 
-  {$IfDef OLD_METHODS}
-  glColor4ub( ( Color and $FF0000 ) shr 16, ( Color and $FF00 ) shr 8, Color and $FF, Alpha );
-  {$Else}
   Set_ToNumColor(numColor);
-  {$EndIf}
   glVertex2f(X + {$IfDef LINUX}rv_0_5{$Else}0.5{$EndIf}, Y + {$IfDef LINUX}rv_0_5{$Else}0.5{$EndIf});
 
   if not b2dStarted Then
@@ -137,7 +130,7 @@ begin
   end;
 end;
 
-procedure pr2d_Line( X1, Y1, X2, Y2 : Single; {$IfNDef OLD_METHODS}numColor: LongWord;{$Else}Color: LongWord; Alpha: Byte = 255;{$EndIf}FX : LongWord = 0 );
+procedure pr2d_Line( X1, Y1, X2, Y2 : Single; numColor: LongWord; FX : LongWord = 0 );
 begin
   if ( not b2dStarted ) or batch2d_Check( GL_LINES, FX_BLEND or FX, nil ) Then
   begin
@@ -166,11 +159,7 @@ begin
     glVertex2f(X2, Y2);
   end else
   begin
-    {$IfDef OLD_METHODS}
-    glColor4f(((Color and $FF0000 ) shr 16) / 255, (( Color and $FF00 ) shr 8) / 255, (Color and $FF) / 255, Alpha / 255);
-    {$Else}
     Set_ToNumColor(numColor);
-    {$EndIf}
     glVertex2f(X1, Y1);
     glVertex2f(X2, Y2);
   end;
@@ -190,7 +179,7 @@ begin
   end;
 end;
 
-procedure pr2d_LineSORL(Points: Pointer; count: Cardinal; {$IfNDef OLD_METHODS}numColor: LongWord;{$Else}Color: LongWord; Alpha: Byte = 255;{$EndIf} FX: LongWord = 0);
+procedure pr2d_LineSORL(Points: Pointer; count: Cardinal; numColor: LongWord; FX: LongWord = 0);
 var
   i: LongWord;
   PPoint:  zglPPoint2D;
@@ -214,7 +203,6 @@ begin
       glBegin(GL_LINE_STRIP);
   end;
 
-  {$IfNDef OLD_METHODS}
   if FX and LINE_RGBA > 0 Then
   begin
     PPointColor := Points;
@@ -224,15 +212,10 @@ begin
       glVertex2f(PPointColor^.X + {$IfDef LINUX}rv_0_5{$Else}0.5{$EndIf}, PPointColor^.Y + {$IfDef LINUX}rv_0_5{$Else}0.5{$EndIf});
       inc(PPointColor);
     end;
-  end else
-  {$EndIf}
-  begin
+  end
+  else begin
     PPoint := Points;
-    {$IfDef OLD_METHODS}
-    glColor4f(((Color and $FF0000 ) shr 16) / 255, (( Color and $FF00 ) shr 8) / 255, (Color and $FF) / 255, Alpha / 255);
-    {$Else}
     Set_ToNumColor(numColor);
-    {$EndIf}
     for i := 0 to count - 1 do
     begin
       glVertex2f( PPoint^.X + {$IfDef LINUX}rv_0_5{$Else}0.5{$EndIf}, PPoint^.Y + {$IfDef LINUX}rv_0_5{$Else}0.5{$EndIf} );
@@ -255,7 +238,7 @@ begin
   end;
 end;
 
-procedure pr2d_Rect(X, Y, W, H: Single; {$IfNDef OLD_METHODS}numColor: LongWord;{$Else}Color: LongWord; Alpha: Byte = 255;{$EndIf}FX: LongWord = 0);
+procedure pr2d_Rect(X, Y, W, H: Single; numColor: LongWord; FX: LongWord = 0);
 var
   mode: LongWord;
   XW, YH: Single;
@@ -309,11 +292,7 @@ begin
     end;
   end else
   begin
-    {$IfDef OLD_METHODS}
-    glColor4f(((Color and $FF0000 ) shr 16) / 255, (( Color and $FF00 ) shr 8) / 255, (Color and $FF) / 255, Alpha / 255);
-    {$Else}
     Set_ToNumColor(numColor);
-    {$EndIf}
     glVertex2f(X, Y);
     glVertex2f(XW, Y);
     glVertex2f(XW, YH);
@@ -339,7 +318,7 @@ begin
   end;
 end;
 
-procedure pr2d_Circle(X, Y, Radius: Single; {$IfNDef OLD_METHODS}numColor: LongWord;{$Else}Color: LongWord; Alpha: Byte = 255;{$EndIf}Quality: Word = 32; FX: LongWord = 0);
+procedure pr2d_Circle(X, Y, Radius: Single; numColor: LongWord; Quality: Word = 32; FX: LongWord = 0);
 var
   i : Integer;
   k : Single;
@@ -365,11 +344,7 @@ begin
           glBegin( GL_LINES );
         end;
 
-      {$IfDef OLD_METHODS}
-      glColor4f(((Color and $FF0000 ) shr 16) / 255, (( Color and $FF00 ) shr 8) / 255, (Color and $FF) / 255, Alpha / 255);
-      {$Else}
       Set_ToNumColor(numColor);
-      {$EndIf}
       for i := 0 to Quality - 1 do
         begin
           glVertex2f( X + Radius * cosTable[ Round( i * k ) ], Y + Radius * sinTable[ Round( i * k ) ] );
@@ -405,11 +380,7 @@ begin
             glBegin( GL_TRIANGLES );
           end;
 
-        {$IfDef OLD_METHODS}
-        glColor4f(((Color and $FF0000 ) shr 16) / 255, (( Color and $FF00 ) shr 8) / 255, (Color and $FF) / 255, Alpha / 255);
-        {$Else}
         Set_ToNumColor(numColor);
-        {$EndIf}
         for i := 0 to Quality - 1 do
           begin
             glVertex2f( X, Y );
@@ -433,7 +404,7 @@ begin
       end;
 end;
 
-procedure pr2d_Ellipse( X, Y, xRadius, yRadius : Single; {$IfNDef OLD_METHODS}numColor: LongWord;{$Else}Color: LongWord; Alpha: Byte = 255;{$EndIf}Quality : Word = 32; FX : LongWord = 0 );
+procedure pr2d_Ellipse( X, Y, xRadius, yRadius : Single; numColor: LongWord; Quality : Word = 32; FX : LongWord = 0 );
   var
     i : Integer;
     k : Single;
@@ -459,11 +430,7 @@ begin
         glBegin( GL_LINES );
       end;
 
-      {$IfDef OLD_METHODS}
-      glColor4f(((Color and $FF0000) shr 16) / 255, (( Color and $FF00) shr 8) / 255, (Color and $FF) / 255, Alpha / 255);
-      {$Else}
       Set_ToNumColor(numColor);
-      {$EndIf}
       for i := 0 to Quality - 1 do
       begin
         glVertex2f( X + xRadius * cosTable[ Round( i * k ) ], Y + yRadius * sinTable[ Round( i * k ) ] );
@@ -499,11 +466,7 @@ begin
             glBegin( GL_TRIANGLE_FAN );
           end;
 
-        {$IfDef OLD_METHODS}
-        glColor4f(((Color and $FF0000 ) shr 16) / 255, (( Color and $FF00 ) shr 8) / 255, (Color and $FF) / 255, Alpha / 255);
-        {$Else}
         Set_ToNumColor(numColor);
-        {$EndIf}
         glVertex2f( X, Y );
         for i := 0 to Quality - 1 do
         begin   
@@ -527,7 +490,7 @@ begin
       end;
 end;
 
-procedure pr2d_TriList(Texture: zglPTexture; TriList, TexCoords: zglPPoints2D; iLo, iHi: Integer; {$IfNDef OLD_METHODS}numColor: LongWord;{$Else}Color: LongWord; Alpha: Byte = 255;{$EndIf}FX: LongWord = FX_BLEND);
+procedure pr2d_TriList(Texture: zglPTexture; TriList, TexCoords: zglPPoints2D; iLo, iHi: Integer; numColor: LongWord; FX: LongWord = FX_BLEND);
   var
     i    : Integer;
     w, h : Single;
@@ -560,11 +523,7 @@ begin
       glBegin( mode );
     end;
 
-  {$IfDef OLD_METHODS}
-  glColor4f(((Color and $FF0000 ) shr 16) / 255, (( Color and $FF00 ) shr 8) / 255, (Color and $FF) / 255, Alpha / 255);
-  {$Else}
   Set_ToNumColor(numColor);
-  {$EndIf}
 
   if Assigned( Texture ) and ( mode = GL_TRIANGLES ) Then
     begin
@@ -625,7 +584,7 @@ begin
     end;
 end;
 
-procedure pr2d_Triangle(X1, Y1, X2, Y2, X3, Y3: Single; {$IfNDef OLD_METHODS}numColor: LongWord;{$Else}Color: LongWord; Alpha: Byte = 255;{$EndIf}FX : LongWord = 0);
+procedure pr2d_Triangle(X1, Y1, X2, Y2, X3, Y3: Single; numColor: LongWord; FX : LongWord = 0);
 var
   mode: LongWord;
 begin
@@ -670,11 +629,7 @@ begin
     end;
   end else
   begin
-    {$IfDef OLD_METHODS}
-    glColor4f(((Color and $FF0000 ) shr 16) / 255, (( Color and $FF00 ) shr 8) / 255, (Color and $FF) / 255, Alpha / 255);
-    {$Else}
     Set_ToNumColor(numColor);
-    {$EndIf}
     glVertex2f(X1, Y1);
     glVertex2f(X2, Y2);
     glVertex2f(X3, Y3);
@@ -697,7 +652,7 @@ begin
   end;
 end;
 
-procedure pr2d_quad(X1, Y1, X2, Y2, X3, Y3, X4, Y4: Single; {$IfNDef OLD_METHODS}numColor: LongWord;{$Else}Color: LongWord; Alpha: Byte = 255;{$EndIf}FX : LongWord = 0);
+procedure pr2d_quad(X1, Y1, X2, Y2, X3, Y3, X4, Y4: Single; numColor: LongWord; FX : LongWord = 0);
 var
   mode: LongWord;
 begin
@@ -752,11 +707,7 @@ begin
     end;
   end else
   begin
-    {$IfDef OLD_METHODS}
-    glColor4f(((Color and $FF0000 ) shr 16) / 255, (( Color and $FF00 ) shr 8) / 255, (Color and $FF) / 255, Alpha / 255);
-    {$Else}
     Set_ToNumColor(numColor);
-    {$EndIf}
     glVertex2f(X1, Y1);
     glVertex2f(X2, Y2);
     glVertex2f(X3, Y3);

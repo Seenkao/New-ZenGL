@@ -134,7 +134,7 @@ procedure KeyMouseEvent;
 var
   r : zglTRect2D;
 begin
-  if touch_Tap( 0 ) Then
+  if touch_Click( 0 ) Then
   begin
     // RU: В данном случаи мы начинаем воспроизводить звук сразу в указанных координатах, но их можно менять и в процессе используя процедуру snd_SetPos.
     //     Важно: Для OpenAL можно позиционировать только mono-звуки

@@ -19,11 +19,9 @@ uses
   zgl_textures_jpg,
   zgl_types,
   zgl_collision_2d,
-  {$IfNDef OLD_METHODS}
   gegl_color,
-  {$EndIf}
-  zgl_utils
-  ;
+  zgl_types,
+  zgl_utils;
 
 var
   dirRes  : UTF8String = 'assets/';
@@ -66,12 +64,12 @@ begin
   correctRect.Y := 100;
   if correctAspect Then
     begin
-      pr2d_Rect( correctRect.X, correctRect.Y, correctRect.W, correctRect.H, {$IfDef OLD_METHODS}$FFFFFF, 25,{$Else}cl_White05,{$EndIf} PR2D_FILL );
-      pr2d_Rect( correctRect.X, correctRect.Y, correctRect.W, correctRect.H, {$IfDef OLD_METHODS}$00FF00, 255{$Else}cl_Lime{$EndIf} );
+      pr2d_Rect( correctRect.X, correctRect.Y, correctRect.W, correctRect.H, cl_White05, PR2D_FILL );
+      pr2d_Rect( correctRect.X, correctRect.Y, correctRect.W, correctRect.H, cl_Lime );
     end else
       begin
-        pr2d_Rect( correctRect.X, correctRect.Y, correctRect.W, correctRect.H, {$IfDef OLD_METHODS}$000000, 155,{$Else}cl_Black05,{$EndIf} PR2D_FILL );
-        pr2d_Rect( correctRect.X, correctRect.Y, correctRect.W, correctRect.H, {$IfDef OLD_METHODS}$FFFFFF, 255{$Else}cl_White{$EndIf} );
+        pr2d_Rect( correctRect.X, correctRect.Y, correctRect.W, correctRect.H, cl_Black05, PR2D_FILL );
+        pr2d_Rect( correctRect.X, correctRect.Y, correctRect.W, correctRect.H, cl_White );
       end;
   text_DrawInRect( fntMain, correctRect, str, TEXT_HALIGN_CENTER or TEXT_VALIGN_CENTER );
 end;

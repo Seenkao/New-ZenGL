@@ -38,7 +38,7 @@ uses
   zgl_glx_wgl,
   {$ENDIF}
   {$IFDEF MACOSX}
-  MacOSAll,
+//  MacOSAll,       ???
   {$ENDIF}
   {$IFNDEF USE_GLES}
   zgl_opengl,
@@ -54,7 +54,34 @@ const
   RT_TYPE_PBUFFER = 0;
   RT_TYPE_FBO     = 1;
 
+  RT_DEFAULT      = $00;
+  RT_FULL_SCREEN  = $01;
+  RT_USE_DEPTH    = $02;
+  RT_CLEAR_COLOR  = $04;
+  RT_CLEAR_DEPTH  = $08;
+
   RT_FORCE_PBUFFER = $100000;
+
+type
+  zglPRenderTarget = ^zglTRenderTarget;
+  zglTRenderTarget = record
+    Type_     : Byte;
+    Handle    : Pointer;
+    Surface   : zglPTexture;
+    Flags     : Byte;
+
+    prev, next: zglPRenderTarget;
+end;
+
+type
+  zglPRenderTargetManager = ^zglTRenderTargetManager;
+  zglTRenderTargetManager = record
+    Count: Integer;
+    First: zglTRenderTarget;
+end;
+
+type
+  zglTRenderCallback = procedure(Data: Pointer);
 
 {$IfNDef MAC_COCOA}
 function  rtarget_Add(Surface: zglPTexture; Flags: Byte): zglPRenderTarget;
@@ -100,14 +127,6 @@ type
     RC    : HGLRC;
 end;
 {$ENDIF}
-{$IFDEF MACOSX}{$IfNDef MAC_COCOA}
-type
-  zglPPBuffer = ^zglTPBuffer;
-  zglTPBuffer = record
-    Context: TAGLContext;
-    PBuffer: TAGLPbuffer;
-  end;
-{$ENDIF}{$EndIf}
 {$ENDIF}
 
 type
@@ -144,10 +163,6 @@ function rtarget_Add(Surface: zglPTexture; Flags: Byte): zglPRenderTarget;
     pixelFormat : array[0..63] of Integer;
     nPixelFormat: LongWord;
   {$ENDIF}
-  {$IFDEF MACOSX}{$IfNDef MAC_COCOA}
-    pbufferdAttr: array[0..31] of LongWord;
-    pixelFormat : TAGLPixelFormat;
-  {$ENDIF}{$EndIf}
   procedure FreePBuffer(var Target: zglPRenderTarget; Stage: Integer);
   begin
     oglCanPBuffer := FALSE;
@@ -163,12 +178,6 @@ function rtarget_Add(Surface: zglPTexture; Flags: Byte): zglPRenderTarget;
   {$IFDEF WINDOWS}
     if Stage = 2 Then
       wglDestroyPbufferARB(zglPPBuffer(Target.Handle).Handle);
-  {$ENDIF}
-  {$IFDEF MACOSX}
-    if Stage = 2 Then
-      aglDestroyPixelFormat(pixelFormat);
-    if Stage = 3 Then
-      aglDestroyContext(zglPPBuffer(Target.Handle).Context);
   {$ENDIF}
     Target := nil;
   end;
@@ -386,70 +395,6 @@ begin
         wglMakeCurrent(wndDC, oglContext);
       end;
     {$ENDIF}
-    {$IFDEF MACOSX}
-    RT_TYPE_PBUFFER:
-      begin
-        zgl_GetMem(Result.next.Handle, SizeOf(zglTPBuffer));
-        pPBuffer := Result.next.Handle;
-
-        FillChar(pbufferdAttr[0], 32 * 4, AGL_NONE);
-        pbufferdAttr[0 ] := AGL_DOUBLEBUFFER;
-        pbufferdAttr[1 ] := AGL_RGBA;
-        pbufferdAttr[2 ] := GL_TRUE;
-        pbufferdAttr[3 ] := AGL_RED_SIZE;
-        pbufferdAttr[4 ] := 8;
-        pbufferdAttr[5 ] := AGL_GREEN_SIZE;
-        pbufferdAttr[6 ] := 8;
-        pbufferdAttr[7 ] := AGL_BLUE_SIZE;
-        pbufferdAttr[8 ] := 8;
-        pbufferdAttr[9 ] := AGL_ALPHA_SIZE;
-        pbufferdAttr[10] := 8;
-        pbufferdAttr[11] := AGL_DEPTH_SIZE;
-        pbufferdAttr[12] := oglzDepth;
-        i := 13;
-        if oglStencil > 0 Then
-          begin
-            pbufferdAttr[i    ] := AGL_STENCIL_SIZE;
-            pbufferdAttr[i + 1] := oglStencil;
-            INC(i, 2);
-          end;
-        if oglFSAA > 0 Then
-          begin
-            pbufferdAttr[i    ] := AGL_SAMPLE_BUFFERS_ARB;
-            pbufferdAttr[i + 1] := 1;
-            pbufferdAttr[i + 2] := AGL_SAMPLES_ARB;
-            pbufferdAttr[i + 3] := oglFSAA;
-          end;
-
-        DMGetGDeviceByDisplayID(DisplayIDType(scrDisplay), oglDevice, FALSE);
-        pixelFormat := aglChoosePixelFormat(@oglDevice, 1, @pbufferdAttr[0]);
-        if not Assigned(pixelFormat) Then
-          begin
-            log_Add('PBuffer: aglChoosePixelFormat - failed');
-            FreePBuffer(Result, 1);
-            Result := nil;
-            exit;
-          end;
-
-        pPBuffer.Context := aglCreateContext(pixelFormat, oglContext);
-        if not Assigned(pPBuffer.Context) Then
-          begin
-            log_Add('PBuffer: aglCreateContext - failed');
-            FreePBuffer(Result, 2);
-            Result := nil;
-            exit;
-          end;
-        aglDestroyPixelFormat(pixelFormat);
-
-        if aglCreatePBuffer(Surface.Width, Surface.Height, GL_TEXTURE_2D, GL_RGBA, 0, @pPBuffer.PBuffer) = GL_FALSE Then
-          begin
-            log_Add('PBuffer: aglCreatePBuffer - failed');
-            FreePBuffer(Result, 3);
-            Result := nil;
-            exit;
-          end;
-      end;
-    {$ENDIF}
     {$ENDIF}
     RT_TYPE_FBO:
       begin
@@ -553,10 +498,6 @@ begin
         if zglPPBuffer(Target.Handle).Handle <> 0 Then
           wglDestroyPbufferARB(zglPPBuffer(Target.Handle).Handle);
         {$ENDIF}
-        {$IFDEF MACOSX}
-        aglDestroyContext(zglPPBuffer(Target.Handle).Context);
-        aglDestroyPBuffer(zglPPBuffer(Target.Handle).PBuffer);
-        {$ENDIF}
       end;
     {$ENDIF}
     RT_TYPE_FBO:
@@ -602,10 +543,6 @@ begin
             {$ENDIF}
             {$IFDEF WINDOWS}
             wglMakeCurrent(zglPPBuffer(Target.Handle).DC, zglPPBuffer(Target.Handle).RC);
-            {$ENDIF}
-            {$IFDEF MACOSX}
-            aglSetCurrentContext(zglPPBuffer(Target.Handle).Context);
-            aglSetPBuffer(zglPPBuffer(Target.Handle).Context, zglPPBuffer(Target.Handle).PBuffer, 0, 0, aglGetVirtualScreen(oglContext));
             {$ENDIF}
           end;
         {$ENDIF}
@@ -656,10 +593,6 @@ begin
                 {$ENDIF}
                 {$IFDEF WINDOWS}
                 wglMakeCurrent(wndDC, oglContext);
-                {$ENDIF}
-                {$IFDEF MACOSX}
-                aglSwapBuffers(zglPPBuffer(lRTarget.Handle).Context);
-                aglSetCurrentContext(oglContext);
                 {$ENDIF}
               end;
             {$ENDIF}

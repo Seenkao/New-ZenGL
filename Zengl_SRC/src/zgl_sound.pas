@@ -163,7 +163,7 @@ procedure snd_Create(var Sound: zglTSound; Format: LongWord);
 function  snd_LoadFromFile(const FileName: UTF8String; SourceCount: Integer = 8): zglPSound;
 function  snd_LoadFromMemory(const Memory: zglTMemory; const Extension: UTF8String; SourceCount: Integer = 8): zglPSound;
 
-// паузы нет!!!!
+// РїР°СѓР·С‹ РЅРµС‚!!!!
 function  snd_Play(Sound: zglPSound; Loop: Boolean = FALSE; X: Single = 0; Y: Single = 0; Z: Single = 0; Volume: Single = SND_VOLUME_DEFAULT): Integer;
 procedure snd_Stop(Sound: zglPSound; ID: Integer);
 procedure snd_SetPos(Sound: zglPSound; ID: Integer; X, Y, Z: Single);
@@ -406,7 +406,7 @@ begin
   log_Add('OpenAL: opening "Generic Software"');
   oalDevice := alcOpenDevice('Generic Software');
   {$ENDIF}
-  {$IFDEF MACOSX}
+  {$IFDEF MAC_COCOA}
   log_Add('OpenAL: opening "CoreAudio Software"');
   oalDevice := alcOpenDevice('CoreAudio Software');
   {$ENDIF}

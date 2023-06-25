@@ -24,7 +24,8 @@ uses
   zgl_types,
   zgl_collision_2d,
   zgl_utils,
-  zgl_memory;
+  zgl_memory
+  ;
 
 const
   SCREEN_WIDTH  = 800;

@@ -29,7 +29,7 @@ unit zgl_opengl_all;
 {$IFDEF UNIX}
   {$DEFINE stdcall := cdecl}
 {$ENDIF}
-{$IFDEF MACOSX}
+{$IFDEF MAC_COCOA}
   {$LINKFRAMEWORK OpenGL}
 {$ENDIF}
 
@@ -40,17 +40,13 @@ uses
   Windows,
   {$ENDIF}
   {$IFDEF MACOSX}
-  MacOSAll,
+//  MacOSAll,     ????
   {$ENDIF}
   zgl_gltypeconst,
   zgl_pasOpenGL;
 
 function InitGL: Boolean;
 procedure FreeGL;
-{$IFDEF MACOSX}{$IfNDef MAC_COCOA}
-function InitAGL: Boolean;
-procedure FreeAGL;
-{$ENDIF}{$EndIf}
 function gl_GetProc(const Proc: UTF8String): Pointer;
 function gl_IsSupported(const Extension, SearchIn: UTF8String): Boolean;
 // Rus: проверка и загрузка расширений.
@@ -225,73 +221,8 @@ var
   glBlendEquation: procedure(mode: GLenum); stdcall;                                                  // GL_VERSION_1_4
   glBlendFuncSeparate: procedure(sfactorRGB: GLenum; dfactorRGB: GLenum; sfactorAlpha: GLenum; dfactorAlpha: GLenum); stdcall; // GL_VERSION_1_4
 
-
-{$IFDEF MACOSX}{$IfNDef MAC_COCOA}
-const
-  AGL_NONE         = 0;
-  AGL_BUFFER_SIZE  = 2;
-  AGL_RGBA         = 4;
-  AGL_DOUBLEBUFFER = 5;
-  AGL_RED_SIZE     = 8;
-  AGL_GREEN_SIZE   = 9;
-  AGL_BLUE_SIZE    = 10;
-  AGL_ALPHA_SIZE   = 11;
-  AGL_DEPTH_SIZE   = 12;
-  AGL_STENCIL_SIZE = 13;
-  AGL_FULLSCREEN   = 54;
-
-  AGL_SAMPLE_BUFFERS_ARB = 55;
-  AGL_SAMPLES_ARB        = 56;
-  AGL_MULTISAMPLE        = 59;
-  AGL_SUPERSAMPLE        = 60;
-
-  AGL_SWAP_INTERVAL = 222;
-
-  AGL_CLIP_REGION = 254;
-
-type
-  TGDHandle = ptrint;
-  TCGrafPtr = Pointer;
-
-  PAGLDevice = ^TAGLDevice;
-  TAGLDevice = TGDHandle;
-
-  PAGLDrawable = ^TAGLDrawable;
-  TAGLDrawable = TCGrafPtr;
-
-  TAGLPixelFormat = Pointer;
-
-  TAGLContext = Pointer;
-
-  TAGLPbuffer = Pointer;
-  PAGLPbuffer = ^TAGLPbuffer;
-
-  function aglSetInt(ctx:TAGLContext; pname:GLenum; params:GLint):GLboolean;
-
-var
-  aglChoosePixelFormat: function(gdevs:PAGLDevice; ndev:GLint; attribs:PGLint):TAGLPixelFormat;cdecl;
-  aglDestroyPixelFormat: procedure(pix:TAGLPixelFormat);cdecl;
-  aglCreateContext: function(pix:TAGLPixelFormat; share:TAGLContext):TAGLContext;cdecl;
-  aglDestroyContext: function(ctx:TAGLContext):GLboolean;cdecl;
-  aglUpdateContext: function(ctx:TAGLContext):GLboolean;cdecl;
-  aglSetCurrentContext: function(ctx:TAGLContext):GLboolean;cdecl;
-  aglSetDrawable: function(ctx:TAGLContext; draw:TAGLDrawable):GLboolean;cdecl;
-  aglGetDrawable: function(ctx:TAGLContext):TAGLDrawable;cdecl;
-  aglSetFullScreen: function(ctx:TAGLContext; width:GLsizei; height:GLsizei; freq:GLsizei; device:GLint):GLboolean;cdecl;
-  aglSwapBuffers: procedure(ctx:TAGLContext);cdecl;
-  aglSetInteger: function(ctx:TAGLContext; pname:GLenum; params:PGLint):GLboolean;cdecl;
-  aglEnable: function(ctx:TAGLContext; pname:GLenum):GLboolean;cdecl;
-  aglGetVirtualScreen: function(ctx:TAGLContext):GLint;cdecl;
-  aglCreatePBuffer: function(width:GLint; height:GLint; target:GLenum; internalFormat:GLenum; max_level:longint; pbuffer:PAGLPbuffer):GLboolean;cdecl;
-  aglDestroyPBuffer: function(pbuffer:TAGLPbuffer):GLboolean;cdecl;
-  aglSetPBuffer: function(ctx:TAGLContext; pbuffer:TAGLPbuffer; face:GLint; level:GLint; screen:GLint):GLboolean;cdecl;
-{$ENDIF}{$EndIf}
-
 var
   oglLibrary: {$IFDEF UNIX} Pointer {$ENDIF} {$IFDEF WINDOWS} HMODULE {$ENDIF};
-  {$IFDEF MACOSX}{$IfNDef MAC_COCOA}
-  aglLibrary: Pointer;
-  {$ENDIF}{$EndIf}
 
 implementation
 uses
@@ -321,47 +252,6 @@ procedure FreeGL;
 begin
   dlclose(oglLibrary);
 end;
-
-{$IFDEF MACOSX}{$IfNDef MAC_COCOA}
-function aglSetInt;
-  var
-    i: Integer;
-begin
-  i := params;
-  Result := aglSetInteger(ctx, pname, @i);
-end;
-
-function InitAGL: Boolean;
-begin
-  aglLibrary := dlopen(libAGL, $001);
-  if aglLibrary <> nil Then
-  begin
-    aglChoosePixelFormat  := dlsym(aglLibrary, 'aglChoosePixelFormat');
-    aglDestroyPixelFormat := dlsym(aglLibrary, 'aglDestroyPixelFormat');
-    aglCreateContext      := dlsym(aglLibrary, 'aglCreateContext');
-    aglDestroyContext     := dlsym(aglLibrary, 'aglDestroyContext');
-    aglUpdateContext      := dlsym(aglLibrary, 'aglUpdateContext');
-    aglSetCurrentContext  := dlsym(aglLibrary, 'aglSetCurrentContext');
-    aglSetDrawable        := dlsym(aglLibrary, 'aglSetDrawable');
-    aglGetDrawable        := dlsym(aglLibrary, 'aglGetDrawable');
-    aglSetFullScreen      := dlsym(aglLibrary, 'aglSetFullScreen');
-    aglSwapBuffers        := dlsym(aglLibrary, 'aglSwapBuffers');
-    aglSetInteger         := dlsym(aglLibrary, 'aglSetInteger');
-    aglCreatePBuffer      := dlsym(aglLibrary, 'aglCreatePBuffer');
-    aglDestroyPBuffer     := dlsym(aglLibrary, 'aglDestroyPBuffer');
-    aglSetPBuffer         := dlsym(aglLibrary, 'aglSetPBuffer');
-    aglEnable             := dlsym(aglLibrary, 'aglEnable');
-    aglGetVirtualScreen   := dlsym(aglLibrary, 'aglGetVirtualScreen');
-    Result := TRUE;
-  end else
-    Result := FALSE;
-end;
-
-procedure FreeAGL;
-begin
-  dlclose(aglLibrary);
-end;
-{$ENDIF}{$EndIf}
 
 function gl_GetProc(const Proc: UTF8String): Pointer;
 var
@@ -480,10 +370,6 @@ begin
     oglCanPBuffer := FALSE;
   log_Add('WGL_PBUFFER: ' + u_BoolToStr(oglCanPBuffer));
 {$ENDIF}
-{$IFDEF MACOSX}{$IfNDef MAC_COCOA}
-  oglCanPBuffer := Assigned(aglCreatePBuffer);
-  log_Add('AGL_PBUFFER: ' + u_BoolToStr(oglCanPBuffer));
-{$ENDIF}{$EndIf}
 
   // WaitVSync
 {$IFDEF LINUX}
@@ -494,13 +380,6 @@ begin
   wglSwapIntervalEXT := gl_GetProc('wglSwapInterval');
   oglCanVSync     := Assigned(wglSwapIntervalEXT);
 {$ENDIF}
-{$IFDEF MACOSX}{$IfNDef MAC_COCOA}
-  if aglSetInt(oglContext, AGL_SWAP_INTERVAL, 1) = GL_TRUE Then
-    oglCanVSync := TRUE
-  else
-    oglCanVSync := FALSE;
-  aglSetInt(oglContext, AGL_SWAP_INTERVAL, Byte(scrVSync));
-{$ENDIF}{$EndIf}
   if oglCanVSync Then
     scr_VSync;
   log_Add('Support WaitVSync: ' + u_BoolToStr(oglCanVSync));

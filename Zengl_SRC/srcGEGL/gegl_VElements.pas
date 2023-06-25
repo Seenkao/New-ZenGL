@@ -40,9 +40,7 @@ uses
   zgl_touch,
   {$EndIf}
   zgl_collision_2d,
-  {$IfNDef OLD_METHODS}
   gegl_color,
-  {$EndIf}
   zgl_window;
 
 var
@@ -138,22 +136,19 @@ implementation
 
   {$IfDef FULL_LOGGING}
 uses
-  {$IfDef MOBILE}
-  zgl_application,
-  {$EndIf}
   zgl_log;
   {$EndIf}
 
 var
-  // RU: поле ввода (пока просто вывода текста).
+  // RU: поле ввода (пока просто вывода текста)
   UseText: geglPEdit;
-  // точка поворота.
+  // точка поворота
   pointManager: zglTPoint2D = (x: 0; y: 0);
-  // угол поворота.
+  // угол поворота
   geAngle: Single = 0;
   // цвет по умолчанию.
   geDefColor: geglDefColor;
-  useFont: zglPFont;  // защита от многопроцессорного исполнения?
+  useFont: zglPFont;  // защита от многопроцессорного исполнения
 
   rs1_2: Single = 1.2;
   _cursor: geglPCursor;

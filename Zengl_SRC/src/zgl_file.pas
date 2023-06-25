@@ -46,6 +46,25 @@ uses
   {$ENDIF}
   zgl_types;
 
+type
+  zglTFile     = Ptr;
+  zglTFileList = zglTStringList;
+
+const
+  FILE_ERROR = {$IFNDEF WINDOWS} 0 {$ELSE} Ptr(-1) {$ENDIF};
+
+  // Open Mode
+  FOM_CREATE = $01; // Create
+  FOM_OPENR  = $02; // Read
+  FOM_OPENW  = $03; // Write
+  FOM_OPENRW = $04; // Read&Write
+
+
+  // Seek Mode
+  FSM_SET    = $01;
+  FSM_CUR    = $02;
+  FSM_END    = $03;
+
 // Rus: открыть файл.
 // Eng: open file.
 function  file_Open(out FileHandle: zglTFile; const FileName: UTF8String; Mode: Byte{$IfDef MAC_COCOA}; log: Boolean = false{$EndIf}): Boolean;
@@ -249,7 +268,7 @@ end;
 
 function file_Remove(const Name: UTF8String): Boolean;
   var
-  {$IF defined(UNIX) or DEFINED(MACOSX)}
+  {$IF defined(UNIX) or DEFINED(MAC_COCOA)}
     status: Stat;
   {$IFEND}
   {$IFDEF iOS}
@@ -283,7 +302,7 @@ begin
   dir := GetFileAttributesW(wideStr) and FILE_ATTRIBUTE_DIRECTORY > 0;
   FreeMem(wideStr);
 {$ENDIF}
-{$IFDEF MACOSX}
+{$IFDEF MAC_COCOA}
   FpStat(platform_GetRes(filePath + Name), status);
   dir := fpS_ISDIR(status.st_mode);
 {$ENDIF}
@@ -311,7 +330,7 @@ begin
       Result  := RemoveDirectoryW(wideStr);
       FreeMem(wideStr);
       {$ENDIF}
-      {$IFDEF MACOSX}
+      {$IFDEF MAC_COCOA}
       Result := FpRmdir(platform_GetRes(filePath + Name)) = 0;
       {$ENDIF}
       {$IFDEF iOS}
@@ -328,7 +347,7 @@ begin
         FreeMem(wideStr);
       end;
       {$ENDIF}
-      {$IFDEF MACOSX}
+      {$IFDEF MAC_COCOA}
       Result := FpUnlink(platform_GetRes(filePath + Name)) = 0;
       {$ENDIF}
       {$IFDEF iOS}
@@ -363,7 +382,7 @@ begin
   Result  := GetFileAttributesW(wideStr) <> $FFFFFFFF;
   FreeMem(wideStr);
 {$ENDIF}
-{$IFDEF MACOSX}
+{$IFDEF MAC_COCOA}
   Result := FpStat(platform_GetRes(filePath + Name), status) = 0;
 {$ENDIF}
 {$IFDEF iOS}
@@ -535,7 +554,7 @@ end;
 
 procedure file_Find(const Directory: UTF8String; out List: zglTFileList; FindDir: Boolean);
   var
-  {$IF defined(UNIX) or DEFINED(MACOSX)}
+  {$IF defined(UNIX) or DEFINED(MAC_COCOA)}
     dir   : PDir;
     dirent: PDirent;
     type_ : Integer;
@@ -598,13 +617,13 @@ begin
   end;
   {$ENDIF}
 
-{$IF defined(UNIX) or DEFINED(MACOSX)}
+{$IF defined(UNIX) or DEFINED(MAC_COCOA)}
   if FindDir Then
     type_ := 4
   else
     type_ := 8;
 
-  {/$IfDef UNIX}{$IfNDef MACOSX}
+  {/$IfDef UNIX}{$IfNDef MAC_COCOA}
   dir := FpOpenDir(filePath + Directory);
   {$ELSE}
   dir := FpOpenDir(platform_GetRes(filePath + Directory));
@@ -733,7 +752,7 @@ begin
   filePath := __GetDir(Path);
 end;
 
-{$IFDEF MACOSX}
+{$IFDEF MAC_COCOA}
 function platform_GetRes(const FileName: UTF8String): UTF8String;
 begin
   if (Length(FileName) > 0) and (FileName[1] <> '/') Then
@@ -767,7 +786,7 @@ begin
     exit;
   end;
 
-  {$IF DEFINED(MACOSX) or DEFINED(iOS)}
+  {$IF DEFINED(MAC_COCOA) or DEFINED(iOS)}
   zipCurrent := zip_open(PAnsiChar(platform_GetRes(filePath + FileName)), 0, error);
   {$ELSE}
   zipCurrent := zip_open(PAnsiChar(filePath + FileName), 0, error);                 

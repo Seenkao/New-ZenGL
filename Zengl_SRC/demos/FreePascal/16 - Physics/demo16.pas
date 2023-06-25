@@ -33,7 +33,7 @@ uses
 
 var
   dirRes  : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
-  fntMain : LongWord;
+  fntMain : Byte;
   space   : PcpSpace;
   bCount  : Integer;
   Bodies  : array of PcpBody;

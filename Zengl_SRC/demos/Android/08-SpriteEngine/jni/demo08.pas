@@ -21,9 +21,7 @@ uses
   zgl_font,
   zgl_text,
   zgl_types,
-  {$IfNDef OLD_METHODS}
   gegl_color,
-  {$EndIf}
   zgl_utils
   ;
 
@@ -48,10 +46,8 @@ var
   sengine2d : zglTSEngine2D;
   TimeStart : Byte;
   TimeMiku  : Byte;
-  {$IfNDef OLD_METHODS}
   newColor  : LongWord;
   correctColor: LongWord;
-  {$EndIf}
 
 // Miku
 procedure MikuInit( var Miku : zglTMikuSprite );
@@ -148,10 +144,8 @@ begin
 
   file_CloseArchive();
   setFontTextScale(15, fntMain);
-  {$IfNDef OLD_METHODS}
   newColor := Color_FindOrAdd($80A080FF - 55);
   correctColor := Color_FindOrAdd($AFAFAFFF);
-  {$EndIf}
 end;
 
 procedure Draw;
@@ -167,20 +161,18 @@ begin
   else
     if time < 510 Then
       begin
-        pr2d_Rect( 0, 0, 800, 600, {$IfDef OLD_METHODS}$AFAFAF, 510 - time,{$Else}correctColor,{$EndIf} PR2D_FILL );
-        {$IfDef OLD_METHODS}
+        pr2d_Rect( 0, 0, 800, 600, correctColor, PR2D_FILL );
         i := Get_Color(correctColor);
         dec(i);
         if i < $AFAFAF00 then
           i := $AFAFAF00;
         Correct_Color(correctColor, i);
-        {$EndIf}
         ssprite2d_Draw( texLogo, 400 - 256, 300 - 128, 512, 256, 0, 510 - time );
       end;
 
   if time > 255 Then
     begin
-      pr2d_Rect( 0, 0, 256, 64, {$IfDef OLD_METHODS} $80A080, 200,{$Else}newColor,{$EndIf} PR2D_FILL );
+      pr2d_Rect( 0, 0, 256, 64, newColor, PR2D_FILL );
       text_Draw( fntMain, 0, 0, 'FPS: ' + u_IntToStr( zgl_Get( RENDER_FPS ) ) );
       text_Draw( fntMain, 0, 20, 'Sprites: ' + u_IntToStr( sengine2d.Count ) );
       text_Draw( fntMain, 0, 40, 'Up/Down - Add/Delete Miku :)' );

@@ -32,13 +32,11 @@ const
   libGL  = 'opengl32.dll';
   libGLU = 'glu32.dll';
   {$ENDIF}
-  {$IFDEF MACOSX}
+  {$IFDEF MAC_COCOA}
 const
   libGL  = '/System/Library/Frameworks/OpenGL.framework/Libraries/libGL.dylib';
   libGLU = '/System/Library/Frameworks/OpenGL.framework/Libraries/libGLU.dylib';
-  {$IfNDef MAC_COCOA}
-  libAGL = '/System/Library/Frameworks/AGL.framework/AGL';
-  {$ENDIF}{$EndIf}
+  {$EndIf}
 
 
 Type

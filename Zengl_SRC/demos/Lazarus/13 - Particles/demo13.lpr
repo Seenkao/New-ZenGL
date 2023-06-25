@@ -28,10 +28,8 @@ uses
   zgl_text,
   zgl_math_2d,
   zgl_utils,
-  zgl_types
-  {$IfNDef OLD_METHODS}
-  , gegl_color
-  {$EndIf}
+  zgl_types,
+  gegl_color
   {$ELSE}
   zglHeader
   {$ENDIF}
@@ -100,7 +98,7 @@ begin
   if debug Then
     for i := 0 to particles.Count.Emitters - 1 do
       with particles.List[ i ].BBox do
-        pr2d_Rect( MinX, MinY, MaxX - MinX, MaxY - MinY,{$IfNDef OLD_METHODS}cl_Red{$Else} $FF0000, 255{$EndIf} );
+        pr2d_Rect( MinX, MinY, MaxX - MinX, MaxY - MinY, cl_Red );
 
   text_Draw( fntMain, 0, 0, 'FPS: ' + u_IntToStr( zgl_Get( RENDER_FPS ) ) );
   text_Draw( fntMain, 0, 20, 'Particles: ' + u_IntToStr( particles.Count.Particles ) );

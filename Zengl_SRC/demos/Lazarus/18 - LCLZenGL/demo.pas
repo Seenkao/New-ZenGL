@@ -23,11 +23,6 @@ uses
   {$ENDIF}
 {$ENDIF}
 
-{$IFDEF MACOSX}
-//  CarbonPrivate,
-  CocoaPrivate,
-{$ENDIF}
-
   {$IFDEF USE_ZENGL_STATIC}
   zgl_application,
   zgl_window,
@@ -78,7 +73,7 @@ var
   Form1: TForm1;
 
 //-----------------------------------------
-  dirRes  : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
+  dirRes  : UTF8String;
 
   fntMain : Byte;
   MyIcon    : array[ 0..1 ] of zglPTexture;
@@ -221,11 +216,6 @@ begin
     zgl_InitToHandle( Handle );
   {$ENDIF}
 
-  {$IFDEF MACOSX}
-    // RU: В MacOS X инициализироваться нужно в форму, даже если рисовать надо в другом контроле.
-    // EN: For MacOS X initialization should be done into form, even if rendering will be into another control.
-    zgl_InitToHandle( LongWord( TCarbonWindow( Form1.Handle ).Window ) );
-  {$ENDIF}
   // таймер должен быть изначально выключен. Включаем таймер только когда окно инициализировано.
   Timer1.Enabled := True;
 end;

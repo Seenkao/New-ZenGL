@@ -102,7 +102,7 @@ const
     {$L jutils}
   {$ENDIF}
   {$IFDEF MACOSX}
-    {$LINKLIB libgcc.a}
+    {$LINKLIB libgcc.a}   // ??????
   {$ENDIF}
 {$ENDIF}
 {/$EndIf}

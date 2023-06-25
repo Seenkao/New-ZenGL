@@ -1,4 +1,4 @@
-library demo11;
+library demo10;
 
 {$I zglCustomConfig.cfg}
 {$I zgl_config.cfg}

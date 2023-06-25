@@ -275,7 +275,7 @@ begin
       r.Y := r.Y + 1;
       DrawButton(TouchKey.OneButton[i].X + {$IfDef LINUX}rs1{$Else}1{$EndIf}, TouchKey.OneButton[i].Y + {$IfDef LINUX}rs1{$Else}1{$EndIf}, TouchKey.OWidth, TouchKey.Height, 2);
       text_DrawInRect(fontUse, r, ID_toUTF8( TouchKey.OneButton[i].symb[n]), TEXT_HALIGN_CENTER or TEXT_VALIGN_CENTER);
-      log_Add(ID_toUTF8(TouchKey.OneButton[i].symb[n]));
+      // log_Add(ID_toUTF8(TouchKey.OneButton[i].symb[n]));
       Continue;                 
     end;
 

@@ -28,8 +28,7 @@ unit zgl_joystick;
 interface
 {$IFDEF UNIX}
 uses
-  BaseUnix,
-  zgl_types;
+  BaseUnix;
 type
   js_event = record
     time  : LongWord; // event timestamp in milliseconds
@@ -132,6 +131,17 @@ const
 {$ENDIF}
 
 type
+  zglPJoyInfo = ^zglTJoyInfo;
+  zglTJoyInfo = record
+    Name  : UTF8String;
+    Count : record
+      Axes   : Integer;
+      Buttons: Integer;
+             end;
+    Caps  : LongWord;
+  end;
+
+type
   zglPJoyState = ^zglTJoyState;
   zglTJoyState = record
     Axis       : array[0..7] of Single;
@@ -156,12 +166,26 @@ type
     State  : zglTJoyState;
   end;
 
-{$IFDEF UNIX}
 const
+  JOY_HAS_Z   = $000001;
+  JOY_HAS_R   = $000002;
+  JOY_HAS_U   = $000004;
+  JOY_HAS_V   = $000008;
+  JOY_HAS_POV = $000010;
+
+  JOY_AXIS_X = 0;
+  JOY_AXIS_Y = 1;
+  JOY_AXIS_Z = 2;
+  JOY_AXIS_R = 3;
+  JOY_AXIS_U = 4;
+  JOY_AXIS_V = 5;
+  JOY_POVX   = 6;
+  JOY_POVY   = 7;
+
+{$IFDEF UNIX}
   JS_AXIS: array[0..17] of Byte = (JOY_AXIS_X, JOY_AXIS_Y, JOY_AXIS_Z, JOY_AXIS_U, JOY_AXIS_V, JOY_AXIS_R, JOY_AXIS_Z, JOY_AXIS_R, 0, 0, 0, 0, 0, 0, 0, 0, JOY_POVX, JOY_POVY);
 {$ENDIF}
 {$IFDEF WINDOWS}
-const
   JS_AXIS: array[0..5] of LongWord = (17 {X}, 19 {Y}, 21 {Z}, 26 {R}, 28 {U}, 30 {V});
 {$ENDIF}
 
@@ -200,10 +224,10 @@ begin
   for i := 0 to 15 do
     begin
       joyArray[joyCount].device := FpOpen('/dev/input/js' + u_IntToStr(i), O_RDONLY or O_NONBLOCK);
-      if joyArray[joyCount].device <= FILE_ERROR Then
+      if joyArray[joyCount].device = FILE_ERROR Then
         joyArray[joyCount].device := FpOpen('/dev/js' + u_IntToStr(i), O_RDONLY or O_NONBLOCK);
 
-      if joyArray[joyCount].device > FILE_ERROR Then
+      if joyArray[joyCount].device <> FILE_ERROR Then
         begin
           SetLength(joyArray[joyCount].Info.Name, 256);
           FpIOCtl(joyArray[joyCount].device, JSIOCGNAME,    @joyArray[joyCount].Info.Name[1]);
@@ -229,21 +253,14 @@ begin
               end;
 
           // Checking if joystick is a real one, because laptops with accelerometer can be detected as a joystick :)
-          // Also ignore devices with more than 8 axes and 32 buttons
-          if ( joyArray[ joyCount ].Info.Count.Axes >= 2 ) and ( joyArray[ joyCount ].Info.Count.Buttons > 0 ) and
-             ( joyArray[ joyCount ].Info.Count.Axes <= 8 ) and ( joyArray[ joyCount ].Info.Count.Buttons <= 32 ) Then
-          begin
-            log_Add('Joy: Found "' + joyArray[joyCount].Info.Name + '" (ID: ' + u_IntToStr(joyCount) +
-                    '; Axes: ' + u_IntToStr(joyArray[joyCount].Info.Count.Axes) +
-                    '; Buttons: ' + u_IntToStr(joyArray[joyCount].Info.Count.Buttons) + ')');
+          if (joyArray[joyCount].Info.Count.Axes >= 2) and (joyArray[joyCount].Info.Count.Buttons > 0) Then
+            begin
+              log_Add('Joy: Find "' + joyArray[joyCount].Info.Name + '" (ID: ' + u_IntToStr(joyCount) +
+                       '; Axes: ' + u_IntToStr(joyArray[joyCount].Info.Count.Axes) +
+                       '; Buttons: ' + u_IntToStr(joyArray[joyCount].Info.Count.Buttons) + ')');
 
-            INC(joyCount);
-          end
-          else begin
-            log_Add('Joy: Ignore "' + joyArray[ joyCount ].Info.Name + '" (ID: ' + u_IntToStr( joyCount ) +
-                    '; Axes: ' + u_IntToStr( joyArray[ joyCount ].Info.Count.Axes ) +
-                    '; Buttons: ' + u_IntToStr( joyArray[ joyCount ].Info.Count.Buttons ) + ')' );
-          end;
+              INC(joyCount);
+            end;
         end else
           break;
     end;
@@ -358,10 +375,10 @@ begin
                   joyArray[i].State.BtnDown[event.number] := TRUE;
                   joyArray[i].State.BtnUp  [event.number] := FALSE;
                   if joyArray[i].State.BtnCanPress[event.number] Then
-                  begin
-                    joyArray[i].State.BtnPress   [event.number] := TRUE;
-                    joyArray[i].State.BtnCanPress[event.number] := FALSE;
-                  end;
+                    begin
+                      joyArray[i].State.BtnPress   [event.number] := TRUE;
+                      joyArray[i].State.BtnCanPress[event.number] := FALSE;
+                    end;
                 end;
             end;
         end;
@@ -378,40 +395,40 @@ begin
       if joyGetPosEx(i, @state) = 0 Then
         begin
           for j := 0 to joyArray[i].Info.Count.Axes - 1 do
-          begin
-            // Say "no" to if's, and do everything trciky :)
-            a     := joyArray[i].axesMap[j];
-            pcaps := @joyArray[i].caps;
-            INC(pcaps, JS_AXIS[a]);
-            vMin  := pcaps^;
-            INC(pcaps);
-            vMax  := pcaps^;
-            value := @state;
-            INC(value, 2 + a);
+            begin
+              // Say "no" to if's, and do everything trciky :)
+              a     := joyArray[i].axesMap[j];
+              pcaps := @joyArray[i].caps;
+              INC(pcaps, JS_AXIS[a]);
+              vMin  := pcaps^;
+              INC(pcaps);
+              vMax  := pcaps^;
+              value := @state;
+              INC(value, 2 + a);
 
-            joyArray[i].State.Axis[a] := Round((value^ / (vMax - vMin) * 2 - 1) * 1000) / 1000;
-          end;
+              joyArray[i].State.Axis[a] := Round((value^ / (vMax - vMin) * 2 - 1) * 1000) / 1000;
+            end;
 
           FillChar(joyArray[i].State.Axis[JOY_POVX], 8, 0);
           if (joyArray[i].Info.Caps and JOY_HAS_POV > 0) and (state.dwPOV and $FFFF <> $FFFF)Then
-          begin
-            joyArray[i].State.Axis[JOY_POVX] := Round(m_Sin(state.dwPOV and $FFFF div 100));
-            joyArray[i].State.Axis[JOY_POVY] := -Round(m_Cos(state.dwPOV and $FFFF div 100));
-          end;
+            begin
+              joyArray[i].State.Axis[JOY_POVX] := Round(m_Sin(state.dwPOV and $FFFF div 100));
+              joyArray[i].State.Axis[JOY_POVY] := -Round(m_Cos(state.dwPOV and $FFFF div 100));
+            end;
 
           for j := 0 to joyArray[i].Info.Count.Buttons - 1 do
-          begin
-            btn := state.wButtons and (1 shl j);
-            if (joyArray[i].State.BtnDown[j]) and (btn = 0) Then
-              joyArray[i].State.BtnUp[j] := TRUE;
-
-            if (joyArray[i].State.BtnCanPress[j]) and (not joyArray[i].State.BtnDown[j]) and (btn <> 0) Then
             begin
-              joyArray[i].State.BtnPress   [j] := TRUE;
-              joyArray[i].State.BtnCanPress[j] := FALSE;
+              btn := state.wButtons and (1 shl j);
+              if (joyArray[i].State.BtnDown[j]) and (btn = 0) Then
+                joyArray[i].State.BtnUp[j] := TRUE;
+
+              if (joyArray[i].State.BtnCanPress[j]) and (not joyArray[i].State.BtnDown[j]) and (btn <> 0) Then
+                begin
+                  joyArray[i].State.BtnPress   [j] := TRUE;
+                  joyArray[i].State.BtnCanPress[j] := FALSE;
+                end;
+              joyArray[i].State.BtnDown[j] := btn <> 0;
             end;
-            joyArray[i].State.BtnDown[j] := btn <> 0;
-          end;
         end;
     end;
 {$ENDIF}
@@ -420,8 +437,7 @@ end;
 function joy_GetInfo(JoyID: Byte): zglPJoyInfo;
 begin
   Result := nil;
-  if JoyID >= joyCount Then
-    exit;
+  if JoyID >= joyCount Then exit;
 
   Result := @joyArray[JoyID].Info;
 end;
@@ -429,8 +445,7 @@ end;
 function joy_AxisPos(JoyID, Axis: Byte): Single;
 begin
   Result := 0;
-  if (JoyID >= joyCount) or (Axis > 7) Then
-    exit;
+  if (JoyID >= joyCount) or (Axis > 7) Then exit;
 
   Result := joyArray[JoyID].State.Axis[Axis];
 end;
@@ -438,8 +453,7 @@ end;
 function joy_Down(JoyID, Button: Byte): Boolean;
 begin
   Result := FALSE;
-  if (JoyID >= joyCount) or (Button >= joyArray[JoyID].Info.Count.Buttons) Then
-    exit;
+  if (JoyID >= joyCount) or (Button >= joyArray[JoyID].Info.Count.Buttons) Then exit;
 
   Result := joyArray[JoyID].State.BtnDown[Button];
 end;
@@ -447,8 +461,7 @@ end;
 function joy_Up(JoyID, Button: Byte): Boolean;
 begin
   Result := FALSE;
-  if (JoyID >= joyCount) or (Button >= joyArray[JoyID].Info.Count.Buttons) Then
-    exit;
+  if (JoyID >= joyCount) or (Button >= joyArray[JoyID].Info.Count.Buttons) Then exit;
 
   Result := joyArray[JoyID].State.BtnUp[Button];
 end;
@@ -456,8 +469,7 @@ end;
 function joy_Press(JoyID, Button: Byte): Boolean;
 begin
   Result := FALSE;
-  if (JoyID >= joyCount) or (Button >= joyArray[JoyID].Info.Count.Buttons) Then
-    exit;
+  if (JoyID >= joyCount) or (Button >= joyArray[JoyID].Info.Count.Buttons) Then exit;
 
   Result := joyArray[JoyID].State.BtnPress[Button];
 end;
@@ -469,12 +481,12 @@ procedure joy_ClearState;
 begin
   for i := 0 to joyCount - 1 do
     for j := 0 to joyArray[i].Info.Count.Buttons - 1 do
-    begin
-      state := @joyArray[i].State;
-      state.BtnUp[j]       := FALSE;
-      state.BtnPress[j]    := FALSE;
-      state.BtnCanPress[j] := TRUE;
-    end;
+      begin
+        state := @joyArray[i].State;
+        state.BtnUp[j]       := FALSE;
+        state.BtnPress[j]    := FALSE;
+        state.BtnCanPress[j] := TRUE;
+      end;
 end;
 
 initialization

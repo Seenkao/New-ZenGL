@@ -64,13 +64,7 @@ public class ZenGL extends GLSurfaceView
 	public ZenGL( Context context, String appName, String appSourceDir )
 	{
 		super( context );
-
-		System.loadLibrary( "zenjpeg" );
-		System.loadLibrary( "openal" );
-		System.loadLibrary( "ogg" );
-		System.loadLibrary( "vorbis" );
-		System.loadLibrary( "theoradec" );
-		System.loadLibrary( "chipmunk" );
+		
 		System.loadLibrary( appName );
 
 		SourceDir = appSourceDir;

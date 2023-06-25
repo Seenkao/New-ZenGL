@@ -20,9 +20,7 @@ uses
   zgl_video,
   zgl_video_theora,
   zgl_types,
-  {$IfNDef OLD_METHODS}
   gegl_color,
-  {$EndIf}
   zgl_utils;
 
 var
@@ -31,9 +29,7 @@ var
   video     : zglPVideoStream;
   videoFile : zglTMemory;
   videoSeek : Boolean;
-  {$IfNDef OLD_METHODS}
   newColor  : LongWord;
-  {$EndIf}
 
 procedure Init;
 begin
@@ -53,7 +49,7 @@ begin
   video := video_OpenMemory( videoFile, 'OGV' );
   setFontTextScale(20, fntMain);
 
-  newColor := Color_FindOrAdd($00FF0090);
+  newColor := Color_FindOrAdd($A0AA4090);
 end;
 
 procedure Draw;
@@ -65,8 +61,8 @@ begin
       ssprite2d_Draw( video^.Texture, ( 800 - video^.Info.Width ) / 2, ( 600 - video^.Info.Height ) / 2, video^.Info.Width, video^.Info.Height, 0 );
       // EN: Rendering of progress bar.
       // RU: Рендеринг полосы прогресса.
-      pr2d_Rect( 4, 600 - 100, 792, 20, {$IfNDef OLD_METHODS}cl_Green{$Else}$00FF00, 255{$EndIf} );
-      pr2d_Rect( 4, 600 - 100, ( 792 / video^.Info.Duration ) * video^.Time, 20, {$IfDef OLD_METHODS}$00FF00, 155,{$Else}newColor,{$EndIf} PR2D_FILL );
+      pr2d_Rect( 4, 600 - 100, 792, 20, cl_Green );
+      pr2d_Rect( 4, 600 - 100, ( 792 / video^.Info.Duration ) * video^.Time, 20, newColor, PR2D_FILL );
 
       text_Draw( fntMain, 0, 0, 'FPS: ' + u_IntToStr( zgl_Get( RENDER_FPS ) ) );
       text_Draw( fntMain, 0, 20, 'Frame: ' + u_IntToStr( video^.Frame ) );

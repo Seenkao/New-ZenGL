@@ -32,11 +32,8 @@ interface
 uses
   zgl_font,
   zgl_gltypeconst,
-  zgl_types
-  {$IfNDef OLD_METHODS}
-  , gegl_color
-  {$EndIf}
-  ;
+  zgl_types,
+  gegl_color;
 
 const
   TEXT_HALIGN_LEFT    = $000001;
@@ -55,13 +52,13 @@ const
 procedure text_Draw(fnt: LongWord; X, Y: Single; const Text: UTF8String; Flags: LongWord = 0);
 // Rus: расширенная процедура вывода текста.
 // Eng: extended text output procedure.
-procedure text_DrawEx(fnt: LongWord; X, Y, Scale, Step: Single; const Text: UTF8String; {$IfDef OLD_METHODS} Alpha: Byte = 255; Color: LongWord = $FFFFFFFF;{$Else} Color: LongWord = cl_White;{$EndIf} Flags: LongWord = 0);
+procedure text_DrawEx(fnt: LongWord; X, Y, Scale, Step: Single; const Text: UTF8String; Color: LongWord = cl_White; Flags: LongWord = 0);
 // Rus: процедура вывода текста в определённую область (прямоугольник).
 // Eng: procedure for outputting text to a certain area (rectangle).
 procedure text_DrawInRect(fnt: LongWord; const Rect: zglTRect2D; const Text: UTF8String; Flags: LongWord = 0);
 // Rus: расширенная процедура вывода текста в определённую область (прямоугольник).
 // Eng: extended procedure for outputting text to a certain area (rectangle).
-procedure text_DrawInRectEx(fnt: LongWord; const Rect: zglTRect2D; Scale, Step: Single; const Text: UTF8String; {$IfDef OLD_METHODS} Alpha: Byte = 0; Color: LongWord = $FFFFFF;{$Else} Color: LongWord = cl_White;{$EndIf} Flags: LongWord = 0);
+procedure text_DrawInRectEx(fnt: LongWord; const Rect: zglTRect2D; Scale, Step: Single; const Text: UTF8String; Color: LongWord = cl_White; Flags: LongWord = 0);
 // Rus: возвращаем ширину всего текста.
 // Eng: return the width of the entire text.
 function  text_GetWidth(fnt: LongWord; const Text: UTF8String; Step: Single = 0.0): Single;
@@ -157,7 +154,7 @@ type
 end;
 
 var
-  textRGBA      : {$IfDef OLD_METHODS} array[0..3] of Byte = (255, 255, 255, 255){$Else}LongWord = $FFFFFFFF{$EndIf};
+  textRGBA      : LongWord = $FFFFFFFF;
   textStep      : Single = 0.0;
   textLength    : Integer;
   textLCoord    : zglPPoint2D;
@@ -222,14 +219,7 @@ end;
 
 procedure setTextColor(Color: Cardinal);
 begin
-  {$IfDef OLD_METHODS}
-  textRGBA[3] := Color shr 24;
-  textRGBA[2] := (Color and $FF0000) shr 16;
-  textRGBA[1] := (Color and $FF00) shr 8;
-  textRGBA[0] := Color and $FF;
-  {$else}
   textRGBA := Color;
-  {$EndIf}
 end;
 
 procedure text_CalcRect(fnt: LongWord; const Rect: zglTRect2D; const Text: UTF8String; Flags: LongWord = 0);
@@ -394,7 +384,7 @@ begin
   for i := 0 to useFont.Count.Pages - 1 do
     if not Assigned(useFont.Pages[i]) Then exit;
 
-  glColor4ubv(@textRGBA{$IfDef OLD_METHODS}[0]{$EndIf});
+  glColor4ubv(@textRGBA);
 
   if Off_TextScale then
     Y := Y - useFont.MaxShiftY * useScaleEx
@@ -581,37 +571,20 @@ begin
   end;
 end;
 
-procedure text_DrawEx(fnt: LongWord; X, Y, Scale, Step: Single; const Text: UTF8String; {$IfDef OLD_METHODS} Alpha: Byte = 255; Color: LongWord = $FFFFFFFF;{$Else} Color: LongWord = cl_White;{$EndIf} Flags: LongWord = 0);
+procedure text_DrawEx(fnt: LongWord; X, Y, Scale, Step: Single; const Text: UTF8String; Color: LongWord = cl_White; Flags: LongWord = 0);
 var
-  oldTextRGBA: {$IfDef OLD_METHODS} array[0..3] of Byte = (255, 255, 255, 255){$Else}LongWord{$EndIf};
+  oldTextRGBA: LongWord;
   oldTextStep: Single;
 begin
   oldTextStep := textStep;
-  {$IfDef OLD_METHODS}
-  oldTextRGBA[0] := textRGBA[0];
-  oldTextRGBA[1] := textRGBA[1];
-  oldTextRGBA[2] := textRGBA[2];
-  oldTextRGBA[3] := textRGBA[3];
-  textRGBA[0] := Color shr 16;
-  textRGBA[1] := (Color and $FF00) shr 8;
-  textRGBA[2] := Color and $FF;
-  textRGBA[3] := Alpha;
-  {$Else}
+
   oldTextRGBA := textRGBA;
   textRGBA := Get_Color(Color);
-  {$EndIf}
   Off_TextScale := True;
   useScaleEx := Scale * managerFont.Font[fnt].ScaleNorm;
   textStep    := Step;
   text_Draw(fnt, X, Y, Text, Flags);
-  {$IfDef OLD_METHODS}
-  textRGBA[0] := oldTextRGBA[0];
-  textRGBA[1] := oldTextRGBA[1];
-  textRGBA[2] := oldTextRGBA[2];
-  textRGBA[3] := oldTextRGBA[3];
-  {$Else}
   textRGBA := oldTextRGBA;
-  {$EndIf}
   Off_TextScale := False;
   textStep    := oldTextStep;
 end;
@@ -646,37 +619,19 @@ begin
   end;
 end;
 
-procedure text_DrawInRectEx(fnt: LongWord; const Rect: zglTRect2D; Scale, Step: Single; const Text: UTF8String; {$IfDef OLD_METHODS} Alpha: Byte = 0; Color: LongWord = $FFFFFF;{$Else} Color: LongWord = cl_White;{$EndIf} Flags: LongWord = 0);
+procedure text_DrawInRectEx(fnt: LongWord; const Rect: zglTRect2D; Scale, Step: Single; const Text: UTF8String; Color: LongWord = cl_White; Flags: LongWord = 0);
 var
-  oldTextRGBA: {$IfDef OLD_METHODS} array[0..3] of Byte = (255, 255, 255, 255){$Else}LongWord{$EndIf};
+  oldTextRGBA: LongWord;
   oldTextStep: Single;
 begin
   oldTextStep := textStep;
-  {$IfDef OLD_METHODS}
-  oldTextRGBA[0] := textRGBA[0];
-  oldTextRGBA[1] := textRGBA[1];
-  oldTextRGBA[2] := textRGBA[2];
-  oldTextRGBA[3] := textRGBA[3];
-  textRGBA[0] := Color shr 16;
-  textRGBA[1] := (Color and $FF00) shr 8;
-  textRGBA[2] := Color and $FF;
-  textRGBA[3] := Alpha;
-  {$Else}
   oldTextRGBA := textRGBA;
   textRGBA := Get_Color(Color);
-  {$EndIf}
   Off_TextScale := True;
   useScaleEx := Scale * managerFont.Font[fnt].ScaleNorm;
   textStep      := Step;
   text_DrawInRect(fnt, Rect, Text, Flags);
-  {$IfDef OLD_METHODS}
-  textRGBA[0] := oldTextRGBA[0];
-  textRGBA[1] := oldTextRGBA[1];
-  textRGBA[2] := oldTextRGBA[2];
-  textRGBA[3] := oldTextRGBA[3];
-  {$Else}
   textRGBA := oldTextRGBA;
-  {$EndIf}
   Off_TextScale := False;
   textStep      := oldTextStep;
 end;

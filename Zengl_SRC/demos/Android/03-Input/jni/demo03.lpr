@@ -2,6 +2,11 @@ library demo03;
 {$I zgl_config.cfg}
 {$I zglCustomConfig.cfg}
 
+// RU: Включите KEYBOARD_OLD_FUNCTION в zgl_config.cfg, если хотите использовать старые функции клавиатуры.
+//     С введением Green Engine - они стали не актуальны, но я их пока оставляю.
+// EN: Enable KEYBOARD_OLD_FUNCTION in zgl_config.cfg if you want to use the old keyboard functions.
+//     With the introduction of the Green Engine - they are no longer relevant, but I leave them for now.
+
 uses
   zgl_application,
   zgl_file,
@@ -19,7 +24,7 @@ uses
   zgl_types,
   zgl_log,
   zgl_utils
-  {$IfDef OLD_METHODS}
+  {$IfDef KEYBOARD_OLD_FUNCTION}
   zgl_collision_2d
   {$else}
   , gegl_draw_gui,
@@ -46,7 +51,7 @@ var
   // RU: строка для получения значения из поля ввода
   // EN: string to get value from input field
   userInput  : UTF8String;
-  {$IfDef OLD_METHODS}
+  {$IfDef KEYBOARD_OLD_FUNCTION}
   trackInput : Boolean;
   inputRect  : zglTRect;
   lineAlpha  : LongWord;
@@ -77,12 +82,12 @@ begin
   //     Текст будет выведен поверх того, что вы здесь нарисуете.
   // EN: displacement and rotation will be done prior to performing the procedure. I am showing you how to draw a frame.
   //     The text will be drawn on top of what you draw here.
-  pr2d_Rect(- 2, - 1, myRect.W + 5, myRect.H,  {$IfnDef OLD_METHODS}cl_White{$else}, $FFFFFF, 128{$EndIf}, PR2D_FILL);
+  pr2d_Rect(- 2, - 1, myRect.W + 5, myRect.H, cl_White, PR2D_FILL);
 end;
   {$EndIf}
 
 procedure Init;
-{$IfNDef OLD_METHODS}
+{$IfNDef KEYBOARD_OLD_FUNCTION}
 var
   EScale: LongWord;
 {$EndIf}
@@ -99,11 +104,11 @@ begin
   // note
   // RU: Мы дважды загружаем один и тот же фонт для того, чтоб работать с ними по раздельности. Один фонт для клавиатуры, другой фонт для поля ввода.
   // EN: We download the same font twice in order to work with them separately. One font for the keyboard, another font for the input field.
-  {$IfNDef OLD_METHODS}
+  {$IfNDef KEYBOARD_OLD_FUNCTION}
   // обязательный код! Данные для отображения клавиатуры.
   // RU: Загружаем данные о шрифте.
   // EN: Load the font.
-   fntEdit := font_LoadFromFile(dirRes + 'CalibriBold50pt.zfi');
+  fntEdit := font_LoadFromFile(dirRes + 'CalibriBold50pt.zfi');
   JoyArrow := tex_LoadFromFile(dirRes + 'arrow.png');     // загрузили текстуру
   tex_SetFrameSize(JoyArrow, 64, 64);                     // и разбили её на части, но в записях не будет указано количество полученных текстур
   // RU: Данные для виртуальной клавиатуры.
@@ -116,7 +121,7 @@ begin
 
   file_CloseArchive();
 
-  {$IfNDef OLD_METHODS}
+  {$IfNDef KEYBOARD_OLD_FUNCTION}
   // RU: устанавливаем размеры шрифтов
   // EN: set font sizes
   setFontTextScale(15, fntMain);
@@ -191,7 +196,7 @@ begin
   text_Draw(fntMain, 0, 128, 'Nine  X, Y: ' + u_IntToStr(touch_X(8)) + '; ' + u_IntToStr(touch_Y(8)));
   text_Draw(fntMain, 0, 144, 'Ten   X, Y: ' + u_IntToStr(touch_X(9)) + '; ' + u_IntToStr(touch_Y(9)));
 
-  {$IfDef OLD_METHODS}
+  {$IfDef KEYBOARD_OLD_FUNCTION}
   // RU: Выводим введённый пользователем текст.
   // EN: Show the inputted text.
   pr2d_Rect( inputRect.X, inputRect.Y, inputRect.W, inputRect.H, $FFFFFF, 255 );
@@ -212,7 +217,7 @@ begin
   batch2d_End;
 end;
 
-{$IfDef OLD_METHODS}
+{$IfDef KEYBOARD_OLD_FUNCTION}
 procedure Timer;
 begin
   if lineAlpha > 5 Then
@@ -224,7 +229,7 @@ end;
 
 procedure KeyMouseEvent;
 begin
-  {$IfDef OLD_METHODS}
+  {$IfDef KEYBOARD_OLD_FUNCTION}
   // RU: Проверить тапнул ли пользователь в пределах inputRect и начать отслеживать ввод текста.
   // EN: Check if there was tap inside inputRect and start to track text input.
   if touch_Tap( 0 ) and col2d_PointInRect( touch_X( 0 ), touch_Y( 0 ), inputRect ) Then
@@ -259,7 +264,7 @@ procedure Restore;
 begin
   file_OpenArchive( PAnsiChar( zgl_Get( DIRECTORY_APPLICATION ) ) );
   font_RestoreFromFile( fntMain, dirRes + 'font.zfi' );
-  {$IfNDef OLD_METHODS}
+  {$IfNDef KEYBOARD_OLD_FUNCTION}
   font_RestoreFromFile( fntMain, dirRes + 'CalibriBold50pt.zfi' );
   tex_RestoreFromFile( JoyArrow, dirRes + 'arrow.png' );
   {$EndIf}
@@ -268,7 +273,7 @@ end;
 
 procedure Java_zengl_android_ZenGL_Main( var env; var thiz ); cdecl;
 begin
-  {$IfDef OLD_METHODS}
+  {$IfDef KEYBOARD_OLD_FUNCTION}
   TimerStart := timer_Add( @Timer, 16, Start );
   {$EndIf}
 

@@ -109,7 +109,7 @@ uses
 
 const
 // I hate Apple! :)
-  {$IFDEF MACOSX}
+  {$IFDEF MAC_COCOA}
   prefix = '_';
   {$ELSE}
   prefix = '';

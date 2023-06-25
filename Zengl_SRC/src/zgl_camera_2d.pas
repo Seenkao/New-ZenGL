@@ -32,15 +32,6 @@ uses
   zgl_types;
 
 type
-  zglPCamera2D = ^zglTCamera2D;
-  zglTCamera2D = record
-    X, Y  : Single;
-    Angle : Single;
-    Zoom  : zglTPoint2D;
-    Center: zglTPoint2D;
-  end;
-
-type
   zglPCameraSystem = ^zglTCameraSystem;
   zglTCameraSystem = record
     Global: zglPCamera2D;

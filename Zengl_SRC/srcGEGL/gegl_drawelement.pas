@@ -95,7 +95,7 @@ begin
       if UseText^.Cursor.Flags then                  // проверяем что прорисовывать (флаг мигания)
       begin                                         // и для знака подчёркивания
         pr2d_Rect(UseText^.Cursor.curRect.X, UseText^.Cursor.curRect.Y, UseText^.Cursor.curRect.W,
-                                             UseText^.Cursor.curRect.H, {$IfDef OLD_METHODS}$FFFFFF, 160{$Else}UseText^.ColorCursor{$EndIf}, PR2D_FILL);
+                                             UseText^.Cursor.curRect.H, UseText^.ColorCursor, PR2D_FILL);
       end;
       dec(UseText^.Cursor.NSleep);
     end

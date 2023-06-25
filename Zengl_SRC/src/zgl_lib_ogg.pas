@@ -54,16 +54,11 @@ unit zgl_lib_ogg;
   {$IFDEF UNIX}
     {$LINKLIB m}
   {$ENDIF}
-  {$IFDEF MACOSX}{$IfNDef MAC_COCOA}
+  {$IFDEF MACOSX}{$IfNDef MAC_COCOA}      // ????
     {$LINKLIB libgcc.a}
   {$ENDIF}{$EndIf}
 {$ENDIF}
 
-{$IF DEFINED(USE_TREMOLO)}
-  {$LINKLIB libtremolo.a}
-{$ELSEIF DEFINED(USE_TREMOR)}
-  {$LINKLIB libtremor.a}
-{$IFEND}
 {$IF DEFINED(iOS) and (not DEFINED(iPHONESIM))}
   {$LINKLIB libgcc_s.1.dylib}
 {$IFEND}
@@ -95,7 +90,7 @@ const
   libvorbis     = 'libvorbis-0.dll';
   libvorbisfile = 'libvorbisfile-3.dll';
 {$ENDIF}
-{$IFDEF MACOSX}
+{$IFDEF MAC_COCOA}
   libogg        = 'libogg.0.dylib';
   libvorbis     = 'libvorbis.0.dylib';
   libvorbisfile = 'libvorbisfile.3.dylib';
@@ -361,7 +356,7 @@ var
 implementation
 {$IFNDEF USE_OGG_STATIC}
 uses
-  {$IFDEF MACOSX}
+  {$IFDEF MAC_COCOA}
   zgl_application,
   {$ENDIF}
   zgl_utils;
@@ -391,15 +386,13 @@ begin
   {$IFDEF WINDOWS}
   oggLibrary := dlopen(libogg);
   {$ENDIF}
-  {$IFDEF MACOSX}{$IfDef MAC_COCOA}
+  {$IfDef MAC_COCOA}
   {$IfDef NO_USE_STATIC_LIBRARY}
   oggLibrary := dlopen(PAnsiChar(libogg), 1);
   {$Else}
   oggLibrary := dlopen(PAnsiChar('/usr/local/lib/' + libogg), 1);
   {$EndIf}
-  {$Else}
-  oggLibrary := dlopen(PAnsiChar(appWorkDir + 'Contents/Frameworks/' + libogg), $001);
-  {$ENDIF}{$EndIf}
+  {$EndIf}
 
   if oggLibrary <> LIB_ERROR Then
   begin
@@ -468,13 +461,10 @@ begin
     vorbisLibrary     := dlopen(libvorbis);
     vorbisfileLibrary := dlopen(libvorbisfile);
     {$ENDIF}
-    {$IFDEF MACOSX}{$IfDef MAC_COCOA}
+    {$IfDef MAC_COCOA}
     vorbisLibrary := dlopen(PAnsiChar({'/usr/local/lib/' + }libvorbis), 1);
     vorbisfileLibrary := dlopen(PAnsiChar({'/usr/local/lib/' + }libvorbisfile), 1);
-    {$Else}
-    vorbisLibrary     := dlopen(PAnsiChar(appWorkDir + 'Contents/Frameworks/' + libvorbis), $001);
-    vorbisfileLibrary := dlopen(PAnsiChar(appWorkDir + 'Contents/Frameworks/' + libvorbisfile), $001);
-    {$EndIf}{$EndIf}
+    {$EndIf}
 
     if (vorbisLibrary <> LIB_ERROR) and (vorbisfileLibrary <> LIB_ERROR) Then
     begin

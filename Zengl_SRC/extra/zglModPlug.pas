@@ -54,9 +54,6 @@ const
 {$IF defined(LINUX) or defined(ANDROID)}
   libmodplug = 'libmodplug.so';
 {$ENDIF}
-{$IFDEF MACOSX}
-  libmodplug = 'libmodplug.dylib';
-{$ENDIF}
   MAX_FORMATS = 22;
 
 procedure InitModPlug;
@@ -177,9 +174,6 @@ begin
   {$ENDIF}
   {$IFDEF WINDOWS}
   mpLibrary := dlopen( libmodplug );
-  {$ENDIF}
-  {$IFDEF MACOSX}
-  mpLibrary := dlopen( PAnsiChar( PAnsiChar( zgl_Get( DIRECTORY_APPLICATION ) ) + 'Contents/Frameworks/' + libmodplug ), $001 );
   {$ENDIF}
 
   if mpLibrary <> LIB_ERROR Then

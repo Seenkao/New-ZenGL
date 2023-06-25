@@ -45,16 +45,18 @@ uses
   Windows,
   zgl_glx_wgl,
 {$ENDIF}
-{$IFDEF MACOSX}{$IfDef MAC_COCOA}
+{$IfDef MAC_COCOA}
   CocoaAll,
-{$EndIf}
-  MacOSAll,
 {$ENDIF}
 {$IFDEF iOS}
   iPhoneAll, CFBase, CFString,
 {$ENDIF}
 
   zgl_types;
+
+const
+  REFRESH_MAXIMUM = 0;
+  REFRESH_DEFAULT = 1;
 
 var
   SetViewPort: procedure;
@@ -138,28 +140,16 @@ procedure SetGLVersionAndFlags({$IfNDef MAC_COCOA}major, minor: Integer; flag: L
 {$EndIf}
 
 type
-  // временное решение. Определить подобные решения для всех систем!
-  // позже перенести в zgl_types.
-  {$IfDef LINUX}
   zglTPrevResolution = record
     Width : Integer;
     Height: Integer;
     frequency: array[0..9] of Integer;
   end;
-  {$EndIf}
 
   zglPResolutionList = ^zglTResolutionList;
   zglTResolutionList = record
     Count : Integer;
-    {$IfNDef Linux}
-    Width: array of Integer;
-    Height: array of Integer;
-    {$Else}
     List: array of zglTPrevResolution;
-    {$EndIf}
-    {$IfDef WINDOWS}
-    frequency: array of Integer;
-    {$EndIf}
   end;
 
 {$IFDEF WINDOWS}
@@ -221,9 +211,9 @@ var
   scrDesktop : DEVMODEW;
   scrMonInfo : MONITORINFOEX;
   {$ENDIF}
-  {$IFDEF MACOSX}
+  {$IFDEF MAC_COCOA}
   scrDisplay  : CGDirectDisplayID;
-  scrDesktop  : {$IfDef MAC_COCOA}CGDisplayModeRef{$Else} CFDictionaryRef{$EndIf};
+  scrDesktop  : CGDisplayModeRef;
   scrDesktopW : Integer;
   scrDesktopH : Integer;
   scrSettings : CFDictionaryRef;
@@ -307,10 +297,9 @@ var
   {$IFDEF WINDOWS}
   tmpSettings: DEVMODEW;
   {$ENDIF}
-  {$IFDEF MACOSX}
+  {$IFDEF MAC_COCOA}
   tmpSettings  : UnivPtr;
   width, height: Integer;
-
   {$ENDIF}
   {$IfNDef LINUX}
   function Already(Width, Height: Integer): Boolean;
@@ -385,7 +374,7 @@ begin
     INC(i);
   end;
 {$ENDIF}
-{$IFDEF MACOSX}
+{$IFDEF MAC_COCOA}
   tmpSettings := scrModeList;
   for i := 0 to scrModeCount - 1 do
   begin
@@ -413,8 +402,8 @@ begin
 end;
 
 procedure scr_Init;
-//var
-//  _res: PXRRScreenConfiguration;
+var
+  _res: PXRRScreenConfiguration;
   {$IFDEF iOS}
   var
     i           : Integer;
@@ -471,13 +460,13 @@ begin
   // Delphi: standard ENUM_REGISTRY_SETTINGS doesn't exist in Windows unit, no comments...
   EnumDisplaySettingsW(scrMonInfo.szDevice, LongWord(-2), scrDesktop);
 {$ENDIF}
-{$IFDEF MACOSX}
+{$IFDEF MAC_COCOA}
   scrDisplay  := CGMainDisplayID();
-  scrDesktop  := {$IfNDef MAC_COCOA}CGDisplayCurrentMode(scrDisplay);{$Else}CGDisplayCopyDisplayMode(scrDisplay);{$EndIf}
+  scrDesktop  := CGDisplayCopyDisplayMode(scrDisplay);
   scrDesktopW := CGDisplayPixelsWide(scrDisplay);
   scrDesktopH := CGDisplayPixelsHigh(scrDisplay);
 
-  scrModeList  := {$IfNDef MAC_COCOA}CGDisplayAvailableModes(scrDisplay){$Else}CGDisplayCopyAllDisplayModes(scrDisplay, nil){$EndIf};
+  scrModeList  := CGDisplayCopyAllDisplayModes(scrDisplay, nil);
   scrModeCount := CFArrayGetCount(scrModeList);
 {$ENDIF}
 {$IFDEF iOS}
@@ -557,10 +546,6 @@ begin
 {$IFDEF WINDOWS}
   ChangeDisplaySettingsExW(scrMonInfo.szDevice, DEVMODEW(nil^), 0, CDS_FULLSCREEN, nil);
 {$ENDIF}
-{$IFDEF MACOSX}
-  CGDisplaySwitchToMode(scrDisplay, scrDesktop);
-  //CGDisplayRelease(scrDisplay);
-{$ENDIF}
 end;
 
 procedure scr_SetWindowedMode;
@@ -590,10 +575,6 @@ begin
   end else
     scr_Reset();
   {$ENDIF}
-  {$IFDEF MACOSX}
-  scr_Reset();
-  ShowMenuBar();
-  {$ENDIF}
 end;
 {$EndIf}
 
@@ -616,7 +597,7 @@ begin
       exit;
     end;
 
-  {$IfDef OLD_METHODS}
+  {$IfDef KEYBOARD_OLD_FUNCTION}
   appXIM := XOpenIM(scrDisplay, nil, nil, nil);
   if not Assigned(appXIM) Then
     log_Add('XOpenIM - Fail')
@@ -634,7 +615,7 @@ begin
   if (not wndFullScreen) and (scrDesktop.dmBitsPerPel <> 32) Then
     scr_SetWindowedMode();
   {$ENDIF}
-  {$IFDEF MACOSX}{$IfDef MAC_COCOA}
+  {$IfDef MAC_COCOA}
   pool := NSAutoreleasePool.new;
   NSApp := NSApplication.sharedApplication;
   NSApp.setActivationPolicy(0);
@@ -645,16 +626,7 @@ begin
   mainMenu.setMenuBarVisible(false);        // menu not visible
 
   pool.dealloc;
-
-  {$Else}
-  if CGDisplayBitsPerPixel(scrDisplay) <> 32 Then
-    begin
-      u_Error('Desktop not set to 32-bit mode.');
-      winOn := False;
-      Result := FALSE;
-      exit;
-    end;
-  {$ENDIF}{$EndIf}
+  {$EndIf}
   log_Add('Current mode: ' + u_IntToStr(zgl_Get(DESKTOP_WIDTH)) + ' x ' + u_IntToStr(zgl_Get(DESKTOP_HEIGHT)));
   Result := TRUE;
 end;
@@ -667,16 +639,14 @@ begin
   {$EndIf}
   {$IFDEF USE_X11}
   XRRFreeScreenConfigInfo(scrSettings);
-  {$IfDef OLD_METHODS}
+  {$IfDef KEYBOARD_OLD_FUNCTION}
   XDestroyIC(appXIC);
   XCloseIM(appXIM);
   {$EndIf}
   {$ENDIF}
 
   scrResList.Count := 0;
-  {$IfDef LINUX}
   SetLength(scrResList.List, 0);
-  {$EndIf}
 
   scrInitialized := FALSE;
 end;
@@ -701,11 +671,9 @@ begin
   {$IFDEF WINDOWS}
   SwapBuffers(wndDC);
   {$ENDIF}
-  {$IFDEF MACOSX}{$IfDef MAC_COCOA}
+  {$IfDef MAC_COCOA}
   oglContext.flushBuffer;
-  {$Else}
-  aglSwapBuffers(oglContext);
-  {$ENDIF}{$EndIf}
+  {$EndIf}
 {$ELSE}
   {$IFNDEF NO_EGL}
   eglSwapBuffers(oglDisplay, oglSurface);
@@ -730,7 +698,7 @@ function scr_SetOptions(): Boolean;
     i: Integer;
     r: Integer;
   {$ENDIF}
-  {$IFDEF MACOSX}
+  {$IFDEF MAC_COCOA}
   var
     b: Integer;
   {$ENDIF}
@@ -830,7 +798,7 @@ begin
   end else
     scr_SetWindowedMode();
 {$ENDIF}
-{$IFDEF MACOSX}{$IfDef MAC_COCOA}
+{$IFDEF MAC_COCOA}
   if winOn then
   begin
     if wndFullScreen then
@@ -851,29 +819,7 @@ begin
       wndHandle.setFrame_display(viewNSRect, True);
     end;
   end;
-{$Else}
-  if wndFullScreen Then
-  begin
-    if (scrRefresh <> 0) and (scrRefresh <> 1) Then
-    begin
-      scrSettings := CGDisplayBestModeForParametersAndRefreshRate(scrDisplay, 32, wndWidth, wndHeight, scrRefresh, b);
-      scrRefresh  := b;
-    end;
-    if (scrRefresh = 0) or (scrRefresh = 1) Then
-      scrSettings := CGDisplayBestModeForParameters(scrDisplay, 32, wndWidth, wndHeight, b);
-
-    if (b <> 1) or (CGDisplaySwitchToMode(scrDisplay, scrSettings) <> kCGErrorSuccess) Then
-    begin
-      u_Warning('Cannot set fullscreen mode: ' + u_IntToStr(wndWidth) + 'x' + u_IntToStr(wndHeight));
-      wndFullScreen := FALSE;
-      Result        := FALSE;
-      exit;
-    end;
-
-    HideMenuBar();
-  end else
-    scr_SetWindowedMode();
-{$ENDIF}{$EndIf}
+{$EndIf}
   if wndFullScreen Then
     log_Add('Screen options changed to: ' + u_IntToStr(wndWidth) + ' x ' + u_IntToStr(wndHeight) + ' fullscreen')
   else
@@ -1012,12 +958,9 @@ begin
   if oglCanVSync Then
     wglSwapIntervalEXT(Integer(scrVSync));
   {$ENDIF}
-  {$IFDEF MACOSX}{$IfDef MAC_COCOA}
+  {$IFDEF MAC_COCOA}
 //  oglContext.setValues_forParameter(30, NSOpenGLCPSwapInterval);
-  {$Else}
-  if Assigned(oglContext) Then
-    aglSetInt(oglContext, AGL_SWAP_INTERVAL, Byte(scrVSync));
-  {$ENDIF}{$EndIf}
+  {$EndIf}
 {$ELSE}
   {$IFNDEF NO_EGL}
   if oglCanVSync Then
@@ -1114,7 +1057,7 @@ procedure SetGLVersionAndFlags({$IfNDef MAC_COCOA}major, minor: Integer; flag: L
   {$EndIf}
 
 begin
-  {$IfDef MACOSX}
+  {$IfDef MAC_COCOA}
   if (mode > CORE_4_1) or (mode = 0) then
     mode := CORE_2_1;
   if mode = CORE_3_2 then
@@ -1129,7 +1072,6 @@ begin
   end;
   oglAttr[8] := $1000;
   {$Else}
-
   if (flag and 3) = 3 then
     flag := flag and 13;
   contextMask := flag and 3;

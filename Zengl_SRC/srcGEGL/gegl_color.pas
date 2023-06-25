@@ -103,15 +103,15 @@ procedure Correct_Color(num, Color: LongWord); {$IfDef USE_INLINE} inline;{$EndI
 // Eng: set the color (for compatibility with OpenGL ES). The color number is
 //      specified, not the color itself.
 procedure Set_ToNumColor(numColor: LongWord); {$IfDef USE_INLINE} inline;{$EndIf}
-// Rus: получаем значение цвета. Значение цвета идёт в обратном порядке! Это
-//      удобно для передачи ссылкой в glColor4ubv делая вид, что это ссылка на
-//      массив байт.
-// Eng: get the color value. The color value goes in reverse order! This is handy
-//      for passing by reference to glColor4ubv. Pretending it's a reference to
-//      an array of bytes.
+// Rus: Возвращаем значение номера цвета (не сам цвет). Значение цвета идёт в
+//      обратном порядке! Это удобно для передачи ссылкой в glColor4ubv делая
+//      вид, что это ссылка на массив байт.
+// Eng: We return the value of the color number (not the color itself). The
+//      color value goes in reverse order! This is handy for passing by
+//      reference to glColor4ubv. Pretending it's a reference to an array of bytes.
 function Get_Color(num: LongWord): LongWord; {$IfDef USE_INLINE} inline;{$EndIf}
 // Rus: получаем одно из значений (Red, Green, Blue или Alpha) цвета.
-//      num - номер цвета. El должно принимать одо из значений:
+//      num - номер цвета. El должно принимать одно из значений:
 //         is_clRed, is_clGreen, is_clBlue, is_clAlpha.
 //      Result = $FFFFFFFF - ошибка.
 // Eng: we get one of the values (Red, Green, Blue or Alpha) of the color.

@@ -3,6 +3,11 @@ program demo03;
 {$I zglCustomConfig.cfg}
 {$I zgl_config.cfg}
 
+// RU: Включите KEYBOARD_OLD_FUNCTION в zgl_config.cfg, если хотите использовать старые функции клавиатуры.
+//     С введением Green Engine - они стали не актуальны, но я их пока оставляю.
+// EN: Enable KEYBOARD_OLD_FUNCTION in zgl_config.cfg if you want to use the old keyboard functions.
+//     With the introduction of the Green Engine - they are no longer relevant, but I leave them for now.
+
 uses
   {$IFDEF UNIX}
   cthreads,
@@ -19,12 +24,19 @@ uses
   zgl_text,
   zgl_textures_png,
   zgl_types,
-  {$IfDef OLD_METHODS}
+  {$IfDef KEYBOARD_OLD_FUNCTION}
   zgl_collision_2d,
   {$Else}
-  gegl_color,
   gegl_VElements,
+  gegl_utils,
+  // Rus: Включите Define USE_VKEYBOARD в zgl_config.cfg если хотите попробовать использовать виртуальную клавиатуру.
+  // Eng: Enable Define USE_VKEYBOARD in zgl_config.cfg if you want to try using the virtual keyboard.
+  {$IfDef USE_VKEYBOARD}
+  gegl_draw_gui,
+  gegl_menu_gui,
   {$EndIf}
+  {$EndIf}
+  gegl_color,
   zgl_utils
   ;
 
@@ -43,7 +55,7 @@ var
   // RU: строка для получения значения из поля ввода
   // EN: string to get value from input field
   userInput  : UTF8String;
-  {$IfDef OLD_METHODS}
+  {$IfDef KEYBOARD_OLD_FUNCTION}
   trackInput : Boolean;
   inputRect  : zglTRect;
   lineAlpha  : LongWord;
@@ -67,22 +79,23 @@ begin
   // Текст будет выведен поверх того, что вы здесь нарисуете.
   // EN: displacement and rotation will be done prior to performing the procedure. I am showing you how to draw a frame.
   // The text will be drawn on top of what you draw here.
-  pr2d_Rect(- 2, - 1, myRect.W + 5, myRect.H, {$IfnDef OLD_METHODS}cl_White{$else}, $FFFFFF, 128{$EndIf}, PR2D_FILL);
+  pr2d_Rect(- 2, - 1, myRect.W + 5, myRect.H, cl_White, PR2D_FILL);
 end;
   {$EndIf}
 
 procedure Init;
-{$IfNDef OLD_METHODS}
+{$IfNDef KEYBOARD_OLD_FUNCTION}
 var
   EScale: LongWord; 
 {$EndIf}
 begin
   fntMain := font_LoadFromFile( dirRes + 'font.zfi' );
-  {$IfNDef OLD_METHODS}
+  {$IfNDef KEYBOARD_OLD_FUNCTION}
   // RU: Загружаем данные о шрифте.
   // EN: Load the font.
   fntEdit := font_LoadFromFile( dirRes + 'CalibriBold50pt.zfi');
 
+  {$IfDef USE_VKEYBOARD}
 //------------------------------------------------------------------------------
 // RU: Данные для виртуальной клавиатуры. Раскомментируйте, если будете использовать виртуальную клавиатуру для ПК.
 // EN: Data for the virtual keyboard. Uncomment if you will use the virtual keyboard for PC.
@@ -90,19 +103,20 @@ begin
   // обязательный код! Данные для отображения клавиатуры.
   // RU: Загружаем данные о шрифте.
   // EN: Load the font.
-//   fontUse := font_LoadFromFile(dirRes + 'CalibriBold50pt.zfi');
-//   JoyArrow := tex_LoadFromFile(dirRes + 'arrow.png');     // загрузили текстуру
-//   tex_SetFrameSize(JoyArrow, 64, 64);                     // и разбили её на части, но в записях не будет указано количество полученных текстур
+   fontUse := font_LoadFromFile(dirRes + 'CalibriBold50pt.zfi');
+   JoyArrow := tex_LoadFromFile(dirRes + 'arrow.png');     // загрузили текстуру
+   tex_SetFrameSize(JoyArrow, 64, 64);                     // и разбили её на части, но в записях не будет указано количество полученных текстур
   // RU: Данные для виртуальной клавиатуры.
   // EN: Data for the virtual keyboard.
-//   txt_LoadFromFile(dirRes + 'Rus.txt', LoadText);
+   txt_LoadFromFile(dirRes + 'Rus.txt', LoadText);
   // RU: Создаём виртуальную клавиатуру. Для мобильных систем это будет обязательным кодом в дальнейшем.
   // EN: We create a virtual keyboard. For mobile systems, this will be a mandatory code in the future.
-//   CreateTouchKeyboard;
+   CreateTouchKeyboard;
 
 // RU: здесь данные для виртуальной клавиатуры заканчиваются.
 // EN: here the data for the virtual keyboard ends.
 //------------------------------------------------------------------------------
+  {$EndIf}
 
   // RU: устанавливаем размеры шрифтов
   // EN: set font sizes
@@ -162,7 +176,7 @@ begin
 end;
 
 procedure Draw;
-{$IfDef OLD_METHODS}
+{$IfDef KEYBOARD_OLD_FUNCTION}
 var
   w : Single;
 {$EndIf}
@@ -178,7 +192,7 @@ begin
   // EN: Mouse coordinates can be got using functions mouse_X and mouse_Y.
   text_Draw( fntMain, 0, 18, 'Mouse X, Y: ' + u_IntToStr( mouseX ) + '; ' + u_IntToStr( mouseY ) );
 
-  {$IfDef OLD_METHODS}
+  {$IfDef KEYBOARD_OLD_FUNCTION}
   // RU: Выводим введённый пользователем текст.
   // EN: Show the inputted text.
   pr2d_Rect( inputRect.X, inputRect.Y, inputRect.W, inputRect.H, $FFFFFF, 255 );
@@ -234,7 +248,7 @@ begin
   batch2d_End;
 end;
 
-{$IfDef OLD_METHODS}
+{$IfDef KEYBOARD_OLD_FUNCTION}
 procedure Timer;
 begin
   if lineAlpha > 5 Then
@@ -246,7 +260,7 @@ end;
 
 procedure KeyMouseEvent;
 begin
-  {$IfDef OLD_METHODS}
+  {$IfDef KEYBOARD_OLD_FUNCTION}
   // RU: Проверить нажата ли левая кнопка мыши в пределах inputRect и начать отслеживать ввод текста.
   // EN: Check if left mouse button was pressed inside inputRect and start to track text input.
   if mouseBClick( M_BLEFT ) and col2d_PointInRect( mouseX, mouseY, inputRect ) Then
@@ -278,7 +292,7 @@ begin
 end;
 
 Begin
-  {$IfDef OLD_METHODS}
+  {$IfDef KEYBOARD_OLD_FUNCTION}
   TimeStart := timer_Add( @Timer, 16, t_Start );
   {$EndIf}
 

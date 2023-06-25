@@ -21,11 +21,8 @@ uses
   zgl_font,
   zgl_text,
   zgl_types,
-  zgl_utils
-  {$IfNDef OLD_METHODS}
-  , gegl_color
-  {$EndIf}
-  ;
+  zgl_utils,
+  gegl_color;
 
 type
   CMiku = class(zglCSprite2D)
@@ -163,8 +160,8 @@ begin
 
   if time <= 255 Then
   begin
+    pr2d_Rect(0, 0, 800, 600, correctColor[1], PR2D_FILL);
     i := Get_Color(correctColor[1]);
-    pr2d_Rect(0, 0, 800, 600,{$IfDef OLD_METHODS} $7FAF7F, 255,{$Else}correctColor[1],{$EndIf} PR2D_FILL);
     dec(i);
     if i < $7FAF7F00 then
       i := $7FAF7F00;
@@ -174,8 +171,8 @@ begin
   else
     if time < 510 Then
       begin
+        pr2d_Rect( 0, 0, 800, 600, correctColor[0], PR2D_FILL );
         i := Get_Color(correctColor[0]);
-        pr2d_Rect( 0, 0, 800, 600,{$IfDef OLD_METHODS} $AFAFAF, 510 - time,{$Else}correctColor[0],{$EndIf} PR2D_FILL );
         dec(i);
         if i < $AFAFAF00 then
           i := $AFAFAF00;
@@ -185,7 +182,7 @@ begin
 
   if time > 255 Then
     begin
-      pr2d_Rect(0, 0, 256, 64, {$IfDef OLD_METHODS} $80A080, 200,{$Else}newColor,{$EndIf} PR2D_FILL);
+      pr2d_Rect(0, 0, 256, 64, newColor, PR2D_FILL);
       text_Draw(fntMain, 0, 0, 'FPS: ' + u_IntToStr(zgl_Get(RENDER_FPS)));
       text_Draw(fntMain, 0, 20, 'Sprites: ' + u_IntToStr(sengine2d.Count));
       text_Draw(fntMain, 0, 40, 'Up/Down - Add/Delete Miku :)');

@@ -32,20 +32,16 @@ uses
   zgl_math_2d,
   zgl_gltypeconst,
   zgl_types,
-  {$IfNDef OLD_METHODS}
-  gegl_color
-  {$EndIf}
-  ;
+  gegl_color;
 
 
 // Rus: Точка с определёнными координатами и цветом.
 // Eng: A point with specified coordinates and color.
-// procedure pr2d_PixelEX(X, Y: Single; {$IfNDef OLD_METHODS}numColor: LongWord{$Else}Color: LongWord; Alpha: Byte = 255{$EndIf});
+// procedure pr2d_PixelEX(X, Y: Single; numColor: LongWord);
 
 // Rus: Линия с определённым цветом и указанием сглаживания (флаг FX = PR2D_SMOOTH).
 // Eng: A line with a specific color and smoothing indication (FX flag = PR2D_SMOOTH).
-procedure pr2d_LineEX(X1, Y1, X2, Y2: Single; {$IfNDef OLD_METHODS}numColor: LongWord;{$Else}Color1, Color2: LongWord; Alpha: Byte = 255;{$EndIf}
-          WidthLine: LongWord = 2; FX: LongWord = 0);
+procedure pr2d_LineEX(X1, Y1, X2, Y2: Single; numColor: LongWord; WidthLine: LongWord = 2; FX: LongWord = 0);
 // Rus: Ломанная линия. Задаётся посредством множества точек. Points - указатель
 //      на массив точек, count - количество точек, Color - цвет, флаг FX -
 //      PR2D_SMOOTH (сглаживание), LINE_RGBA (отдельный цвет для каждой точки).
@@ -57,8 +53,7 @@ procedure pr2d_LineEX(X1, Y1, X2, Y2: Single; {$IfNDef OLD_METHODS}numColor: Lon
 //      point array, count - number of points, Color - color, FX flag -
 //      PR2D_SMOOTH (smoothing), LINE_RGBA (separate color for each dot).
 //      LINE_LOOP (looped line).
-procedure pr2d_LineStripEX(Points: Pointer; count: Cardinal; {$IfNDef OLD_METHODS}numColor: LongWord;{$Else}Color1, Color2: LongWord; Alpha: Byte = 255;{$EndIf}
-          WidthLine: LongWord = 2; FX: LongWord = 0);
+procedure pr2d_LineStripEX(Points: Pointer; count: Cardinal; numColor: LongWord; WidthLine: LongWord = 2; FX: LongWord = 0);
 // Rus: квадрат/прямоугольник с определённым цветом и широким бордюром.
 //      Действующие флаги для FX PR2D_SMOOTH (сглаживание), PR2D_FILL (заливка),
 //      FX2D_VCA (использование цвета для отдельных точек). Если флаг FX2D_VCA
@@ -67,8 +62,7 @@ procedure pr2d_LineStripEX(Points: Pointer; count: Cardinal; {$IfNDef OLD_METHOD
 // Eng: square/rectangle with a specific color. Active flags for FX
 //      PR2D_SMOOTH (smooth), PR2D_FILL (fill),
 //      FX2D_VCA (use color for individual dots).
-procedure pr2d_RectEX(X, Y, W, H: Single; {$IfNDef OLD_METHODS}numCol, ColOrFlag: LongWord;{$Else}Color, ColOrFlag: LongWord; Alpha: Byte = 255;{$EndIf}
-          WidthLine: LongWord = 2; FX: LongWord = 0 );
+procedure pr2d_RectEX(X, Y, W, H: Single; numCol, ColOrFlag: LongWord; WidthLine: LongWord = 2; FX: LongWord = 0 );
 (* // Rus: Круг, где координата - центр вокруг которого описана окружность с данным
 //      радиусом. Передаётся указанный цвет. Quality - "сглаживание" (количество
 //      углов у окружности). Действующие флаги FX - PR2D_SMOOTH (сглаживание),
@@ -77,7 +71,7 @@ procedure pr2d_RectEX(X, Y, W, H: Single; {$IfNDef OLD_METHODS}numCol, ColOrFlag
 //      a circle with the specified radius. The specified color is transmitted.
 //      Quality - "smoothing" (the number of corners of the circle). Active FX
 //      flags - PR2D_SMOOTH (smoothing), PR2D_FILL (fill).
-procedure pr2d_CircleEX(X, Y, Radius: Single; {$IfNDef OLD_METHODS}numColor: LongWord;{$Else}Color: LongWord; Alpha: Byte = 255;{$EndIf}Quality: Word = 32; FX: LongWord = 0);
+procedure pr2d_CircleEX(X, Y, Radius: Single; numColor: LongWord; Quality: Word = 32; FX: LongWord = 0);
 // Rus: Еллипс, где координата - центр. У эллипса два радиуса. Передаётся
 //      указанный цвет. Quality - "сглаживание" (количество углов у окружности).
 //      Действующие флаги FX - PR2D_SMOOTH (сглаживание), PR2D_FILL (заливка).
@@ -85,14 +79,14 @@ procedure pr2d_CircleEX(X, Y, Radius: Single; {$IfNDef OLD_METHODS}numColor: Lon
 //      The specified color is transmitted. Quality - "smoothing" (the number of
 //      corners of the circle).
 //      Valid FX flags - PR2D_SMOOTH (smooth), PR2D_FILL (fill).
-procedure pr2d_EllipseEX(X, Y, xRadius, yRadius: Single; {$IfNDef OLD_METHODS}numColor: LongWord;{$Else}Color: LongWord; Alpha: Byte = 255;{$EndIf}Quality: Word = 32; FX: LongWord = 0);
+procedure pr2d_EllipseEX(X, Y, xRadius, yRadius: Single; numColor: LongWord; Quality: Word = 32; FX: LongWord = 0);
 // Rus: Произвольный треугольник. Три координаты, цвет. Действующие флаги FX
 //      PR2D_SMOOTH (сглаживание), PR2D_FILL (заливка),
 //      FX2D_VCA (использование цвета для отдельных точек).
 // Eng: Arbitrary triangle. Three coordinates, color. Active FX Flags
 //      PR2D_SMOOTH (smooth), PR2D_FILL (fill),
 //      FX2D_VCA (use color for individual dots).
-procedure pr2d_TriangleEX(X1, Y1, X2, Y2, X3, Y3: Single; {$IfNDef OLD_METHODS}numColor: LongWord;{$Else}Color: LongWord; Alpha: Byte = 255;{$EndIf}FX : LongWord = 0);
+procedure pr2d_TriangleEX(X1, Y1, X2, Y2, X3, Y3: Single; numColor: LongWord; FX : LongWord = 0);
 // Rus: произвольный четырёхугольник. Четыре координаты, цвет. Действующие флаги
 //      PR2D_SMOOTH (сглаживание), PR2D_FILL (заливка),
 //      FX2D_VCA (использование цвета для отдельных точек). Проверок на
@@ -102,7 +96,7 @@ procedure pr2d_TriangleEX(X1, Y1, X2, Y2, X3, Y3: Single; {$IfNDef OLD_METHODS}n
 //      PR2D_SMOOTH (smooth), PR2D_FILL (fill), FX2D_VCA (use color for individual
 //      dots). There are no checks for line crossings (you might end up with an
 //      hourglass). This is the correct behavior. The coordinates are exact.
-procedure pr2d_quadEX(X1, Y1, X2, Y2, X3, Y3, X4, Y4: Single; {$IfNDef OLD_METHODS}numColor: LongWord;{$Else}Color: LongWord; Alpha: Byte = 255;{$EndIf}FX : LongWord = 0);
+procedure pr2d_quadEX(X1, Y1, X2, Y2, X3, Y3, X4, Y4: Single; numColor: LongWord; FX : LongWord = 0);
 *)
 
 implementation
@@ -121,7 +115,7 @@ var
   rv_360: Single = 360;
 {$EndIf}
 
-(*procedure pr2d_PixelEX(X, Y: Single; {$IfNDef OLD_METHODS}numColor: LongWord{$Else}Color: LongWord; Alpha: Byte = 255{$EndIf});
+(*procedure pr2d_PixelEX(X, Y: Single; numColor: LongWord);
 begin
   if ( not b2dStarted ) or batch2d_Check( GL_POINTS, FX_BLEND, nil ) Then
   begin
@@ -129,11 +123,7 @@ begin
     glBegin( GL_POINTS );
   end;
 
-  {$IfDef OLD_METHODS}
-  glColor4ub( ( Color and $FF0000 ) shr 16, ( Color and $FF00 ) shr 8, Color and $FF, Alpha );
-  {$Else}
   Set_ToNumColor(numColor);
-  {$EndIf}
   glVertex2f(X + {$IfDef LINUX}rv_0_5{$Else}0.5{$EndIf}, Y + {$IfDef LINUX}rv_0_5{$Else}0.5{$EndIf});
 
   if not b2dStarted Then
@@ -143,8 +133,7 @@ begin
   end;
 end;          *)
 
-procedure pr2d_LineEX(X1, Y1, X2, Y2 : Single; {$IfNDef OLD_METHODS}numColor: LongWord;{$Else}Color1, Color2: LongWord; Alpha: Byte = 255;{$EndIf}
-          WidthLine: LongWord = 2; FX : LongWord = 0);
+procedure pr2d_LineEX(X1, Y1, X2, Y2 : Single; numColor: LongWord; WidthLine: LongWord = 2; FX : LongWord = 0);
 var
   dx, dy, c, cc, da1, db1: Single;
   xx1, xx2, yy1, yy2, xx3, xx4, yy3, yy4: Single;
@@ -202,11 +191,7 @@ begin
     glVertex2f( xx1, yy1);
   end else
   begin
-    {$IfDef OLD_METHODS}
-    glColor4f(((Color and $FF0000 ) shr 16) / 255, (( Color and $FF00 ) shr 8) / 255, (Color and $FF) / 255, Alpha / 255);
-    {$Else}
     Set_ToNumColor(numColor);
-    {$EndIf}
     glVertex2f( xx1, yy1);
     glVertex2f( xx2, yy2);
     glVertex2f( xx3, yy3);
@@ -228,8 +213,7 @@ begin
   end;
 end;
 
-procedure pr2d_LineStripEX(Points: Pointer; count: Cardinal; {$IfNDef OLD_METHODS}numColor: LongWord;{$Else}Color: LongWord; Alpha: Byte = 255;{$EndIf}
-          WidthLine: LongWord = 2; FX: LongWord = 0);
+procedure pr2d_LineStripEX(Points: Pointer; count: Cardinal; numColor: LongWord; WidthLine: LongWord = 2; FX: LongWord = 0);
 var
   i: LongWord;
   PPoint:  zglPPoint2D;
@@ -282,7 +266,6 @@ begin
     glBegin(GL_QUADS);
   end;
 
-  {$IfNDef OLD_METHODS}
   if FX and LINE_RGBA > 0 Then
   begin
     PPointColor := Points;
@@ -308,15 +291,10 @@ begin
       numColor := PPointColor^.Color;
       inc(PPointColor);
     end;
-  end else
-  {$EndIf}
-  begin
+  end
+  else begin
     PPoint := Points;
-    {$IfDef OLD_METHODS}
-    glColor4f(((Color and $FF0000 ) shr 16) / 255, (( Color and $FF00 ) shr 8) / 255, (Color and $FF) / 255, Alpha / 255);
-    {$Else}
     Set_ToNumColor(numColor);
-    {$EndIf}
     X1 := PPoint^.X;
     Y1 := PPoint^.Y;
     inc(PPoint);
@@ -352,8 +330,7 @@ begin
   end;
 end;
 
-procedure pr2d_RectEX(X, Y, W, H: Single; {$IfNDef OLD_METHODS}numCol, ColOrFlag: LongWord;{$Else}Color, ColOrFlag: LongWord; Alpha: Byte = 255;{$EndIf}
-          WidthLine: LongWord = 2; FX: LongWord = 0);
+procedure pr2d_RectEX(X, Y, W, H: Single; numCol, ColOrFlag: LongWord; WidthLine: LongWord = 2; FX: LongWord = 0);
 var
   mode: LongWord;
   XW, YH: Single;
@@ -453,11 +430,7 @@ begin
   end
   else
   begin
-    {$IfDef OLD_METHODS}
-    glColor4f(((Color and $FF0000 ) shr 16) / 255, (( Color and $FF00 ) shr 8) / 255, (Color and $FF) / 255, Alpha / 255);
-    {$Else}
     Set_ToNumColor(numCol);
-    {$EndIf}
     glVertex2f(xx1, yy1);
     glVertex2f(X, Y);
     glVertex2f(XW, Y);
@@ -503,7 +476,7 @@ begin
   end;
 end;
 
-(* procedure pr2d_CircleEX(X, Y, Radius: Single; {$IfNDef OLD_METHODS}numColor: LongWord;{$Else}Color: LongWord; Alpha: Byte = 255;{$EndIf}Quality: Word = 32; FX: LongWord = 0);
+(* procedure pr2d_CircleEX(X, Y, Radius: Single; numColor: LongWord; Quality: Word = 32; FX: LongWord = 0);
 var
   i : Integer;
   k : Single;
@@ -529,11 +502,7 @@ begin
           glBegin( GL_LINES );
         end;
 
-      {$IfDef OLD_METHODS}
-      glColor4f(((Color and $FF0000 ) shr 16) / 255, (( Color and $FF00 ) shr 8) / 255, (Color and $FF) / 255, Alpha / 255);
-      {$Else}
       Set_ToNumColor(numColor);
-      {$EndIf}
       for i := 0 to Quality - 1 do
         begin
           glVertex2f( X + Radius * cosTable[ Round( i * k ) ], Y + Radius * sinTable[ Round( i * k ) ] );
@@ -569,11 +538,7 @@ begin
             glBegin( GL_TRIANGLES );
           end;
 
-        {$IfDef OLD_METHODS}
-        glColor4f(((Color and $FF0000 ) shr 16) / 255, (( Color and $FF00 ) shr 8) / 255, (Color and $FF) / 255, Alpha / 255);
-        {$Else}
         Set_ToNumColor(numColor);
-        {$EndIf}
         for i := 0 to Quality - 1 do
           begin
             glVertex2f( X, Y );
@@ -597,7 +562,7 @@ begin
       end;
 end;
 
-procedure pr2d_EllipseEX( X, Y, xRadius, yRadius : Single; {$IfNDef OLD_METHODS}numColor: LongWord;{$Else}Color: LongWord; Alpha: Byte = 255;{$EndIf}Quality : Word = 32; FX : LongWord = 0 );
+procedure pr2d_EllipseEX( X, Y, xRadius, yRadius : Single; numColor: LongWord; Quality : Word = 32; FX : LongWord = 0 );
   var
     i : Integer;
     k : Single;
@@ -623,11 +588,7 @@ begin
         glBegin( GL_LINES );
       end;
 
-      {$IfDef OLD_METHODS}
-      glColor4f(((Color and $FF0000) shr 16) / 255, (( Color and $FF00) shr 8) / 255, (Color and $FF) / 255, Alpha / 255);
-      {$Else}
       Set_ToNumColor(numColor);
-      {$EndIf}
       for i := 0 to Quality - 1 do
       begin
         glVertex2f( X + xRadius * cosTable[ Round( i * k ) ], Y + yRadius * sinTable[ Round( i * k ) ] );
@@ -663,11 +624,7 @@ begin
             glBegin( GL_TRIANGLE_FAN );
           end;
 
-        {$IfDef OLD_METHODS}
-        glColor4f(((Color and $FF0000 ) shr 16) / 255, (( Color and $FF00 ) shr 8) / 255, (Color and $FF) / 255, Alpha / 255);
-        {$Else}
         Set_ToNumColor(numColor);
-        {$EndIf}
         glVertex2f( X, Y );
         for i := 0 to Quality - 1 do
         begin
@@ -691,7 +648,7 @@ begin
       end;
 end;
 
-procedure pr2d_TriangleEX(X1, Y1, X2, Y2, X3, Y3: Single; {$IfNDef OLD_METHODS}numColor: LongWord;{$Else}Color: LongWord; Alpha: Byte = 255;{$EndIf}FX : LongWord = 0);
+procedure pr2d_TriangleEX(X1, Y1, X2, Y2, X3, Y3: Single; numColor: LongWord; FX : LongWord = 0);
 var
   mode: LongWord;
 begin
@@ -736,11 +693,7 @@ begin
     end;
   end else
   begin
-    {$IfDef OLD_METHODS}
-    glColor4f(((Color and $FF0000 ) shr 16) / 255, (( Color and $FF00 ) shr 8) / 255, (Color and $FF) / 255, Alpha / 255);
-    {$Else}
     Set_ToNumColor(numColor);
-    {$EndIf}
     glVertex2f(X1, Y1);
     glVertex2f(X2, Y2);
     glVertex2f(X3, Y3);
@@ -763,7 +716,7 @@ begin
   end;
 end;
 
-procedure pr2d_quadEX(X1, Y1, X2, Y2, X3, Y3, X4, Y4: Single; {$IfNDef OLD_METHODS}numColor: LongWord;{$Else}Color: LongWord; Alpha: Byte = 255;{$EndIf}FX : LongWord = 0);
+procedure pr2d_quadEX(X1, Y1, X2, Y2, X3, Y3, X4, Y4: Single; numColor: LongWord; FX : LongWord = 0);
 var
   mode: LongWord;
 begin
@@ -818,11 +771,7 @@ begin
     end;
   end else
   begin
-    {$IfDef OLD_METHODS}
-    glColor4f(((Color and $FF0000 ) shr 16) / 255, (( Color and $FF00 ) shr 8) / 255, (Color and $FF) / 255, Alpha / 255);
-    {$Else}
     Set_ToNumColor(numColor);
-    {$EndIf}
     glVertex2f(X1, Y1);
     glVertex2f(X2, Y2);
     glVertex2f(X3, Y3);

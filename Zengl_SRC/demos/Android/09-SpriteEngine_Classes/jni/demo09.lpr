@@ -21,9 +21,7 @@ uses
   zgl_text,
   zgl_types,
   zgl_utils,
-  {$IfNDef OLD_METHODS}
   gegl_color,
-  {$EndIf}
   zglSpriteEngine                       // переместили ниже, видимо какая-то активация проходит и вызывает ошибку при работе приложения
   ;
 
@@ -47,10 +45,8 @@ var
   sengine2d : zglCSEngine2D;
   TimeStart : Byte;
   TimeMiku  : Byte;
-  {$IfNDef OLD_METHODS}
   newColor  : LongWord;
   correctColor: array[0..1] of LongWord;
-  {$ENDIF}
 
 // Miku
 procedure CMiku.OnInit( _Texture : zglPTexture; _Layer : Integer );
@@ -156,11 +152,9 @@ begin
 
   file_CloseArchive();
   setFontTextScale(20, fntMain);
-  {$IfNDef OLD_METHODS}
   newColor := Color_FindOrAdd($80A080FF - 55);
   correctColor[1] := Color_FindOrAdd($7FAF7FFF);
   correctColor[0] := Color_FindOrAdd($AFAFAFFF);
-  {$EndIf}
 end;
 
 procedure Draw;
@@ -175,33 +169,29 @@ begin
 
   if time <= 255 Then
     begin
-      pr2d_Rect(0, 0, 800, 600,{$IfDef OLD_METHODS} $7FAF7F, 255,{$Else}correctColor[1],{$EndIf} PR2D_FILL);
-      {$IfNDef OLD_METHODS}
+      pr2d_Rect(0, 0, 800, 600, correctColor[1], PR2D_FILL);
       i := Get_Color(correctColor[1]);
       dec(i);
       if i < $7FAF7F00 then
         i := $7FAF7F00;
       Correct_Color(correctColor[1], i);
-      {$EndIf}
       ssprite2d_Draw(texLogo, 400 - 256, 300 - 128, 512, 256, 0, time)
     end
     else
       if time < 510 Then
       begin
-        pr2d_Rect( 0, 0, 800, 600,{$IfDef OLD_METHODS} $AFAFAF, 510 - time,{$Else}correctColor[0],{$EndIf} PR2D_FILL );
-        {$IfNDef OLD_METHODS}
+        pr2d_Rect( 0, 0, 800, 600, correctColor[0], PR2D_FILL );
         i := Get_Color(correctColor[0]);
         dec(i);
         if i < $AFAFAF00 then
           i := $AFAFAF00;
         Correct_Color(correctColor[0], i);
-        {$EndIf}
         ssprite2d_Draw( texLogo, 400 - 256, 300 - 128, 512, 256, 0, 510 - time );
       end;
 
   if time > 255 Then
   begin
-    pr2d_Rect( 0, 0, 256, 64, {$IfDef OLD_METHODS} $80A080, 200,{$Else}newColor,{$EndIf} PR2D_FILL );
+    pr2d_Rect( 0, 0, 256, 64, newColor, PR2D_FILL );
     text_Draw( fntMain, 0, 0, 'FPS: ' + u_IntToStr( zgl_Get( RENDER_FPS ) ) );
     text_Draw( fntMain, 0, 20, 'Sprites: ' + u_IntToStr( sengine2d.Count ) );
     text_Draw( fntMain, 0, 40, 'Up/Down - Add/Delete Miku :)' );

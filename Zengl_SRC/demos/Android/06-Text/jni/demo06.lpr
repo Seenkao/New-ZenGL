@@ -1,4 +1,7 @@
 ﻿library demo06;
+// RU: Включение UTF8 для данной страницы.
+// EN: Enable UTF8 for this page.
+{$Codepage UTF8}
 
 {$I zglCustomConfig.cfg}
 {$I zgl_config.cfg}
@@ -17,9 +20,7 @@ uses
   zgl_font,
   zgl_text,
   zgl_types,
-  {$IfNDef OLD_METHODS}
   gegl_color,
-  {$EndIf}
   zgl_utils
   ;
 
@@ -58,7 +59,7 @@ begin
 
   text_Draw( fntMain, 400, 25, 'String with center alignment', TEXT_HALIGN_CENTER );
 
-  text_DrawEx( fntMain, 400, 65, 3, 0, 'Scaling', {$IfDef OLD_METHODS}255, $FFFFFF, {$Else}cl_White,{$EndIf}TEXT_HALIGN_CENTER );
+  text_DrawEx( fntMain, 400, 65, 3, 0, 'Scaling', cl_White, TEXT_HALIGN_CENTER );
 
   fx2d_SetVCA( $FF0000, $00FF00, $0000FF, $FFFFFF, 255, 255, 255, 255 );
   text_Draw( fntMain, 400, 125, 'Gradient color for every symbol', TEXT_FX_VCA or TEXT_HALIGN_CENTER );
@@ -69,14 +70,14 @@ begin
   r.H := 256;
   // выставить кодировку страницы на UTF-8 с BOM
   text_DrawInRect( fntMain, r, 'Simple text rendering in rectangle ' + ' Текст в квадрате на русском )))');
-  pr2d_Rect( r.X, r.Y, r.W, r.H, {$IfDef OLD_METHODS} $FF0000 {$Else}cl_Aqua{$EndIf} );
+  pr2d_Rect( r.X, r.Y, r.W, r.H, cl_Aqua );
 
   r.X := 800 - 192;
   r.Y := 300 - 128;
   r.W := 192;
   r.H := 256;
   text_DrawInRect( fntMain, r, 'Text rendering using horizontal right alignment and vertical bottom alignment', TEXT_HALIGN_RIGHT or TEXT_VALIGN_BOTTOM );
-  pr2d_Rect( r.X, r.Y, r.W, r.H, {$IfDef OLD_METHODS} $FF0000 {$Else}cl_Yellow{$EndIf} );
+  pr2d_Rect( r.X, r.Y, r.W, r.H, cl_Yellow );
 
   r.X := 400 - 192;
   r.Y := 300 - 128;
@@ -84,7 +85,7 @@ begin
   r.H := 256;
   text_DrawInRect( fntMain, r, 'This text uses justify alignment and centered vertically. Text which doesn''t fit inside the rectangle will be cropped.',
                    TEXT_HALIGN_JUSTIFY or TEXT_VALIGN_CENTER );
-  pr2d_Rect( r.X, r.Y, r.W, r.H, {$IfDef OLD_METHODS} $FF0000 {$Else}cl_Red{$EndIf} );
+  pr2d_Rect( r.X, r.Y, r.W, r.H, cl_Red );
 
   r.X := 400 - 320;
   r.Y := 300 + 160;
@@ -92,7 +93,7 @@ begin
   r.H := 128;
   text_DrawInRect( fntMain, r, 'For starting new line LF symbol can be used' + #10 + 'code of which is equal to 10 and named in Unicode as "Line Feed"',
                    TEXT_HALIGN_CENTER or TEXT_VALIGN_CENTER );
-  pr2d_Rect( r.X, r.Y, r.W, r.H, {$IfDef OLD_METHODS} $FF0000 {$Else}cl_Blue{$EndIf} );
+  pr2d_Rect( r.X, r.Y, r.W, r.H, cl_Blue );
 
   // RU: Выводим количество FPS в правом углу, используя text_GetWidth.
   // EN: Render FPS in the top right corner using text_GetWidth.

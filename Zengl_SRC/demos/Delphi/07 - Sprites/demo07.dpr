@@ -21,10 +21,8 @@ uses
   zgl_font,
   zgl_text,
   zgl_types,
-  zgl_utils
-  {$IfNDef OLD_METHODS}
-  , gegl_color
-  {$EndIf};
+  zgl_utils,
+  gegl_color;
 
 type
   TTux = record
@@ -35,7 +33,7 @@ end;
 
 var
   dirRes      : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
-  fntMain     : LongWord;
+  fntMain     : Byte;
   texLogo     : zglPTexture;
   texBack     : zglPTexture;
   texGround   : zglPTexture;
@@ -151,8 +149,8 @@ begin
             // RU: Рисуем надпись в "рамочке" над пингвином.
             // EN: Render the text in frame over penguins.
         t := text_GetWidth( fntMain, 'I''m so red...' ) * 0.75;
-        pr2d_Rect(tux[i].Pos.X - 1, tux[i].Pos.Y - ScaleF + 4, t, ScaleF, {$IfDef OLD_METHODS}$000000, 200,{$Else}newColor,{$EndIf} PR2D_FILL);
-        pr2d_Rect(tux[i].Pos.X - 2, tux[i].Pos.Y - ScaleF + 3, t + 2, ScaleF + 2, {$IfDef OLD_METHODS}$FFFFFF,{$Else}cl_White{$EndIf});
+        pr2d_Rect(tux[i].Pos.X - 1, tux[i].Pos.Y - ScaleF + 4, t, ScaleF, newColor, PR2D_FILL);
+        pr2d_Rect(tux[i].Pos.X - 2, tux[i].Pos.Y - ScaleF + 3, t + 2, ScaleF + 2, cl_White);
         text_DrawEx(fntMain, tux[i].Pos.X, tux[i].Pos.Y - ScaleF + 5, 1, 0, 'I''m so red...');
             // RU: Рисуем красного пингвина используя fx2d-функцию и флаг FX_COLOR.
             // EN: Render red penguin using fx2d-function and flag FX_COLOR.
@@ -162,9 +160,9 @@ begin
       if i = 7 Then
       begin
         t := text_GetWidth(fntMain, '???') * 0.75;
-        pr2d_Rect(tux[i].Pos.X + 32 - t / 2, tux[i].Pos.Y - ScaleF + 4, t, ScaleF, {$IfDef OLD_METHODS}$000000, 200,{$Else}newColor,{$EndIf} PR2D_FILL);
-        pr2d_Rect(tux[i].Pos.X + 32 - t / 2 - 1, tux[i].Pos.Y - ScaleF + 3, t + 2, ScaleF + 2, {$IfDef OLD_METHODS}$FFFFFF,{$Else}cl_White{$EndIf});
-        text_DrawEx(fntMain, tux[i].Pos.X + 32, tux[i].Pos.Y - ScaleF + 5, 1, 0, '???', {$IfDef OLD_METHODS}255, $FFFFFF,{$Else}cl_White,{$EndIf} TEXT_HALIGN_CENTER);
+        pr2d_Rect(tux[i].Pos.X + 32 - t / 2, tux[i].Pos.Y - ScaleF + 4, t, ScaleF, newColor, PR2D_FILL);
+        pr2d_Rect(tux[i].Pos.X + 32 - t / 2 - 1, tux[i].Pos.Y - ScaleF + 3, t + 2, ScaleF + 2, cl_White );
+        text_DrawEx(fntMain, tux[i].Pos.X + 32, tux[i].Pos.Y - ScaleF + 5, 1, 0, '???', cl_White, TEXT_HALIGN_CENTER);
                 // RU: Рисуем пингвина приведение используя флаг FX_COLOR установив режим в FX_COLOR_SET :)
                 // EN: Render penguin ghost using flag FX_COLOR and mode FX_COLOR_SET :)
         fx_SetColorMode(FX_COLOR_SET);
@@ -182,8 +180,8 @@ begin
       if i = 13 Then
       begin
         t := text_GetWidth(fntMain, 'I''m so big...') * 0.75;
-        pr2d_Rect(tux[i].Pos.X - 2, tux[i].Pos.Y - ScaleF - 10, t, ScaleF, {$IfDef OLD_METHODS}$000000, 200,{$Else}newColor,{$EndIf} PR2D_FILL);
-        pr2d_Rect(tux[i].Pos.X - 3, tux[i].Pos.Y - ScaleF - 11, t + 2, ScaleF + 2, {$IfDef OLD_METHODS}$FFFFFF,{$Else}cl_White{$EndIf});
+        pr2d_Rect(tux[i].Pos.X - 2, tux[i].Pos.Y - ScaleF - 10, t, ScaleF, newColor, PR2D_FILL);
+        pr2d_Rect(tux[i].Pos.X - 3, tux[i].Pos.Y - ScaleF - 11, t + 2, ScaleF + 2, cl_White );
         text_DrawEx(fntMain, tux[i].Pos.X, tux[i].Pos.Y - ScaleF - 9, 1, 0, 'I''m so big...');
             // RU: Рисуем "большего" пингвина. Т.к. FX2D_SCALE увеличивает спрайт относительно центра, то пингвина следует немного "поднять".
             // EN: Render "big" penguin. It must be shifted up, because FX2D_SCALE scale sprite relative to the center.
@@ -210,9 +208,9 @@ begin
     asprite2d_Draw(texGround, 13 * 32, 300 - 16, 32, 32, 0, 3);
 
     t := text_GetWidth(fntMain, 'o_O') * 0.75;
-    pr2d_Rect(tux[20].Pos.X + 32 - t / 2 - 1, tux[20 ].Pos.Y - ScaleF + 3, t + 2, ScaleF + 2, {$IfDef OLD_METHODS}$000000, 200,{$Else}newColor,{$EndIf} PR2D_FILL);
-    pr2d_Rect(tux[20].Pos.X + 32 - t / 2 - 2, tux[20 ].Pos.Y - ScaleF + 2, t + 4, ScaleF + 4, {$IfDef OLD_METHODS}$FFFFFF,{$Else}cl_White{$EndIf});
-    text_DrawEx(fntMain, tux[20].Pos.X + 32, tux[20].Pos.Y - ScaleF + 5, 1, 0, 'o_O', {$IfDef OLD_METHODS}255, $FFFFFF,{$Else}cl_White,{$EndIf} TEXT_HALIGN_CENTER);
+    pr2d_Rect(tux[20].Pos.X + 32 - t / 2 - 1, tux[20 ].Pos.Y - ScaleF + 3, t + 2, ScaleF + 2, newColor, PR2D_FILL);
+    pr2d_Rect(tux[20].Pos.X + 32 - t / 2 - 2, tux[20 ].Pos.Y - ScaleF + 2, t + 4, ScaleF + 4, cl_White );
+    text_DrawEx(fntMain, tux[20].Pos.X + 32, tux[20].Pos.Y - ScaleF + 5, 1, 0, 'o_O', cl_White, TEXT_HALIGN_CENTER);
     asprite2d_Draw(tux[20].Texture, tux[20].Pos.X, tux[20].Pos.Y, 64, 64, 0, tux[20].Frame div 2);
   end;
 
@@ -224,7 +222,7 @@ begin
       // RU: Получаем значение цвета.
       // EN:
       i := Get_Color(correctColor);
-      pr2d_Rect(0, 0, 800, 600,{$IfDef OLD_METHODS} $000000, 510 - time,{$Else} correctColor,{$EndIf} PR2D_FILL);
+      pr2d_Rect(0, 0, 800, 600, correctColor, PR2D_FILL);
        dec(i);
         if i < 0 then
           i := 0;

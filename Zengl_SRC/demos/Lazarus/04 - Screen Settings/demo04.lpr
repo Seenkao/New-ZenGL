@@ -27,10 +27,9 @@ uses
   zgl_textures,
   zgl_textures_png,
   zgl_textures_jpg,
-  zgl_utils
-  {$IfNDef OLD_METHODS}
-  , gegl_color
-  {$EndIf}
+  zgl_utils,
+  zgl_types,
+  gegl_color
   {$ELSE}
   zglHeader
   {$ENDIF}
@@ -47,12 +46,8 @@ begin
   fntMain := font_LoadFromFile( dirRes + 'font.zfi' );
   texBack := tex_LoadFromFile( dirRes + 'back03.jpg' );
 
-  // RU: цвет шрифта.
-  // EN: font color.
   setTextColor(Get_Color(cl_White));
-  // RU: размер шрифта.
-  // EN: font size.
-  setFontTextScale(15, fntMain);
+  setFontTextScale(15, fntMain);                  // razmery shrifta
 end;
 
 procedure Draw;

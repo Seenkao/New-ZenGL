@@ -34,7 +34,7 @@ interface
 
 uses
   {$IFDEF UNIX}
-  sysutils, BaseUnix,
+  sysutils,
   {$ENDIF}
   {$IFDEF USE_X11}
   X, XLib, XUtil, xrandr,
@@ -42,11 +42,9 @@ uses
   {$IFDEF WINDOWS}
   Windows,
   {$ENDIF}
-  {$IFDEF MACOSX}
-  MacOSAll,
   {$IfDef MAC_COCOA}
   CocoaAll,
-  {$ENDIF}{$EndIf}
+  {$ENDIF}
   {$IFDEF iOS}
   iPhoneAll, CGGeometry,
   {$ENDIF}
@@ -54,11 +52,119 @@ uses
   zgl_types;
 
 const
-  cs_ZenGL    = 'ZenGL - 0.3.30';
+  cs_ZenGL    = 'ZenGL - 0.4.0';
   cs_Date     = '14.03.2023';
   cv_major    = 0;
-  cv_minor    = 3;
-  cv_revision = 30;
+  cv_minor    = 4;
+  cv_revision = 0;
+
+  // zgl_Reg
+  SYS_APP_INIT           = $000001;
+  SYS_LOAD               = $000003;
+  SYS_DRAW               = $000004;
+  SYS_UPDATE             = $000005;
+  SYS_EXIT               = $000006;
+  SYS_ACTIVATE           = $000007;
+
+  SYS_EVENTS             = $000009;                         // keyboard, mouse, touchpad
+  SYS_KEYESCAPE          = $000008;                         // перехват клавиши Escape
+  SYS_POSTDRAW           = $000012;                         // процедура постотрисовки (после того как вывелось всё на экран)
+  SYS_RESET              = $000013;                         // процедура обнуления
+  {$IfNDef ANDROID}
+  SYS_CLOSE_QUERY        = $000008;
+  SYS_APP_LOOP           = $000002;
+  {$EndIf}
+  OGL_USER_MODE          = $000014;
+  OGL_VIEW_PORT          = $000016;
+  {$IFDEF iOS}
+  SYS_iOS_MEMORY_WARNING     = $000010;
+  SYS_iOS_CHANGE_ORIENTATION = $000011;
+  {$ENDIF}
+  {$IFDEF ANDROID}
+  SYS_ANDROID_RESTORE = $000015;
+  {$ENDIF}
+
+  TEXTURE_FORMAT_EXTENSION   = $000100;                     // расширение файла
+  TEXTURE_FORMAT_FILE_LOADER = $000101;                     // процедура загрузки
+  TEXTURE_FORMAT_MEM_LOADER  = $000102;                     // процедура загрузки из памяти
+  TEXTURE_CURRENT_EFFECT     = $000103;                     // процедура дополнительных эффектов
+
+  SND_FORMAT_EXTENSION    = $000110;
+  SND_FORMAT_FILE_LOADER  = $000111;
+  SND_FORMAT_MEM_LOADER   = $000112;
+  SND_FORMAT_DECODER      = $000113;
+
+  VIDEO_FORMAT_DECODER    = $000130;
+
+  // zgl_Get
+  ZENGL_VERSION           = 1;
+  ZENGL_VERSION_STRING    = 2;
+  ZENGL_VERSION_DATE      = 3;
+
+  DIRECTORY_APPLICATION   = 101;
+  DIRECTORY_HOME          = 102;
+
+  LOG_FILENAME            = 203;
+
+  DESKTOP_WIDTH           = 300;
+  DESKTOP_HEIGHT          = 301;
+  RESOLUTION_LIST         = 302;
+
+  WINDOW_HANDLE           = 400;
+  WINDOW_X                = 401;
+  WINDOW_Y                = 402;
+  WINDOW_WIDTH            = 403;
+  WINDOW_HEIGHT           = 404;
+
+  GAPI_CONTEXT            = 500;
+  GAPI_MAX_TEXTURE_SIZE   = 501;
+  GAPI_MAX_TEXTURE_UNITS  = 502;
+  GAPI_MAX_ANISOTROPY     = 503;
+  GAPI_CAN_BLEND_SEPARATE = 504;
+  GAPI_CAN_AUTOGEN_MIPMAP = 505;
+
+  VIEWPORT_WIDTH          = 600;
+  VIEWPORT_HEIGHT         = 601;
+  VIEWPORT_OFFSET_X       = 602;
+  VIEWPORT_OFFSET_Y       = 603;
+
+  RENDER_FPS              = 700;
+  RENDER_BATCHES_2D       = 701;
+  RENDER_CURRENT_MODE     = 702;
+  RENDER_CURRENT_TARGET   = 703;
+  RENDER_VRAM_USED        = 704;
+
+  MANAGER_TIMER           = 800;
+  MANAGER_TEXTURE         = 801;
+  MANAGER_FONT            = 802;
+  MANAGER_RTARGET         = 803;
+  MANAGER_SOUND           = 804;
+  MANAGER_EMITTER2D       = 805;
+
+  // zgl_Enable/zgl_Disable
+  COLOR_BUFFER_CLEAR    = $000001;
+  DEPTH_BUFFER          = $000002;
+  DEPTH_BUFFER_CLEAR    = $000004;
+  DEPTH_MASK            = $000008;
+  STENCIL_BUFFER_CLEAR  = $000010;               // не активируется ни где.
+  CORRECT_RESOLUTION    = $000020;
+  CORRECT_WIDTH         = $000040;
+  CORRECT_HEIGHT        = $000080;
+  APP_USE_AUTOPAUSE     = $000100;
+  APP_USE_LOG           = $000200;
+  APP_USE_ENGLISH_INPUT = $000400;
+  APP_USE_DT_CORRECTION = $000800;
+  WND_USE_AUTOCENTER    = $001000;
+  SND_CAN_PLAY          = $002000;
+  SND_CAN_PLAY_FILE     = $004000;
+  CLIP_INVISIBLE        = $008000;
+
+  XY_IN_CENTER_WINDOW   = $020000;               // окно выводится от центра экрана когда oglMode = Mode2D
+                                                 // при этом надо перерабатывать прорисовку примитивов
+                                                 // весь ZenGL сделан от края окна, могут быть не состыковки.
+  {$IFDEF iOS}
+  SND_ALLOW_BACKGROUND_MUSIC = $100000;
+  {$ENDIF}
 
 {$IfDef MAC_COCOA}
 type
@@ -201,17 +307,12 @@ var
   wndBrdSizeY : Integer;
   wndCaptionW : PWideChar;
   {$ENDIF}
-  {$IFDEF MACOSX}{$IfDef MAC_COCOA}
+  {$IfDef MAC_COCOA}
   zglView     : zglNSView;
   wndHandle   : zglNSWindow;
   viewNSRect  : NSRect;
 //  pool      : NSAutoreleasePool;
-  {$Else}
-  wndHandle : WindowRef;
-  wndAttr   : WindowAttributes;
-  wndEvents : array[0..14] of EventTypeSpec;
-  wndMouseIn: Boolean;
-  {$ENDIF}{$EndIf}
+  {$EndIf}
   {$IFDEF iOS}
   wndHandle  : UIWindow;
   wndViewCtrl: UIViewController;
@@ -265,7 +366,7 @@ uses
   zgl_lib_theora,
   {$ENDIF}
   {$ENDIF}
-  {$IfNDef OLD_METHODS}
+  {$IfNDef KEYBOARD_OLD_FUNCTION}
   gegl_VElements,
   {$EndIf}
   zgl_utils;
@@ -336,27 +437,20 @@ begin
 {$IFDEF WINDOWS}
   BringWindowToTop(wndHandle);
 {$ENDIF}
-{$IFDEF MACOSX}{$IfNDef MAC_COCOA}
-  SelectWindow(wndHandle);
-  ShowWindow(wndHandle);
-{$Else}
+{$IfDef MAC_COCOA}
   if wndFullScreen Then
     wnd_SetPos(0, 0);
-{$ENDIF}{$EndIf}
+{$EndIf}
 {$IFDEF iOS}
   wndHandle.makeKeyAndVisible();
 {$ENDIF}
 end;
 
 function wnd_Create(): Boolean;
-  {$IFDEF MACOSX}
+  {$IFDEF MAC_COCOA}
   var
-  {$IfDef MAC_COCOA}
     createFlags: LongWord = 0;
-  {$Else}
-    size  : MacOSAll.Rect;
-    status: OSStatus;
-  {$ENDIF}{$EndIf}
+  {$EndIf}
 begin
   Result := TRUE;
   if wndHandle <> {$IFNDEF DARWIN} 0 {$ELSE} nil {$ENDIF} Then exit;
@@ -465,7 +559,7 @@ begin
   end;
   wnd_Select();
 {$ENDIF}
-{$IFDEF MACOSX}{$IfDef MAC_COCOA}
+{$IfDef MAC_COCOA}
   if wndFullScreen then
   begin
     viewNSRect.origin.x := 0;
@@ -491,59 +585,7 @@ begin
   wndHandle.setDelegate(NSWindowDelegateProtocol(zglView));
   wndHandle.setAcceptsMouseMovedEvents(True);
   wndHandle.makeKeyAndOrderFront(nil);
-{$Else}
-  size.Left   := wndX;
-  size.Top    := wndY;
-  size.Right  := wndX + wndWidth;
-  size.Bottom := wndY + wndHeight;
-  wndAttr     := kWindowCloseBoxAttribute or kWindowCollapseBoxAttribute or kWindowStandardHandlerAttribute;// or kWindowCompositingAttribute;
-  if wndFullScreen Then
-    wndAttr := wndAttr or kWindowNoTitleBarAttribute;
-  status      := CreateNewWindow(kDocumentWindowClass, wndAttr, size, wndHandle);
-
-  if (status <> noErr) or (wndHandle = nil) Then
-  begin
-    u_Error('Cannot create window');
-    exit;
-  end;
-
-  // Window
-  wndEvents[0].eventClass := kEventClassWindow;
-  wndEvents[0].eventKind  := kEventWindowClosed;
-  wndEvents[1].eventClass := kEventClassWindow;
-  wndEvents[1].eventKind  := kEventWindowActivated;
-  wndEvents[2].eventClass := kEventClassWindow;
-  wndEvents[2].eventKind  := kEventWindowDeactivated;
-  wndEvents[3].eventClass := kEventClassWindow;
-  wndEvents[3].eventKind  := kEventWindowCollapsed;
-  wndEvents[4].eventClass := kEventClassWindow;
-  wndEvents[4].eventKind  := kEventWindowBoundsChanged;
-  // Keyboard
-  wndEvents[5].eventClass := kEventClassKeyboard;
-  wndEvents[5].eventKind  := kEventRawKeyDown;
-  wndEvents[6].eventClass := kEventClassKeyboard;
-  wndEvents[6].eventKind  := kEventRawKeyUp;
-  wndEvents[7].eventClass := kEventClassKeyboard;
-  wndEvents[7].eventKind  := kEventRawKeyRepeat;
-  wndEvents[8].eventClass := kEventClassKeyboard;
-  wndEvents[8].eventKind  := kEventRawKeyModifiersChanged;
-  // Mouse
-  wndEvents[9].eventClass  := kEventClassMouse;
-  wndEvents[9].eventKind   := kEventMouseMoved;
-  wndEvents[10].eventClass := kEventClassMouse;
-  wndEvents[10].eventKind  := kEventMouseDown;
-  wndEvents[11].eventClass := kEventClassMouse;
-  wndEvents[11].eventKind  := kEventMouseUp;
-  wndEvents[12].eventClass := kEventClassMouse;
-  wndEvents[12].eventKind  := kEventMouseWheelMoved;
-  wndEvents[13].eventClass := kEventClassMouse;
-  wndEvents[13].eventKind  := kEventMouseDragged;
-  // Command
-  wndEvents[14].eventClass := kEventClassCommand;
-  wndEvents[14].eventKind  := kEventProcessCommand;
-  InstallEventHandler(GetApplicationEventTarget, NewEventHandlerUPP(@app_ProcessMessages), 15, @wndEvents[0], nil, nil);
-  wnd_Select();
-{$ENDIF}{$EndIf}
+{$EndIf}
 {$IFDEF iOS}
   // always fullscreen
   wndFullScreen := TRUE;
@@ -589,9 +631,6 @@ begin
   wndHandle.close;
 
 {$Else}
-{$IFDEF MACOSX}
-  ReleaseWindow(wndHandle);
-{$ENDIF}
   wndHandle := {$IFNDEF DARWIN} 0 {$ELSE} nil {$ENDIF};
 {$EndIf}
 end;
@@ -644,18 +683,9 @@ begin
   SetWindowLongW(wndHandle, GWL_STYLE, LongInt(wndStyle));
   SetWindowLongW(wndHandle, GWL_EXSTYLE, WS_EX_APPWINDOW or WS_EX_TOPMOST * Byte(FullScreen));
 {$ENDIF}
-{$IFDEF MACOSX}{$IfDef MAC_COCOA}
+{$IfDef MAC_COCOA}
 
-{$Else}
-  if wndFullScreen Then
-    ChangeWindowAttributes(wndHandle, kWindowNoTitleBarAttribute, kWindowResizableAttribute)
-  else
-    ChangeWindowAttributes(wndHandle, kWindowResizableAttribute, kWindowNoTitleBarAttribute);
-  // Apple and their magic driving me crazy...
-  ChangeWindowAttributes(wndHandle, 0, kWindowResizableAttribute);
-
-  aglSetCurrentContext(oglContext);
-{$ENDIF}{$EndIf}
+{$EndIf}
 {$IFDEF iOS}
   UIApplication.sharedApplication.setStatusBarHidden(wndFullScreen);
 {$ENDIF}
@@ -688,10 +718,6 @@ procedure wnd_UpdateCaption();
   var
     len: Integer;
   {$ENDIF}
-  {$IFDEF MACOSX}
-  var
-    str: CFStringRef;
-  {$ENDIF}
 begin
 {$IFDEF USE_X11}
   if wndHandle <> 0 Then
@@ -721,17 +747,9 @@ begin
     SetWindowTextW(wndHandle, wndCaptionW);
   end;
 {$ENDIF}
-{$IFDEF MACOSX}{$IfDef MAC_COCOA}
+{$IfDef MAC_COCOA}
   wndHandle.setTitle(NSSTR(wndCaption));
-{$Else}
-  if Assigned(wndHandle) Then
-  begin
-    str := CFStringCreateWithPascalString(nil, wndCaption, kCFStringEncodingUTF8);
-    SetWindowTitleWithCFString(wndHandle, str);
-    CFRelease(str);
-    wnd_Select();
-  end;
-{$ENDIF}{$EndIf}
+{$EndIf}
 end;
 {$EndIf}
 {$EndIf}
@@ -755,20 +773,10 @@ begin
   {$IFDEF WINDOWS}
     wnd_SetPos(wndX, wndY);
   {$ENDIF}
-  {$IFDEF MACOSX}{$IfDef MAC_COCOA}
+  {$IfDef MAC_COCOA}
   viewNSRect.size.width := wndWidth;
   viewNSRect.size.height := wndHeight;
-  {$Else}
-  if Assigned(wndHandle) Then
-    begin
-      begin
-        SizeWindow(wndHandle, wndWidth, wndHeight, TRUE);
-        aglUpdateContext(oglContext);
-        wnd_Select();
-      end else
-        wnd_SetPos(wndX, wndY);
-    end;
-  {$ENDIF}{$EndIf}
+  {$EndIf}
 {$ENDIF}
 {$IFDEF iOS}
   eglContext.renderbufferStorage_fromDrawable(GL_RENDERBUFFER, eglSurface);
@@ -784,21 +792,10 @@ begin
 end;
 
 procedure wnd_SetPos(X, Y: Integer);
-  {$IFDEF MACOSX}
-  var
-    clipRgn: RgnHandle;
-  {$ENDIF}
 begin
   wndX := X;
   wndY := Y;
 {$IfDef USE_INIT_HANDLE}
-    {$IFDEF MACOSX}
-    clipRgn := NewRgn();
-    SetRectRgn(clipRgn, X, Y, X + wndWidth, Y + wndHeight);
-    aglSetInteger(oglContext, AGL_CLIP_REGION, clipRgn);
-    aglEnable(oglContext, AGL_CLIP_REGION);
-    DisposeRgn(clipRgn);
-    {$ENDIF}
     exit;
 {$Else}
 
@@ -816,16 +813,10 @@ begin
     else
       SetWindowPos(wndHandle, HWND_TOPMOST, 0, 0, wndWidth, wndHeight, SWP_NOACTIVATE);
   {$ENDIF}
-  {$IFDEF MACOSX}{$IfDef MAC_COCOA}
+  {$IfDef MAC_COCOA}
   viewNSRect.origin.x := wndX;
   viewNSRect.origin.y := wndY;
-  {$Else}
-  if Assigned(wndHandle) Then
-    if not wndFullScreen Then
-      MoveWindow(wndHandle, wndX, wndY, TRUE)
-    else
-      MoveWindow(wndHandle, 0, 0, TRUE);
-  {$ENDIF}{$EndIf}
+  {$EndIf}
   {$IFDEF iOS}
   wndX := 0;
   wndY := 0;
@@ -861,7 +852,7 @@ begin
         XDefineCursor( scrDisplay, wndHandle, appCursor );
       end;
 {$ENDIF}
-{$IF DEFINED(WINDOWS) or DEFINED(MACOSX) or DEFINED(iOS) or DEFINED(ANDROID)}
+{$IF DEFINED(WINDOWS) or DEFINED(MAC_COCOA) or DEFINED(iOS) or DEFINED(ANDROID)}
 begin
   appShowCursor := Show;
 {$IFEND}
@@ -951,15 +942,15 @@ begin
   wnd_UpdateCaption();
   {$EndIf}
   winOn := TRUE;
-  {$IF DEFINED(WINDOWS) or DEFINED(LINUX) or DEFINED(MACOSX)}
+  {$IF DEFINED(WINDOWS) or DEFINED(LINUX) or DEFINED(MAC_COCOA)}
   if wndFullScreen Then
     scr_SetOptions;
   {$IFEND}
 
-  {$IFDEF iOS}
-  key_BeginReadText('');
+  {$IFDEF iOS}{$IfDef KEYBOARD_OLD_FUNCTION}
+  key_BeginReadText('');                    // Здесь требуется правка, если будет поддержка iOS дальнейшая.
   key_EndReadText();
-  {$ENDIF}
+  {$ENDIF}{$ENDIF}
 
   app_PInit();
   {$IFDEF iOS}
@@ -1006,12 +997,9 @@ begin
   wndHandle := HWND(Handle);
   wndDC     := GetDC(wndHandle);
   {$ENDIF}
-  {$IFDEF MACOSX}
-  wndHandle := WindowRef(Handle);
-  {$ENDIF}
 
-  if not gl_Initialize() Then exit;
-
+  if not gl_Initialize() Then
+    exit;
 
   InitSoundVideo();
 
@@ -1046,7 +1034,7 @@ begin
     app_PExit();
   res_Free();
 
-  {$IfNDef OLD_METHODS}
+  {$IfNDef KEYBOARD_OLD_FUNCTION}
   if managerSetOfTools.count > 0 then
   begin
     log_Add('Destroy GE-Elements: ' + u_IntToStr(managerSetOfTools.count));
@@ -1380,13 +1368,6 @@ const
     fn : PWideChar;
     len: Integer;
 {$ENDIF}
-{$IFDEF MACOSX}
-  var
-    appBundle  : CFBundleRef;
-    appCFURLRef: CFURLRef;
-    appCFString: CFStringRef;
-    appPath    : array[0..8191] of AnsiChar;
-{$ENDIF}
 begin
 {$IFDEF LINUX}
   appWorkDir := utf8_Copy(GetCurrentDir);
@@ -1417,7 +1398,7 @@ begin
   appHomeDir[len + 1] := '\';
   FreeMem(fn);
 {$ENDIF}
-{$IFDEF MACOSX}{$IfDef MAC_COCOA}
+{$IfDef MAC_COCOA}
   appWorkDir := ExtractFileDir(ParamStr(0));
   appLogDir := file_GetDirectory(appWorkDir);
   appWorkDir := appLogDir + utf8_Copy('Resources/');
@@ -1426,14 +1407,7 @@ begin
   appLogDir := copy(appLogDir, 0, Length(appLogDir) - 1);
   appLogDir := file_GetDirectory(appLogDir);
   appHomeDir  := FpGetEnv('HOME') + '/Library/Preferences/';
-{$Else}
-  appBundle   := CFBundleGetMainBundle();
-  appCFURLRef := CFBundleCopyBundleURL(appBundle);
-  appCFString := CFURLCopyFileSystemPath(appCFURLRef, kCFURLPOSIXPathStyle);
-  CFStringGetFileSystemRepresentation(appCFString, @appPath[0], 8192);
-  appWorkDir  := appPath + '/Contents/Resources/';
-  appHomeDir  := FpGetEnv('HOME') + '/Library/Preferences/';
-{$ENDIF}{$EndIf}
+{$EndIf}
 {$IFDEF iOS}
   appWorkDir := file_GetDirectory(ParamStr(0));
   appHomeDir := FpGetEnv('HOME') + '/Documents/';

@@ -13,15 +13,12 @@ uses
   zgl_font,
   zgl_text,
   zgl_sprite_2d,
-  zgl_types,
   zgl_textures,
   zgl_textures_png,
   zgl_textures_jpg,
-  zgl_utils
-  {$IfNDef OLD_METHODS}
-  , gegl_color
-  {$EndIf}
-  ;
+  zgl_utils,
+  zgl_types,
+  gegl_color;
 
 var
   dirRes  : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
