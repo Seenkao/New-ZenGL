@@ -217,7 +217,7 @@ begin
     sengine2d.ClearAll()
   else
     begin
-      if touch_Tap( 0 ) Then
+      if touch_Click( 0 ) Then
       begin
         if touch_Y( 0 ) < 300 Then
           AddMiku()
