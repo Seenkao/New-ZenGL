@@ -65,6 +65,7 @@ public class ZenGL extends GLSurfaceView
 	{
 		super( context );
 
+		System.loadLibrary( "openal" );
 		System.loadLibrary( appName );
 
 		SourceDir = appSourceDir;
