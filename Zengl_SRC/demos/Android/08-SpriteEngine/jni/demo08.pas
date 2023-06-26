@@ -149,6 +149,8 @@ begin
 end;
 
 procedure Draw;
+var
+  i: Integer;
 begin
   batch2d_Begin();
   // RU: Рисуем все спрайты находящиеся в текущем спрайтовом менеджере.
@@ -198,7 +200,7 @@ begin
     sengine2d_ClearAll()
   else
     begin
-      if touch_Tap( 0 ) Then
+      if touch_Click( 0 ) Then
         begin
           if touch_Y( 0 ) < 300 Then
             AddMiku()
@@ -206,8 +208,6 @@ begin
             DelMiku();
         end;
     end;
-  mouse_ClearState;
-  touch_ClearState();
 end;
 
 procedure Restore;
