@@ -16,6 +16,8 @@ uses
   zgl_sprite_2d,
   zgl_textures,
   zgl_textures_png,
+  // Rus: для Android v5 и v6 отключите в файле конфигурации define CPUARMV7A.
+  // Eng: for Android v5 and v6 disable in the config file define CPUARMV7A.
   zgl_textures_jpg,
   zgl_types,
   zgl_collision_2d,

@@ -3,7 +3,7 @@ rm -r ../libs
 # copy libraries
 mkdir ../libs
 mkdir ../libs/arm64-v8a/
-cp ../../../../bin/Android/arm64-v8a/libzenjpeg.so ../libs/arm64-v8a/
+cp ../../../../bin/Android/arm64-v8a/libjpeg_turbo.so ../libs/arm64-v8a/
 cp ../../../../bin/Android/arm64-v8a/libopenal.so ../libs/arm64-v8a/
 cp ../../../../bin/Android/arm64-v8a/libogg.so ../libs/arm64-v8a/
 cp ../../../../bin/Android/arm64-v8a/libvorbis.so ../libs/arm64-v8a/
