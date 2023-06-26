@@ -527,12 +527,12 @@ finalization
 
   UnloadLibZip;
 {$EndIf}{$EndIf}
-{$IfDef ANDROID}
+{$IfDef ANDROID}{$IfDef NOT_OLD_ARM}
 initialization
   LoadLibZip(libzip, libz);
 
 finalization
   UnloadLibZip;
-{$EndIf}
+{$EndIf}{$EndIf}
 
 end.
