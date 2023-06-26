@@ -127,7 +127,7 @@ type
     GetMem : function(Size: Integer): PByte; cdecl;
   end;
 
-  procedure jpgturbo_Load(var jpgData: zglTJPGData; out Data: Pointer); cdecl; external {$IFDEF ANDROID} 'zenjpeg' {$ENDIF};
+  procedure jpgturbo_Load(var jpgData: zglTJPGData; out Data: Pointer); cdecl; external {$IFDEF ANDROID} 'jpeg_turbo' {$ENDIF};
 {$ENDIF}
 
 {$IFDEF USE_OLEPICTURE}
