@@ -53,7 +53,7 @@ uses
 
 const
   cs_ZenGL    = 'ZenGL - 0.4.0';
-  cs_Date     = '14.03.2023';
+  cs_Date     = '26.06.2023';
   cv_major    = 0;
   cv_minor    = 4;
   cv_revision = 0;
