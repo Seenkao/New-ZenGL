@@ -59,7 +59,7 @@
 
 // Rus: вы можете принудительно включить виртуальную клавиатуру везде, а так же виртуальные джойстики.
 // Eng: you can force enable virtual keyboard everywhere, as well as virtual joysticks.
-{$DEFINE USE_VKEYBOARD}
+{.$DEFINE USE_VKEYBOARD}
 
 // Escape = exit
 {$DEFINE USE_EXIT_ESCAPE}
@@ -83,7 +83,7 @@
 // Rus: если вы будете использовать (ARM v5) или (ARM v6) отключите DEFINE CPUARMV7A.
 // Eng: if you will be using (ARM v5) or (ARM v6) disable DEFINE CPUARMV7A.
   {$IFNDEF CPU64}
-    {$DEFINE CPUARMV7A}
+    {.$DEFINE CPUARMV7A}
   {$ENDIF}
   {$IF DEFINED(CPU64) OR DEFINED(CPUARMV7A) or DEFINED(CPUi386) or DEFINED(CPUx86_64)}
     {$DEFINE NOT_OLD_ARM}   // старшие версии Anroid.

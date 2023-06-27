@@ -1,5 +1,5 @@
 library demo05;
-
+{$I zgl_config.cfg}
 {$I zglCustomConfig.cfg}
 
 uses

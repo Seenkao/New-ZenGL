@@ -206,7 +206,7 @@ type
   end;
 
 {$IFDEF USE_ZIP}
-{$If defined(MAC_COCOA) or defined(ANDROID)}
+{$If defined(MAC_COCOA) or (defined(ANDROID) and defined(NOT_OLD_ARM))}
 var
   zip_open: function(path: PAnsiChar; flags: Integer; out error: cint): Pzip; cdecl;
   zip_close: function( archive : Pzip ): cint; cdecl;
@@ -255,45 +255,45 @@ function deflateInit2_ : Integer; cdecl;
 {$IfEnd}
 {$ENDIF}
 
-procedure zlib_Init(out strm: z_stream_s ); cdecl;//{$IfNDef MAC_COCOA}external;{$EndIf}
-procedure zlib_Free(var strm: z_stream_s ); cdecl;//{$IfNDef MAC_COCOA} external;{$EndIf}
+procedure zlib_Init(out strm: z_stream_s ); cdecl;
+procedure zlib_Free(var strm: z_stream_s ); cdecl;
 function png_DecodeIDAT( var pngMem: zglTMemory; var pngZStream: z_stream_s; out pngIDATEnd: LongWord; Buffer: Pointer;
-     Bytes: Integer): Integer; cdecl;//{$IfNDef MAC_COCOA} external;{$EndIf}
+     Bytes: Integer): Integer; cdecl;
 {/$IfDef CEGCC}
 function udimodsi4(num, den: LongWord; modwanted: Integer): LongWord; cdecl;
 function __umodsi3(a, b: clong): clong; cdecl;
 {/$EndIf}
 
-{$IfNDef ANDROID}
+{$If Not (defined (ANDROID) and defined(NOT_OLD_ARM))}
 function inflateInit_(var strm: z_stream_s; version: pchar; stream_size: cint): cint; cdecl; external
   {$ifdef DYNAMICZLIB}libz name 'inflateInit_'{$endif};
 function inflateEnd(var strm: z_stream_s): cint; cdecl; external
   {$ifdef DYNAMICZLIB}libz name 'inflateEnd'{$endif};
 function inflate(var strm: z_stream_s; flush: cint): cint; cdecl; external
   {$ifdef DYNAMICZLIB}libz name 'inflate'{$endif};
-{$endif}
+{$IfEnd}
 
 {$IFDEF USE_ZIP}
 threadvar
   zipCurrent : Pzip;
 
-{$If defined(MAC_COCOA) or defined(ANDROID)}
+{$If defined(MAC_COCOA) or (defined(ANDROID) and defined(NOT_OLD_ARM))}
 procedure LoadLibZip(const zDLL, zlDLL: String);
 procedure UnloadLibZip;
 {$IfEnd}
-{$ENDIF}
+{$EndIf}
 
 implementation
 
-{$If defined(MAC_COCOA) or defined(ANDROID)}
+{$If defined(MAC_COCOA) or (defined(ANDROID) and defined(NOT_OLD_ARM))}
 uses
   zgl_log,
   zgl_utils,
   zgl_application;
-{$IfEnd}
 
 var
   zipDLL: Pointer;
+{$IfEnd}
 
 {$IFDEF USE_ZIP}
 {$IFDEF FPC}
@@ -312,7 +312,7 @@ begin
   Result := 0;
 end;
 
-{$If defined(MAC_COCOA) or defined(ANDROID)}
+{$If defined(MAC_COCOA) or (defined(ANDROID) and defined(NOT_OLD_ARM))}
 procedure LoadLibZip(const zDLL, zlDLL: String);
 begin
   UnloadLibZip;

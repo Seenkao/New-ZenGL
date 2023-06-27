@@ -29,7 +29,6 @@
       <Unit0>
         <Filename Value="demo10.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="demo10"/>
       </Unit0>
     </Units>
   </ProjectOptions>
@@ -42,7 +41,7 @@
     <SearchPaths>
       <IncludeFiles Value="..\..\..\..\headers;..\..\..\..\headers\android;$(ProjOutDir);..\..\..\..\src;..\..\..\..\srcGEGL;..\..\..\..\srcGL"/>
       <Libraries Value="..\libs\armeabi-v7a"/>
-      <OtherUnitFiles Value="..\..\..\..\src;..\..\..\..\extra;..\..\..\..\lib\zlib\arm-linux;..\..\..\..\lib\zip\arm-linux;..\..\..\..\lib\theora\arm-linux;..\..\..\..\lib\ogg\arm-linux;..\..\..\..\srcGEGL;..\..\..\..\srcGL"/>
+      <OtherUnitFiles Value="..\..\..\..\src;..\..\..\..\extra;..\..\..\..\srcGEGL;..\..\..\..\srcGL;..\..\..\..\lib\theora\android\armv7a"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>

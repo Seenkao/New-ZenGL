@@ -41,7 +41,7 @@
     <SearchPaths>
       <IncludeFiles Value="..\..\..\..\headers;..\..\..\..\headers\android;$(ProjOutDir);..\..\..\..\src;..\..\..\..\srcGEGL;..\..\..\..\srcGL"/>
       <Libraries Value="..\libs\armeabi-v7a"/>
-      <OtherUnitFiles Value="..\..\..\..\src;..\..\..\..\srcGEGL;..\..\..\..\srcGL;..\..\..\..\extra;..\..\..\..\lib\zlib\arm-linux;..\..\..\..\lib\zip\arm-linux;..\..\..\..\lib\theora\arm-linux;..\..\..\..\lib\ogg\arm-linux"/>
+      <OtherUnitFiles Value="..\..\..\..\src;..\..\..\..\srcGEGL;..\..\..\..\srcGL;..\..\..\..\extra;..\..\..\..\lib\theora\android\armv7a"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>

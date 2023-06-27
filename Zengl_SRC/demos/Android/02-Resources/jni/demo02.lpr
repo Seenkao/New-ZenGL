@@ -1,5 +1,5 @@
 library demo02;
-
+{$I zgl_config.cfg}
 {$I zglCustomConfig.cfg}
 
 uses
@@ -22,8 +22,6 @@ uses
   // EN: Units for using textures. zgl_textures is a main unit, next units provide support of different formats.
   zgl_textures,
   zgl_textures_tga, // TGA
-  // Rus: для Android v5 и v6 отключите в файле конфигурации define CPUARMV7A.
-  // Eng: for Android v5 and v6 disable in the config file define CPUARMV7A.
   zgl_textures_jpg, // JPG
   zgl_textures_png, // PNG
   // RU: Звуковая подсистема реализована в модулях ниже. Подход такой же как и с текстурами - основной модуль и модули поддержки форматов.

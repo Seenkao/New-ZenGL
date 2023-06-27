@@ -30,6 +30,10 @@ unit zglChipmunk;
 {$I zglCustomConfig.cfg}
 {$I zgl_config.cfg}
 
+{$IfDef NOT_OLD_ARM}
+  {$Error !!! this architecture is not supported !!! Or you didn't comment out CPUARMV7A define for v5 or v6. }
+{$EndIf}
+
 {$IFDEF FPC}
   {.$MODE DELPHI}
   {$PACKRECORDS C}

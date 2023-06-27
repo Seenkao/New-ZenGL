@@ -183,7 +183,7 @@ end;
 
 procedure KeyMouseEvent;
 begin
-  if touch_Tap(0) Then
+  if touch_Click(0) Then
   begin
     if not balls Then
     begin

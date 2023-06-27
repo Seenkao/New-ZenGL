@@ -1,4 +1,4 @@
-package zengl.demo13;
+package zengl.demo14;
 
 import zengl.android.ZenGL;
 
@@ -10,7 +10,7 @@ import android.view.WindowManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 
-public class Demo13Activity extends Activity
+public class Demo14Activity extends Activity
 {
 	private ZenGL zengl;
 
@@ -28,13 +28,13 @@ public class Demo13Activity extends Activity
 		String appSourceDir = "";
 		try
 		{
-			appSourceDir = getPackageManager().getApplicationInfo( "zengl.demo13", 0 ).sourceDir;
+			appSourceDir = getPackageManager().getApplicationInfo( "zengl.demo14", 0 ).sourceDir;
 		}
 		catch ( NameNotFoundException e ) {}
 
 		// RU: создаём zglCGLSurfaceView, делаем его текущим и передаём имя pascal-библиотеки
 		// EN: create new zglCGLSurfaceView, make it as a current view and pass name of pascal library
-		zengl = new ZenGL( this, "demo13", appSourceDir );
+		zengl = new ZenGL( this, "demo14", appSourceDir );
 		setContentView( zengl );
 	}
 
