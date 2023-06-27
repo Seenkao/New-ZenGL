@@ -454,7 +454,6 @@ begin
     app_PLoad();
   scr_Flush();
 
-  log_Add(' demo initialization end');
   timer_Reset();
   timeCalcFPS := timer_Add(@app_CalcFPS, 1000, t_Start);
   {$IfNDef USE_INIT_HANDLE}
