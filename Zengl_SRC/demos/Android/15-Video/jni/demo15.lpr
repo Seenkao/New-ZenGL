@@ -20,7 +20,6 @@ uses
   zgl_video_theora,
   zgl_types,
   gegl_color,
-  zgl_log,
   zgl_utils;
 
 var
@@ -33,7 +32,6 @@ var
 
 procedure Init;
 begin
-  log_Add(' demo initialization start');
   zgl_Enable( CORRECT_RESOLUTION );
   scr_CorrectResolution( 800, 600 );
 
@@ -51,7 +49,6 @@ begin
   setFontTextScale(20, fntMain);
 
   newColor := Color_FindOrAdd($A0AA4090);
-  log_Add(' demo initialization end');
 end;
 
 procedure Draw;
