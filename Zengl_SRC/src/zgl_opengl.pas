@@ -20,7 +20,7 @@
  *
  *  3. This notice may not be removed or altered from any
  *     source distribution.
- !!! modification from Serge 26.02.2022
+ !!! modification from Serge
 }
 unit zgl_opengl;
 {$IFDEF LINUX}
@@ -47,7 +47,7 @@ uses
   zgl_glx_wgl
   {$ENDIF}
   {$IfDef MAC_COCOA}
-  CocoaAll,
+  CocoaAll
   {$ENDIF}
   ;
 
