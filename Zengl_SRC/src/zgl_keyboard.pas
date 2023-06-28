@@ -31,15 +31,14 @@ unit zgl_keyboard;
 {$ENDIF}
 
 interface
+{$IfNDef MAC_COCOA}
 uses
+{$EndIf}
   {$IFDEF USE_X11}
   X, Xlib, keysym;
   {$ENDIF}
   {$IFDEF WINDOWS}
   Windows;
-  {$ENDIF}
-  {$IFDEF MACOSX}
-//  MacOSAll;      ???
   {$ENDIF}
   {$IFDEF iOS}
   iPhoneAll, CGGeometry;
