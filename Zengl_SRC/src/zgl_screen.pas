@@ -47,11 +47,11 @@ uses
 {$ENDIF}
 {$IfDef MAC_COCOA}
   CocoaAll,
+  MacOSAll,
 {$ENDIF}
 {$IFDEF iOS}
   iPhoneAll, CFBase, CFString,
 {$ENDIF}
-
   zgl_types;
 
 const
@@ -383,10 +383,9 @@ begin
     if not Already(width, height) Then
     begin
       INC(scrResList.Count);
-      SetLength(scrResList.Width, scrResList.Count);
-      SetLength(scrResList.Height, scrResList.Count);
-      scrResList.Width[scrResList.Count - 1]  := width;
-      scrResList.Height[scrResList.Count - 1] := height;
+      SetLength(scrResList.List, scrResList.Count);
+      scrResList.List[scrResList.Count - 1].Width  := width;
+      scrResList.List[scrResList.Count - 1].Height := height;
     end;
   end;
 {$ENDIF}
