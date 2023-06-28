@@ -143,7 +143,7 @@ type
   zglTPrevResolution = record
     Width : Integer;
     Height: Integer;
-    frequency: array[0..9] of Integer;
+    frequency: {array[0..9] of} Integer;    // переделать под массив, если руки дойдут
   end;
 
   zglPResolutionList = ^zglTResolutionList;
@@ -308,7 +308,7 @@ var
   begin
     Result := FALSE;
     for j := 0 to scrResList.Count - 1 do
-      if (scrResList.Width[j] = Width) and (scrResList.Height[j] = Height) Then
+      if (scrResList.List[j].Width = Width) and (scrResList.List[j].Height = Height) Then
         Result := TRUE;
   end;
   {$EndIf}
@@ -364,12 +364,10 @@ begin
     if not Already(tmpSettings.dmPelsWidth, tmpSettings.dmPelsHeight) Then
     begin
       INC(scrResList.Count);                                                              
-      SetLength(scrResList.Width, scrResList.Count);
-      SetLength(scrResList.Height, scrResList.Count);
-      SetLength(scrResList.frequency, scrResList.Count);
-      scrResList.Width[scrResList.Count - 1]  := tmpSettings.dmPelsWidth;
-      scrResList.Height[scrResList.Count - 1] := tmpSettings.dmPelsHeight;
-      scrResList.frequency[scrResList.Count - 1] := tmpSettings.dmDisplayFrequency;       
+      SetLength(scrResList.List, scrResList.Count);
+      scrResList.List[scrResList.Count - 1].Width := tmpSettings.dmPelsWidth;
+      scrResList.List[scrResList.Count - 1].Height := tmpSettings.dmPelsHeight;
+      scrResList.List[scrResList.Count - 1].frequency := tmpSettings.dmDisplayFrequency;
     end;
     INC(i);
   end;
@@ -402,8 +400,8 @@ begin
 end;
 
 procedure scr_Init;
-var
-  _res: PXRRScreenConfiguration;
+//var
+//  _res: PXRRScreenConfiguration;
   {$IFDEF iOS}
   var
     i           : Integer;
@@ -646,7 +644,14 @@ begin
   {$ENDIF}
 
   scrResList.Count := 0;
+
+  {$IfDef WINDOWS}
+  SetLength(scrResList.Width 0);
+  SetLength(scrResList.Height 0);
+  SetLength(scrResList.frequency 0);
+  {$Else}
   SetLength(scrResList.List, 0);
+  {$EndIf}
 
   scrInitialized := FALSE;
 end;
