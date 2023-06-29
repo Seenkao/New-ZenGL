@@ -34,7 +34,7 @@
 **Supported platforms for Lazarus/FreePascal:**
 - Windows 32/64
 - Linux 32/64
-- Android
+- Android - ARM32 (v5, v6, v7a)/ARM64(v8a)/x86/x86_64
 - MacOS Cocoa - beta version
 - *MacOS Carbon (not tested, use version 3.12 if won't work)*
 
@@ -49,7 +49,7 @@ Ways to work with 3D were not implemented. You will need to do this manually or 
 
 Clicking on the image will take you to the video. Where I redo the 3rd demo. At the end of the video, it shows that you can make multiple input fields.
 
-[![demo3 remake](https://zengl.org/screens/screen03.jpg)](https://youtu.be/qb8hxilAI_I)
+[![demo3 remake](https://github.com/Seenkao/New-ZenGL/blob/ZenGL_4_0/Zengl_SRC/bin/data/back04.jpg)](https://youtu.be/qb8hxilAI_I)
 
 <a name="Features"></a>**Features:**  
 * __Main__  
@@ -146,7 +146,7 @@ Please write about the errors found in the process of working with ZenGL. )))
 **Поддерживаемые платформы для Lazarus/FreePascal:**
 - Windows 32/64
 - Linux 32/64
-- Android
+- Android - ARM32 (v5, v6, v7a)/ARM64(v8a)/x86/x86_64
 - MacOS Cocoa - beta version
 - *MacOS Carbon (не проверено используйте версию 3.12 если не будет работать)*
 
@@ -158,11 +158,11 @@ Please write about the errors found in the process of working with ZenGL. )))
 
 Важное обновление: в данной версии обновлён OpeGL до последней версии согласно конца 2021 года. Так же обновлены все расширения. Файлы: __zgl_pasOpenGL.pas__, __zgl_GLU.pas__, __zgl_GLX_WGL.pas__, __zgl_gltypeconst.pas__, __GLdefine.cfg__.
 
-Способов работы с 3D не реализовывалось. Вам надо будет делать это вручную или __oglMode__ приравнять 3. Я не проверял работоспособность! Вы можете переписать процедуру __Set3DMode(FOVY: Single = 45);__ и задайть все параметры самим.
+Способов работы с 3D не реализовывалось. Вам надо будет делать это вручную или __oglMode__ приравнять 3. Я не проверял работоспособность! Вы можете переписать процедуру __Set3DMode(FOVY: Single = 45);__ и задать все параметры самим.
 
 при нажатии на картинку перейдёте на видео. Где я переделываю 3-ю демо версию. В конце видео показано, что можно делать несколько полей ввода.
 
-[![переделка demo3](https://zengl.org/screens/screen03.jpg)](https://youtu.be/qb8hxilAI_I)
+[![переделка demo3](https://github.com/Seenkao/New-ZenGL/blob/ZenGL_4_0/Zengl_SRC/bin/data/back04.jpg)](https://youtu.be/qb8hxilAI_I)
 
 <a name="FeaturesRus"></a>**Возможности библиотеки:**  
  * __Основные__  
