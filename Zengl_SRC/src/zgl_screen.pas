@@ -337,13 +337,13 @@ begin
   for i := 0 to scrModeCount - 1 do
   begin
     for j := 0 to 9 do
-      scrResList.List[i].frequency[j] := 0;              // "очищаем"
+      scrResList.List[i].frequency := 0;              // "очищаем"
     scrResList.List[i].Width := tmpSettings.width;       // ширина
     scrResList.List[i].Height := tmpSettings.height;     // высота
     rates := XRRRates(scrDisplay, 0, i, @num_rates);
     for j := 0 to num_rates - 1 do
     begin
-      scrResList.List[i].frequency[j] := rates^;         // частота
+      scrResList.List[i].frequency := rates^;         // частота
     //  log_Add('width = ' + u_IntToStr(tmpSettings.width) + ', height = ' + u_IntToStr(tmpSettings.height) + ', frequency = ' + u_IntToStr(rates^));
     //  log_Add('mwidth = ' + u_IntToStr(tmpSettings.mwidth) + ', mheight = ' + u_IntToStr(tmpSettings.mheight));
       inc(rates);
