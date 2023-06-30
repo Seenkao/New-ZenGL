@@ -53,7 +53,9 @@
 // modification by Serg
 }
 unit zgl_lib_zip;
+{$IfNDef FPC}
 {$mode delphi}
+{$EndIf}
 {$I zgl_config.cfg}
 
 // Данный файл требует дальнейшей модификации и исправлений всех ошибок.
@@ -103,7 +105,7 @@ uses
   {$IFDEF WINDOWS}
   zgl_lib_msvcrt,
   {$ENDIF}
-//  zgl_memory,            CPUARMV7A
+  zgl_memory,    //        CPUARMV7A
 //  zgl_utils,
   zgl_types;
 
