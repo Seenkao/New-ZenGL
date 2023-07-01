@@ -36,7 +36,6 @@
 - Linux 32/64
 - Android - ARM32 (v5, v6, v7a)/ARM64(v8a)/x86/x86_64
 - MacOS Cocoa - beta version
-- *MacOS Carbon (not tested, use version 3.12 if won't work)*
 
 **Supported Platforms for Delphi:**
 - Windows 32 (some demos will probably work with Windows 64 too, but certainly not all)
@@ -148,7 +147,6 @@ Please write about the errors found in the process of working with ZenGL. )))
 - Linux 32/64
 - Android - ARM32 (v5, v6, v7a)/ARM64(v8a)/x86/x86_64
 - MacOS Cocoa - beta version
-- *MacOS Carbon (не проверено используйте версию 3.12 если не будет работать)*
 
 **Поддерживаемые платформы для Delphi:**
 - Windows 32 (вероятно некоторые демо-версии будут работать и с Windows 64, но точно не все)
