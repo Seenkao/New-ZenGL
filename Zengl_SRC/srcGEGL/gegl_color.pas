@@ -221,10 +221,7 @@ end;
 function Get_Color(num: LongWord): LongWord; {$IfDef USE_INLINE} inline;{$EndIf}
 begin
   if num >= managerColor.count then
-  begin
-    Result := cl_Black05;
-    exit;
-  end;
+    num := cl_Black05;
   Result := managerColor.Color[num];
 end;
 
