@@ -644,13 +644,7 @@ begin
 
   scrResList.Count := 0;
 
-  {$IfDef WINDOWS}
-  SetLength(scrResList.Width 0);
-  SetLength(scrResList.Height 0);
-  SetLength(scrResList.frequency 0);
-  {$Else}
   SetLength(scrResList.List, 0);
-  {$EndIf}
 
   scrInitialized := FALSE;
 end;
