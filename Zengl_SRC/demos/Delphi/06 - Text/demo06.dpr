@@ -18,8 +18,7 @@ uses
   zgl_text,
   zgl_types,
   zgl_utils,
-  gegl_color,
-  gegl_utils;             // для перевода текста в UTF-8
+  gegl_color;
 
 var
   dirRes  : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
@@ -35,7 +34,7 @@ begin
   // EN: If textures were named without special mask - "$(font_name)-page$(number).$(extension)", then use this method to load them(for png):
   //for i := 0 to fntMain.Count.Pages - 1 do
   //  fntMain.Pages[ i ] := tex_LoadFromFile( dirRes + 'font-page' + u_IntToStr( i ) + '.png' );
-  MyText := AscToUtf8Rus('Это текст для вывода его в квадрате');
+  MyText := AnsiToUtf8('Это текст для вывода его в квадрате');
   setFontTextScale(15, fntMain);              // установка шкалы размерности шрифта
 end;
 
