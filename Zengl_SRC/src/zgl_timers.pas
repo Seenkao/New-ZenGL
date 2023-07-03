@@ -131,9 +131,6 @@ var
   i: LongWord;
   t: Double;
   newTimer: zglPTimer;
-  {$IFDEF DELPHI7_AND_DOWN}
-  z: Pointer;
-  {$ENDIF}
 begin
   Result := 255;
   if managerTimer.Count >= managerTimer.maxTimers then
@@ -163,12 +160,7 @@ begin
 
   if not Assigned(newTimer) then
   begin
-    {$IFDEF DELPHI7_AND_DOWN}
-    zgl_GetMem(z, SizeOf(zglTTimer));
-    newTimer := z;
-    {$ELSE}
-    zgl_GetMem(newTimer, SizeOf(zglTTimer));
-    {$ENDIF}
+    zgl_GetMem(Pointer(newTimer), SizeOf(zglTTimer));
     managerTimer.Timers[i] := newTimer;
   end;
 
