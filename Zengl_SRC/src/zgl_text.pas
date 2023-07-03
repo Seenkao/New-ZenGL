@@ -130,6 +130,7 @@ var
   // Eng: scale for disabled flags, this scale will be used instead of the scale
   //      specified in the font.
   useScaleEx: Single;
+  textRGBA      : LongWord = $FFFFFFFF;
 
 implementation
 uses
@@ -154,7 +155,6 @@ type
 end;
 
 var
-  textRGBA      : LongWord = $FFFFFFFF;
   textStep      : Single = 0.0;
   textLength    : Integer;
   textLCoord    : zglPPoint2D;
