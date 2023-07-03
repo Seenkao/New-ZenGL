@@ -242,10 +242,10 @@ function deflateInit2_ : Integer; cdecl;
 {$EndIf}
 {$ENDIF}
 
-procedure zlib_Init(out strm: z_stream_s ); cdecl;//{$IfNDef MAC_COCOA}external;{$EndIf}
-procedure zlib_Free(var strm: z_stream_s ); cdecl;//{$IfNDef MAC_COCOA} external;{$EndIf}
+procedure zlib_Init(out strm: z_stream_s ); cdecl; {$IfNDef FPC}external;{$EndIf}
+procedure zlib_Free(var strm: z_stream_s ); cdecl; {$IfNDef FPC}external;{$EndIf}
 function png_DecodeIDAT( var pngMem: zglTMemory; var pngZStream: z_stream_s; out pngIDATEnd: LongWord; Buffer: Pointer;
-     Bytes: Integer): Integer; cdecl;//{$IfNDef MAC_COCOA} external;{$EndIf}
+     Bytes: Integer): Integer; cdecl; {$IfNDef FPC}external;{$EndIf}
 {/$IfDef CEGCC}
 function udimodsi4(num, den: LongWord; modwanted: Integer): LongWord; cdecl;
 function __umodsi3(a, b: clong): clong; cdecl;
@@ -277,10 +277,10 @@ implementation
 uses
   zgl_log,
   zgl_application;
-{$EndIf}
 
 var
   zipDLL: Pointer;
+{$EndIf}
 
 {$IFDEF USE_ZIP}
 {$IFDEF FPC}
@@ -389,7 +389,7 @@ end;
 {$ENDIF}
 {$ENDIF}
 
-{.$IfDef MAC_COCOA}
+{$IfDef FPC}
 procedure zlib_Init( out strm : z_stream_s );
 begin
   FillChar(strm, sizeof(strm), 0);
@@ -501,7 +501,7 @@ function __umodsi3(a, b: clong): clong;
 begin
   Result := udimodsi4(a, b, 1);
 end;
-{.$EndIf}
+{$EndIf}
 
 {$IfDef USE_ZIP}{$IfDef MAC_COCOA}
 initialization
