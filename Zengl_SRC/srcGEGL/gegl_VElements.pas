@@ -162,9 +162,6 @@ var
 
 function CreateEdit(Rect: zglTRect2D; fnt, Scale: LongWord; UserData1: Pointer = nil; UserData2: Pointer = nil; Len: Word = MAX_SYMBOL_LINE): LongWord;
 var
-  {$IFDEF DELPHI7_AND_DOWN}
-  z: Pointer;
-  {$ENDIF}
   i: LongWord;
   pFlags: PLongWord;
   charDesc: zglPCharDescSmall;
@@ -206,12 +203,7 @@ begin
 
   if not Assigned(UseText) then
   begin
-    {$IFDEF DELPHI7_AND_DOWN}
-    zgl_GetMem(z, SizeOf(geglTEdit));
-    UseText := z;
-    {$ELSE}
-    zgl_GetMem(UseText, SizeOf(geglTEdit));
-    {$ENDIF}
+    zgl_GetMem(Pointer(UseText), SizeOf(geglTEdit));
     managerSetOfTools.SetOfTools[managerSetOfTools.count] := UseText;
   end;
 
