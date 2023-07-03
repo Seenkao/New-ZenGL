@@ -133,6 +133,9 @@ function _file_GetDirectory(const FileName: UTF8String): PAnsiChar;
 function platform_GetRes(const FileName: UTF8String): UTF8String;
 {$ENDIF}
 
+var
+  filePath: UTF8String = '';
+
 implementation
 uses
   {$IFDEF DARWIN}
@@ -153,7 +156,6 @@ const
 {$ENDIF}
 
 var
-  filePath: UTF8String = '';
   filePathArchive: UTF8String = '';
   {$IFDEF iOS}
   iosFileManager: NSFileManager;
@@ -701,7 +703,6 @@ begin
     Result := copy(Str, lenStr - (lenStr - pos) + 1, (lenStr - pos));
 end;
 
-// имя
 function file_GetName(const FileName: UTF8String): UTF8String;
   var
     tmp: UTF8String;
