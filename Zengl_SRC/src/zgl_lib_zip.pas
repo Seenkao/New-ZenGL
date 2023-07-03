@@ -53,7 +53,7 @@
 // modification by Serg
 }
 unit zgl_lib_zip;
-{$IfNDef FPC}
+{$IfDef FPC}
 {$mode delphi}
 {$EndIf}
 {$I zgl_config.cfg}
@@ -65,8 +65,10 @@ unit zgl_lib_zip;
   {$L libzip}
   {$EndIf}
 {$EndIf}
-
 {$ENDIF}
+{$IfNDef FPC}
+{$L zlib_helper}
+{$EndIf}
 
   {$IfDef WINDOWS}
   {$IFDEF USE_ZLIB_FULL}
@@ -257,14 +259,14 @@ function deflateInit2_ : Integer; cdecl;
 {$IfEnd}
 {$ENDIF}
 
-procedure zlib_Init(out strm: z_stream_s ); cdecl;
-procedure zlib_Free(var strm: z_stream_s ); cdecl;
+procedure zlib_Init(out strm: z_stream_s ); cdecl; {$IfNDef FPC}external;{$EndIf}
+procedure zlib_Free(var strm: z_stream_s ); cdecl; {$IfNDef FPC}external;{$EndIf}
 function png_DecodeIDAT( var pngMem: zglTMemory; var pngZStream: z_stream_s; out pngIDATEnd: LongWord; Buffer: Pointer;
-     Bytes: Integer): Integer; cdecl;
-{/$IfDef CEGCC}
+     Bytes: Integer): Integer; cdecl; {$IfNDef FPC}external;{$EndIf}
+{$IfDef FPC}
 function udimodsi4(num, den: LongWord; modwanted: Integer): LongWord; cdecl;
 function __umodsi3(a, b: clong): clong; cdecl;
-{/$EndIf}
+{$EndIf}
 
 {$If Not (defined (ANDROID) and defined(NOT_OLD_ARM))}
 function inflateInit_(var strm: z_stream_s; version: pchar; stream_size: cint): cint; cdecl; external
@@ -404,6 +406,10 @@ end;
 {$ENDIF}
 {$ENDIF}
 
+{$IfDef FPC}
+// данный код работает в Delphi 7, но не хочет работать в Delphi XE.
+// Может быть... когда нибудь... если кто-то сподобится собрать 64-х битные объектные файлы для Delphi XE,
+// я может соберусь это всё сделать рабочим для Delphi XE.
 procedure zlib_Init( out strm : z_stream_s );
 begin
   FillChar(strm, sizeof(strm), 0);
@@ -418,7 +424,7 @@ end;
 function png_DecodeIDAT(var pngMem: zglTMemory; var pngZStream: z_stream_s; out pngIDATEnd: LongWord; Buffer: Pointer;
      Bytes: Integer): Integer;
 var
-  b: {$IfDef USE_INLINE}PByte{$Else}array[0..3] of Byte{$EndIf};
+  b: {$IfDef FPC}PByte{$Else}array[0..3] of Byte{$EndIf};
   IDATHeader: PChar;
 begin
   pngZStream.next_out := Buffer;
@@ -428,7 +434,7 @@ begin
     if ((pngMem.Position = pngIDATEnd) and (pngZStream.avail_out > 0) and (pngZStream.avail_in = 0)) then
     begin
       inc(pngMem.Position, 4);
-      {$IfDef USE_INLINE}
+      {$IfDef FPC}
       b := PByte(Ptr(pngMem.Memory) + pngMem.Position);
       pngIDATEnd := b[3] + (b[2] shl 8) + (b[1] shl 16) + (b[0] shl 24);
       inc(pngMem.Position, 4);
@@ -515,7 +521,7 @@ function __umodsi3(a, b: clong): clong;
 begin
   Result := udimodsi4(a, b, 1);
 end;
-{.$EndIf}
+{$EndIf}
 
 {$IfDef USE_ZIP}{$IfDef MAC_COCOA}
 initialization
