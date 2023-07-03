@@ -48,10 +48,12 @@ uses
   {$ENDIF}
 
   {$ELSE}
+  {$IfNDef WIN64}          // если будет добавление объектников 64-х битных для Delphi, то эту часть надо проверять.
   procedure _llmul; cdecl;
   procedure errno; cdecl; external 'msvcrt.dll' name '_errno';
   procedure fstat; cdecl; external 'msvcrt.dll' name '_fstat';
   procedure dup; cdecl; external 'msvcrt.dll' name '_dup';
+  {$EndIf}
   {$ENDIF}
 
   function MoveFileExA(lpExistingFileName: PAnsiChar; lpNewFileName: PAnsiChar; dwFlags: DWORD): Boolean; stdcall; external 'kernel32.dll';
@@ -133,7 +135,7 @@ end;
 {$ENDIF}
 
 {$ELSE}
-
+{$IfNDef WIN64}
 procedure _llmul; cdecl;
 asm
   push  edx
@@ -156,7 +158,7 @@ asm
 
   ret     8
 end;
-
+{$EndIf}
 {$ENDIF}
 
 end.
