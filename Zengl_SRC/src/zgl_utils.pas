@@ -57,11 +57,11 @@ function u_IntToStr(Value: Integer): UTF8String;
 function u_StrToInt(const Value: UTF8String): Integer;
 // Rus: перевод Single/Double в String.
 // Eng: convert Single/Double to String.
-function u_FloatToStr(Value: Single; Digits: Integer = 2): UTF8String; {$IfNDef DELPHI7_AND_DOWN}overload;
+function u_FloatToStr(Value: Single; Digits: Integer = 2): UTF8String; {$IfDef FPC}overload;
 function u_FloatToStr(Value: Double; Digits: Integer = 2): UTF8String; overload;{$EndIf}
 // Rus: перевод String в Single/Double.
 // Eng: convert String to Single/Double.
-function u_StrToFloat(const Value: UTF8String): Single; {$IfNDef DELPHI7_AND_DOWN} overload;
+function u_StrToFloat(const Value: UTF8String): Single; {$IfDef FPC} overload;
 function u_StrToFloat(const Value: UTF8String): Double; overload;{$EndIf}
 // Rus: перевод Boolean в String.
 // Eng: convert Boolean to String.
@@ -187,7 +187,7 @@ function u_FloatToStr(Value: Single; Digits: Integer = 2): UTF8String;
 begin
   Str(Value:0:Digits, Result);
 end;
-{$IfNDef DELPHI7_AND_DOWN}
+{$IfDef FPC}
 function u_FloatToStr(Value: Double; Digits: Integer): UTF8String;
 begin
   Str(Value:0:Digits, Result);
@@ -201,7 +201,7 @@ begin
   if e <> 0 Then
     Result := 0;
 end;
-{$IfNDef DELPHI7_AND_DOWN}
+{$IfDef FPC}
 function u_StrToFloat(const Value: UTF8String): Double;
 var
   e: Integer;
