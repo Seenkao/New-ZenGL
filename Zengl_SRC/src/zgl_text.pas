@@ -133,6 +133,7 @@ var
   // Eng: scale for disabled flags, this scale will be used instead of the scale
   //      specified in the font.
   useScaleEx: Single;
+  textRGBA      : {$IfDef OLD_METHODS} array[0..3] of Byte = (255, 255, 255, 255){$Else}LongWord = $FFFFFFFF{$EndIf};
 
 implementation
 uses
@@ -157,7 +158,6 @@ type
 end;
 
 var
-  textRGBA      : {$IfDef OLD_METHODS} array[0..3] of Byte = (255, 255, 255, 255){$Else}LongWord = $FFFFFFFF{$EndIf};
   textStep      : Single = 0.0;
   textLength    : Integer;
   textLCoord    : zglPPoint2D;
