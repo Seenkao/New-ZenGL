@@ -263,12 +263,7 @@ begin
     inc(i);
   end;
 
-  {$IFDEF DELPHI7_AND_DOWN}
-  zgl_GetMem(z, SizeOf(geglTCursor));
-  UseText^.Cursor := z;
-  {$ELSE}
-  zgl_GetMem(UseText^.Cursor, SizeOf(geglTCursor));
-  {$EndIf}
+  zgl_GetMem(Pointer(UseText^.Cursor), SizeOf(geglTCursor));
   _cursor := UseText^.Cursor;
   _cursor^.curRect.X := 0;
   _cursor^.curRect.Y := rs1_2 * Scale;
