@@ -44,7 +44,7 @@ var
 
 {$IfDef DELPHI7_AND_DOWN}
 // Delphi 7 and down - UTF8. Rus only.
-function AscToUtf8Rus(text: AnsiString): UTF8String;
+function AnsiToUtf8(text: AnsiString): UTF8String;
 function ByteToUtf8Rus(myByte: Byte): UTF8String;
 {$EndIf}
 // Rus: переводим клавиатурные коды в русскую символику. Для других языков, надо
@@ -70,7 +70,7 @@ function get_FlagForLoadText: Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
 implementation
 
 {$IfDef DELPHI7_AND_DOWN}
-function AscToUtf8Rus(text: AnsiString): UTF8String;
+function AnsiToUtf8(text: AnsiString): UTF8String;
 var
   i, len: Integer;
   n: Byte;
