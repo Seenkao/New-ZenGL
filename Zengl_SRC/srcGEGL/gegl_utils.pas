@@ -69,39 +69,6 @@ function get_FlagForLoadText: Boolean; {$IfDef USE_INLINE}inline;{$EndIf}
 
 implementation
 
-{$IfDef DELPHI7_AND_DOWN}
-function AnsiToUtf8(text: AnsiString): UTF8String;
-var
-  i, len: Integer;
-  n: Byte;
-begin
-  Result := '';
-  len := Length(text);
-  for i := 1 to len do
-  begin
-    n := byte(text[i]);
-    case n of
-      0..127: Result := Result + chr(n);
-      192..255: Result := Result + chr($D0) + chr(n - $C0 + $90);
-      168: Result := Result + chr($D0) + chr($81);                          // Ё
-      184: Result := Result + chr($D1) + chr($91);                          // ё
-      185: Result := Result + chr($E2) + chr($84) + chr($96);      // №
-    end;
-  end;
-end;
-
-function ByteToUtf8Rus(myByte: Byte): UTF8String;
-begin
-  case myByte of
-    0..127: Result := chr(myByte);
-    192..255: Result := chr($D0) + chr((myByte - $C0 + $90));
-    168: Result := chr($D0) + chr($81);
-    184: Result := chr($D1) + chr($91);
-    185: Result := Result + chr($E2) + chr($84) + chr($96);
-  end;
-end;
-{$EndIf}
-
 procedure EngToRus(var symb: LongWord);
 begin
   case symb of
