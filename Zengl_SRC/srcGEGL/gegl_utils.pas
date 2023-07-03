@@ -42,11 +42,6 @@ var
   //      line completely.
   fLoadTextClearing: Boolean = True;
 
-{$IfDef DELPHI7_AND_DOWN}
-// Delphi 7 and down - UTF8. Rus only.
-function AnsiToUtf8(text: AnsiString): UTF8String;
-function ByteToUtf8Rus(myByte: Byte): UTF8String;
-{$EndIf}
 // Rus: переводим клавиатурные коды в русскую символику. Для других языков, надо
 //      свою функцию делать. И знать клавиатурную раскладку.
 // Eng: we translate keyboard codes into Russian symbols. For other languages,
