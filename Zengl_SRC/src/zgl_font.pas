@@ -123,9 +123,6 @@ function font_Add: LongWord;
 var
   i: LongWord;
   newFont: zglPFont;
-  {$IFDEF DELPHI7_AND_DOWN}
-  z: Pointer;
-  {$ENDIF}
 begin
   i := 1;
   Result := 255;
@@ -147,12 +144,7 @@ begin
 
   if not Assigned(newFont) then
   begin
-    {$IFDEF DELPHI7_AND_DOWN}
-    zgl_GetMem(z, SizeOf(zglTFont));
-    newFont := z;
-    {$ELSE}
-    zgl_GetMem(newFont, SizeOf(zglTFont));
-    {$ENDIF}
+    zgl_GetMem(Pointer(newFont), SizeOf(zglTFont));
     managerFont.Font[i] := newFont;
   end;
   newFont.Flags := newFont.Flags or Enable or UseFnt;
