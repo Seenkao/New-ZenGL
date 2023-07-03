@@ -134,6 +134,12 @@ function EditNotSymbolic: Boolean;
 // Eng:
 procedure SetVisibleElement(numEl: LongWord; flag: Boolean);
 
+var
+  // угол поворота
+  geAngle: Single = 0;
+  // точка поворота
+  pointManager: zglTPoint2D = (x: 0; y: 0);
+
 implementation
 
   {$IfDef FULL_LOGGING}
@@ -147,10 +153,6 @@ uses
 var
   // RU: поле ввода (пока просто вывода текста).
   UseText: geglPEdit;
-  // точка поворота.
-  pointManager: zglTPoint2D = (x: 0; y: 0);
-  // угол поворота.
-  geAngle: Single = 0;
   // цвет по умолчанию.
   geDefColor: geglDefColor;
   useFont: zglPFont;  // защита от многопроцессорного исполнения?
