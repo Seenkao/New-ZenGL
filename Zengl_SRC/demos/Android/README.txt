@@ -14,7 +14,6 @@ https://www.fandroid.info/ustanovka-eclipse-i-podklyuchenie-plagina-android-deve
 
 Порядок сборки:
 - собрать библиотеку используя файл проекта для Lazarus'а, например "01-Initialization/jni/demo01_linux.lpi"
-- *.so - библиотеку скопировать в папку "..libs\armeabi\" - папки проекта "01-Initialization"
 - импортировать в Eclipse (Android Studio) основной каталог проекта - "01-Initialization"
 - запустить дебаг :)
 
