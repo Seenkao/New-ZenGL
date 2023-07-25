@@ -5730,6 +5730,11 @@ begin
 end;
 
 function LoadOpenGL: Boolean;
+{$IfDef LINUX}
+{$IfDef GL_VERSION_3_0}
+var
+  i, j: Integer;
+{$EndIf}{$EndIf}
 begin
 {  Result := False;
   if gl_Library <> Nil then
