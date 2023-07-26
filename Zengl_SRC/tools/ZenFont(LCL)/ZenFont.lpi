@@ -51,7 +51,7 @@
       <Filename Value="ZenFont"/>
     </Target>
     <SearchPaths>
-      <IncludeFiles Value="$(ProjOutDir);../../src;../../srcGL;../../srcGEGL"/>
+      <IncludeFiles Value="$(ProjOutDir);../../src;../../headers;../../srcGL;../../srcGEGL"/>
       <OtherUnitFiles Value="../../src;../../lib/jpeg/$(TargetCPU)-$(TargetOS);../../lib/msvcrt/$(TargetCPU);../../lib/ogg/$(TargetCPU)-$(TargetOS);../../lib/theora/$(TargetCPU)-$(TargetOS);../../lib/zlib/$(TargetCPU)-$(TargetOS);../../lib/zip/$(TargetCPU)-$(TargetOS);../../srcGL;../../srcGEGL"/>
       <UnitOutputDirectory Value="tmp/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
