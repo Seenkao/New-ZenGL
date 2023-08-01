@@ -1389,11 +1389,11 @@ const
   EGL_READ                        = $305A;
   EGL_CORE_NATIVE_ENGINE          = $305B;
 
-  {$IF defined(WINDOWS) or defined(ANDROID)}
+  {$IfDef WINDOWS}
   EGL_DEFAULT_DISPLAY = 0;
   {$ELSE}
   EGL_DEFAULT_DISPLAY = nil;
-  {$IfEnd}
+  {$EndIf}
   EGL_NO_CONTEXT      = nil;
   EGL_NO_DISPLAY      = nil;
   EGL_NO_SURFACE      = nil;
