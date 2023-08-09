@@ -18,7 +18,7 @@
 <a name="English"></a>Eng:
 -------------
 
-<a name= "About"></a>**About:**  
+<a name="About"></a>**About:**  
 [zengl 3.12](https://github.com/skalogryz/zengl) - version that also supports iOS.
 
 [google arhive](https://code.google.com/archive/p/zengl/)
@@ -129,7 +129,7 @@ Please write about the errors found in the process of working with ZenGL. )))
 <a name="Russian"></a>Rus:
 -------------
 
-<a name= "AboutRus"></a>**О ZenGL:**  
+<a name="AboutRus"></a>**О ZenGL:**  
 [zengl 3.12](https://github.com/skalogryz/zengl) - версия которая так же поддерживает iOS.
 
 [архив гугла](https://code.google.com/archive/p/zengl/)
