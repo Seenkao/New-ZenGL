@@ -5,15 +5,21 @@
 **Attention!!!** This version has undergone many changes. Excluded code for MacOS-carbon. Compiled and added libraries Ogg, Vorbis, Theora, LibZip for Android ARM32/ARM64/X86/X86_64. There may be problems with running on MacOS-Cocoa, this will be fixed. You can use ZenGL version 3.30, it is the most stable version but does not support Android updates.
 
 
-[Eng](#English)
-1. [About](#About)
-2. [Features](#Features)  
-3. [Green Engine](#GEEng) 
+[Eng](#English)  
+1.
+ [About](#About)  
+2.
+ [Features](#Features)  
+3.
+ [Green Engine](#GEEng) 
 
-[Rus](#Russian)
-1. [О ZenGL](#AboutRus)
-2. [Возможности библиотеки](#FeaturesRus)
-3. [Green Engine](#GERus)  
+[Rus](#Russian)  
+1.
+ [О ZenGL](#AboutRus)  
+2.
+ [Возможности библиотеки](#FeaturesRus)  
+3.
+ [Green Engine](#GERus)  
 
 <a name="English"></a>Eng:
 -------------
