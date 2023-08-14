@@ -24,7 +24,10 @@
 <a name="English"></a>Eng:
 -------------
 
+
 <a name="About"></a>**About:**  
+---
+
 [zengl 3.12](https://github.com/skalogryz/zengl) - version that also supports iOS.
 
 [google arhive](https://code.google.com/archive/p/zengl/)
@@ -57,6 +60,7 @@ Clicking on the image will take you to the video. Where I redo the 3rd demo. At 
 [![demo3 remake](https://github.com/Seenkao/New-ZenGL/blob/ZenGL_4_0/Zengl_SRC/bin/data/back04.jpg)](https://youtu.be/qb8hxilAI_I)
 
 <a name="Features"></a>**Features:**  
+---
 * __Main__  
    can be used as so/dll/dylib or statically compiled with your application (in this version only static compilation)  
    rendering to own or any other prepared window  
@@ -116,6 +120,7 @@ Clicking on the image will take you to the video. Where I redo the 3rd demo. At 
 ***
 
 <a name="GEEng"></a>**Green Engine:**
+---
 
 **GE** is a library that works on top of ZenGL features. Currently, it includes an input field with additional functions for it, and a module for working with color, where there are standard colors and you can set your own.
 
@@ -136,6 +141,7 @@ Please write about the errors found in the process of working with ZenGL. )))
 -------------
 
 <a name="AboutRus"></a>**О ZenGL:**  
+---
 [zengl 3.12](https://github.com/skalogryz/zengl) - версия которая так же поддерживает iOS.
 
 [архив гугла](https://code.google.com/archive/p/zengl/)
@@ -169,6 +175,7 @@ Please write about the errors found in the process of working with ZenGL. )))
 [![переделка demo3](https://github.com/Seenkao/New-ZenGL/blob/ZenGL_4_0/Zengl_SRC/bin/data/back04.jpg)](https://youtu.be/qb8hxilAI_I)
 
 <a name="FeaturesRus"></a>**Возможности библиотеки:**  
+---
  * __Основные__  
    библиотека может быть скомпилирована статически к проекту, или использоваться, как динамическая библиотека (в данной версии только статическая компиляция)  
    рендеринг как в собственное, так и в заранее подготовленное окно (LCL, VCL)  
@@ -228,6 +235,7 @@ Please write about the errors found in the process of working with ZenGL. )))
 ***
 
 <a name="GERus"></a>**Green Engine:**
+---
 
 **GE** - это библиотека которая работает поверх возможностей ZenGL. В данное время она включает в себя поле ввода с дополнительными функциями для него, и модуль для работы с цветом, где есть стандартные цвета и можно задавать свои.
 
