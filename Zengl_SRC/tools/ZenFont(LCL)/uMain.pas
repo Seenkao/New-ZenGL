@@ -173,7 +173,7 @@ begin
 
   while i <= len do
     begin
-      c := utf8_toUnicode(EditChars.Text, i, @j);
+      c := utf8_GetID(EditChars.Text, i, @j);
       if not fg_CharsUse[c] Then
       begin
         fg_CharsUse[c] := TRUE;
