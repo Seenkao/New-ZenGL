@@ -33,7 +33,7 @@ const
 var
   DirApp  : UTF8String;
   DirHome : UTF8String;
-  DirShader: UTF8String = {$IfNDef MAC_COCOA}'shaders/'{$EndIf};
+  DirShader: UTF8String = {$IfNDef MAC_COCOA}'../shaders/'{$EndIf};
 
   TimeStart  : LongWord = 0;
 
