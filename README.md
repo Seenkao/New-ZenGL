@@ -131,8 +131,10 @@ You can also contact me on the Lazarus forums and express your wishes and shortc
 You can support through Sberbank:
 2202200951985520
 
-The original source code is at [GitHub](https://github.com/Seenkao/New-ZenGL) other sites may have a back branch.
+---
+The source code is on [SourceForge](https://sourceforge.net/projects/new-zengl/), the project is no longer supported on GitHub.
 
+---
 Please write about the errors found in the process of working with ZenGL. )))
 
 ****
@@ -224,11 +226,11 @@ Please write about the errors found in the process of working with ZenGL. )))
  * __Видео__  
    декодирование видео заставок в текстуры  
    поддержка кодека __theora__ в формате __ogv__  
- * __Математический вычисление__  
+ * __Математика__  
    базовый набор вспомогательных математических функций  
    необходимый набор функций для триангуляции  
    простейшие функции проверки столкновений  
- * __Доплнительно__  
+ * __Дополнительно__  
    чтение и запись INI файлов  
    дополнительные функции для работы с файлами и памятью  
 
@@ -246,6 +248,9 @@ Please write about the errors found in the process of working with ZenGL. )))
 Поддержать можно через сбер:
 2202200951985520
 
-Оригинальный исходный код находится на [GitHub](https://github.com/Seenkao/New-ZenGL) на других сайтах может отстающая ветка.
+---
+Исходный код находится на [SourceForge](https://sourceforge.net/projects/new-zengl/), на GitHub проект больше не поддерживается.
+
+---
 
 Просьба писать об ошибках выявленных в процессе работы с ZenGL. )))
