@@ -26,7 +26,6 @@
 unit zgl_screen;
 
 {$I zgl_config.cfg}
-{$I GLdefine.cfg}
 
 {$IF defined(iOS) or defined(MAC_COCOA)}
   {$modeswitch objectivec1}
@@ -36,14 +35,16 @@ interface
 
 uses
 {$IFDEF USE_X11}
-  X, XLib, XRandr, UnixType,      gdk2, gtk2,   // эти два возможно можно будет в дальнейшем удалить.
+  X, XLib, {gegl_}xrandr, UnixType,  //    gdk2, gtk2,   // эти два возможно можно будет в дальнейшем удалить.
   {$IfNDef USE_GLES}
   zgl_glx_wgl,
   {$EndIf}
 {$ENDIF}
 {$IFDEF WINDOWS}
   Windows,
+{$IfNDef USE_GLES}
   zgl_glx_wgl,
+  {$EndIf}
 {$ENDIF}
 {$IfDef MAC_COCOA}
   CocoaAll,
@@ -59,7 +60,7 @@ const
   REFRESH_DEFAULT = 1;
 
 var
-  SetViewPort: procedure;
+  scr_SetViewPort: procedure;
 
 {$IfNDef ANDROID}
 // Rus: инициализация окна.
@@ -128,7 +129,7 @@ procedure scr_ReadPixels(var pData: Pointer; X, Y, Width, Height: Word);
 //      что Far не должно быть меньше нуля.
 // Eng: depth setting for 2D mode. Can be used for 3D as well, given that Far
 //      must not be less than zero.
-procedure Set2DNearFar(newNear, newFar: {$IfNDef USE_GLES}Double{$Else}{$IF DEFINED(USE_GLES_ON_DESKTOP) and DEFINED(USE_AMD_DRIVERS)}Double{$Else}Single{$IfEnd}{$EndIf});
+procedure Set2DNearFar(newNear, newFar: {$IfNDef USE_GLES}Double{$Else}Single{$EndIf});
 {$IfDef GL_VERSION_3_0}
 // Rus: установка версии OpenGL, маски и флагов. Вызывать обязательно до
 //      создания окна (до zgl_Init)!!! Совместимые версии только до OpenGL 3.1,
@@ -238,42 +239,40 @@ var
   scrFar: Double = 1;
   scrNear: Double = - 1;
   {$Else}
-  {$IF DEFINED(USE_GLES_ON_DESKTOP) and DEFINED(USE_AMD_DRIVERS)}
-  scrFar: Double = 1;
-  scrNear: Double = - 1;
-  {$Else}
   scrFar: Single = 1;
   scrNear: Single = - 1;
-  {$IfEnd}
   {$EndIf}
-
 
 implementation
 uses
   zgl_application,
   zgl_window,
-  zgl_gltypeconst,
   {$IFNDEF USE_GLES}
+  zgl_gltypeconst,
   zgl_opengl,
   zgl_opengl_all,
   {$ELSE}
   zgl_opengles,
   zgl_opengles_all,
+  zgl_gles,
   {$ENDIF}
   zgl_render,
   zgl_render_2d,
   zgl_camera_2d,
   zgl_log,
+  {$IfNDef NO_EGL}
+  zgl_EGL,
+  {$EndIf}
   {$IfDef USE_VKEYBOARD}
   gegl_menu_gui,
   {$EndIf}
   zgl_utils;
 
-{$IFDEF USE_X11}
-function XOpenIM(para1:PDisplay; para2:PXrmHashBucketRec; para3:PAnsiChar; para4:Pchar):PXIM;cdecl;external;
+{$IFDEF USE_X11}     // вернуть, если будет работать с ошибкой работа с клавиатурой в Linux.
+{function XOpenIM(para1:PDisplay; para2:PXrmHashBucketRec; para3:PAnsiChar; para4:Pchar):PXIM;cdecl;external;
 function XCloseIM(im: PXIM): TStatus;cdecl;external;
 function XCreateIC(para1: PXIM; para2: array of const):PXIC;cdecl;external;
-procedure XDestroyIC(ic: PXIC);cdecl;external;
+procedure XDestroyIC(ic: PXIC);cdecl;external;}
 {$ENDIF}
 {$IFDEF WINDOWS}
 const
@@ -290,9 +289,9 @@ var
   tmpSettings: PXRRScreenSize;
   num_rates, j: Integer;
   rates: PSmallInt;
-  _sss1: PGdkScreen;
+//  _sss1: PGdkScreen;
   num_monitors: integer;
-  _rect: TGdkRectangle;
+//  _rect: TGdkRectangle;
   {$ENDIF}
   {$IFDEF WINDOWS}
   tmpSettings: DEVMODEW;
@@ -316,7 +315,7 @@ var
 begin
 {$IFDEF USE_X11}
 
-  // эторешение для GDK, меня интересует решение через Xrandr
+ { // это решение для GDK, меня интересует решение через Xrandr
   gtk_init(@argc, @argv);
  // log_Add('_0_');
   _sss1 := gdk_screen_get_default;
@@ -328,7 +327,120 @@ begin
     gdk_screen_get_monitor_geometry(_sss1, i, @_rect);
   //  log_Add('r.x = ' + u_IntToStr(_rect.x) + '   r.y = ' + u_IntToStr(_rect.y));
   //  log_Add('r.w = ' + u_IntToStr(_rect.width) + '   r.h = ' + u_IntToStr(_rect.height));
-  end;
+  end;      }
+
+(* !!! xrandr  !!!            --------------------------------------------------
+  Делаем подкачку ресурсов: XRRGetScreenResources   (надо ли делать XRRUpdateConfiguration???)
+    typedef struct _XRRScreenResources {
+        Time	timestamp;
+        Time	configTimestamp;
+        int		ncrtc;
+        RRCrtc	*crtcs;
+        int		noutput;
+        RROutput	*outputs;
+        int		nmode;
+        XRRModeInfo	*modes;
+    } XRRScreenResources;
+
+  получаем информацию о всех разрешениях: XRRGetOutputInfo
+    typedef struct _XRROutputInfo {
+        Time	    timestamp;
+        RRCrtc	    crtc;
+        char	    *name;
+        int		    nameLen;
+        unsigned long   mm_width;
+        unsigned long   mm_height;
+        Connection	    connection;
+        SubpixelOrder   subpixel_order;
+        int		    ncrtc;
+        RRCrtc	    *crtcs;
+        int		    nclone;
+        RROutput	    *clones;
+        int		    nmode;
+        int		    npreferred;
+        RRMode	    *modes;
+    } XRROutputInfo;
+
+        RRGetOutputInfo returns information about the current and available
+	configurations 'output'.
+
+	If 'config-timestamp' does not match the current configuration
+	timestamp (as returned by RRGetScreenResources), 'status' is set to
+	InvalidConfigTime and the remaining reply data is empty. Otherwise,
+	'status' is set to Success.
+
+	'timestamp' indicates when the configuration was last set.
+
+	'crtc' is the current source CRTC for video data, or Disabled if the
+	output is not connected to any CRTC.
+
+	'name' is a UTF-8 encoded string designed to be presented to the
+	user to indicate which output this is. E.g. "S-Video" or "DVI".
+
+	'connection' indicates whether the hardware was able to detect a
+	device connected to this output. If the hardware cannot determine
+	whether something is connected, it will set this to
+	UnknownConnection.
+
+	'subpixel-order' contains the resulting subpixel order of the
+	connected device to allow correct subpixel rendering.
+
+	'widthInMillimeters' and 'heightInMillimeters' report the physical
+	size of the displayed area. If unknown, or not really fixed (e.g.,
+	for a projector), these	values are both zero.
+
+	'crtcs' is the list of CRTCs that this output may be connected to.
+	Attempting to connect this output to a different CRTC results in a
+	Match error.
+
+	'clones' is the list of outputs which may be simultaneously
+	connected to the same CRTC along with this output. Attempting to
+	connect this output with an output not in the 'clones' list
+	results in a Match error.
+
+	'modes' is the list of modes supported by this output. Attempting to
+	connect this output to a CRTC not using one of these modes results
+	in a Match error.
+
+	The first 'num-preferred' modes in 'modes' are preferred by the
+	monitor in some way; for fixed-pixel devices, this would generally
+	indicate which modes match the resolution of the output device.
+
+
+        RRGetOutputInfo возвращает информацию о текущей и доступной конфигурации «выход».
+
+        Если «config-timestamp» не соответствует текущей временной метке конфигурации (возвращаемой RRGetScreenResources),
+        «status» устанавливается в InvalidConfigTime, а остальные данные ответа пусты. В противном случае «статус» устанавливается на «Успешно».
+
+        «метка времени» указывает, когда конфигурация была установлена в последний раз.
+
+        «crtc» — текущий источник CRTC для видеоданных или отключен, если выход не подключен ни к одному CRTC.
+
+        «имя» — это строка в кодировке UTF-8, предназначенная для представления пользователю, чтобы указать, какой это вывод. Например. «S-Video» или «DVI».
+
+        «connection» указывает, смогло ли оборудование обнаружить устройство, подключенное к этому выходу. Если оборудование не может определить,
+        подключено ли что-либо, оно установит для этого параметра значение UnknownConnection.
+
+        'subpixel-order' содержит результирующий порядок субпикселей подключенного устройства, обеспечивающий правильную рендеринг субпикселей.
+
+        'widthInMillimeters' и 'heightInMillimeters' сообщают физический размер отображаемой области. Если они неизвестны или не зафиксированы
+        (например, для проектора), оба эти значения равны нулю.
+
+        «crtcs» — это список CRTC, к которым может быть подключен этот выход. Попытка подключить этот выход к другому CRTC приводит к ошибке сопоставления.
+
+        «клоны» — это список выходов, которые могут быть одновременно подключены к одному и тому же CRTC вместе с этим выходом.
+        Попытка соединить этот выход с выходом, которого нет в списке «клонов», приводит к ошибке сопоставления.
+
+        «режимы» — это список режимов, поддерживаемых этим выходом. Попытка подключить этот выход к CRTC, не используя ни один из этих режимов,
+        приводит к ошибке сопоставления.
+
+        Первые «число предпочтительных» режимов в «режимах» каким-то образом являются предпочтительными для монитора; для устройств с
+        фиксированным пикселем это обычно указывает, какие режимы соответствуют разрешению устройства вывода.
+
+  используем данную информацию и очищаем данные: XRRFreeOutputInfo
+
+
+------------------------------------------------------------------------------*)
 
   scrModeList := XRRSizes(scrDisplay, 0, @scrModeCount);
   tmpSettings := scrModeList;
@@ -414,7 +526,6 @@ procedure scr_Init;
   {$endif}
 begin
 {$IFDEF USE_X11}
-
   if appInitialized or scrInitialized Then
     exit;
   log_Init();
@@ -430,10 +541,10 @@ begin
   end;
 
   scrDefault := DefaultScreen(scrDisplay);
-  wndRoot    := {Default}RootWindow(scrDisplay, 0);          // это первичный запрос окна     а вообще, ему пофиг дефолтный рут или нет.
+  wndRoot    := DefaultRootWindow(scrDisplay{, 0});          // это первичный запрос окна     а вообще, ему пофиг дефолтный рут или нет.
 
   XRRSelectInput(scrDisplay, wndRoot, RRScreenChangeNotifyMask); // остаётся вопрос, а нужно ли отправлять сообщение? Если мы его отправляем только при создании.
-//  XRRGetScreenInfo();
+
   if not (XRRQueryExtension(scrDisplay, @scrEventBase, @scrErrorBase)) then
   begin
     u_Error('Error: GLX extension not supported.');
@@ -924,14 +1035,14 @@ begin
     render2dClipYH := render2dClipY + render2dClipH;
   end;
 
-  glViewPort(scrViewportX, scrViewportY, scrViewportW, scrViewportH);
+  glViewport(scrViewportX, scrViewportY, scrViewportW, scrViewportH);
 end;
 
 procedure scr_SetVSync(WSync: Boolean);
 begin
   {$IfNDef USE_INIT_HANDLE}
-  if (useFPS > 60) and WSync then
-    scr_SetFPS(60);
+//  if (useFPS > 60) and WSync then
+//    scr_SetFPS(60);
   {$EndIf}
   scrVSync := WSync;
 end;
@@ -970,16 +1081,7 @@ end;
 {$IfNDef USE_INIT_HANDLE}
 procedure scr_SetFPS(FPS: LongWord);
 begin
-{  if FPS < 30 then
-    FPS := 30;
-  if (FPS <> 60) and (FPS <> 75) and (FPS <> 85) and (FPS <> 90) and (FPS <> 100) and (FPS <> 120) and (FPS <> 144) then
-    FPS := 60;     }
   useFPS := FPS;
-{  if useFPS > 60 then
-  begin
-    scrVSync := True;
-    scr_VSync;
-  end;}
   deltaFPS := 1000 / FPS;
 end;
 {$EndIf}
@@ -1010,7 +1112,7 @@ begin
   glReadPixels(X, oglHeight - Height - Y, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pData);
 end;
 
-procedure Set2DNearFar(newNear, newFar: {$IfNDef USE_GLES}Double{$Else}{$IF DEFINED(USE_GLES_ON_DESKTOP) and DEFINED(USE_AMD_DRIVERS)}Double{$Else}Single{$IfEnd}{$EndIf});
+procedure Set2DNearFar(newNear, newFar: {$IfNDef USE_GLES}Double{$Else}Single{$EndIf});
 begin
   scrFar := newFar;
   scrNear := newNear;

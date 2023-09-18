@@ -44,7 +44,9 @@ uses
   zgl_window;
 
 var
+  // менеджер элементов.
   managerSetOfTools: geglTSetOfToolsManager;
+  // указанный элемент и его флаги.
   propEl: geglPPropertElement;
 
 // Rus: создание поля ввода. Заданный прямоугольник; шрифт; размер шрифта;

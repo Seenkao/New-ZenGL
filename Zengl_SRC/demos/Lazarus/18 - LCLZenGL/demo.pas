@@ -5,8 +5,14 @@
 
 interface
 
-// RU: Для данной демо-версии надо включить "USE_INIT_HANDLE" в файле конфигурации "zgl_config.cfg".
-// EN: For this demo, "USE_INIT_HANDLE" must be enabled in the configuration file "zgl_config.cfg".
+// RU: обратите внимание!!!
+//     Проекты LCL имеют свои конфигурационные файлы "zgl_config.cfg". Лучше всего для каждого вашего проекта иметь свой
+//     конфигурационный файл, это может решить многие проблемы, если вдруг вы будете вносить изменения в конфигурацию проекта
+//     и, это отобразится на других ваших проектах использующих тот же конфигурационный файл.
+// EN: note!!!
+//     LCL projects have their own configuration files "zgl_config.cfg". It's best to have a separate config file for each of
+//     your projects, this can solve many problems if you suddenly make changes to the project config and it will show up on
+//     your other projects using the same config file.
 
 uses
   Classes,
@@ -161,7 +167,8 @@ end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
-  // вариант для неизменного окна или выбирайте нужный вариант в настройках формы.
+  // RU: вариант для неизменного окна или выбирайте нужный вариант в настройках формы.
+  // EN: option for a fixed window or select the desired option in the form settings.
   // Form1.BorderStyle := bsSingle;
 end;
 
@@ -208,26 +215,39 @@ begin
     {$IFDEF LCLGTK2}
     widget := GetFixedWidget( PGtkWidget( Handle ) );
     gtk_widget_realize( widget );
-    zgl_InitToHandle( GDK_WINDOW_XID( widget^.window ) );
+    if not zgl_InitToHandle( GDK_WINDOW_XID( widget^.window ) ) then
+    begin
+      zgl_Destroy;
+      Application.Terminate;
+      Exit;
+    end;
     {$ENDIF}
   {$ENDIF}
 
   {$IFDEF WINDOWS}
-    zgl_InitToHandle( Handle );
+    if not zgl_InitToHandle( Handle ) then
+    begin
+      zgl_Destroy;
+      Application.Terminate;
+      Exit;
+    end;
   {$ENDIF}
 
-  // таймер должен быть изначально выключен. Включаем таймер только когда окно инициализировано.
+  // RU: таймер должен быть изначально выключен! Включаем таймер только когда окно инициализировано.
+  // EN: the timer must be initially turned off! We turn on the timer only when the window is initialized.
   Timer1.Enabled := True;
 end;
 
-// проверка нажатия клавиши
+// RU: проверка нажатия клавиши.
+// EN: keypress check.
 procedure TForm1.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   if Key = 27 then
     Form1.Close;
 end;
 
-// обработка мыши и проигрывание музыки
+// RU: обработка мыши и проигрывание музыки.
+// EN: mouse handling and music playback.
 procedure TForm1.FormMouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 begin
@@ -240,13 +260,16 @@ begin
     // EN: In this case, we begin to play the sound directly in these coordinates, but they can be changed later using procedure snd_SetPos.
     //     Important: OpenAL can position only mono-sounds.
 
-// эта часть изменена!!! Теперь можно заново воспроизводить звуки, даже если они не закончили играть.
+// !!! -------------------------------------------------------------------------
+// RU: эта часть изменена!!! Теперь можно заново воспроизводить звуки, даже если они не закончили играть.
+// EN: this part has changed! Sounds can now be replayed even if they haven't finished playing.
     if snd_Get(sound, IDSound[0], SND_STATE_PLAYING) = IDSound[0] then
       snd_Stop(sound, IDSound[0]);
     IDSound[0] := snd_Play(sound, FALSE, CalcX2D(X), CalcY2D(Y));
-// ------------------------------------------------------------------------------------------
+// !!! -------------------------------------------------------------------------
 
-// добавляем проверку на проигрывание звука, только если много развных звуков/музыки, то номера надо менять (не только 1!!!)
+// RU: добавляем проверку на проигрывание звука, только если много разных звуков/музыки, то номера надо менять (не только 1!!!)
+// EN: we add a check for sound playback, only if there are many different sounds / music, then the numbers must be changed (not only 1 !!!)
     if col2d_PointInRect(X, Y, r) Then
     begin
       if audioPlay then
@@ -259,7 +282,8 @@ begin
   Timer1.Enabled := true;
 end;
 
-// для примера использования перемещения мышки
+// RU: для примера использования перемещения мышки.
+// EN: for an example of using mouse movement.
 procedure TForm1.FormMouseMove(Sender: TObject; Shift: TShiftState; X,
   Y: Integer);
 begin

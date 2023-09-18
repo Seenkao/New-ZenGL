@@ -1,5 +1,14 @@
 unit uMain;
 
+// RU: обратите внимание!!!
+//     Проекты LCL имеют свои конфигурационные файлы "zgl_config.cfg". Лучше всего для каждого вашего проекта иметь свой
+//     конфигурационный файл, это может решить многие проблемы, если вдруг вы будете вносить изменения в конфигурацию проекта
+//     и, это отобразится на других ваших проектах использующих тот же конфигурационный файл.
+// EN: note!!!
+//     LCL projects have their own configuration files "zgl_config.cfg". It's best to have a separate config file for each of
+//     your projects, this can solve many problems if you suddenly make changes to the project config and it will show up on
+//     your other projects using the same config file.
+
 interface
 
 uses
@@ -378,14 +387,12 @@ begin
   Timer1.Enabled := False;
   SaveFontDialog.FileName := FontDialog.Font.Name + '-' + style + '-' + IntToStr( fg_FontSize ) + 'pt';
 
-//  if SaveFontDialog.Execute() Then
-//    begin
-      _name := file_GetName( SaveFontDialog.FileName );
-      dir  := file_GetDirectory( SaveFontDialog.FileName );
-      fontgen_SaveFont( fg_Font, _name );
+  _name := file_GetName( SaveFontDialog.FileName );
+  dir  := file_GetDirectory( SaveFontDialog.FileName );
+  fontgen_SaveFont( fg_Font, _name );
 
   ShowMessage(_name + ' save');
-//    end;
+
   Timer1.Enabled := True;
 end;
 

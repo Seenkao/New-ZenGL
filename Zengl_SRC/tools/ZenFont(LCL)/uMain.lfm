@@ -1,9 +1,10 @@
 object Form1: TForm1
   Left = 281
   Height = 600
-  Top = 42
+  Top = 416
   Width = 800
   ActiveControl = Panel1
+  BorderStyle = bsSingle
   Caption = 'ZenFont 0.2.6(LCL)'
   ClientHeight = 600
   ClientWidth = 800
@@ -13,7 +14,7 @@ object Form1: TForm1
   OnClose = FormClose
   OnResize = FormResize
   Position = poScreenCenter
-  LCLVersion = '2.2.0.4'
+  LCLVersion = '2.2.4.0'
   Visible = True
   object GroupBox1: TGroupBox
     Left = 0
@@ -22,14 +23,14 @@ object Form1: TForm1
     Width = 800
     Align = alBottom
     Caption = 'Parameters'
-    ClientHeight = 180
-    ClientWidth = 796
+    ClientHeight = 176
+    ClientWidth = 798
     TabOrder = 0
     object CheckBoxAntialiasing: TCheckBox
       Left = 10
-      Height = 19
+      Height = 27
       Top = 95
-      Width = 82
+      Width = 114
       Caption = 'Antialiasing'
       Checked = True
       OnChange = CheckBoxAntialiasingChange
@@ -38,9 +39,9 @@ object Form1: TForm1
     end
     object CheckBoxPack: TCheckBox
       Left = 10
-      Height = 19
+      Height = 27
       Top = 120
-      Width = 45
+      Width = 62
       Caption = 'Pack'
       Checked = True
       OnChange = CheckBoxPackChange
@@ -49,17 +50,18 @@ object Form1: TForm1
     end
     object LabelCurrentPage: TLabel
       Left = 10
-      Height = 15
+      Height = 23
       Top = 55
-      Width = 72
+      Width = 104
       Caption = 'Current Page:'
+      ParentColor = False
     end
     object ComboBoxPageSize: TComboBox
       Left = 90
-      Height = 23
+      Height = 35
       Top = 10
       Width = 70
-      ItemHeight = 15
+      ItemHeight = 0
       ItemIndex = 1
       Items.Strings = (
         '128'
@@ -75,10 +77,11 @@ object Form1: TForm1
     end
     object LabelPageSize: TLabel
       Left = 10
-      Height = 15
+      Height = 23
       Top = 15
-      Width = 52
+      Width = 76
       Caption = 'Page Size:'
+      ParentColor = False
     end
     object ButtonChooseFont: TButton
       Left = 10
@@ -90,7 +93,7 @@ object Form1: TForm1
       TabOrder = 3
     end
     object ButtonSaveFont: TButton
-      Left = 640
+      Left = 642
       Height = 25
       Top = 40
       Width = 150
@@ -100,7 +103,7 @@ object Form1: TForm1
       TabOrder = 5
     end
     object ButtonExit: TButton
-      Left = 640
+      Left = 642
       Height = 25
       Top = 150
       Width = 150
@@ -110,7 +113,7 @@ object Form1: TForm1
       TabOrder = 6
     end
     object ButtonRebuildFont: TButton
-      Left = 640
+      Left = 642
       Height = 25
       Top = 10
       Width = 150
@@ -123,44 +126,48 @@ object Form1: TForm1
       Left = 170
       Height = 70
       Top = 105
-      Width = 460
+      Width = 462
       Anchors = [akTop, akLeft, akRight]
       Caption = 'Char Padding'
-      ClientHeight = 50
-      ClientWidth = 456
+      ClientHeight = 46
+      ClientWidth = 460
       TabOrder = 7
       object Label1: TLabel
         Left = 120
-        Height = 15
+        Height = 23
         Top = 15
-        Width = 23
+        Width = 32
         Caption = 'Top:'
+        ParentColor = False
       end
       object Label2: TLabel
         Left = 10
-        Height = 15
+        Height = 23
         Top = 15
-        Width = 23
+        Width = 33
         Caption = 'Left:'
+        ParentColor = False
       end
       object Label3: TLabel
         Left = 220
-        Height = 15
+        Height = 23
         Top = 15
-        Width = 31
+        Width = 44
         Caption = 'Right:'
+        ParentColor = False
       end
       object Label4: TLabel
         Left = 340
-        Height = 15
+        Height = 23
         Top = 15
-        Width = 43
+        Width = 61
         Caption = 'Bottom:'
+        ParentColor = False
       end
       object SpinTop: TSpinEdit
         Left = 160
-        Height = 23
-        Top = 10
+        Height = 40
+        Top = 0
         Width = 50
         OnChange = SpinTopChange
         TabOrder = 1
@@ -168,8 +175,8 @@ object Form1: TForm1
       end
       object SpinLeft: TSpinEdit
         Left = 60
-        Height = 23
-        Top = 10
+        Height = 40
+        Top = 0
         Width = 50
         OnChange = SpinLeftChange
         TabOrder = 0
@@ -177,8 +184,8 @@ object Form1: TForm1
       end
       object SpinRight: TSpinEdit
         Left = 280
-        Height = 23
-        Top = 10
+        Height = 40
+        Top = 0
         Width = 50
         OnChange = SpinRightChange
         TabOrder = 2
@@ -186,8 +193,8 @@ object Form1: TForm1
       end
       object SpinBottom: TSpinEdit
         Left = 400
-        Height = 23
-        Top = 10
+        Height = 40
+        Top = 0
         Width = 50
         OnChange = SpinBottomChange
         TabOrder = 3
@@ -196,7 +203,7 @@ object Form1: TForm1
     end
     object SpinCurrentPage: TSpinEdit
       Left = 110
-      Height = 23
+      Height = 40
       Top = 50
       Width = 50
       Enabled = False
@@ -210,11 +217,11 @@ object Form1: TForm1
       Left = 295
       Height = 95
       Top = 0
-      Width = 335
+      Width = 337
       Anchors = [akTop, akLeft, akRight]
       Caption = 'Chars'
-      ClientHeight = 75
-      ClientWidth = 331
+      ClientHeight = 71
+      ClientWidth = 335
       TabOrder = 9
       object ButtonDefaultSymbols: TButton
         Left = 11
@@ -226,7 +233,7 @@ object Form1: TForm1
         TabOrder = 0
       end
       object ButtonImportSymbols: TButton
-        Left = 170
+        Left = 174
         Height = 25
         Top = 45
         Width = 150
@@ -236,10 +243,10 @@ object Form1: TForm1
         TabOrder = 1
       end
       object EditChars: TEdit
-        Left = 10
-        Height = 23
-        Top = 10
-        Width = 310
+        Left = 11
+        Height = 40
+        Top = 0
+        Width = 314
         Anchors = [akTop, akLeft, akRight]
         TabOrder = 2
       end
@@ -250,13 +257,13 @@ object Form1: TForm1
       Top = 0
       Width = 120
       Caption = 'Test String'
-      ClientHeight = 75
-      ClientWidth = 116
+      ClientHeight = 71
+      ClientWidth = 118
       TabOrder = 10
       object EditTest: TEdit
         Left = 10
-        Height = 23
-        Top = 10
+        Height = 40
+        Top = 0
         Width = 95
         TabOrder = 0
         Text = 'Test'

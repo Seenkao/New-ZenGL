@@ -1,5 +1,14 @@
 unit uMain;
 
+// RU: обратите внимание!!!
+//     Проекты LCL имеют свои конфигурационные файлы "zgl_config.cfg". Лучше всего для каждого вашего проекта иметь свой
+//     конфигурационный файл, это может решить многие проблемы, если вдруг вы будете вносить изменения в конфигурацию проекта
+//     и, это отобразится на других ваших проектах использующих тот же конфигурационный файл.
+// EN: note!!!
+//     LCL projects have their own configuration files "zgl_config.cfg". It's best to have a separate config file for each of
+//     your projects, this can solve many problems if you suddenly make changes to the project config and it will show up on
+//     your other projects using the same config file.
+
 interface
 
 uses
@@ -67,8 +76,7 @@ type
     procedure FormResize(Sender: TObject);
     procedure Panel1MouseDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
-    procedure Panel1MouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer
-     );
+    procedure Panel1MouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure Panel1MouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
     procedure SpinLeftChange(Sender: TObject);
@@ -159,7 +167,7 @@ begin
   len := length(EditChars.Text);
   while i <= len do
   begin
-    c := utf8_toUnicode(EditChars.Text, i, @j);
+    c := utf8_GetID(EditChars.Text, i, @j);
     if not fg_CharsUse[c] Then
     begin
       fg_CharsUse[c] := TRUE;
@@ -364,12 +372,10 @@ begin
   Timer1.Enabled := False;
   SaveFontDialog.FileName := FontDialog.Font.Name + '-' + style + '-' + IntToStr(fg_FontSize) + 'pt';
 
-//  if SaveFontDialog.Execute() Then
-//  begin
-    name := file_GetName(SaveFontDialog.FileName);
-    dir  := file_GetDirectory(SaveFontDialog.FileName);
-    fontgen_SaveFont(fg_Font, name);
-//  end;
+  name := file_GetName(SaveFontDialog.FileName);
+  dir  := file_GetDirectory(SaveFontDialog.FileName);
+  fontgen_SaveFont(fg_Font, name);
+
   ShowMessage(name + ' save');
   Timer1.Enabled := True;
 end;

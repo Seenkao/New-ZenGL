@@ -33,7 +33,7 @@ unit zgl_application;
 interface
 uses
   {$IFDEF USE_X11}
-  X, XLib, XRandr
+  X, XLib, gegl_xrandr
   {$ENDIF}
   {$IFDEF WINDOWS}
   Windows, Messages
@@ -335,7 +335,8 @@ begin
   if not appPause Then
     INC(appFPSCount);
 
-  // это для работы с буферами после отрисовки
+  // Rus: это для работы с буферами после отрисовки.
+  // Eng: this is for dealing with buffers after rendering.
   if Assigned(app_PostPDraw) then
     app_PostPDraw;
 end;
@@ -399,8 +400,7 @@ begin
   if keysDown[K_ESCAPE] = True then
     if Assigned(app_PKeyEscape) then
       app_PKeyEscape
-    else
-    begin
+    else begin
       winOn := False;
       log_Add('Terminate program');
     end;
@@ -428,6 +428,7 @@ begin
     end;
   {$EndIf}
 
+  {$IfDef CLEAR_STATE}
   key_ClearState;
   mouse_ClearState;
   {$IFDEF USE_JOYSTICK}
@@ -435,6 +436,7 @@ begin
   {$EndIf}
   {$IfDef MOBILE}
   touch_ClearState;
+  {$EndIf}
   {$EndIf}
 end;
 {$EndIf}

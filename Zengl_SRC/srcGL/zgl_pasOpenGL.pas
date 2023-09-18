@@ -1,5 +1,5 @@
 (*
- *  Copyright (c) 2022 Serge - SSW
+ *  Copyright (c) 2022-2023 Serge - SSW
  *
  *  This software is provided 'as-is', without any express or
  *  implied warranty. In no event will the authors be held
@@ -22,9 +22,16 @@
  *     source distribution.
  *)
 
+// Copyright 2013-2020 The Khronos Group Inc.
+// SPDX-License-Identifier: MIT
+//
+// This header is generated from the Khronos OpenGL / OpenGL ES XML
+// API Registry. The current version of the Registry, generator scripts
+// used to make the header, and the header can be found at
+//   https://github.com/KhronosGroup/OpenGL-Registry
+
 unit zgl_pasOpenGL;
 {$I zgl_config.cfg}
-{$I GLdefine.cfg}
 
 {$IfDef UNIX}
   {$DEFINE stdcall := cdecl}
@@ -4651,66 +4658,25 @@ procedure AllCheckGLExtension;
 //      максимально возможное. Если в файле конфигурации (GLdefine.cfg) задано
 //      использовать версию OpenGL 2.1 (USE_GL_21), а ваша видеокарта может
 //      работать с OpenGL версии 4.4, то вы будете работать с версией OpengL не
-//      выше 2.1.    !!! Обратите на это нвимание!!!
-// Eng:
+//      выше 2.1.    !!! Обратите на это внимание!!!
+// Eng: checking the version of OpenGL. Returns the actual value or the maximum
+//      possible value. If the configuration file (GLdefine.cfg) is set to use
+//      OpenGL version 2.1 (USE_GL_21) and your graphics card can run OpenGL
+//      version 4.4, then you will be running OpengL 2.1. Not higher!
+//      !!! Pay attention to this!!!
 procedure CheckGLVersion;
-// Rus: загрузка динамических функций.
-// Eng:
+// Rus: загрузка динамических функций OpenGL.
+// Eng: loading dynamic OpenGL functions.
 function LoadOpenGL: Boolean;
 
 implementation
 
 uses
   zgl_opengl,
-  zgl_opengl_all,
-  zgl_glu;
-
-(*{$IFDEF LINUX}
-
-function dlopen(Name: PAnsiChar; Flags: LongInt): Pointer; cdecl; external 'dl';
-function dlclose(Lib: Pointer): LongInt; cdecl; external 'dl';
-
-function dlsym(Lib: Pointer; Name: PAnsiChar): Pointer; cdecl; external 'dl';
-{$ENDIF}
-
-function glLoadLib(Name: PChar): Pointer;
-begin
-  {$IfDef WINDOWS}
-  Result := Pointer(LoadLibrary(Name));
-  {$EndIf}
-  {$IfDef LINUX}
-  Result := dlopen(Name, $001);
-  {$EndIf}
-end;
-
-function glFreeLib(Lib: Pointer): Boolean;
-begin
-  {$IfDef WINDOWS}
-  Result := FreeLibrary();
-  {$EndIf}
-  {$IfDef LINUX}
-  Result := dlclose(Lib) = 0;
-  {$EndIf}
-end; *)
-
-(* function gl_GetProcAddr(const procName: PAnsiChar): Pointer;  // в ZenGL это не нужно
-begin
-  {$IfDef WINDOWS}
-  if Assigned(wglGetProcAddress) then
-    Result := wglGetProcAddress(procName);
-  if Result = nil then
-    Result := GetProcAddress(HMODULE(gl_Library), procName);
-  {$EndIf}
-  {$IfDef LINUX}
-  if Assigned(glXGetProcAddress) then
-    Result := glXGetProcAddress(procName);
-  if Result = nil then
-    if Assigned(glXGetProcAddressARB) then
-      Result := glXGetProcAddressARB(procName);
-  if Result = nil then
-    Result := dlsym(gl_Library, procName);
-  {$EndIf}
-end; *)
+  zgl_opengl_all
+  {$IfDef USE_GLU}
+  , zgl_glu
+  {$EndIf};
 
 {$If defined(USE_GLCORE) or defined(USE_GLEXT)}
 procedure AllCheckGLExtension;
@@ -5729,6 +5695,8 @@ begin
   {$IfEnd}
 end;
 
+// Примечание: для Windows мы можем загружать библиотеку почти в любое время, для Linux
+//             мы должны это делать только после создания окна и контекста для окна.
 function LoadOpenGL: Boolean;
 {$IfDef LINUX}
 {$IfDef GL_VERSION_3_0}
@@ -5759,8 +5727,9 @@ begin
         oglExtensions := oglExtensions + PAnsiChar(glGetStringi(GL_EXTENSIONS, i)) + #32;
     end;
   end;
-  {$EndIf}
+
   if oglExtensions = '' then
+  {$EndIf}
     oglExtensions := glGetString(GL_EXTENSIONS);
   {$EndIf}
 

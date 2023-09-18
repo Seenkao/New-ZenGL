@@ -32,14 +32,14 @@ uses
   zgl_types,
   zgl_gltypeconst;
 
-// Rus: установки 2D режима.
-// Eng: 2D mode settings.
+// Rus: установки 2D режима. Для установки нужного режима используйте процедуру "SetCurrentMode".
+// Eng: 2D mode settings. Use the "SetCurrentMode" procedure to set the desired mode.
 procedure Set2DMode;
-// Rus: установки 3D режима.
-// Eng: 3D mode settings.
+// Rus: установки 3D режима. Для установки нужного режима используйте процедуру "SetCurrentMode".
+// Eng: 3D mode settings. Use the "SetCurrentMode" procedure to set the desired mode.
 procedure Set3DMode(FOVY: Single = 45);
-// Rus: выбор режима 2D, 3D или пользовательского.
-// Eng: select 2D, 3D or custom mode.
+// Rus: выбор режима 2D, 3D или пользовательского. Mode2D, Mode3D, ModeUser.
+// Eng: select 2D, 3D or custom mode. Mode2D, Mode3D, ModeUser.
 procedure SetCurrentMode(mode: LongWord = Mode2D);
 
 // Rus: установка глубины для 3D. То что будет за нулевой точкой (в минусе)
@@ -90,13 +90,6 @@ var
     {$Else}
     rsd0: Single = 0;
     rsd2: Single = 2;
-    {$IF DEFINED(USE_GLES_ON_DESKTOP) and DEFINED(USE_AMD_DRIVERS)}
-    rs0: Double = 0;
-    rs2: Double = 2;
-    {$Else}
-    rs0: Single = 0;
-    rs2: Single = 2;
-    {$IfEnd}
     {$EndIf}
   {$EndIf}
 
@@ -105,11 +98,7 @@ var
 {$IfNDef USE_GLES}
   scrLeft, scrRight, scrTop, scrBottom: Double;
 {$Else}
-{$IF DEFINED(USE_GLES_ON_DESKTOP) and DEFINED(USE_AMD_DRIVERS)}
-  scrLeft, scrRight, scrTop, scrBottom: Double;
-{$Else}
   scrLeft, scrRight, scrTop, scrBottom: Single;
-{$IfEnd}
 {$EndIf}
 begin
   oglMode := Mode2D;
@@ -173,7 +162,7 @@ begin
       scrTop := {$IfDef LINUX}rsd0{$Else}0{$EndIf};
       scrBottom := oglHeight;
     end;
-  {$IfDef USE_GLES} glOrthof{$Else}glOrtho{$EndIf}(scrLeft, scrRight, scrBottom, scrTop, scrNear, scrFar);
+  {$IfDef USE_GLES}glOrthof{$Else}glOrtho{$EndIf}(scrLeft, scrRight, scrBottom, scrTop, scrNear, scrFar);
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
@@ -223,8 +212,8 @@ begin
       Set3DMode(oglFOVY)
     else
       SetUserMode;
-  if Assigned(SetViewPort) then
-    SetViewPort;
+  if Assigned(scr_SetViewPort) then
+    scr_SetViewPort;
   scrViewPort := False;
 end;
 

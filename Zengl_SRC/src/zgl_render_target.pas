@@ -35,7 +35,9 @@ uses
   {$ENDIF}
   {$IFDEF WINDOWS}
   Windows,
+  {$IfNDef USE_GLES}
   zgl_glx_wgl,
+  {$EndIf}
   {$ENDIF}
   {$IFDEF MACOSX}
 //  MacOSAll,       ???
@@ -106,6 +108,9 @@ uses
   zgl_sprite_2d,
   zgl_log,
   zgl_textures,
+  {$IfDef USE_GLES}
+  zgl_gles,
+  {$EndIf}
   zgl_utils;
 
 {$IFNDEF USE_GLES}
@@ -442,10 +447,10 @@ begin
             {$ELSE}
             if oglzDepth > 16 Then
               begin
-                if (oglzDepth = 32) and (oglCanFBODepth32) Then
+                if (oglzDepth = 32) and (GL_OES_depth32) Then
                   glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT32, Round(Surface.Width / Surface.U), Round(Surface.Height / Surface.V))
                 else
-                  if (oglzDepth = 24) and (oglCanFBODepth24) Then
+                  if (oglzDepth = 24) and (GL_OES_depth24) Then
                     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, Round(Surface.Width / Surface.U), Round(Surface.Height / Surface.V))
                   else
                     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, Round(Surface.Width / Surface.U), Round(Surface.Height / Surface.V));

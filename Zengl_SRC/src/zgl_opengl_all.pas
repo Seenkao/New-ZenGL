@@ -21,7 +21,7 @@
  *  3. This notice may not be removed or altered from any
  *     source distribution.
 
- !!! modification from Serge - SSW 26.02.2022
+ !!! modification from Serge
 }
 unit zgl_opengl_all;
 
@@ -47,47 +47,14 @@ uses
 
 function InitGL: Boolean;
 procedure FreeGL;
+// В данную функцию мы можем завести проверку всех расширений. Но, надо будет
+// определяться какие расширения будут рабочими. Это надо перебрать всю
+// библиотеку OpenGL.
 function gl_GetProc(const Proc: UTF8String): Pointer;
 function gl_IsSupported(const Extension, SearchIn: UTF8String): Boolean;
 // Rus: проверка и загрузка расширений.
 // Eng:
 procedure gl_LoadEx;
-
-type
-  TVector2d = array[0..1] of double;
-  TVector2f = array[0..1] of single;
-  TVector2i = array[0..1] of longint;
-  TVector2s = array[0..1] of smallint;
-  TVector2b = array[0..1] of byte;
-
-  TVector3d = array[0..2] of double;
-  TVector3f = array[0..2] of single;
-  TVector3i = array[0..2] of longint;
-  TVector3s = array[0..2] of smallint;
-  TVector3b = array[0..2] of byte;
-
-  TVector4d = array[0..3] of double;
-  TVector4f = array[0..3] of single;
-  TVector4i = array[0..3] of longint;
-  TVector4s = array[0..3] of smallint;
-  TVector4b = array[0..3] of byte;
-
-  TMatrix3d = array[0..2] of TVector3d;
-  TMatrix3f = array[0..2] of TVector3f;
-  TMatrix3i = array[0..2] of TVector3i;
-  TMatrix3s = array[0..2] of TVector3s;
-  TMatrix3b = array[0..2] of TVector3b;
-
-  TMatrix4d = array[0..3] of TVector4d;
-  TMatrix4f = array[0..3] of TVector4f;
-  TMatrix4i = array[0..3] of TVector4i;
-  TMatrix4s = array[0..3] of TVector4s;
-  TMatrix4b = array[0..3] of TVector4b;
-
-                              PGLvoid     = Pointer;
-  GLvoid     = Pointer;       PPGLvoid    = ^PGLvoid;
-  GLint64    = Int64;         PGLint64    = ^GLint64;
-  GLuint64   = UInt64;        PGLuint64   = ^GLuint64;
 
   function  glGetString(name: GLenum): PAnsiChar; stdcall; external libGL;            // GL_VERSION_1_0
   procedure glHint(target, mode: GLenum); stdcall; external libGL;                    // GL_VERSION_1_0
@@ -255,7 +222,7 @@ end;
 
 function gl_GetProc(const Proc: UTF8String): Pointer;
 var
-  s: String;
+  s: UTF8String;
 begin
   s := '';
   {$IFDEF WINDOWS}
@@ -291,6 +258,7 @@ begin
     Result := glXGetProcAddressARB(PAnsiChar(Proc));
   {$ENDIF}
   {$ENDIF}
+//  log_Add(Proc + s);
 end;
 
 // получение значения заголовка
@@ -302,6 +270,7 @@ begin
   Result := extPos > 0;
   if Result Then
     Result := ((extPos + Length(Extension) - 1) = Length(SearchIn)) or (SearchIn[extPos + Length(Extension)] = ' ');
+  // log_Add(Result);
 end;
 
 procedure gl_LoadEx;
@@ -373,15 +342,16 @@ begin
 
   // WaitVSync
 {$IFDEF LINUX}
-  glXSwapIntervalSGI := gl_GetProc('glXSwapIntervalSGI');
+  glXSwapIntervalSGI := gl_GetProc('glXSwapInterval');
+  if not Assigned(glXSwapIntervalSGI) then
+    glXSwapIntervalSGI := dlsym(oglLibrary, PAnsiChar('glXSwapIntervalSGI'));
   oglCanVSync        := Assigned(glXSwapIntervalSGI);
 {$ENDIF}
 {$IFDEF WINDOWS}
   wglSwapIntervalEXT := gl_GetProc('wglSwapInterval');
   oglCanVSync     := Assigned(wglSwapIntervalEXT);
 {$ENDIF}
-  if oglCanVSync Then
-    scr_VSync;
+  scr_VSync;
   log_Add('Support WaitVSync: ' + u_BoolToStr(oglCanVSync));
 end;
 

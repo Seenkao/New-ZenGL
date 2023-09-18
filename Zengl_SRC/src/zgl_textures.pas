@@ -154,6 +154,7 @@ uses
   {$ELSE}
   zgl_opengles,
   zgl_opengles_all,
+  zgl_gles,
   {$ENDIF}
   zgl_render_2d,
   zgl_resources,
@@ -252,7 +253,7 @@ begin
   Result := FALSE;
 
   {$IFDEF USE_GLES}
-  if ((not oglCanPVRTC) and ((Texture.Format = TEX_FORMAT_RGBA_DXT1) or (Texture.Format = TEX_FORMAT_RGBA_DXT3) or (Texture.Format = TEX_FORMAT_RGBA_DXT5))) or
+  if ((not GL_IMG_texture_compression_pvrtc) and ((Texture.Format = TEX_FORMAT_RGBA_DXT1) or (Texture.Format = TEX_FORMAT_RGBA_DXT3) or (Texture.Format = TEX_FORMAT_RGBA_DXT5))) or
   {$ELSE}
   if ((not GL_EXT_texture_compression_s3tc) and ((Texture.Format = TEX_FORMAT_RGBA_PVR2) or (Texture.Format = TEX_FORMAT_RGBA_PVR4))) or
   {$ENDIF}
@@ -680,7 +681,7 @@ begin
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   end;
 
-  if {$IfNDef USE_GLES}GL_SGIS_generate_mipmap{$Else}oglCanAutoMipMap{$EndIf} Then
+  {$IfNDef USE_GLES}if GL_SGIS_generate_mipmap Then{$EndIf}
     glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, Byte(Flags and TEX_MIPMAP > 0));
 
   if Flags and TEX_MIPMAP > 0 Then
@@ -703,7 +704,7 @@ begin
           glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
           glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         end else
-          if (Flags and TEX_FILTER_TRILINEAR > 0) or ((not {$IfNDef USE_GLES}GL_EXT_texture_filter_anisotropic{$Else}oglCanAnisotropy{$EndIf}) and (Flags and TEX_FILTER_ANISOTROPY > 0)) Then
+          if (Flags and TEX_FILTER_TRILINEAR > 0) or ((not GL_EXT_texture_filter_anisotropic) and (Flags and TEX_FILTER_ANISOTROPY > 0)) Then
           begin
             Texture.Flags := Texture.Flags or TEX_FILTER_TRILINEAR;
             glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);

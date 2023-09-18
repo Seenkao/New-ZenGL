@@ -51,8 +51,8 @@
       <Filename Value="ZenFont"/>
     </Target>
     <SearchPaths>
-      <IncludeFiles Value="$(ProjOutDir);../../src;../../headers;../../srcGL;../../srcGEGL"/>
-      <OtherUnitFiles Value="../../src;../../lib/jpeg/$(TargetCPU)-$(TargetOS);../../lib/msvcrt/$(TargetCPU);../../lib/ogg/$(TargetCPU)-$(TargetOS);../../lib/theora/$(TargetCPU)-$(TargetOS);../../lib/zlib/$(TargetCPU)-$(TargetOS);../../lib/zip/$(TargetCPU)-$(TargetOS);../../srcGL;../../srcGEGL"/>
+      <IncludeFiles Value="$(ProjOutDir);../../src;../../srcGL;../../srcGL/EGL;../../srcGL/GLES;../../srcGEGL"/>
+      <OtherUnitFiles Value="../../src;../../lib/jpeg/$(TargetCPU)-$(TargetOS);../../lib/msvcrt/$(TargetCPU);../../lib/ogg/$(TargetCPU)-$(TargetOS);../../lib/theora/$(TargetCPU)-$(TargetOS);../../lib/zlib/$(TargetCPU)-$(TargetOS);../../lib/zip/$(TargetCPU)-$(TargetOS);../../srcGL;../../srcGL/EGL;../../srcGL/GLES;../../srcGEGL"/>
       <UnitOutputDirectory Value="tmp/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>
@@ -69,6 +69,7 @@
     <Linking>
       <Debugging>
         <GenerateDebugInfo Value="False"/>
+        <DebugInfoType Value="dsDwarf2"/>
         <StripSymbols Value="True"/>
       </Debugging>
       <LinkSmart Value="True"/>

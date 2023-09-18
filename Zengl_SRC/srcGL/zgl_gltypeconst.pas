@@ -1,11 +1,44 @@
-(* вынесено в отдельный файл, для удобства и возможности использовать везде
+(*******************************************************************************
+*  вынесено в отдельный файл, для удобства и возможности использовать везде
 *  константы и типы не занимают в исполняемом файле места, потому можно создавать
 *  миллионы констант
 *  метки в файле стоят, потому поиск по константам можно проводить по меткам.
 *
 *  Для типов требуется "разбить" по определёнию для определённых платформ.
 *  Какие-то определения могут не подходить по типам. Смотрите файлы кроноса.
-*)
+*******************************************************************************)
+
+(*
+ *  Copyright (c) 2022-2023 Serge - SSW
+ *
+ *  This software is provided 'as-is', without any express or
+ *  implied warranty. In no event will the authors be held
+ *  liable for any damages arising from the use of this software.
+ *
+ *  Permission is granted to anyone to use this software for any purpose,
+ *  including commercial applications, and to alter it and redistribute
+ *  it freely, subject to the following restrictions:
+ *
+ *  1. The origin of this software must not be misrepresented;
+ *     you must not claim that you wrote the original software.
+ *     If you use this software in a product, an acknowledgment
+ *     in the product documentation would be appreciated but
+ *     is not required.
+ *
+ *  2. Altered source versions must be plainly marked as such,
+ *     and must not be misrepresented as being the original software.
+ *
+ *  3. This notice may not be removed or altered from any
+ *     source distribution.
+ *)
+
+// Copyright 2013-2020 The Khronos Group Inc.
+// SPDX-License-Identifier: MIT
+//
+// This header is generated from the Khronos OpenGL / OpenGL ES XML
+// API Registry. The current version of the Registry, generator scripts
+// used to make the header, and the header can be found at
+//   https://github.com/KhronosGroup/OpenGL-Registry
 
 unit zgl_gltypeconst;
 {$I zgl_config.cfg}
@@ -685,6 +718,37 @@ type
 
   // GLX_SGIX_video_source
   GLXVideoSourceSGIX = TXID;
+
+type
+  TVector2d = array[0..1] of double;
+  TVector2f = array[0..1] of single;
+  TVector2i = array[0..1] of longint;
+  TVector2s = array[0..1] of smallint;
+  TVector2b = array[0..1] of byte;
+
+  TVector3d = array[0..2] of double;
+  TVector3f = array[0..2] of single;
+  TVector3i = array[0..2] of longint;
+  TVector3s = array[0..2] of smallint;
+  TVector3b = array[0..2] of byte;
+
+  TVector4d = array[0..3] of double;
+  TVector4f = array[0..3] of single;
+  TVector4i = array[0..3] of longint;
+  TVector4s = array[0..3] of smallint;
+  TVector4b = array[0..3] of byte;
+
+  TMatrix3d = array[0..2] of TVector3d;
+  TMatrix3f = array[0..2] of TVector3f;
+  TMatrix3i = array[0..2] of TVector3i;
+  TMatrix3s = array[0..2] of TVector3s;
+  TMatrix3b = array[0..2] of TVector3b;
+
+  TMatrix4d = array[0..3] of TVector4d;
+  TMatrix4f = array[0..3] of TVector4f;
+  TMatrix4i = array[0..3] of TVector4i;
+  TMatrix4s = array[0..3] of TVector4s;
+  TMatrix4b = array[0..3] of TVector4b;
 
 {$ifdef GLX_EXT_stereo_tree}
 type

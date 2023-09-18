@@ -27,7 +27,6 @@ unit zgl_opengl;
 {$mode objfpc}  // delphi???
 {$EndIf}
 {$I zgl_config.cfg}
-{$I GLdefine.cfg}
 
 {$IfDef MAC_COCOA}
   {$modeswitch objectivec1}

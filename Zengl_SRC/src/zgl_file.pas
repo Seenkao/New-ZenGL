@@ -241,6 +241,10 @@ begin
   end;
 {$ENDIF}{$EndIf}
   Result := FileHandle <> FILE_ERROR;
+  {$IfDef FULL_LOGGING}
+  if not Result then
+    log_Add('File ' + FileName + 'not open!');
+  {$EndIf}
 end;
 
 function file_MakeDir(const Directory: UTF8String): Boolean;
@@ -254,7 +258,7 @@ begin
   {$ENDIF}
 
 {$IfDef UNIX}
-{$IfDef DARWIN}
+{$IfNDef DARWIN}
   Result := FpMkdir(filePath + Directory, MODE_MKDIR) = FILE_ERROR;
 {$ENDIF}
 {$EndIf}
@@ -266,6 +270,10 @@ begin
 {$IFDEF DARWIN}
   Result := FpMkdir(platform_GetRes(filePath + Directory), MODE_MKDIR) = FILE_ERROR;
 {$ENDIF}
+  {$IfDef FULL_LOGGING}
+  if not Result then
+    log_Add('Dirrectory ' + Directory + 'not create!');
+  {$EndIf}
 end;
 
 function file_Remove(const Name: UTF8String): Boolean;
@@ -290,10 +298,10 @@ begin
   {$ENDIF}
 
   if not file_Exists(Name) Then
-    begin
-      Result := FALSE;
-      exit;
-    end;
+  begin
+    Result := FALSE;
+    exit;
+  end;
 
 {$IfDef UNIX}{$IfNDef DARWIN}
   FpStat(filePath + Name, status);
@@ -355,6 +363,10 @@ begin
       {$IFDEF iOS}
       Result := iosFileManager.removeItemAtPath_error(utf8_GetNSString(platform_GetRes(filePath + Name)), error);
       {$ENDIF}
+  {$IfDef FULL_LOGGING}
+  if not Result then
+    log_Add('File ' + name + 'not remove!');
+  {$EndIf}
 end;
 
 function file_Exists(const Name: UTF8String): Boolean;
@@ -376,7 +388,6 @@ begin
   {$ENDIF}
 
 {$IfDef UNIX}{$IfNDef DARWIN}
-//  log_Add(filePath + Name);
   Result := FpStat(filePath + Name, status) = 0;
 {$ENDIF}{$EndIf}
 {$IFDEF WINDOWS}
@@ -390,6 +401,10 @@ begin
 {$IFDEF iOS}
   Result := iosFileManager.fileExistsAtPath(utf8_GetNSString(platform_GetRes(filePath + Name)));
 {$ENDIF}
+  {$IfDef FULL_LOGGING}
+  if not Result then
+    log_Add('File ' + name + 'not found!');
+  {$EndIf}
 end;
 
 function file_Seek(FileHandle: zglTFile; Offset, Mode: Integer): LongWord;

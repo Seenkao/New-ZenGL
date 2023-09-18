@@ -14,7 +14,6 @@
       <XPManifest>
         <DpiAware Value="True"/>
       </XPManifest>
-      <Icon Value="0"/>
     </General>
     <BuildModes Count="1">
       <Item1 Name="Default" Default="True"/>
@@ -51,8 +50,8 @@
       <Filename Value="../../../bin/$(TargetCPU)-$(TargetOS)/demoLCL"/>
     </Target>
     <SearchPaths>
-      <IncludeFiles Value="$(ProjOutDir);../../../srcGEGL;../../../src;../../../srcGL"/>
-      <OtherUnitFiles Value="../../../src;../../../srcGL;../../../lib/zlib/$(TargetCPU)-$(TargetOS);../../../lib/zip/$(TargetCPU)-$(TargetOS);../../../lib/theora/$(TargetCPU)-$(TargetOS);../../../lib/ogg/$(TargetCPU)-$(TargetOS);../../../lib/msvcrt/$(TargetCPU);../../../lib/jpeg/$(TargetCPU)-$(TargetOS);../../../lib/chipmunk/$(TargetCPU)-$(TargetOS);../../../srcGEGL"/>
+      <IncludeFiles Value="$(ProjOutDir);../../../srcGEGL;../../../src;../../../srcGL;../../../srcGL/GLES;../../../srcGL/EGL"/>
+      <OtherUnitFiles Value="../../../src;../../../srcGL;../../../srcGL/EGL;../../../srcGL/GLES;../../../lib/zlib/$(TargetCPU)-$(TargetOS);../../../lib/zip/$(TargetCPU)-$(TargetOS);../../../lib/theora/$(TargetCPU)-$(TargetOS);../../../lib/ogg/$(TargetCPU)-$(TargetOS);../../../lib/msvcrt/$(TargetCPU);../../../lib/jpeg/$(TargetCPU)-$(TargetOS);../../../lib/chipmunk/$(TargetCPU)-$(TargetOS);../../../srcGEGL"/>
       <UnitOutputDirectory Value="../tmp/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>
@@ -65,7 +64,6 @@
     </CodeGeneration>
     <Linking>
       <Debugging>
-        <GenerateDebugInfo Value="False"/>
         <DebugInfoType Value="dsDwarf2Set"/>
         <StripSymbols Value="True"/>
       </Debugging>

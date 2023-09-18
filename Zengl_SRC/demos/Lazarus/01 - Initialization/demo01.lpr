@@ -3,7 +3,7 @@ program demo01;
 // RU: Этот файл содержит некоторые настройки(например использовать ли статическую компиляцию) и определения ОС под которую происходит компиляция.
 // EN: This file contains some options(e.g. whether to use static compilation) and defines of OS for which is compilation going.
 {$I zglCustomConfig.cfg}
-{$I GLdefine.cfg}
+{$I zgl_config.cfg}
 
 {$IFDEF WINDOWS}
   {$R *.res}
@@ -144,8 +144,8 @@ Begin
   zgl_SetParam(800, 600, false, false);
 
   {$IfDef GL_VERSION_3_0}
-  // RU: Устанавливаем контекст OpenGL 3.3. Для этого надо включить  дефайн "USE_GL_33" в GLdefine.cfg.
-  // EN: Setting context OpenGL 3.3. Enable "USE_GL_33" in GLdefine.cfg.
+  // RU: Устанавливаем контекст OpenGL 3.3. Для этого надо включить  дефайн "USE_GL_33" и отключить "USE_MIN_OPENGL" в GLdefine.cfg.
+  // EN: Setting context OpenGL 3.3. To do this, enable the "USE_GL_33" define and disable "USE_MIN_OPENGL" in GLdefine.cfg.
   SetGLVersionAndFlags(3, 3);
   {$EndIf}
 

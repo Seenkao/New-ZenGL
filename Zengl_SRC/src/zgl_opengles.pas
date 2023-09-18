@@ -46,6 +46,9 @@ uses
   {$IFDEF iOS}
   iPhoneAll, CGGeometry,
   {$ENDIF}
+  {$IfNDef NO_EGL}
+  zgl_EGL,
+  {$EndIf}
   zgl_opengles_all;
 
 const
@@ -81,12 +84,7 @@ var
   oglExtensions   : UTF8String;
   ogl3DAccelerator: Boolean;
   oglCanVSync     : Boolean;
-  oglCanAnisotropy: Boolean;
-  oglCanPVRTC     : Boolean;
-  oglCanAutoMipMap: Boolean;
   oglCanFBO       : Boolean;
-  oglCanFBODepth24: Boolean;
-  oglCanFBODepth32: Boolean;
   oglCanPBuffer   : Boolean;
   oglMaxTexSize   : Integer;
   oglMaxFBOSize   : Integer;
@@ -124,6 +122,7 @@ uses
   zgl_window,
   zgl_gltypeconst,
   zgl_log,
+  zgl_gles,
   zgl_utils;
 
 function gles_GetErrorStr(ErrorCode: LongWord): UTF8String;
@@ -162,7 +161,11 @@ begin
 
   if not InitGLES() Then
   begin
+    {$IfNDef USE_GLES20}
     u_Error('Cannot load GLES libraries');
+    {$Else}
+    u_Error('not InitGLES for GLES 2.0');
+    {$EndIf}
     exit;
   end;
 
@@ -183,15 +186,16 @@ begin
   oglDisplay := eglGetDisplay(wndDC);
   {$ENDIF}
 
-  if oglDisplay = EGL_NO_DISPLAY Then
+  if oglDisplay = nil {EGL_NO_DISPLAY} Then
   begin
     log_Add('eglGetDisplay: EGL_DEFAULT_DISPLAY');
-    oglDisplay := eglGetDisplay(EGL_DEFAULT_DISPLAY);    // не работает...
+    oglDisplay := eglGetDisplay({$IfDef WINDOWS}0{$Else}nil{$EndIf});  // eglGetDisplay(EGL_DEFAULT_DISPLAY);    // не работает...
   end;
 
   if not eglInitialize(oglDisplay, @i, @j) Then
   begin
     u_Error('Failed to initialize EGL. Error code - ' + gles_GetErrorStr(eglGetError()));
+    // только ли для Windows?
     {$IFDEF WINDOWS}
     wnd_Destroy;
     {$ENDIF}
@@ -239,6 +243,10 @@ begin
       oglAttr[i + 1] := oglFSAA;
       INC(i, 2);
     end;
+    (* это можно сделать, но будет ли толк? *)
+    oglAttr[i] := EGL_RENDERABLE_TYPE;
+    oglAttr[i + 1] := EGL_OPENGL_ES2_BIT;
+    inc(i, 2);
     oglAttr[i] := EGL_NONE;
 
     log_Add('eglChooseConfig: zDepth = ' + u_IntToStr(oglzDepth) + '; ' + 'stencil = ' + u_IntToStr(oglStencil) + '; ' + 'fsaa = ' + u_IntToStr(oglFSAA) );
@@ -247,14 +255,16 @@ begin
     begin
       if oglFSAA = 0 Then
         break
-      else
-      begin
+      else begin
         oglzDepth := 24;
         DEC(oglFSAA, 2);
       end;
     end else
-      if j <> 1 Then DEC(oglzDepth, 8);
-    if oglzDepth = 0 Then oglzDepth := 1;
+      if j <> 1 Then
+        DEC(oglzDepth, 8);
+
+    if oglzDepth = 0 Then
+      oglzDepth := 1;
   until j = 1;
 
   Result := j = 1;
@@ -268,11 +278,14 @@ begin
   if oglReadPixelsFBO <> 0 Then
     glDeleteFramebuffers(1, @oglReadPixelsFBO);
 
+  if not Assigned(oglDisplay) then
+    exit;
 {$IFNDEF NO_EGL}
   {$IFDEF USE_X11}
   FreeMem(oglVisualInfo);
   {$ENDIF}
-  eglMakeCurrent(oglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+  // eglMakeCurrent(oglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+  eglMakeCurrent(oglDisplay, nil, nil, nil);
   eglTerminate(oglDisplay);
 {$ENDIF}
 {$IFDEF iOS}
@@ -289,9 +302,13 @@ begin
 end;
 
 function gl_Initialize: Boolean;
-  var
-    err: LongWord;
+var
+  err: LongWord;
+  {$IfDef USE_GLES20}
+  contAttr: array[0..7] of EGLint;
+  {$EndIf}
 begin
+//  Result := False;
 {$IFNDEF NO_EGL}
   oglSurface := eglCreateWindowSurface(oglDisplay, oglConfig, {@}wndHandle, nil);
   err := eglGetError();
@@ -300,10 +317,24 @@ begin
       u_Error('Cannot create Windows surface - ' + gles_GetErrorStr(err));
       exit;
     end;
+
+  {$IfDef USE_GLES20}
+  contAttr[0] := EGL_CONTEXT_CLIENT_VERSION;
+  contAttr[1] := 2;
+  // это работает с какими-то глюками? Я могу определить на ноутбуке только версию 1.1 и 3.0
+  contAttr[2] := EGL_CONTEXT_MAJOR_VERSION;
+  contAttr[3] := 2;
+  contAttr[4] := EGL_CONTEXT_MINOR_VERSION;
+  contAttr[5] := 0;
+  contAttr[6] := EGL_NONE;
+  oglContext := eglCreateContext(oglDisplay, oglConfig, nil, contAttr);
+  {$Else}
   oglContext := eglCreateContext(oglDisplay, oglConfig, nil, nil);
+  {$EndIf}
   err := eglGetError();
   if err <> EGL_SUCCESS Then
     begin
+      // EGL может вызывать ошибку в Linux при двух мониторах, но само приложение запускается.
       u_Error('Cannot create OpenGL ES context - ' + gles_GetErrorStr(err));
       exit;
     end;
@@ -362,7 +393,7 @@ begin
 
   glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, eglRenderbuffer);
 
-  {if oglCanFBODepth24 Then
+  {if GL_OES_depth24 Then
      oglzDepth := 24
   else
      oglzDepth := 16;
@@ -418,35 +449,45 @@ begin
   log_Add('GL_MAX_TEXTURE_SIZE: ' + u_IntToStr(oglMaxTexSize));
 
   glCompressedTexImage2D := gl_GetProc('glCompressedTexImage2D');
-  oglCanPVRTC := gl_IsSupported('GL_IMG_texture_compression_pvrtc', oglExtensions);
-  log_Add('GL_EXT_TEXTURE_COMPRESSION_PVRTC: ' + u_BoolToStr(oglCanPVRTC));
-
-  oglCanAutoMipMap := TRUE;
+  GL_IMG_texture_compression_pvrtc := gl_IsSupported('GL_IMG_texture_compression_pvrtc', oglExtensions);
+  log_Add('GL_IMG_texture_compression_pvrtc: ' + u_BoolToStr(GL_IMG_texture_compression_pvrtc));
 
   // Multitexturing
   glGetIntegerv(GL_MAX_TEXTURE_UNITS, @oglMaxTexUnits);
   log_Add('GL_MAX_TEXTURE_UNITS: ' + u_IntToStr(oglMaxTexUnits));
 
   // Anisotropy
-  oglCanAnisotropy := gl_IsSupported('GL_EXT_texture_filter_anisotropic', oglExtensions);
-  if oglCanAnisotropy Then
-    begin
-      glGetIntegerv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, @oglMaxAnisotropy);
-      oglAnisotropy := oglMaxAnisotropy;
-    end else
-      oglAnisotropy := 0;
-  log_Add('GL_EXT_TEXTURE_FILTER_ANISOTROPIC: ' + u_BoolToStr(oglCanAnisotropy));
+  GL_EXT_texture_filter_anisotropic := gl_IsSupported('GL_EXT_texture_filter_anisotropic', oglExtensions);
+  if GL_EXT_texture_filter_anisotropic Then
+  begin
+    glGetIntegerv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, @oglMaxAnisotropy);
+    oglAnisotropy := oglMaxAnisotropy;
+  end else
+    oglAnisotropy := 0;
+  log_Add('GL_EXT_texture_filter_anisotropic: ' + u_BoolToStr(GL_EXT_texture_filter_anisotropic));
   log_Add('GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT: ' + u_IntToStr(oglMaxAnisotropy));
 
   glBlendEquation     := gl_GetProc('glBlendEquation');
   glBlendFuncSeparate := gl_GetProc('glBlendFuncSeparate');
-  oglSeparate := Assigned(glBlendEquation) and Assigned(glBlendFuncSeparate) and gl_IsSupported('GL_OES_blend_func_separate', oglExtensions);
+
+  {$IfDef USE_GLES20}
+  GL_OES_blend_func_separate := true;
+  {$Else}
+  GL_OES_blend_func_separate := gl_IsSupported('GL_OES_blend_func_separate', oglExtensions);
+  {$EndIf}
+  oglSeparate := Assigned(glBlendEquation) and Assigned(glBlendFuncSeparate) and GL_OES_blend_func_separate;
   log_Add('glBlendEquation: ' + u_BoolToStr(Assigned(glBlendEquation)));
   log_Add('glBlendFuncSeparate: ' + u_BoolToStr(Assigned(glBlendFuncSeparate)));
-  log_Add('GL_OES_BLEND_FUNC_SEPARATE: ' + u_BoolToStr(oglSeparate));
+  log_Add('GL_OES_blend_func_separate: ' + u_BoolToStr(GL_OES_blend_func_separate));
+  log_Add('oglSeparate: ' + u_BoolToStr(oglSeparate));
 
   // FBO
-  if gl_IsSupported('OES_framebuffer_object', oglExtensions) Then
+  {$IfDef USE_GLES20}
+  GL_OES_framebuffer_object := True;
+  {$Else}
+  GL_OES_framebuffer_object := gl_IsSupported('GL_OES_framebuffer_object', oglExtensions);
+  {$EndIf}
+  if GL_OES_framebuffer_object Then
   begin
     oglCanFBO                 := TRUE;
     glBindRenderbuffer        := gl_GetProc('glBindRenderbuffer'       );
@@ -472,8 +513,8 @@ begin
   end else
     oglCanFBO := FALSE;
 
-  oglCanFBODepth24 := gl_IsSupported('GL_OES_depth24', oglExtensions);
-  oglCanFBODepth32 := gl_IsSupported('GL_OES_depth32', oglExtensions);
+  GL_OES_depth24 := gl_IsSupported('GL_OES_depth24', oglExtensions);
+  GL_OES_depth32 := gl_IsSupported('GL_OES_depth32', oglExtensions);
   log_Add('GL_OES_FRAMEBUFFER_OBJECT: ' + u_BoolToStr(oglCanFBO));
 
   // WaitVSync

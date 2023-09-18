@@ -37,7 +37,7 @@ uses
   sysutils, BaseUnix,
   {$ENDIF}
   {$IFDEF USE_X11}
-  X, XLib, XUtil, xrandr,
+  X, XLib, XUtil, {gegl_}xrandr,
   {$ENDIF}
   {$IFDEF WINDOWS}
   Windows,
@@ -52,11 +52,11 @@ uses
   zgl_types;
 
 const
-  cs_ZenGL    = 'ZenGL - 0.4.0';
-  cs_Date     = '26.06.2023';
+  cs_ZenGL    = 'ZenGL - 0.4.1';
+  cs_Date     = '18.09.2023';
   cv_major    = 0;
   cv_minor    = 4;
-  cv_revision = 0;
+  cv_revision = 1;
 
   // zgl_Reg
   SYS_APP_INIT           = $000001;
@@ -224,7 +224,7 @@ procedure zgl_Init(FSAA: Byte = 0; StencilBits: Byte = 0);
 {$Else}
 // Rus: инициализация рабочего LCL-окна и запуск программы.
 // Eng: initialization of the working LCL window and launch of the program.
-procedure zgl_InitToHandle(Handle: Ptr; FSAA: Byte = 0; StencilBits: Byte = 0);
+function zgl_InitToHandle(Handle: Ptr; FSAA: Byte = 0; StencilBits: Byte = 0): Boolean;
 {$EndIf}
 {$IfNDef ANDROID}
 // Rus: установка основных путей для запущенного приложения.
@@ -236,7 +236,7 @@ procedure zgl_GetSysDir;
 procedure zgl_Destroy;
 // Rus: указываем программе на завершение работы.
 // Eng: tell the program to end.
-procedure zgl_Exit;
+procedure zgl_Exit; {$IfDef USE_INLINE}inline;{$EndIf}
 // Rus: регистрация функций для создания и работы приложения.
 // Eng: registration of functions for creation and operation of the application.
 procedure zgl_Reg(What: LongWord; UserData: Pointer);
@@ -268,9 +268,11 @@ procedure zgl_Enable(What: LongWord);
 // Eng: turn off ZenGL flags.
 procedure zgl_Disable(What: LongWord);
 {$IfNDef USE_INIT_HANDLE}
-// Rus: установка интервала обработки клавиатуры, мыши и др.
+// Rus: установка интервала обработки клавиатуры, мыши и др. Определяйте данный
+//      интервал не больше чем у самого малого рабочего таймера.
 //      Определять до создания окна!!!
-// Eng: setting the processing interval for the keyboard, mouse, etc.
+// Eng: setting the processing interval for the keyboard, mouse, etc. Determine
+//      this interval no more than that of the smallest working timer.
 //      Define before window creation!!!
 procedure zgl_SetEventsInterval(Interval: Cardinal);
 {$EndIf}
@@ -926,8 +928,8 @@ begin
     exit;
   end;
 
-  if not Assigned(SetViewPort) then
-    SetViewPort := scr_SetViewPort2D;
+  if not Assigned(scr_SetViewPort) then
+    scr_SetViewPort := scr_SetViewPort2D;
 
   appInitialized := TRUE;
 
@@ -974,8 +976,13 @@ begin
 end;
 
 {$Else}
-procedure zgl_InitToHandle(Handle: Ptr; FSAA: Byte = 0; StencilBits: Byte = 0);
+function zgl_InitToHandle(Handle: Ptr; FSAA: Byte = 0; StencilBits: Byte = 0): Boolean;
 begin
+  Result := False;
+  {$IfDef USE_GLES}
+  log_Add('GLES not work in LCL!!!');
+  exit;
+  {$EndIf}
   zgl_GetSysDir();
   log_Init();
 
@@ -1008,6 +1015,7 @@ begin
   app_PInit();
 
   appInitedToHandle := true;
+  Result := True;
 end;
 {$EndIf}
 
@@ -1181,9 +1189,9 @@ begin
     OGL_VIEW_PORT:
       begin
         if Assigned(UserData) then
-          SetViewPort := UserData
+          scr_SetViewPort := UserData
         else
-          SetViewPort := @scr_SetViewPort2D;
+          scr_SetViewPort := @scr_SetViewPort2D;
       end;
     {$IfNDef USE_INIT_HANDLE}
     SYS_EVENTS:
@@ -1332,7 +1340,7 @@ begin
     GAPI_MAX_TEXTURE_UNITS: Result := oglMaxTexUnits;
     GAPI_MAX_ANISOTROPY: Result := oglMaxAnisotropy;
     GAPI_CAN_BLEND_SEPARATE: Result := Ptr(oglSeparate);
-    GAPI_CAN_AUTOGEN_MIPMAP: Result := Ptr({$IfNDef USE_GLES}GL_SGIS_generate_mipmap{$Else}oglCanAutoMipMap{$EndIf});
+    {$IfNDef USE_GLES}GAPI_CAN_AUTOGEN_MIPMAP: Result := Ptr(GL_SGIS_generate_mipmap);{$EndIf}
 
     RENDER_FPS: Result := appFPS;
     RENDER_BATCHES_2D: Result := b2dBatches + 1;

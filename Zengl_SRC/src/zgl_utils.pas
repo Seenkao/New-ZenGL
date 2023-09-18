@@ -136,10 +136,10 @@ procedure u_Error(const ErrStr: UTF8String);
 procedure u_Warning(const ErrStr: UTF8String);
 
 // Rus: дополнение до ближайшего верхнего 2^n (2, 4, 8, 16, 32 и т. д.)
-// Eng:
+// Eng: complement to nearest upper 2^n (2, 4, 8, 16, 32, etc.)
 function u_GetPOT(Value: Integer): Integer;
 // Rus: задержка в милисекундах.
-// Eng:
+// Eng: delay in milliseconds.
 procedure u_Sleep(Milliseconds: LongWord);
 
 {$IFDEF UNIX}
@@ -153,6 +153,7 @@ function printf(format: PAnsiChar; const args: array of const): Integer; cdecl; 
 
 {$ENDIF}
 {$IF DEFINED(LINUX) and DEFINED(CPUx86_64)}
+// GLIBC 2.14 слишком нов, поэтому замените memcpy реализацией Pascal через хак.       Требуется решение для этого или нет?
 // GLIBC 2.14 is too new, so replace memcpy with Pascal implementation via hack
 function memcpy(destination, source: Pointer; num: csize_t): Pointer; cdecl; public name 'memcpy';
 {$IFEND}

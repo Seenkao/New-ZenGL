@@ -141,6 +141,8 @@ Begin
   zgl_Reg( SYS_EXIT, @Quit );
 
   wnd_SetCaption(utf8_Copy('13 - Particles'));
+  scr_SetFPS(1000);
+  scr_SetVSync(False);
 
   zgl_Init();
 End.
