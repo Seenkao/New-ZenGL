@@ -1,4 +1,8 @@
-# ZenGL version 4.1 + MacOS Cocoa - beta version + Green Engine v1.0
+# ZenGL version 4.2 + MacOS Cocoa - beta version + Green Engine v1.0  
+
+
+**Rus: данный проект переехал на SourceForge. Из-за перехода GitHub на двухфакторную авторизацию - здесь архивирую.**  
+**Eng: This project has moved to SourceForge. Due to GitHub's transition to two-factor authentication, I'm archiving it here.**
 
 **Внимание!!!** Данная версия претерпела много изменений. Исключён код для MacOS-carbon. Собраны библиотеки Ogg, Vorbis, Theora, LibZip для Android ARM32/ARM64/X86/X86_64. Могут быть проблемы с запуском на MacOS-Cocoa, это будет исправляться. Вы можете использовать версию ZenGL 3.30 она наиболее стабильна, но не поддерживает обновлений для Android.
 
