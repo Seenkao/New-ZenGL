@@ -220,6 +220,7 @@ begin
   text_Draw( fntMain, 400, 360, 'JOYSTICK ( Found: ' + u_IntToStr( joyCount ) + ' )', TEXT_HALIGN_CENTER );
 
   setTextColor(Get_Color(cl_Black));
+  // здесь пример где идёт обработка только одного джойстика, а их в системе может быть несколько.
   text_Draw( fntMain, 100, 400, 'Axis X: ' + u_FloatToStr( joy_AxisPos( 0, JOY_AXIS_X ) ) );
   text_Draw( fntMain, 100, 420, 'Axis Y: ' + u_FloatToStr( joy_AxisPos( 0, JOY_AXIS_Y ) ) );
   setTextColor(Get_Color(cl_Black05));

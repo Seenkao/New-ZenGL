@@ -77,8 +77,8 @@ var
   cwave, swave : Single;
 begin
   wave  := wave + random( 1000 ) / 10000;
-  cwave := cos( wave );
-  swave := sin( wave );
+  cwave := cos( wave ) * 3;
+  swave := sin( wave ) * 3;
 
   // RU: Симуляция простого эффекта под водой.
   // EN: Simulation of simple underwater effect.

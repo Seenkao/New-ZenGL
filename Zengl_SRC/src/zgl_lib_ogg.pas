@@ -354,13 +354,17 @@ var
   vorbisInit: Boolean;
 
 implementation
+
 {$IFNDEF USE_OGG_STATIC}
 uses
   {$IFDEF MAC_COCOA}
   zgl_application,
   {$ENDIF}
-  zgl_utils;
+  zgl_utils,
+  zgl_file,
+  zgl_log;
 {$ENDIF}
+
 
 {$IFNDEF USE_OGG_STATIC}
 var
@@ -462,9 +466,14 @@ begin
     vorbisfileLibrary := dlopen(libvorbisfile);
     {$ENDIF}
     {$IfDef MAC_COCOA}
-    vorbisLibrary := dlopen(PAnsiChar({'/usr/local/lib/' + }libvorbis), 1);
-    vorbisfileLibrary := dlopen(PAnsiChar({'/usr/local/lib/' + }libvorbisfile), 1);
+    vorbisLibrary := dlopen(PAnsiChar(libvorbis), 1);
+    vorbisfileLibrary := dlopen(PAnsiChar(libvorbisfile), 1);
     {$EndIf}
+
+    if vorbisfileLibrary = LIB_ERROR then
+      log_Add('vorbisfileLibrary not loaded!!!');
+    if vorbisLibrary = LIB_ERROR then
+      log_Add('vorbisLibrary not loaded!!!');
 
     if (vorbisLibrary <> LIB_ERROR) and (vorbisfileLibrary <> LIB_ERROR) Then
     begin

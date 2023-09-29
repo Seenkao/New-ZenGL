@@ -379,7 +379,7 @@ type
 
 
 
-function XRRQueryExtension(dpy: PDisplay; event_base_return: Plongint; error_base_return: Plongint): TBool; cdecl; external libXrandr;
+function XRRQueryExtension(dpy: PDisplay; event_base_return: Plongint; error_base_return: Plongint): TBoolResult; cdecl; external libXrandr;
 function XRRQueryVersion(dpy: PDisplay; major_version_return: Plongint; minor_version_return: Plongint): TStatus; cdecl; external libXrandr;
 function XRRGetScreenInfo(dpy: PDisplay; window: TWindow): PXRRScreenConfiguration; cdecl; external libXrandr;
 procedure XRRFreeScreenConfigInfo(config: PXRRScreenConfiguration); cdecl; external libXrandr;

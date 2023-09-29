@@ -403,7 +403,7 @@ begin
 {$ENDIF}
   {$IfDef FULL_LOGGING}
   if not Result then
-    log_Add('File ' + name + 'not found!');
+    log_Add('File ' + name + ' not found!');
   {$EndIf}
 end;
 

@@ -70,7 +70,7 @@ function  text_GetHeight(fnt: LongWord; Width: Single; const Text: UTF8String; S
 function  text_GetXY(fnt: LongWord; const Rect: zglTRect2D; const Text: UTF8String; Flags: LongWord = TEXT_HALIGN_CENTER or TEXT_VALIGN_CENTER): zglTPoint2D;
 procedure textFx_SetLength(Length: Integer; LastCoord: zglPPoint2D = nil; LastCharDesc: zglPCharDesc = nil);
 // Index - size, fnt - num font
-procedure setFontTextScale(Index: LongWord; fnt: LongWord);
+procedure setFontTextScale(_Scale: LongWord; fnt: LongWord);
 // Rus: установка флага отключения шкалы размерности. Только для функций,
 //      которые используют свою собственную шкалу.
 // Eng: setting the flag for disabling the dimension scale. Only for functions
@@ -164,7 +164,7 @@ var
   textLinesCount: Integer;
   useFont       : zglPFont;
 
-procedure setFontTextScale(Index: LongWord; fnt: LongWord);
+procedure setFontTextScale(_Scale: LongWord; fnt: LongWord);
 var
   i: Integer;
   charDesc: zglPCharDesc;
@@ -172,7 +172,7 @@ begin
   if fnt > MAX_USE_FONT then
     exit;
   useFont := managerFont.Font[fnt];
-  useFont.Scale := useFont.ScaleNorm * Index / 10;
+  useFont.Scale := useFont.ScaleNorm * _Scale / 10;
   for i := 0 to 65535 do
   begin
     if Assigned(useFont.CharDesc[i]) then

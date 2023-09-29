@@ -35,7 +35,7 @@ interface
 
 uses
 {$IFDEF USE_X11}
-  X, XLib, {gegl_}xrandr, UnixType,  //    gdk2, gtk2,   // эти два возможно можно будет в дальнейшем удалить.
+  X, XLib, gegl_xrandr, UnixType,  //    gdk2, gtk2,   // эти два возможно можно будет в дальнейшем удалить.
   {$IfNDef USE_GLES}
   zgl_glx_wgl,
   {$EndIf}

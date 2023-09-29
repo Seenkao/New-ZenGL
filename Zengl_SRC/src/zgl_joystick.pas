@@ -207,7 +207,9 @@ uses
   zgl_utils;
 
 var
+  // массив общего количества джойстиков.
   joyArray: array[0..15] of zglTJoy;
+  // настоящее количество джойстиков.
   joyCount: Integer;
 
 function joy_Init: Byte;
@@ -232,8 +234,11 @@ begin
           SetLength(joyArray[joyCount].Info.Name, 256);
           FpIOCtl(joyArray[joyCount].device, JSIOCGNAME,    @joyArray[joyCount].Info.Name[1]);
           FpIOCtl(joyArray[joyCount].device, JSIOCGAXMAP,   @joyArray[joyCount].axesMap[0]);
+        //  log_Add('Map = ' + u_IntToStr(joyArray[joyCount].axesMap[0]));
           FpIOCtl(joyArray[joyCount].device, JSIOCGAXES,    @joyArray[joyCount].Info.Count.Axes);
+        //  log_Add('Axes = ' + u_IntToStr(joyArray[joyCount].Info.Count.Axes));
           FpIOCtl(joyArray[joyCount].device, JSIOCGBUTTONS, @joyArray[joyCount].Info.Count.Buttons);
+        //  log_Add('Buttons = ' + u_IntToStr(joyArray[joyCount].Info.Count.Buttons));
 
           for j := 0 to joyArray[joyCount].Info.Count.Axes - 1 do
             with joyArray[joyCount].Info do
@@ -255,9 +260,9 @@ begin
           // Checking if joystick is a real one, because laptops with accelerometer can be detected as a joystick :)
           if (joyArray[joyCount].Info.Count.Axes >= 2) and (joyArray[joyCount].Info.Count.Buttons > 0) Then
             begin
-              log_Add('Joy: Find "' + joyArray[joyCount].Info.Name + '" (ID: ' + u_IntToStr(joyCount) +
-                       '; Axes: ' + u_IntToStr(joyArray[joyCount].Info.Count.Axes) +
-                       '; Buttons: ' + u_IntToStr(joyArray[joyCount].Info.Count.Buttons) + ')');
+              log_Add('Joy: Found "' + joyArray[joyCount].Info.Name + '" (ID: ' + u_IntToStr(joyCount) + '; Axes: ' +
+                      u_IntToStr(joyArray[joyCount].Info.Count.Axes) + '; Buttons: ' +
+                      u_IntToStr(joyArray[joyCount].Info.Count.Buttons) + ')');
 
               INC(joyCount);
             end;
@@ -308,7 +313,7 @@ begin
             INC(joyArray[i].Info.Count.Axes, 2);
           end;
 
-        log_Add('Joy: Find "' + joyArray[i].Info.Name + '" (ID: ' + u_IntToStr(i) +
+        log_Add('Joy: Found "' + joyArray[i].Info.Name + '" (ID: ' + u_IntToStr(i) +
                  '; Axes: ' + u_IntToStr(joyArray[i].Info.Count.Axes) +
                  '; Buttons: ' + u_IntToStr(joyArray[i].Info.Count.Buttons) + ')');
 
@@ -356,10 +361,16 @@ begin
   for i := 0 to joyCount - 1 do
     begin
       while FpRead(joyArray[i].device, event, 8) = 8 do
+        // кнопки "Опции", "Поделится", "PS" относятся к событию "value".
+        // крестовина относится к событию "_type".
+        // курки относятся к событию "_type", но полное отжатие относится к типу "value".
         case event._type of
           JS_EVENT_AXIS:
             begin
-              joyArray[i].State.Axis[JS_AXIS[joyArray[i].axesMap[event.number]]] := Round((event.value / 32767) * 1000) / 1000;
+          //    if joyArray[i].axesMap[event.number] < 16 then      // это ещё раз надо редактировать, опять какая-то фигня происходит и значения меняются.
+                joyArray[i].State.Axis[JS_AXIS[joyArray[i].axesMap[event.number]]] := Round((event.value / 32767) * 1000) / 1000
+          //    else
+          //      joyArray[i].State.Axis[JS_AXIS[joyArray[i].axesMap[event.number]]] := event.value;
             end;
           JS_EVENT_BUTTON:
             case event.value of
@@ -388,7 +399,7 @@ begin
   state.dwSize := SizeOf(TJOYINFOEX);
   for i := 0 to joyCount - 1 do
     begin
-      state.dwFlags := JOY_RETURNALL or JOY_USEDEADZONE;
+      state.dwFlags := JOY_RETURNALL{ or JOY_USEDEADZONE};
       if joyArray[i].caps.wCaps and JOYCAPS_POVCTS > 0 Then
         state.dwFlags := state.dwFlags or JOY_RETURNPOVCTS;
 

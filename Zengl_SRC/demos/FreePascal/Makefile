@@ -54,6 +54,25 @@ linux32:
 	make -C $(DEMO16) linux32
 	make -C $(DEMO17) linux32
 
+linux64:
+	make -C $(DEMO01) linux64
+	make -C $(DEMO02) linux64
+	make -C $(DEMO03) linux64
+	make -C $(DEMO04) linux64
+	make -C $(DEMO05) linux64
+	make -C $(DEMO06) linux64
+	make -C $(DEMO07) linux64
+	make -C $(DEMO08) linux64
+	make -C $(DEMO09) linux64
+	make -C $(DEMO10) linux64
+	make -C $(DEMO11) linux64
+	make -C $(DEMO12) linux64
+	make -C $(DEMO13) linux64
+	make -C $(DEMO14) linux64
+	make -C $(DEMO15) linux64
+	make -C $(DEMO16) linux64
+	make -C $(DEMO17) linux64
+
 win32:
 	make -C $(DEMO01) win32
 	make -C $(DEMO02) win32

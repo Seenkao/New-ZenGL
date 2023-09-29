@@ -10,15 +10,13 @@ ifeq ($(shell uname), Linux)
   OS    = linux
 else ifeq ($(shell uname), Darwin)
   OS    = darwin
-  ARCH  = i386
 endif
 
-# Variables
-# Rus: введите свой путь к FPC
-# Eng: enter your path to FPC
-FPC     = fpc
+# Variables# Rus: введите свой путь к FPC (fpc, fpc.exe or fpc.sh).
+# Eng: enter your path to FPC (fpc, fpc.exe or fpc.sh).
+FPC     = fpc.sh
 FLAGS   = -O3 -XsX -CX -Sd -al
-INCLUDE = -Fu../../../headers -Fi../../../headers -Fi../../../srcGEGL -Fi../../../src -Fi../../../srcGL -Fu../../../srcGEGL -Fu../../../extra -Fu../../../src -Fu../../../srcGL
+INCLUDE = -Fu../../../headers -Fi../../../headers -Fi../../../srcGEGL -Fi../../../src -Fi../../../srcGL -Fi../../../srcGL/EGL -Fi../../../srcGL/GLES -Fu../../../srcGEGL -Fu../../../extra -Fu../../../src -Fu../../../srcGL -Fu../../../srcGL/EGL -Fu../../../srcGL/GLES
 LIBS    = -Fu../../../lib/jpeg/$(ARCH)-$(OS) -Fu../../../lib/ogg/$(ARCH)-$(OS) -Fu../../../lib/theora/$(ARCH)-$(OS) -Fu../../../lib/zlib/$(ARCH)-$(OS) -Fu../../../lib/zip/$(ARCH)-$(OS)
 LIBSPPC = -Fu../../../lib/jpeg/powerpc-$(OS) -Fu../../../lib/ogg/powerpc-$(OS) -Fu../../../lib/theora/powerpc-$(OS) -Fu../../../lib/zlib/powerpc-$(OS) -Fu../../../lib/zip/powerpc-$(OS)
 OUTPUT  = ../../../bin/
@@ -43,6 +41,16 @@ linux32: clean
 	-Fu../../../lib/zip/i386-linux \
 	-FE$(OUTPUT)i386-linux/ -FU$(TMP) $(FLAGS) -o$(TARGET) -TLINUX -Pi386 -Xd
 	strip $(OUTPUT)i386-linux/$(TARGET) --strip-unneeded -R .comment -R .note
+
+Linux64: clean
+	$(FPC) $(UNIT) $(INCLUDE) \
+	-Fu../../../lib/jpeg/x86_64-linux \
+	-Fu../../../lib/ogg/x86_64-linux \
+	-Fu../../../lib/theora/x86_64-linux \
+	-Fu../../../lib/zlib/x86_64-linux \
+	-Fu../../../lib/zip/x86_64-linux \
+	-FE$(OUTPUT)x86_64-linux/ -FU$(TMP) $(FLAGS) -o$(TARGET) -Tlinux -Px86_64 -Xd
+	strip $(OUTPUT)x86_64-linux/$(TARGET) --strip-unneeded -R .comment -R .note
 
 win32: clean
 	$(FPC) $(UNIT) $(INCLUDE) \

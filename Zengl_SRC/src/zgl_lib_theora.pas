@@ -160,7 +160,8 @@ implementation
 {$IFDEF MAC_COCOA}
 {$IFNDEF USE_THEORA_STATIC}
 uses
-  zgl_application;
+  zgl_application,
+  zgl_file;
 {$ENDIF}
 {$ENDIF}
 

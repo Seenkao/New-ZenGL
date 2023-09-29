@@ -399,17 +399,18 @@ begin
   {$ENDIF}
 
   {$IfDef UNIX}
+  {$IFDEF MAC_COCOA}
+  log_Add('OpenAL: opening "CoreAudio Software"');
+  oalDevice := alcOpenDevice('CoreAudio Software');
+  {$Else}
   log_Add('OpenAL: opening "ALSA Software"');
   oalDevice := alcOpenDevice('ALSA Software');
-  {$ENDIF}
+  {$ENDIF}{$ENDIF}
   {$IFDEF WINDOWS}
   log_Add('OpenAL: opening "Generic Software"');
   oalDevice := alcOpenDevice('Generic Software');
   {$ENDIF}
-  {$IFDEF MAC_COCOA}
-  log_Add('OpenAL: opening "CoreAudio Software"');
-  oalDevice := alcOpenDevice('CoreAudio Software');
-  {$ENDIF}
+
   {$IFDEF iOS}
   log_Add('OpenAL: opening default device - "' + alcGetString(nil, ALC_DEFAULT_DEVICE_SPECIFIER) + '"');
   oalDevice := alcOpenDevice(nil);

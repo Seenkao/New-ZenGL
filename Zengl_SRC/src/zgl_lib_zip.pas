@@ -120,6 +120,11 @@ const
   libz = 'libz.so';
   libzip = 'libzip.so';
 {$EndIf}
+{$IfDef MAC_COCOA}
+const
+  libz = 'libz.dylib';
+  libzip = 'libzip.dylib';
+{$EndIf}
 
 {$IFDEF USE_ZIP}
 const
@@ -129,6 +134,16 @@ const
   ZIP_FL_UNCHANGED  = 8;  // use original data, ignoring changes
   ZIP_FL_RECOMPRESS = 16; // force recompression of data
   ZIP_FL_ENCRYPTED  = 32; // read encrypted data
+
+  Z_OK              = 0;
+  Z_STREAM_END      = 1;
+  Z_NEED_DICT       = 2;
+  Z_ERRNO           = (-1);
+  Z_STREAM_ERROR    = (-2);
+  Z_DATA_ERROR      = (-3);
+  Z_MEM_ERROR       = (-4);
+  Z_BUF_ERROR       = (-5);
+  Z_VERSION_ERROR   = (-6);
 
 type
   Pzip      = ^Tzip;
@@ -268,6 +283,7 @@ function udimodsi4(num, den: LongWord; modwanted: Integer): LongWord; cdecl;
 function __umodsi3(a, b: clong): clong; cdecl;
 {$EndIf}
 
+{$IfNDef MAC_COCOA}
 {$If Not (defined (ANDROID) and defined(NOT_OLD_ARM))}
 function inflateInit_(var strm: z_stream_s; version: pchar; stream_size: cint): cint; cdecl; external
   {$ifdef DYNAMICZLIB}libz name 'inflateInit_'{$endif};
@@ -275,6 +291,7 @@ function inflateEnd(var strm: z_stream_s): cint; cdecl; external
   {$ifdef DYNAMICZLIB}libz name 'inflateEnd'{$endif};
 function inflate(var strm: z_stream_s; flush: cint): cint; cdecl; external
   {$ifdef DYNAMICZLIB}libz name 'inflate'{$endif};
+{$IfEnd}
 {$IfEnd}
 
 {$IFDEF USE_ZIP}
@@ -321,7 +338,7 @@ procedure LoadLibZip(const zDLL, zlDLL: String);
 begin
   UnloadLibZip;
 
-  zipDLL := dlopen(PChar(zDLL), 1);
+  zipDLL := dlopen(PAnsiChar(zDLL), 1);
   if zipDLL = nil then
   begin
     log_Add('Could not load Zip');
@@ -344,7 +361,7 @@ begin
   @zip_get_num_entries := dlsym(zipDLL, 'zip_get_num_entries');
   @zip_get_name := dlsym(zipDLL, 'zip_get_name');
 
-  zipDLL := dlopen(PChar(zlDLL), 1);
+  zipDLL := dlopen(PAnsiChar(zlDLL), 1);
   if zipDLL = nil then
   begin
     log_Add('Could not load Zip');
@@ -523,23 +540,9 @@ begin
 end;
 {$EndIf}
 
-{$IfDef USE_ZIP}{$IfDef MAC_COCOA}
-initialization
-  {$IfDef NO_USE_STATIC_LIBRARY}
-  LoadLibZip('libzip.dylib', 'libz.dylib');
-  {$Else}
-  LoadLibZip('/usr/local/lib/libzip.dylib', '/usr/local/Cellar/zlib/1.2.11/lib/libz.dylib');
-  {$EndIf}
-
+{$IfDef USE_ZIP}{$If defined(MAC_COCOA) or (defined(ANDROID) and defined(NOT_OLD_ARM))}
 finalization
 
-  UnloadLibZip;
-{$EndIf}{$EndIf}
-{$IfDef ANDROID}{$IfDef NOT_OLD_ARM}
-initialization
-  LoadLibZip(libzip, libz);
-
-finalization
   UnloadLibZip;
 {$EndIf}{$EndIf}
 

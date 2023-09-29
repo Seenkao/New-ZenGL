@@ -249,8 +249,8 @@ var
 
   {$IfNDef USE_INIT_HANDLE}
   oldTimeDraw: Double;
-  useFPS     : LongWord = 30;
-  deltaFPS   : Single = 1000 / 30;
+  useFPS     : LongWord = 60;
+  deltaFPS   : Single = 1000 / 60;
   // номер таймера опроса событий
   timeAppEvents: LongWord;
   // интервал опроса событий
@@ -705,7 +705,6 @@ begin
       scr_Init();
       continue;
     end;
-
     if winOn Then
     case event._type of
         ClientMessage:
@@ -832,6 +831,8 @@ begin
 
               keyboardUp(key);
             end;
+        MotionNotify:
+           ;
     end;
   end;
 {$ENDIF}

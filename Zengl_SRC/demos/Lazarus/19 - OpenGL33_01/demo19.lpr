@@ -56,8 +56,8 @@ var
   vao: GLuint;
   vboHandles: array[0..1] of GLuint;
 
-// RU: создание VAO и VBO.
-// EN: creation of VAO and VBO.
+// RU: создание VAO и VBO. Во избежание ошибок, создавайте VAO и VBO после создания шейдера!
+// EN: creation of VAO and VBO. To avoid errors, create VAO and VBO after creating the shader!
 procedure createVBOAndVAO;
 begin
   // RU: буферные объекты.
@@ -108,12 +108,12 @@ end;
 // EN: We use our projection matrix.
 procedure UserMode;
 begin
-  Matrix4_Perspective(45, zgl_Get(WINDOW_WIDTH) / zgl_Get(WINDOW_HEIGHT), 1, 100);
+  Matrix4x4_Perspective(45, zgl_Get(WINDOW_WIDTH) / zgl_Get(WINDOW_HEIGHT), 1, 100);
   // glUseProgram(shadProg);        // это не обязательно в данном случае.
   // RU: если данная переменная не используется в шейдере, то и вызов делать не будем.
   // EN: if this variable is not used in the shader, then we will not make the call.
   if projMatrLoc <> -1 then
-    glUniformMatrix4fv(projMatrLoc, 1, GL_FALSE, @projMatr);
+    glUniformMatrix4fv(projMatrLoc, 1, GL_FALSE, @zgl_MatrixS[projectionMatrix]);
   // glUseProgram(0);             // это не обязательно в данном случае.
 end;
 
@@ -124,9 +124,6 @@ procedure Init;
 var
   status: GLint;
 begin
-  // RU: создаём буфера и привязываем их к VAO.
-  // EN: we create buffers and bind them to VAO.
-  createVBOAndVAO;
   // RU: создание шедерной программы и шейдеров.
   // EN: creating a shader program and shaders.
   shadProg := glCreateProgram;
@@ -184,6 +181,10 @@ begin
   glDeleteShader(fragShad);
 
   glUseProgram(shadProg);
+  // RU: создаём буфера и привязываем их к VAO.
+  // EN: we create buffers and bind them to VAO.
+  createVBOAndVAO;
+
   zgl_Enable(DEPTH_BUFFER);
   glDepthMask(GL_TRUE);
   glDepthFunc(GL_LEQUAL);

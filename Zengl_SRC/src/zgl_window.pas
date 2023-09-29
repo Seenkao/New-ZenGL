@@ -37,7 +37,7 @@ uses
   sysutils, BaseUnix,
   {$ENDIF}
   {$IFDEF USE_X11}
-  X, XLib, XUtil, {gegl_}xrandr,
+  X, XLib, XUtil, gegl_xrandr,
   {$ENDIF}
   {$IFDEF WINDOWS}
   Windows,
@@ -52,11 +52,11 @@ uses
   zgl_types;
 
 const
-  cs_ZenGL    = 'ZenGL - 0.4.1';
-  cs_Date     = '18.09.2023';
+  cs_ZenGL    = 'ZenGL - 0.4.2';
+  cs_Date     = '29.09.2023';
   cv_major    = 0;
   cv_minor    = 4;
-  cv_revision = 1;
+  cv_revision = 2;
 
   // zgl_Reg
   SYS_APP_INIT           = $000001;
@@ -368,6 +368,9 @@ uses
   zgl_lib_theora,
   {$ENDIF}
   {$ENDIF}
+  {$IfDef USE_ZIP}    // MacOS, Android
+  zgl_lib_zip,
+  {$EndIf}
   {$IfNDef KEYBOARD_OLD_FUNCTION}
   gegl_VElements,
   {$EndIf}
@@ -866,7 +869,7 @@ begin
   {$IFDEF USE_OGG}
   if not InitVorbis() Then
     {$IFNDEF USE_OGG_STATIC}
-    log_Add('Ogg: Error while loading libraries: ' + libogg + ', ' + libvorbis + ', ' + libvorbisfile)
+    log_Add('Ogg: Error while loading libraries: ' + libogg + ' or(and) ' + libvorbis + ' or(and) ' + libvorbisfile)
     {$ENDIF}
   else
     log_Add('Ogg: Initialized');
@@ -887,6 +890,10 @@ begin
   {$IfNDef ANDROID}
 //  scr_GetResList;
   zgl_GetSysDir();
+  {$EndIf}
+
+  {$If defined(MAC_COCOA) or (defined(ANDROID) and defined(NOT_OLD_ARM))}
+  LoadLibZip(libzip, libz);
   {$EndIf}
 
   scr_SetOptions;
@@ -1303,7 +1310,7 @@ begin
 
     DESKTOP_WIDTH:
     {$IFDEF USE_X11}
-      Result := PXRRScreenSize(scrModeList + scrDesktop).width;
+      Result := {PXRRScreenSize(}scrModeList.Width + scrDesktop;//).width;
     {$ENDIF}
     {$IFDEF WINDOWS}
       Result := scrDesktop.dmPelsWidth;
@@ -1313,7 +1320,7 @@ begin
     {$IFEND}
     DESKTOP_HEIGHT:
     {$IFDEF USE_X11}
-      Result := PXRRScreenSize(scrModeList + scrDesktop).height;
+      Result := {PXRRScreenSize(}scrModeList.Height + scrDesktop;//).height;
     {$ENDIF}
     {$IFDEF WINDOWS}
       Result := scrDesktop.dmPelsHeight;

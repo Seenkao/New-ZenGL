@@ -342,9 +342,11 @@ begin
 
   // WaitVSync
 {$IFDEF LINUX}
-  glXSwapIntervalSGI := gl_GetProc('glXSwapInterval');
+  glXSwapIntervalSGI := dlsym(oglLibrary, PAnsiChar('glXSwapIntervalSGI'));
   if not Assigned(glXSwapIntervalSGI) then
-    glXSwapIntervalSGI := dlsym(oglLibrary, PAnsiChar('glXSwapIntervalSGI'));
+    glXSwapIntervalSGI := gl_GetProc('glXSwapInterval');
+
+
   oglCanVSync        := Assigned(glXSwapIntervalSGI);
 {$ENDIF}
 {$IFDEF WINDOWS}

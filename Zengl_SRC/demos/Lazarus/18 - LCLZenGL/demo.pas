@@ -79,7 +79,7 @@ var
   Form1: TForm1;
 
 //-----------------------------------------
-  dirRes  : UTF8String;
+  dirRes  : UTF8String {$IFNDEF MACOSX} = '../data/' {$ENDIF};
 
   fntMain : Byte;
   MyIcon    : array[ 0..1 ] of zglPTexture;
